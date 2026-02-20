@@ -1,0 +1,2495 @@
+{
+  "common": {
+    "language": "Dil",
+    "languageChanged": "Dil {language} olarak güncellendi.",
+    "languageChangeError": "Dil değiştirilemedi. Lütfen tekrar deneyin.",
+    "navbar": {
+      "profile": "Profil",
+      "settings": "Ayarlar",
+      "walletTransactions": "Bakiye Hareketleri",
+      "logout": "Çıkış Yap",
+      "unknownUser": "Kullanıcı",
+      "orderSearchPlaceholder": "Sipariş numarası ara",
+      "orderSearchAria": "Sipariş numarasına göre ara"
+    },
+    "actions": {
+      "search": "Ara",
+      "apply": "Uygula",
+      "reset": "Sıfırla",
+      "close": "Kapat",
+      "refresh": "Yenile",
+      "downloadPdf": "PDF indir",
+      "add": "Ekle",
+      "save": "Kaydet",
+      "cancel": "İptal",
+      "edit": "Düzenle",
+      "delete": "Sil"
+    },
+    "status": {
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "pending": "Beklemede",
+      "blocked": "Engellendi",
+      "awaiting_payment": "Ödeme Bekliyor",
+      "awaiting_shipment": "Sevkiyat Bekliyor",
+      "shipped": "Gönderildi",
+      "cancelled": "İptal Edildi",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "canceled": "İptal Edildi"
+    },
+    "table": {
+      "searchPlaceholder": "{label} ara",
+      "selectPlaceholder": "{label} seç",
+      "totalItems": "Toplam {count} kayıt"
+    }
+  },
+  "home": {
+    "title": "EasyJet'e Hoş Geldiniz",
+    "description": "Çoklu dil desteği artık etkin. İçerikleri çeviri sözlüğünden okuyabilirsiniz."
+  },
+  "dashboard": {
+    "stats": {
+      "totalOrders": "Toplam Sipariş",
+      "pending": "Bekleyen",
+      "completed": "Tamamlanan"
+    },
+    "table": {
+      "title": "Son Siparişler",
+      "columns": {
+        "orderNo": "No",
+        "customerName": "Müşteri",
+        "status": "Durum"
+      }
+    },
+    "financial": {
+      "topupList": {
+        "title": "Bakiye Yükleme Talepleri"
+      },
+      "adminTopups": {
+        "title": "Bakiye Yükleme Onayları"
+      },
+      "transactions": {
+        "title": "Bakiye Hareketleri",
+        "currentBalance": "Güncel Bakiye",
+        "columns": {
+          "id": "ID",
+          "type": "Tip",
+          "direction": "Yön",
+          "amount": "Tutar",
+          "status": "Durum",
+          "orderId": "Sipariş ID",
+          "orderNumber": "Sipariş Numarası",
+          "createdAt": "Oluşturma Tarihi"
+        },
+        "filters": {
+          "type": "Tip seçin",
+          "direction": "Yön seçin",
+          "status": "Durum seçin",
+          "createdAt": "Tarih aralığı seçin"
+        },
+        "types": {
+          "topup": "Bakiye Yükleme",
+          "order": "Sipariş",
+          "shipment": "Sevkiyat"
+        },
+        "directions": {
+          "credit": "Giriş",
+          "debit": "Çıkış"
+        },
+        "statuses": {
+          "completed": "Tamamlandı",
+          "pending": "Beklemede",
+          "failed": "Başarısız",
+          "canceled": "İptal"
+        }
+      },
+      "topupDetail": {
+        "title": "Bakiye Yükleme Detayı",
+        "adminTitle": "Bakiye Yükleme Detayı (Admin)"
+      },
+      "form": {
+        "title": "Bakiye Yükle",
+        "subtitle": "Admin onayı için yeni bir bakiye yükleme talebi oluşturun."
+      },
+      "fields": {
+        "fundingAccount": "Hesap",
+        "amount": "Tutar",
+        "currency": "Para Birimi",
+        "receiptUrl": "Dekont URL",
+        "receipt": "Dekont Dosyası",
+        "bankReference": "Banka Referansı",
+        "note": "Not",
+        "approvedAmount": "Onaylanan Tutar",
+        "owner": "Sahip",
+        "requestedBy": "Talep Eden",
+        "reviewedBy": "İnceleyen",
+        "reviewedAt": "İnceleme Tarihi",
+        "rejectReason": "Red Sebebi",
+        "updatedAt": "Güncellenme Tarihi"
+      },
+      "placeholders": {
+        "selectFundingAccount": "Hesap seçin",
+        "amount": "Tutar girin",
+        "currency": "Para birimi seçin",
+        "receiptUrl": "https://",
+        "bankReference": "Referans",
+        "note": "Opsiyonel not"
+      },
+      "validation": {
+        "required": "Bu alan zorunludur."
+      },
+      "columns": {
+        "id": "ID",
+        "ownerType": "Sahip Tipi",
+        "amount": "Tutar",
+        "approvedAmount": "Onaylanan Tutar",
+        "currency": "Para Birimi",
+        "fundingAccount": "Hesap",
+        "status": "Durum",
+        "createdAt": "Oluşturma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "status": "Durum seçin",
+        "ownerType": "Sahip tipi seçin",
+        "fundingAccount": "Hesap seçin",
+        "createdAt": "Tarih aralığı seçin"
+      },
+      "ownerTypes": {
+        "company": "Şirket",
+        "partner": "Partner",
+        "customer": "Müşteri"
+      },
+      "actions": {
+        "new": "Yeni Bakiye Yükleme",
+        "view": "Görüntüle",
+        "cancel": "İptal Et",
+        "confirmCancel": "Bu talep iptal edilsin mi?",
+        "confirmOk": "Evet, iptal et",
+        "uploadReceipt": "Dekont yükle",
+        "approveTitle": "Onayla",
+        "rejectTitle": "Reddet",
+        "approvedAmount": "Onaylanan Tutar",
+        "rejectReason": "Red Sebebi",
+        "reject": "Reddet"
+      },
+      "messages": {
+        "loadFundingError": "Hesaplar yüklenemedi.",
+        "createSuccess": "Bakiye yükleme talebi oluşturuldu.",
+        "createError": "Bakiye yükleme talebi başarısız.",
+        "cancelSuccess": "Bakiye yükleme talebi iptal edildi.",
+        "cancelError": "İptal başarısız.",
+        "loadDetailError": "Detay yüklenemedi.",
+        "approveSuccess": "Talep onaylandı.",
+        "rejectSuccess": "Talep reddedildi.",
+        "actionError": "İşlem başarısız.",
+        "noActions": "Bu durumda işlem yapılamaz."
+      }
+    },
+    "fundingAccounts": {
+      "title": "Fonlama Hesapları",
+      "columns": {
+        "id": "ID",
+        "displayName": "Görünen İsim",
+        "accountIdentifier": "Hesap Bilgisi",
+        "type": "Tip",
+        "status": "Durum",
+        "createdAt": "Oluşturma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "displayName": "Görünen isim ara",
+        "accountIdentifier": "Hesap bilgisi ara",
+        "type": "Tip ara",
+        "status": "Durum seçin"
+      },
+      "fields": {
+        "displayName": "Görünen İsim",
+        "accountIdentifier": "Hesap Bilgisi",
+        "type": "Tip",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "displayName": "Görünen isim",
+        "accountIdentifier": "Hesap bilgisi",
+        "type": "Tip",
+        "status": "Durum seçin"
+      },
+      "validation": {
+        "required": "Bu alan zorunludur."
+      },
+      "actions": {
+        "new": "Yeni Fonlama Hesabı",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Fonlama hesabı silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "createSuccess": "Fonlama hesabı oluşturuldu.",
+        "updateSuccess": "Fonlama hesabı güncellendi.",
+        "deleteSuccess": "Fonlama hesabı silindi.",
+        "deleteError": "Silme başarısız.",
+        "loadTypesError": "Fonlama hesap tipleri yüklenemedi.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "modal": {
+        "createTitle": "Fonlama Hesabı Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "table": {
+        "noData": "Veri bulunamadı"
+      }
+    },
+    "customer": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "description": "Açıklama",
+        "categories": "Kategoriler",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "productMultiplier": "Ürün Kar Oranı (%)",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara",
+        "searchDescription": "Açıklama ara",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Müşteri",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Müşteri silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Müşteri oluşturuldu.",
+        "updateSuccess": "Müşteri güncellendi.",
+        "deleteSuccess": "Müşteri silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Müşteri Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "customerPermissions": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "permissions": "İzinler",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara"
+      },
+      "actions": {
+        "edit": "Düzenle",
+        "update": "Güncelle"
+      },
+      "modal": {
+        "title": "İzinler: {name}",
+        "columns": {
+          "permission": "İzin",
+          "value": "Değer",
+          "flags": "Durum"
+        }
+      },
+      "labels": {
+        "inherited": "Devralınan",
+        "overridden": "Ezilmiş",
+        "locked": "Kilitli"
+      },
+      "messages": {
+        "loadError": "İzinler yüklenemedi.",
+        "updateSuccess": "İzinler güncellendi.",
+        "updateError": "Güncelleme başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "company": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "description": "Açıklama",
+        "categories": "Kategoriler",
+        "createdAt": "Oluşturulma",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara",
+        "searchDescription": "Açıklama ara",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Firma",
+        "edit": "Düzenle"
+      },
+      "messages": {
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Firma oluşturuldu.",
+        "updateSuccess": "Firma güncellendi.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Firma Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyPermissions": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "permissions": "İzinler",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara"
+      },
+      "actions": {
+        "edit": "Düzenle",
+        "update": "Güncelle"
+      },
+      "modal": {
+        "title": "İzinler: {name}",
+        "columns": {
+          "permission": "İzin",
+          "value": "Değer",
+          "flags": "Durum"
+        }
+      },
+      "labels": {
+        "inherited": "Devralınan",
+        "overridden": "Ezilmiş",
+        "locked": "Kilitli"
+      },
+      "messages": {
+        "loadError": "İzinler yüklenemedi.",
+        "updateSuccess": "İzinler güncellendi.",
+        "updateError": "Güncelleme başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyAdmins": {
+      "columns": {
+        "id": "Kimlik",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "mobile": "Mobil",
+        "company": "Firma",
+        "categories": "Kategoriler",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchFirstName": "Ad ara",
+        "searchLastName": "Soyad ara",
+        "searchEmail": "E-posta ara",
+        "searchMobile": "Telefon ara",
+        "selectCompany": "Firma seç",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Yönetici",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Yönetici silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Yönetici oluşturuldu.",
+        "updateSuccess": "Yönetici güncellendi.",
+        "deleteSuccess": "Yönetici silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Yeni Yönetici",
+        "editTitle": "Yönetici Düzenle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyUsers": {
+      "columns": {
+        "id": "Kimlik",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "mobile": "Mobil",
+        "role": "Rol",
+        "categories": "Kategoriler",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchFirstName": "Ad ara",
+        "searchLastName": "Soyad ara",
+        "searchEmail": "E-posta ara",
+        "searchMobile": "Telefon ara",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Kullanıcı",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Kullanıcı silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Kullanıcı oluşturuldu.",
+        "updateSuccess": "Kullanıcı güncellendi.",
+        "deleteSuccess": "Kullanıcı silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Yeni Kullanıcı",
+        "editTitle": "Kullanıcı Düzenle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "customerAdmins": {
+      "columns": {
+        "id": "Kimlik",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "mobile": "Mobil",
+        "customer": "Müşteri",
+        "categories": "Kategoriler",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchFirstName": "Ad ara",
+        "searchLastName": "Soyad ara",
+        "searchEmail": "E-posta ara",
+        "searchMobile": "Telefon ara",
+        "selectCustomer": "Müşteri seç",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Yönetici",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Yönetici silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Yönetici oluşturuldu.",
+        "updateSuccess": "Yönetici güncellendi.",
+        "deleteSuccess": "Yönetici silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Yeni Yönetici",
+        "editTitle": "Yönetici Düzenle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partner": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "description": "Açıklama",
+        "categories": "Kategoriler",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara",
+        "searchDescription": "Açıklama ara",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Partner",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Partner silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Partner oluşturuldu.",
+        "updateSuccess": "Partner güncellendi.",
+        "deleteSuccess": "Partner silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Partner Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerPermissions": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "permissions": "İzinler",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "İsim ara"
+      },
+      "actions": {
+        "edit": "Düzenle",
+        "update": "Güncelle"
+      },
+      "modal": {
+        "title": "İzinler: {name}",
+        "columns": {
+          "permission": "İzin",
+          "value": "Değer",
+          "flags": "Durum"
+        }
+      },
+      "labels": {
+        "inherited": "Devralınan",
+        "overridden": "Ezilmiş",
+        "locked": "Kilitli"
+      },
+      "messages": {
+        "loadError": "İzinler yüklenemedi.",
+        "updateSuccess": "İzinler güncellendi.",
+        "updateError": "Güncelleme başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerAdmins": {
+      "columns": {
+        "id": "Kimlik",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "mobile": "Mobil",
+        "partner": "Partner",
+        "categories": "Kategoriler",
+        "createdAt": "Oluşturulma",
+        "status": "Durum",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchFirstName": "Ad ara",
+        "searchLastName": "Soyad ara",
+        "searchEmail": "E-posta ara",
+        "searchMobile": "Telefon ara",
+        "selectPartner": "Partner seç",
+        "selectCategories": "Kategorileri seç",
+        "selectStatus": "Durum seç"
+      },
+      "status": {
+        "active": "Aktif",
+        "inactive": "Pasif"
+      },
+      "actions": {
+        "new": "Yeni Yönetici",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Yönetici silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadPartnersError": "Partnerler yüklenemedi.",
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Yönetici oluşturuldu.",
+        "updateSuccess": "Yönetici güncellendi.",
+        "deleteSuccess": "Yönetici silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Yeni Yönetici",
+        "editTitle": "Yönetici Düzenle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "product": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Ad",
+        "subCategory": "Alt Kategori",
+        "company": "Firma",
+        "category": "Kategori",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "Ad ara",
+        "searchSubCategory": "Alt kategori ara",
+        "selectCompany": "Firma seç",
+        "selectCategory": "Kategori seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Ürün",
+        "templateDownload": "Template İndir",
+        "bulkImport": "Toplu Import",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Ürün silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Ürün oluşturuldu.",
+        "updateSuccess": "Ürün güncellendi.",
+        "deleteSuccess": "Ürün silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importMissingSession": "Oturum bulunamadı. Lütfen yeniden giriş yapın.",
+        "importCompletedWithErrors": "Import tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "Import tamamlandı, bazı kayıtlar hatalı.",
+        "importSuccess": "Import başarıyla tamamlandı.",
+        "importFailed": "Import başarısız."
+      },
+      "import": {
+        "resultTitle": "Import Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Hatalı {failed}",
+        "noErrors": "Hata bulunmuyor.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Ürün Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productSize": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Beden Adı",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "Beden adı ara",
+        "selectProduct": "Ürün seç",
+        "selectCompany": "Firma seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Beden",
+        "templateDownload": "Şablon İndir",
+        "bulkImport": "Toplu İçe Aktar",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Beden silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "createSuccess": "Beden oluşturuldu.",
+        "updateSuccess": "Beden güncellendi.",
+        "deleteSuccess": "Beden silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importCompletedWithErrors": "İçe aktarma tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "İçe aktarma bazı hatalarla tamamlandı.",
+        "importSuccess": "İçe aktarma başarıyla tamamlandı.",
+        "importFailed": "İçe aktarma başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Başarısız {failed}",
+        "noErrors": "Hata bulunamadı.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Beden Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productColor": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Renk Adı",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler",
+        "hex": "Hex Kodu"
+      },
+      "filters": {
+        "searchName": "Renk adı ara",
+        "selectProduct": "Ürün seç",
+        "selectCompany": "Firma seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Renk",
+        "templateDownload": "Şablon İndir",
+        "bulkImport": "Toplu İçe Aktar",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Renk silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "createSuccess": "Renk oluşturuldu.",
+        "updateSuccess": "Renk güncellendi.",
+        "deleteSuccess": "Renk silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importCompletedWithErrors": "İçe aktarma tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "İçe aktarma bazı hatalarla tamamlandı.",
+        "importSuccess": "İçe aktarma başarıyla tamamlandı.",
+        "importFailed": "İçe aktarma başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Başarısız {failed}",
+        "noErrors": "Hata bulunamadı.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Renk Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPosition": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Pozisyon Adı",
+        "image": "Resim",
+        "slug": "Kısa Ad",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "Pozisyon adı ara",
+        "searchSlug": "Kısa ad ara",
+        "selectProduct": "Ürün seç",
+        "selectCompany": "Firma seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Pozisyon",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "previewImage": "Önizleme",
+        "confirmDeleteTitle": "Pozisyon silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "createSuccess": "Pozisyon oluşturuldu.",
+        "updateSuccess": "Pozisyon güncellendi.",
+        "deleteSuccess": "Pozisyon silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Pozisyon Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPositionImage": {
+      "columns": {
+        "id": "Kimlik",
+        "name": "Görsel Adı",
+        "position": "Pozisyon",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "Görsel ara",
+        "selectPosition": "Pozisyon seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Görsel",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Görsel silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadPositionsError": "Pozisyonlar yüklenemedi.",
+        "createSuccess": "Pozisyon görseli oluşturuldu.",
+        "updateSuccess": "Pozisyon görseli güncellendi.",
+        "deleteSuccess": "Pozisyon görseli silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Pozisyon Görseli Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productAdditionalPrice": {
+      "columns": {
+        "id": "Kimlik",
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "amount": "Tutar",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectProduct": "Ürün seç",
+        "selectCustomer": "Müşteri seç",
+        "selectPartner": "Partner seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Ek Pozisyon Fiyatı",
+        "templateDownload": "Şablon İndir",
+        "bulkImport": "Toplu İçe Aktar",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Ek pozisyon fiyatı silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadPartnersError": "Partnerler yüklenemedi.",
+        "createSuccess": "Ek pozisyon fiyatı oluşturuldu.",
+        "updateSuccess": "Ek pozisyon fiyatı güncellendi.",
+        "deleteSuccess": "Ek pozisyon fiyatı silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importCompletedWithErrors": "İçe aktarma tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "İçe aktarma bazı hatalarla tamamlandı.",
+        "importSuccess": "İçe aktarma başarıyla tamamlandı.",
+        "importFailed": "İçe aktarma başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Başarısız {failed}",
+        "noErrors": "Hata bulunamadı.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Ek Pozisyon Fiyatı Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPrice": {
+      "columns": {
+        "id": "Kimlik",
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "company": "Firma",
+        "size": "Beden",
+        "color": "Renk",
+        "price": "Fiyat",
+        "sku": "Stok Kodu",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectProduct": "Ürün seç",
+        "selectCustomer": "Müşteri seç",
+        "selectPartner": "Partner seç",
+        "selectCompany": "Firma seç",
+        "selectSize": "Beden seç",
+        "selectColor": "Renk seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Fiyat",
+        "templateDownload": "Şablon İndir",
+        "bulkImport": "Toplu İçe Aktar",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Fiyat silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCompaniesError": "Firmalar yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadPartnersError": "Partnerler yüklenemedi.",
+        "loadSizesError": "Bedenler yüklenemedi.",
+        "loadColorsError": "Renkler yüklenemedi.",
+        "createSuccess": "Fiyat oluşturuldu.",
+        "updateSuccess": "Fiyat güncellendi.",
+        "deleteSuccess": "Fiyat silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importCompletedWithErrors": "İçe aktarma tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "İçe aktarma bazı hatalarla tamamlandı.",
+        "importSuccess": "İçe aktarma başarıyla tamamlandı.",
+        "importFailed": "İçe aktarma başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Başarısız {failed}",
+        "noErrors": "Hata bulunamadı.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Fiyat Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productStock": {
+      "columns": {
+        "product": "Ürün",
+        "size": "Beden",
+        "color": "Renk",
+        "quantity": "Adet",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectProduct": "Ürün seç",
+        "selectSize": "Beden seç",
+        "selectColor": "Renk seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Stok",
+        "templateDownload": "Şablon İndir",
+        "bulkImport": "Toplu İçe Aktar",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Stok silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadSizesError": "Bedenler yüklenemedi.",
+        "loadColorsError": "Renkler yüklenemedi.",
+        "createSuccess": "Stok oluşturuldu.",
+        "updateSuccess": "Stok güncellendi.",
+        "deleteSuccess": "Stok silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importCompletedWithErrors": "İçe aktarma tamamlandı. Hatalı kayıt: {failed}.",
+        "importCompletedWithErrorsFallback": "İçe aktarma bazı hatalarla tamamlandı.",
+        "importSuccess": "İçe aktarma başarıyla tamamlandı.",
+        "importFailed": "İçe aktarma başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam {total}, Oluşturulan {created}, Güncellenen {updated}, Başarısız {failed}",
+        "noErrors": "Hata bulunamadı.",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj"
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Stok Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerAssignedPrice": {
+      "columns": {
+        "product": "Ürün",
+        "size": "Beden",
+        "color": "Renk",
+        "price": "Fiyat",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi"
+      },
+      "filters": {
+        "selectProduct": "Ürün seç",
+        "selectSize": "Beden seç",
+        "selectColor": "Renk seç",
+        "selectStatus": "Durum seç"
+      },
+      "messages": {
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadSizesError": "Bedenler yüklenemedi.",
+        "loadColorsError": "Renkler yüklenemedi.",
+        "partnerMissing": "Partner bilgisi bulunamadı."
+      },
+      "table": {
+        "noData": "Atanmış fiyat bulunmuyor"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerProductPrice": {
+      "columns": {
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "assignment": "Atama",
+        "size": "Beden",
+        "color": "Renk",
+        "basePrice": "Gelen Fiyat",
+        "price": "Müşteri Fiyatı",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectProduct": "Ürün seç",
+        "selectCustomer": "Müşteri seç",
+        "selectSize": "Beden seç",
+        "selectColor": "Renk seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Müşteri Fiyatı",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Müşteri fiyatı silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "values": {
+        "assignmentCustomer": "Müşteri",
+        "assignmentPartner": "Partner",
+        "readOnly": "Firma fiyatı"
+      },
+      "messages": {
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadSizesError": "Bedenler yüklenemedi.",
+        "loadColorsError": "Renkler yüklenemedi.",
+        "createSuccess": "Fiyat oluşturuldu.",
+        "updateSuccess": "Fiyat güncellendi.",
+        "deleteSuccess": "Fiyat silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız.",
+        "partnerMissing": "Partner bilgisi bulunamadı."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Müşteri Fiyatı Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-",
+        "partnerSelf": "Partner"
+      }
+    },
+    "preOrders": {
+      "columns": {
+        "id": "Kimlik",
+        "orderNumber": "Sipariş #",
+        "customer": "Müşteri",
+        "status": "Durum",
+        "total": "Toplam",
+        "orderDate": "Sipariş Tarihi",
+        "price": "Tutar",
+        "customerName": "Müşteri Adı",
+        "customerEmail": "Müşteri E-postası",
+        "customerPhone": "Müşteri Telefonu",
+        "amountPaid": "Ödenen Tutar",
+        "paymentMethod": "Ödeme Yöntemi",
+        "requestedService": "Talep Edilen Hizmet",
+        "orderByDate": "Sipariş Eden",
+        "shipDate": "Gönderim Tarihi",
+        "taxAmount": "Vergi Tutarı",
+        "shippingAmount": "Kargo Ücreti",
+        "carrierCode": "Kargo Firması",
+        "serviceCode": "Hizmet Kodu",
+        "packageCode": "Paket Kodu",
+        "confirmation": "Onay",
+        "product": "Ürün",
+        "size": "Beden",
+        "color": "Renk",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchOrderNumber": "Sipariş numarası ara",
+        "searchCustomer": "Müşteri ara",
+        "selectStatus": "Durum seç",
+        "selectProduct": "Ürün seç",
+        "selectSize": "Beden seç",
+        "selectColor": "Renk seç",
+        "orderDate": "Sipariş tarihi",
+        "orderDateRange": "Sipariş tarihi aralığı",
+        "singleDate": "Tek tarih",
+        "dateRange": "Tarih aralığı",
+        "clearDate": "Tarih filtresini temizle"
+      },
+      "actions": {
+        "fetch": "ShipStation verisini çek",
+        "fetching": "Veri çekiliyor...",
+        "fetchCountdown": "ShipStation çek ({seconds} sn)",
+        "approve": "Siparişi onayla",
+        "approveSelected": "Seçilenleri onayla",
+        "cancel": "Siparişi iptal et",
+        "confirmApproveTitle": "Bu siparişi onaylamak istiyor musunuz?",
+        "confirmApproveSelectedTitle": "Seçili siparişleri onaylamak istiyor musunuz?",
+        "confirmApproveOk": "Onayla",
+        "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
+        "confirmCancelOk": "İptal et"
+      },
+      "messages": {
+        "fetchSuccess": "ShipStation siparişleri alındı.",
+        "fetchError": "Veri alınamadı.",
+        "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
+        "updateSuccess": "Sipariş ürünü güncellendi.",
+        "updateError": "Sipariş ürünü güncellenemedi.",
+        "approveSuccess": "Sipariş başarıyla onaylandı.",
+        "approveError": "Sipariş onaylanamadı.",
+        "cancelSuccess": "Sipariş başarıyla iptal edildi.",
+        "cancelError": "Sipariş iptal edilemedi."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "items": {
+        "columns": {
+          "image_url": "Görsel",
+          "sku": "Stok Kodu",
+          "item": "Ürün",
+          "quantity": "Adet",
+          "unitPrice": "Birim Fiyat",
+          "taxAmount": "Vergi",
+          "shippingAmount": "Kargo",
+          "adjustment": "Tür",
+          "options": "Seçenekler"
+        },
+        "values": {
+          "adjustment": "Düzeltme",
+          "standard": "Standart Ürün",
+          "noOptions": "Seçenek yok"
+        },
+        "empty": "Ürün bulunmuyor"
+      },
+      "common": {
+        "none": "-",
+        "yes": "Evet",
+        "no": "Hayır"
+      },
+      "details": {
+        "orderSummary": "Sipariş Özeti",
+        "shipment": "Gönderi",
+        "weight": "Ağırlık",
+        "residential": "Konut Adresi",
+        "verified": "Doğrulama",
+        "shippingAddress": "Teslimat Adresi",
+        "billingAddress": "Fatura Adresi",
+        "address": "Adres",
+        "phone": "Telefon"
+      }
+    },
+    "orders": {
+      "title": "Siparişler",
+      "columns": {
+        "id": "ID",
+        "image": "Görsel",
+        "orderNumber": "Sipariş #",
+        "sku": "Stok Kodu",
+        "item": "Ürün",
+        "quantity": "Adet",
+        "status": "Durum",
+        "options": "Seçenekler",
+        "product": "Ürün",
+        "size": "Beden",
+        "color": "Renk",
+        "price": "Fiyat",
+        "customer": "Müşteri",
+        "customerName": "Müşteri Adı",
+        "orderDate": "Sipariş Tarihi",
+        "hasDesign": "Tasarım",
+        "actions": "İşlemler",
+        "notes": "Notlar"
+      },
+      "filters": {
+        "searchOrderNumber": "Sipariş numarası ara",
+        "searchSku": "Stok kodu ara",
+        "searchItem": "Ürün ara",
+        "selectStatus": "Durum seçin",
+        "selectProduct": "Ürün seçin",
+        "selectSize": "Beden seçin",
+        "selectColor": "Renk seçin",
+        "orderDate": "Sipariş tarihi",
+        "orderDateRange": "Sipariş tarihi aralığı",
+        "singleDate": "Tek tarih",
+        "dateRange": "Tarih aralığı",
+        "clearDate": "Tarih filtresini temizle"
+      },
+      "status": {
+        "values": {
+          "newOrder": "Yeni Sipariş",
+          "processing": "İşleniyor",
+          "pdf": "PDF",
+          "completed": "Tamamlandı",
+          "shipped": "Gönderildi",
+          "waitingForDesign": "Tasarım Bekleniyor",
+          "cancel": "İptal"
+        }
+      },
+      "actions": {
+        "cancel": "Siparişi İptal Et",
+        "waitingForDesign": "Tasarım Beklemeye Al",
+        "designUpload": "Tasarım Yükle",
+        "designUpdate": "Tasarımı Güncelle",
+        "viewDetail": "Detayı Gör",
+        "editAddress": "Adres Düzenle",
+        "shippingRates": "Kargo fiyatları",
+        "confirmCancelTitle": "Bu sipariş iptal edilsin mi?",
+        "confirmCancelOk": "İptal",
+        "confirmWaitingTitle": "Bu sipariş Tasarım Bekleniyor durumuna alınsın mı?",
+        "confirmWaitingOk": "Güncelle",
+        "newOrder": "Yeni Siparişe Al",
+        "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
+        "confirmNewOrderOk": "Güncelle"
+      },
+      "messages": {
+        "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
+        "statusUpdateSuccess": "Sipariş durumu güncellendi.",
+        "statusUpdateError": "Sipariş durumu güncellenemedi.",
+        "addressLoadError": "Sipariş detayları yüklenemedi.",
+        "addressUpdateSuccess": "Fatura bilgileri güncellendi.",
+        "addressUpdateError": "Fatura bilgileri güncellenemedi.",
+        "addressMissingOrder": "Sipariş bilgisi eksik."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "values": {
+        "noOptions": "Seçenek yok"
+      },
+      "common": {
+        "none": "-"
+      },
+      "design": {
+        "title": "Tasarım Yükle / Düzenle",
+        "orderInfo": {
+          "title": "Sipariş Bilgileri",
+          "noImage": "Ürün görseli yok",
+          "preview": "Önizleme",
+          "imageHint": "Siparişteki görsel"
+        },
+        "fields": {
+          "note": "Not",
+          "notePlaceholder": "Tasarım ekibine not bırakın",
+          "positions": "Tasarım Pozisyonları",
+          "positionsPlaceholder": "Ürün pozisyonlarını seçin",
+          "positionsEmpty": "Bu ürün için tanımlı pozisyon bulunmuyor."
+        },
+        "positions": {
+          "designUploadLabel": "Tasarım Yükle",
+          "designUploadHelp": "Desteklenen dosyalar: PDF, PNG, JPG, JPEG veya WEBP (en fazla 25 MB).",
+          "invalidFileType": "Desteklenmeyen dosya türü. Lütfen PDF ya da görsel yükleyin.",
+          "invalidFileSize": "Dosya boyutu {{size}} MB'den küçük olmalıdır.",
+          "missingFile": "Seçilen her pozisyon için tasarım dosyası yükleyin.",
+          "noPreview": "Ön izleme yok",
+          "designAreaPlaceholder": "Tasarım bu alanda gösterilecek",
+          "noSelection": "Yükleme yapmak için en az bir pozisyon seçin.",
+          "noSelectionError": "Lütfen en az bir pozisyon seçin.",
+          "noNewDesignError": "Lütfen yeni bir tasarım dosyası yükleyin.",
+          "untitled": "İsimsiz pozisyon",
+          "deleteLabel": "Tasarımı Sil",
+          "deleteConfirmTitle": "Bu tasarımı silmek istediğinize emin misiniz?",
+          "lockedSelectionWarning": "Bu pozisyon mevcut tasarımdan geliyor. Kaldırmadan önce tasarımı silin."
+        },
+        "messages": {
+          "missingParams": "Sipariş bilgisi eksik. Lütfen bu sayfayı Siparişler ekranından yeniden açın.",
+          "loadOrderError": "Sipariş detayı yüklenemedi.",
+          "loadPositionsError": "Ürün pozisyonları alınamadı.",
+          "saveSuccess": "Tasarım bilgileri kaydedildi.",
+          "saveError": "Tasarım bilgileri kaydedilemedi.",
+          "deleteSuccess": "Tasarım silindi.",
+          "deleteError": "Tasarım silinemedi.",
+          "noItemFound": "İlgili sipariş satırı bulunamadı."
+        },
+        "actions": {
+          "save": "Kaydet",
+          "saveConfirmTitle": "Bu tasarım değişiklikleri kaydedilsin mi?"
+        }
+      },
+      "detail": {
+        "title": "Sipariş Detayı",
+        "sections": {
+          "orderInfo": "Sipariş Bilgileri",
+          "customer": "Müşteri",
+          "shipping": "Kargo Servisi",
+          "billing": "Fatura Adresi",
+          "shippingAddress": "Teslimat Adresi",
+          "totals": "Toplamlar",
+          "package": "Paket",
+          "notes": "Notlar",
+          "labels": "Etiketler",
+          "items": "Sipariş Ürünleri"
+        },
+        "fields": {
+          "billToName": "Fatura Adı",
+          "billToCompany": "Fatura Şirketi",
+          "billToStreet1": "Fatura Adresi 1",
+          "billToStreet2": "Fatura Adresi 2",
+          "billToCity": "Fatura Şehri",
+          "billToState": "Fatura Eyaleti",
+          "billToPostalCode": "Fatura Posta Kodu",
+          "billToCountry": "Fatura Ülkesi",
+          "shipToName": "Teslimat Adı",
+          "shipToCompany": "Teslimat Şirketi",
+          "shipToStreet1": "Teslimat Adresi 1",
+          "shipToStreet2": "Teslimat Adresi 2",
+          "shipToCity": "Teslimat Şehri",
+          "shipToState": "Teslimat Eyaleti",
+          "shipToPostalCode": "Teslimat Posta Kodu",
+          "shipToCountry": "Teslimat Ülkesi",
+          "orderDate": "Sipariş Tarihi",
+          "paymentDate": "Ödeme Tarihi",
+          "shipDate": "Kargo Tarihi",
+          "customerName": "Müşteri Adı",
+          "customerEmail": "Müşteri E-postası",
+          "customerUsername": "Müşteri Kullanıcı Adı",
+          "requestedService": "Talep Edilen Servis",
+          "carrierCode": "Taşıyıcı Kodu",
+          "serviceCode": "Servis Kodu",
+          "orderTotal": "Sipariş Toplamı",
+          "amountPaid": "Ödenen Tutar",
+          "taxAmount": "Vergi Tutarı",
+          "shippingAmount": "Kargo Tutarı",
+          "weight": "Ağırlık",
+          "dimensions": "Ölçüler",
+          "confirmation": "Onay",
+          "customerNotes": "Müşteri Notu",
+          "internalNotes": "Dahili Not",
+          "labelSource": "Kaynak",
+          "labelCarrier": "Taşıyıcı",
+          "labelService": "Servis",
+          "labelRate": "Ücret",
+          "labelTracking": "Takip Numarası",
+          "labelCreatedAt": "Oluşturma Tarihi"
+        },
+        "designs": {
+          "title": "Tasarımlar",
+          "empty": "Tasarım bulunamadı",
+          "unknownPosition": "Bilinmeyen konum",
+          "noPreview": "Önizleme görseli yok",
+          "positionLabel": "Tasarım Konumu",
+          "noImage": "Ürün görseli yok",
+          "designAreaPlaceholder": "Tasarım önizlemesi burada görünür"
+        },
+        "messages": {
+          "missingParams": "Sipariş numarası bulunamadı. Lütfen bu sayfayı sipariş listesinden tekrar açın.",
+          "loadOrderError": "Sipariş detayı yüklenemedi.",
+          "loadPositionsError": "Ürün pozisyonları yüklenemedi.",
+          "noOrderFound": "İstenen sipariş bulunamadı.",
+          "noItems": "Sipariş ürünü bulunamadı.",
+          "positionsLoading": "Tasarım pozisyonları yükleniyor...",
+          "noLabels": "Etiket bulunamadı.",
+          "voidLabelSuccess": "Etiket başarıyla iptal edildi.",
+          "voidLabelError": "Etiket iptal edilemedi."
+        },
+        "actions": {
+          "viewLabel": "Etiketi Aç",
+          "voidLabel": "Etiketi İptal Et",
+          "voidLabelConfirmTitle": "Bu etiketi iptal etmek istiyor musunuz?",
+          "voidLabelConfirmOk": "Evet, iptal et"
+        }
+      },
+      "addressEditor": {
+        "title": "Müşteri ve Adresi Düzenle",
+        "sections": {
+          "product": "Ürün Bilgileri",
+          "order": "Sipariş Bilgileri"
+        },
+        "fields": {
+          "billToName": "Fatura Adı",
+          "searchAddress": "Adres ara",
+          "street1": "Adres Satırı 1",
+          "street2": "Adres Satırı 2",
+          "street3": "Adres Satırı 3",
+          "city": "Şehir",
+          "state": "Eyalet / Bölge",
+          "postalCode": "Posta Kodu",
+          "country": "Ülke"
+        },
+        "placeholders": {
+          "billToName": "Müşterinin tam adı",
+          "street1": "Adres satırı 1",
+          "street2": "Apartman, daire vb. (opsiyonel)",
+          "street3": "Adres satırı 3 (opsiyonel)",
+          "searchAddress": "Adres ara",
+          "city": "Şehir",
+          "state": "Eyalet veya bölge",
+          "postalCode": "Posta / ZIP kodu",
+          "country": "Ülke seçin"
+        },
+        "alerts": {
+          "googleMissing": "Google Places API anahtarı tanımlı değil. Öneriler devre dışı."
+        },
+        "messages": {
+          "noItemFound": "Sipariş detayları bulunamadı."
+        },
+        "validation": {
+          "required": "{field} alanı zorunludur."
+        }
+      },
+      "shippingModal": {
+        "title": "Kargo Fiyatları",
+        "empty": "Seçili sipariş satırı bulunamadı.",
+        "items": {
+          "title": "Sipariş Kalemleri",
+          "subtitle": "Bağlı kalemler tek listede gösterilir.",
+          "total": "Toplam ürün fiyatı",
+          "noImage": "Görsel yok",
+          "preview": "Görüntüle",
+          "orderAmount": "Sipariş tutarı",
+          "shippingAmount": "Kargo tutarı",
+          "taxAmount": "Vergi tutarı",
+          "amountPaid": "Toplam tutar",
+          "orderNumber": "Sipariş numarası",
+          "quantity": "Miktar",
+          "unitPrice": "Birim Fiyat"
+        },
+        "address": {
+          "title": "Kargo Adresi"
+        },
+        "package": {
+          "title": "Paket Ölçüleri & Ağırlık",
+          "refresh": "Kargo fiyatlarını getir",
+          "labels": {
+            "weightLb": "Ağırlık (lb)",
+            "weightOz": "Ağırlık (oz)",
+            "lengthIn": "Uzunluk (in)",
+            "widthIn": "Genişlik (in)",
+            "heightIn": "Yükseklik (in)"
+          },
+          "warning": "Kargo fiyatı güncel değil. Lütfen yeni ölçülerle yeniden hesaplayın."
+        },
+        "service": {
+          "title": "Kargo Servisi",
+          "subtitle": "Seçim toplam tutarı günceller.",
+          "placeholder": "Kargo servisi seçiniz",
+          "notFound": "Kargo fiyatı bulunamadı",
+          "zoneLabel": "Bölge: {zone}",
+          "deliveryDaysLabel": "Tahmini Teslimat süresi: {days} iş günü",
+          "deliveryDaysLabelSelector": "{days} iş günü",
+          "tabs": {
+            "easyjet": "EasyJet Kargo Servisi",
+            "company": "{name} Kargo Servisi",
+            "partner": "{name} Kargo Servisi"
+          }
+        },
+        "summary": {
+          "orderTotal": "Order toplamı",
+          "shipping": "Seçilen kargo",
+          "grandTotal": "Genel toplam"
+        },
+        "actions": {
+          "sendToProduction": "Üretime Gönder",
+          "sendSuccess": "Sipariş üretime gönderildi.",
+          "sendError": "Sipariş üretime gönderilemedi.",
+          "confirmSendTitle": "Üretime gönderip etiketi satın al?",
+          "confirmSendDescription": "Seçili kargo etiketi satın alınacak ve sipariş üretime gönderilecek. Devam edilsin mi?",
+          "confirmSendOk": "Evet, gönder"
+        },
+        "errors": {
+          "mustRefreshRates": "Fiyatlar güncel değil. Lütfen göndermeden önce yenileyin."
+        }
+      }
+    },
+    "sidebar": {
+      "dashboard": "Kontrol Paneli",
+      "orders": {
+        "title": "Siparişler",
+        "view": "Siparişleri Görüntüle",
+        "waitingForDesign": "Tasarım Bekleyenler",
+        "cancel": "İptal Siparişler"
+      },
+      "financial": {
+        "title": "Finans",
+        "report": "Finansal Rapor",
+        "paymentManagement": "Ödeme Yönetimi",
+        "topup": "Bakiye Yükle",
+        "topupList": "Bakiye Yükleme Talepleri",
+        "adminTitle": "Finans Admin",
+        "adminTopups": "Bakiye Yükleme Onayları",
+        "fundingAccounts": "Fonlama Hesapları"
+      },
+      "partner": {
+        "title": "Partnerler",
+        "partners": "Partnerler",
+        "admins": "Partner Yöneticileri",
+        "permissions": "İzinler"
+      },
+      "productVariation": {
+        "title": "Ürün Varyasyonları",
+        "products": "Ürünler",
+        "sizes": "Bedenler",
+        "colors": "Renkler",
+        "positions": "Pozisyonlar",
+        "positionImages": "Pozisyon Görselleri",
+        "additionalPrices": "Ek Pozisyon Fiyatları",
+        "stock": "Stok",
+        "prices": "Fiyatlar",
+        "partnerToCustomerPrices": "Müşteri Fiyatları",
+        "partnerPrices": "Partner Fiyatları"
+      },
+      "productMapper": {
+        "title": "Ürün Eşleştirici",
+        "products": "Ürünler",
+        "sizes": "Bedenler",
+        "colors": "Renkler"
+      },
+      "customer": {
+        "title": "Müşteri",
+        "customers": "Müşteriler",
+        "admins": "Müşteri Yöneticileri",
+        "permissions": "İzinler"
+      },
+      "order": {
+        "title": "Sipariş",
+        "preOrders": "Ön Siparişler",
+        "orders": "Siparişler",
+        "pending": "Bekleyen Siparişler",
+        "inProduction": "Üretimdeki Siparişler",
+        "completed": "Tamamlanan Siparişler",
+        "shipped": "Kargolanmış Siparişler"
+      },
+      "company": {
+        "title": "Firma",
+        "companies": "Firmalar",
+        "admins": "Firma Yöneticileri",
+        "permissions": "İzinler"
+      },
+      "myCompany": {
+        "title": "Şirketim",
+        "users": "Şirket Kullanıcıları",
+        "settings": "Şirket Ayarları"
+      },
+      "settings": "Ayarlar"
+    },
+    "settings": {
+      "header": {
+        "title": "Çalışma alanı ayarları",
+        "subtitle": "Tüm entegrasyonları, tercihleri ve gelecek özellikleri tek yerden yönetin."
+      },
+      "preferences": {
+        "title": "Bildirim tercihleri",
+        "subtitle": "Nasıl haberdar olmak istediğinizi seçin.",
+        "items": {
+          "productUpdates": {
+            "label": "Ürün güncellemeleri",
+            "description": "Sürüm notları, iyileştirmeler ve yaklaşan özellikler."
+          },
+          "securityAlerts": {
+            "label": "Güvenlik uyarıları",
+            "description": "Oturum açma bildirimleri, parola sıfırlama ve politika hatırlatıcıları."
+          },
+          "weeklyDigest": {
+            "label": "Haftalık özet",
+            "description": "Rolünüze göre uyarlanmış performans özeti."
+          }
+        },
+        "feedback": {
+          "updated": "Tercih güncellendi"
+        }
+      },
+      "upcoming": {
+        "title": "Yakında",
+        "subtitle": "Bu yetenekler üzerinde aktif olarak çalışıyoruz.",
+        "items": {
+          "auditLog": {
+            "label": "Denetim kaydı",
+            "description": "Uyumluluk raporları için dışa aktarılabilir aktivite geçmişi."
+          },
+          "alerts": {
+            "label": "Özel uyarılar",
+            "description": "SLA riskine girmeden önce sınır bazlı bildirimler."
+          },
+          "api": {
+            "label": "Genel API anahtarları",
+            "description": "Ortamlar arasında ayarları otomatikleştirmek için yetkili anahtarlar."
+          }
+        }
+      },
+      "integrations": {
+        "restrictedTitle": "ShipStation hesabınız yöneticiniz tarafından yönetiliyor",
+        "restrictedDescription": "Erişim talebi için EasyJet yöneticinizle iletişime geçin."
+      }
+    },
+    "profile": {
+      "header": {
+        "uploadTooltip": "Profil fotoğrafınızı yükleyin veya değiştirin",
+        "changePhoto": "Fotoğrafı Değiştir",
+        "fallbackRole": "Kullanıcı",
+        "companyTag": "Firma"
+      },
+      "info": {
+        "title": "Kişisel Bilgiler",
+        "subtitle": "Profil bilgilerinizi güncelleyin",
+        "fields": {
+          "firstName": {
+            "label": "Ad"
+          },
+          "lastName": {
+            "label": "Soyad"
+          },
+          "email": {
+            "label": "E-posta"
+          },
+          "mobile": {
+            "label": "Mobil",
+            "placeholder": "+90..."
+          }
+        },
+        "actions": {
+          "save": "Kaydet"
+        }
+      },
+      "security": {
+        "title": "Güvenlik",
+        "subtitle": "Şifrenizi değiştirin",
+        "fields": {
+          "current": "Mevcut Şifre",
+          "new": "Yeni Şifre",
+          "confirm": "Yeni Şifre (Tekrar)"
+        },
+        "actions": {
+          "clear": "Temizle",
+          "update": "Şifreyi Güncelle"
+        }
+      },
+      "shipStation": {
+        "title": "ShipStation Bağlantısı",
+        "subtitle": "API kimlik bilgilerini yönetin",
+        "labels": {
+          "apiKey": "API Anahtarı",
+          "apiSecret": "API Gizli Anahtarı",
+          "label": "Etiket",
+          "status": "Durum",
+          "storeId": "Mağaza Kimliği",
+          "createdAt": "Oluşturulma",
+          "lastUsed": "Son Kullanım"
+        },
+        "placeholders": {
+          "apiKey": {
+            "edit": "Güncellemek için yeni anahtar girin (varsayılan olarak maskelenir)",
+            "create": "ShipStation API Anahtarı"
+          },
+          "apiSecret": {
+            "edit": "Yenilemek için yeni gizli anahtar girin (sonradan gösterilmez)",
+            "create": "ShipStation API Gizli Anahtarı"
+          },
+          "label": "Örn. Birincil, ABD Mağazası ...",
+          "status": "Durum seç",
+          "storeId": {
+            "edit": "Mağaza Kimliği değiştirilemez",
+            "create": "Örn. my-us-store-01"
+          }
+        },
+        "tooltip": {
+          "storeId": "Mağaza Kimliği yalnızca ilk yapılandırmada belirlenir ve sonradan değiştirilemez."
+        },
+        "note": "Not: API Gizli Anahtarı asla tekrar gösterilmez; yalnızca yenilemek için girin. API Anahtarı maskeli olarak görünür (örn. ****1234); yeni bir değer girerseniz güncellenir. Gizli anahtar ve anahtar arka planda AES-GCM ile şifrelenir. Mağaza Kimliği ilk kurulumda tanımlanır ve sonradan değiştirilemez.",
+        "buttons": {
+          "verify": "API Anahtarı/Gizli Anahtarı Doğrula",
+          "edit": "Düzenle"
+        }
+      },
+      "buttons": {
+        "changePhoto": "Fotoğrafı Değiştir"
+      },
+      "roles": {
+        "fallback": "Kullanıcı",
+        "systemadmin": "Sistem Yöneticisi",
+        "companyadmin": "Şirket Yöneticisi",
+        "companyshipmentworker": "Şirket Sevkiyat Personeli",
+        "companycompletedworker": "Şirket Tamamlama Personeli",
+        "partneradmin": "Partner Yöneticisi",
+        "customeradmin": "Müşteri Yöneticisi"
+      },
+      "messages": {
+        "avatarTypeError": "Sadece PNG, JPG veya WEBP dosyalarına izin verilir.",
+        "avatarSizeError": "Dosya boyutu 5MB'dan küçük olmalıdır.",
+        "avatarUploadSuccess": "Profil fotoğrafı güncellendi.",
+        "avatarUploadError": "Profil fotoğrafı yüklenemedi.",
+        "infoUpdateSuccess": "Profil güncellendi.",
+        "passwordMismatch": "Yeni şifreler eşleşmiyor.",
+        "passwordUpdateSuccess": "Şifre güncellendi.",
+        "passwordUpdateError": "Şifre güncellenemedi.",
+        "storeIdRequired": "Store ID zorunludur.",
+        "apiPairRequired": "API Key ve API Secret birlikte girilmelidir.",
+        "shipstationUpdated": "ShipStation bilgileri güncellendi.",
+        "shipstationCreated": "ShipStation bilgileri kaydedildi.",
+        "shipstationGenericError": "İşlem başarısız.",
+        "verificationMissing": "Doğrulama için API Key ve API Secret birlikte girilmelidir.",
+        "verificationSuccess": "API Key ve API Secret doğrulandı.",
+        "verificationError": "Doğrulama başarısız."
+      }
+    },
+    "productMapper": {
+      "columns": {
+        "id": "Kimlik",
+        "customer": "Müşteri",
+        "product": "Ürün",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectCustomer": "Müşteri seçin",
+        "selectProduct": "Ürün seçin",
+        "selectStatus": "Durum seçin",
+        "searchMapper": "Eşleşme adı ara"
+      },
+      "actions": {
+        "new": "Yeni Ürün Eşleşmesi",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Ürün eşleşmesi silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "createSuccess": "Ürün eşleşmesi oluşturuldu.",
+        "updateSuccess": "Ürün eşleşmesi güncellendi.",
+        "deleteSuccess": "Ürün eşleşmesi silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Ürün Eşleşmesi Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productSizeMapper": {
+      "columns": {
+        "id": "Kimlik",
+        "customer": "Müşteri",
+        "product": "Ürün",
+        "size": "Beden",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectCustomer": "Müşteri seçin",
+        "selectProduct": "Ürün seçin",
+        "selectSize": "Beden seçin",
+        "selectStatus": "Durum seçin",
+        "searchMapper": "Eşleşme adı ara"
+      },
+      "actions": {
+        "new": "Yeni Beden Eşleşmesi",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Beden eşleşmesi silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadSizesError": "Bedenler yüklenemedi.",
+        "createSuccess": "Beden eşleşmesi oluşturuldu.",
+        "updateSuccess": "Beden eşleşmesi güncellendi.",
+        "deleteSuccess": "Beden eşleşmesi silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Beden Eşleşmesi Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productColorMapper": {
+      "columns": {
+        "id": "Kimlik",
+        "customer": "Müşteri",
+        "product": "Ürün",
+        "color": "Renk",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectCustomer": "Müşteri seçin",
+        "selectProduct": "Ürün seçin",
+        "selectColor": "Renk seçin",
+        "selectStatus": "Durum seçin",
+        "searchMapper": "Eşleşme adı ara"
+      },
+      "actions": {
+        "new": "Yeni Renk Eşleşmesi",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Renk eşleşmesi silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadProductsError": "Ürünler yüklenemedi.",
+        "loadColorsError": "Renkler yüklenemedi.",
+        "createSuccess": "Renk eşleşmesi oluşturuldu.",
+        "updateSuccess": "Renk eşleşmesi güncellendi.",
+        "deleteSuccess": "Renk eşleşmesi silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Renk Eşleşmesi Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    }
+  },
+  "forms": {
+    "common": {
+      "buttons": {
+        "cancel": "İptal",
+        "save": "Kaydet"
+      },
+      "validation": {
+        "required": "{field} zorunludur.",
+        "multiRequired": "En az bir {field} seçin.",
+        "email": "Geçerli bir e-posta adresi girin.",
+        "storeRequired": "Mağaza seçimi zorunludur."
+      },
+      "placeholders": {
+        "selectStatus": "Durum seç",
+        "selectCategories": "Kategorileri seç",
+        "selectCompany": "Firma seç",
+        "selectCustomer": "Müşteri seç",
+        "selectPartner": "Partner seç",
+        "selectStore": "Mağaza seç"
+      },
+      "roles": {
+        "companyAdmin": "Şirket Yöneticisi",
+        "companyShipmentWorker": "Şirket Sevkiyat Personeli",
+        "companyCompletedWorker": "Şirket Tamamlama Personeli",
+        "partnerAdmin": "Partner Yöneticisi",
+        "customerAdmin": "Müşteri Yöneticisi"
+      }
+    },
+    "company": {
+      "labels": {
+        "name": "Firma Adı",
+        "description": "Açıklama",
+        "categories": "Kategori",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "status": "Durum",
+        "addressSection": "Adres",
+        "searchAddress": "Adres Ara",
+        "addressName": "İsim",
+        "addressPhone": "Telefon",
+        "addressCompanyName": "Şirket Adı",
+        "addressLine1": "Adres Satırı 1",
+        "cityLocality": "Şehir / İlçe",
+        "stateProvince": "Eyalet / İl",
+        "postalCode": "Posta Kodu",
+        "countryCode": "Ülke Kodu"
+      },
+      "placeholders": {
+        "name": "örn. ACME Inc.",
+        "description": "Açıklama girin",
+        "categories": "Kategori seçin",
+        "shipmentMultiplier": "örn. 15",
+        "searchAddress": "Adres aramaya başlayın",
+        "addressName": "Bu adres için ad",
+        "addressPhone": "örn. +90 555 123 4567",
+        "addressCompanyName": "Şirket veya dikkat",
+        "addressLine1": "Sokak / cadde adresi",
+        "cityLocality": "Şehir",
+        "stateProvince": "Eyalet veya il",
+        "postalCode": "Posta / ZIP kodu",
+        "countryCode": "Ülke kodu (örn. TR)"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
+      }
+    },
+    "customer": {
+      "labels": {
+        "name": "Müşteri Adı",
+        "description": "Açıklama",
+        "categories": "Kategori",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "status": "Durum",
+        "store": "Mağaza",
+        "productMultiplier": "Ürün Kar Oranı (%)"
+      },
+      "placeholders": {
+        "name": "örn. ACME Inc.",
+        "description": "Açıklama girin",
+        "categories": "Kategori seçin",
+        "shipmentMultiplier": "örn. 15",
+        "productMultiplier": "örn. 10"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz.",
+        "productMultiplier": "Ürün fiyatlarına eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
+      },
+      "messages": {
+        "storeListLoadError": "Mağaza listesi yüklenemedi."
+      }
+    },
+    "partner": {
+      "labels": {
+        "name": "Partner Adı",
+        "description": "Açıklama",
+        "categories": "Kategori",
+        "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "name": "örn. ACME Inc.",
+        "description": "Açıklama girin",
+        "categories": "Kategori seçin",
+        "shipmentMultiplier": "örn. 15"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
+      }
+    },
+    "product": {
+      "labels": {
+        "name": "Ürün Adı",
+        "type": "Tür",
+        "company": "Firma",
+        "category": "Kategori",
+        "subCategory": "Alt Kategori",
+        "subCategoryOptional": "Opsiyonel alt kategori",
+        "optional": "Opsiyonel",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "name": "Örn. Hoodie",
+        "type": "Örn. Premium",
+        "subCategory": "Alt kategori ara veya oluştur"
+      },
+      "actions": {
+        "createSubCategory": "\"{name}\" oluştur",
+        "createSubCategoryPlaceholder": "Yeni bir alt kategori oluşturmak için ad yazın",
+        "manageSubCategories": "Alt kategorileri yönet",
+        "newSubCategory": "Alt kategori oluştur",
+        "saveSubCategory": "Alt kategoriyi kaydet"
+      },
+      "helpers": {
+        "subCategoryHint": "Yeni bir alt kategori eklemek için ad yazıp Enter'a basın veya aşağıdaki butonu kullanın.",
+        "subCategoryHintNoCategory": "Alt kategorileri yönetmek için bir kategori seçin.",
+        "subCategoryExisting": "\"{name}\" zaten var. Listeden seçin.",
+        "subCategoryOptionalHint": "Opsiyonel alt kategoriler ürün atamasında atlanabilir."
+      },
+      "manageModal": {
+        "title": "{category} için alt kategoriler",
+        "empty": "Henüz alt kategori yok."
+      },
+      "confirms": {
+        "createTitle": "\"{name}\" alt kategorisi oluşturulsun mu?",
+        "createContent": "\"{name}\", \"{category}\" altına eklenecek.",
+        "updateTitle": "\"{name}\" alt kategorisi güncellensin mi?",
+        "updateContent": "\"{name}\", \"{category}\" altında güncellenecek.",
+        "deleteTitle": "\"{name}\" alt kategorisi silinsin mi?",
+        "deleteContent": "Bu alt kategori silinecek. Daha sonra yeniden oluşturabilirsiniz."
+      },
+      "messages": {
+        "subCategoryLoadError": "Alt kategoriler yüklenemedi.",
+        "subCategoryCreateSuccess": "Alt kategori oluşturuldu.",
+        "subCategoryCreateError": "Alt kategori oluşturulamadı.",
+        "subCategoryCreateNoCategory": "Alt kategori oluşturmadan önce bir kategori seçin.",
+        "subCategoryAlreadyExists": "\"{name}\" alt kategorisi zaten mevcut.",
+        "subCategoryUpdateSuccess": "Alt kategori güncellendi.",
+        "subCategoryUpdateError": "Alt kategori güncellenemedi.",
+        "subCategoryDeleteSuccess": "Alt kategori silindi.",
+        "subCategoryDeleteError": "Alt kategori silinemedi.",
+        "subCategoryManageNoCategory": "Alt kategorileri yönetmek için bir kategori seçin.",
+        "subCategoryUnknownCategory": "seçilen kategori"
+      }
+    },
+    "productSize": {
+      "labels": {
+        "name": "Beden Adı",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "name": "Örn. Large",
+        "product": "Ürün seç"
+      }
+    },
+    "productColor": {
+      "labels": {
+        "name": "Renk Adı",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum",
+        "hex": "Hex Kodu"
+      },
+      "placeholders": {
+        "name": "Örn. Kırmızı",
+        "product": "Ürün seç",
+        "hex": "Örn. #FFFFFF"
+      },
+      "validation": {
+        "invalidHex": "Geçerli bir hex kodu girin (örn. #FFFFFF)."
+      }
+    },
+    "productPosition": {
+      "labels": {
+        "name": "Pozisyon Adı",
+        "slug": "Kısa Ad",
+        "product": "Ürün",
+        "company": "Firma",
+        "status": "Durum",
+        "image": "Görsel",
+        "designArea": "Baskı Alanı"
+      },
+      "placeholders": {
+        "name": "Örn. Ön",
+        "slug": "Örn. on",
+        "product": "Ürün seç"
+      },
+      "buttons": {
+        "selectImage": "Görsel seç"
+      },
+      "designArea": {
+        "title": "Baskı Alanı",
+        "instructions": "Müşteri tasarımının görüneceği alanı işaretlemek için dikdörtgeni sürükleyip yeniden boyutlandırın.",
+        "noImageMessage": "Baskı alanını işaretlemek için önce bir görsel yükleyin.",
+        "noSelection": "Devam etmek için bir seçim oluşturun.",
+        "emptyState": "Seçim yapabilmek için bir maket görseli yükleyin.",
+        "sizeLabel": "{width}% × {height}%",
+        "actions": {
+          "create": "Seçim Oluştur",
+          "recenter": "Ortaya Yerleştir",
+          "reset": "Temizle"
+        }
+      },
+      "messages": {
+        "invalidImageType": "Sadece JPG, JPEG, PNG veya WEBP dosyalarına izin verilir.",
+        "invalidImageSize": "Görsel boyutu 5 MB'tan küçük olmalıdır."
+      }
+    },
+    "productPositionImage": {
+      "labels": {
+        "name": "Görsel Adı",
+        "position": "Pozisyon",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "name": "Örn. Ön Maket",
+        "position": "Pozisyon seç"
+      }
+    },
+    "productAdditionalPrice": {
+      "labels": {
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "amount": "Tutar",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seç",
+        "customer": "Müşteri seç",
+        "partner": "Partner seç",
+        "amount": "Tutar girin"
+      },
+      "validation": {
+        "customerOrPartner": "Müşteri veya partner alanlarından birini seçmelisiniz."
+      }
+    },
+    "productPrice": {
+      "labels": {
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "company": "Firma",
+        "size": "Beden",
+        "color": "Renk",
+        "price": "Fiyat",
+        "sku": "Stok Kodu",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seç",
+        "customer": "Müşteri seç",
+        "partner": "Partner seç",
+        "size": "Beden seç",
+        "color": "Renk seç",
+        "price": "Fiyat girin",
+        "sku": "Stok kodu girin"
+      },
+      "validation": {
+        "customerOrPartner": "Müşteri veya partner alanlarından birini seçmelisiniz."
+      }
+    },
+    "productStock": {
+      "labels": {
+        "product": "Ürün",
+        "size": "Beden",
+        "color": "Renk",
+        "quantity": "Adet",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seç",
+        "size": "Beden seç",
+        "color": "Renk seç",
+        "quantity": "Adet girin"
+      }
+    },
+    "partnerProductPrice": {
+      "labels": {
+        "product": "Ürün",
+        "customer": "Müşteri",
+        "size": "Beden",
+        "color": "Renk",
+        "basePrice": "Gelen Fiyat",
+        "loadingBasePrice": "Yükleniyor...",
+        "price": "Müşteri Fiyatı",
+        "sku": "Stok Kodu",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seç",
+        "customer": "Müşteri seç",
+        "size": "Beden seç",
+        "color": "Renk seç",
+        "price": "Müşteri fiyatı girin",
+        "sku": "Stok kodu girin"
+      },
+      "messages": {
+        "basePriceLoadError": "Gelen fiyat yüklenemedi.",
+        "basePriceNotFound": "Seçim için gelen fiyat bulunamadı.",
+        "dependentListsError": "İlişkili seçenekler yüklenemedi.",
+        "partnerMissing": "Partner bilgisi bulunamadı."
+      },
+      "validation": {
+        "priceTooLow": "Fiyat en az {price} olmalıdır.",
+        "invalidPrice": "Geçerli bir fiyat girin."
+      }
+    },
+    "companyAdmin": {
+      "labels": {
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "password": "Şifre",
+        "mobile": "Mobil",
+        "company": "Firma",
+        "status": "Durum",
+        "role": "Rol"
+      }
+    },
+    "companyUser": {
+      "labels": {
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "password": "Şifre",
+        "mobile": "Mobil",
+        "status": "Durum",
+        "role": "Rol",
+        "categories": "Kategoriler"
+      }
+    },
+    "customerAdmin": {
+      "labels": {
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "password": "Şifre",
+        "mobile": "Mobil",
+        "customer": "Müşteri",
+        "status": "Durum",
+        "role": "Rol"
+      }
+    },
+    "partnerAdmin": {
+      "labels": {
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "password": "Şifre",
+        "mobile": "Mobil",
+        "partner": "Partner",
+        "status": "Durum",
+        "role": "Rol"
+      }
+    },
+    "productMapper": {
+      "labels": {
+        "product": "Ürün",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seçin",
+        "mapper": "Örn. Özel Hoodie"
+      }
+    },
+    "productSizeMapper": {
+      "labels": {
+        "product": "Ürün",
+        "size": "Beden",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seçin",
+        "size": "Beden seçin",
+        "mapper": "Örn. XL Uzun"
+      }
+    },
+    "productColorMapper": {
+      "labels": {
+        "product": "Ürün",
+        "color": "Renk",
+        "mapper": "Eşleşme Adı",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "product": "Ürün seçin",
+        "color": "Renk seçin",
+        "mapper": "Örn. Okyanus Mavisi"
+      }
+    }
+  },
+  "rbac": {
+    "forbidden": {
+      "subtitle": "Bu sayfayı görüntüleme yetkiniz yok.",
+      "backToDashboard": "Kontrol paneline git"
+    }
+  }
+}

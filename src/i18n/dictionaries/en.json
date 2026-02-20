@@ -1,0 +1,2495 @@
+{
+  "common": {
+    "language": "Language",
+    "languageChanged": "Dil {language} olarak güncellendi.",
+    "languageChangeError": "We couldn't update the language. Please try again.",
+    "navbar": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "walletTransactions": "Wallet Transactions",
+      "logout": "Sign Out",
+      "unknownUser": "User",
+      "orderSearchPlaceholder": "Search order number",
+      "orderSearchAria": "Search by order number"
+    },
+    "actions": {
+      "search": "Search",
+      "apply": "Apply",
+      "reset": "Reset",
+      "close": "Close",
+      "refresh": "Refresh",
+      "downloadPdf": "Download PDF",
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "blocked": "Blocked",
+      "awaiting_payment": "Awaiting Payment",
+      "awaiting_shipment": "Awaiting Shipment",
+      "shipped": "Shipped",
+      "cancelled": "Cancelled",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "canceled": "Canceled"
+    },
+    "table": {
+      "searchPlaceholder": "Search {label}",
+      "selectPlaceholder": "Select {label}",
+      "totalItems": "Total {count} items"
+    }
+  },
+  "home": {
+    "title": "Welcome to EasyJet",
+    "description": "Multi-language support is now available. Read copy from the translation dictionary."
+  },
+  "dashboard": {
+    "stats": {
+      "totalOrders": "Total Orders",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "table": {
+      "title": "Latest Orders",
+      "columns": {
+        "orderNo": "No",
+        "customerName": "Customer",
+        "status": "Status"
+      }
+    },
+    "financial": {
+      "topupList": {
+        "title": "Top-Up Requests"
+      },
+      "adminTopups": {
+        "title": "Top-Up Approvals"
+      },
+      "transactions": {
+        "title": "Wallet Transactions",
+        "currentBalance": "Current Balance",
+        "columns": {
+          "id": "ID",
+          "type": "Type",
+          "direction": "Direction",
+          "amount": "Amount",
+          "status": "Status",
+          "orderNumber": "Order Number",
+          "orderId": "Order ID",
+          "createdAt": "Created At"
+        },
+        "filters": {
+          "type": "Select type",
+          "direction": "Select direction",
+          "status": "Select status",
+          "createdAt": "Select date range"
+        },
+        "types": {
+          "topup": "Top-Up",
+          "order": "Order",
+          "shipment": "Shipment"
+        },
+        "directions": {
+          "credit": "Credit",
+          "debit": "Debit"
+        },
+        "statuses": {
+          "completed": "Completed",
+          "pending": "Pending",
+          "failed": "Failed",
+          "canceled": "Canceled"
+        }
+      },
+      "topupDetail": {
+        "title": "Top-Up Detail",
+        "adminTitle": "Top-Up Detail (Admin)"
+      },
+      "form": {
+        "title": "Wallet Top-Up",
+        "subtitle": "Create a new top-up request to be approved by admin."
+      },
+      "fields": {
+        "fundingAccount": "Funding Account",
+        "amount": "Amount",
+        "currency": "Currency",
+        "receiptUrl": "Receipt URL",
+        "receipt": "Receipt File",
+        "bankReference": "Bank Reference",
+        "note": "Note",
+        "approvedAmount": "Approved Amount",
+        "owner": "Owner",
+        "requestedBy": "Requested By",
+        "reviewedBy": "Reviewed By",
+        "reviewedAt": "Reviewed At",
+        "rejectReason": "Reject Reason",
+        "updatedAt": "Updated At"
+      },
+      "placeholders": {
+        "selectFundingAccount": "Select funding account",
+        "amount": "Enter amount",
+        "currency": "Select currency",
+        "receiptUrl": "https://",
+        "bankReference": "Reference",
+        "note": "Optional note"
+      },
+      "validation": {
+        "required": "This field is required."
+      },
+      "columns": {
+        "id": "ID",
+        "ownerType": "Owner Type",
+        "amount": "Amount",
+        "approvedAmount": "Approved Amount",
+        "currency": "Currency",
+        "fundingAccount": "Funding Account",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "status": "Select status",
+        "ownerType": "Select owner type",
+        "fundingAccount": "Select funding account",
+        "createdAt": "Select date range"
+      },
+      "ownerTypes": {
+        "company": "Company",
+        "partner": "Partner",
+        "customer": "Customer"
+      },
+      "actions": {
+        "new": "New Top-Up",
+        "view": "View",
+        "cancel": "Cancel",
+        "confirmCancel": "Cancel this top-up request?",
+        "confirmOk": "Yes, cancel",
+        "uploadReceipt": "Upload receipt",
+        "approveTitle": "Approve Top-Up",
+        "rejectTitle": "Reject Top-Up",
+        "approvedAmount": "Approved Amount",
+        "rejectReason": "Reject Reason",
+        "reject": "Reject"
+      },
+      "messages": {
+        "loadFundingError": "Funding accounts could not be loaded.",
+        "createSuccess": "Top-up request created.",
+        "createError": "Top-up request failed.",
+        "cancelSuccess": "Top-up request canceled.",
+        "cancelError": "Cancel failed.",
+        "loadDetailError": "Top-up detail could not be loaded.",
+        "approveSuccess": "Top-up approved.",
+        "rejectSuccess": "Top-up rejected.",
+        "actionError": "Action failed.",
+        "noActions": "No actions available for this status."
+      }
+    },
+    "fundingAccounts": {
+      "title": "Funding Accounts",
+      "columns": {
+        "id": "ID",
+        "displayName": "Display Name",
+        "accountIdentifier": "Account Identifier",
+        "type": "Type",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "displayName": "Search display name",
+        "accountIdentifier": "Search identifier",
+        "type": "Search type",
+        "status": "Select status"
+      },
+      "fields": {
+        "displayName": "Display Name",
+        "accountIdentifier": "Account Identifier",
+        "type": "Type",
+        "status": "Status"
+      },
+      "placeholders": {
+        "displayName": "Display name",
+        "accountIdentifier": "Identifier",
+        "type": "Type",
+        "status": "Select status"
+      },
+      "validation": {
+        "required": "This field is required."
+      },
+      "actions": {
+        "new": "New Funding Account",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete funding account?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "createSuccess": "Funding account created.",
+        "updateSuccess": "Funding account updated.",
+        "deleteSuccess": "Funding account deleted.",
+        "deleteError": "Delete failed.",
+        "loadTypesError": "Funding account types could not be loaded.",
+        "operationFailed": "Operation failed."
+      },
+      "modal": {
+        "createTitle": "Create Funding Account",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "table": {
+        "noData": "No data"
+      }
+    },
+    "customer": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "description": "Description",
+        "categories": "Categories",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "productMultiplier": "Product Markup (%)",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "searchDescription": "Search description",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Customer",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete customer?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Customer created.",
+        "updateSuccess": "Customer updated.",
+        "deleteSuccess": "Customer deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Customer",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "customerPermissions": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "permissions": "Permissions",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name"
+      },
+      "actions": {
+        "edit": "Edit",
+        "update": "Update"
+      },
+      "modal": {
+        "title": "Permissions: {name}",
+        "columns": {
+          "permission": "Permission",
+          "value": "Value",
+          "flags": "Flags"
+        }
+      },
+      "labels": {
+        "inherited": "Inherited",
+        "overridden": "Overridden",
+        "locked": "Locked"
+      },
+      "messages": {
+        "loadError": "Permissions could not be loaded.",
+        "updateSuccess": "Permissions updated.",
+        "updateError": "Update failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "company": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "description": "Description",
+        "categories": "Categories",
+        "createdAt": "Created At",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "searchDescription": "Search description",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Company",
+        "edit": "Edit"
+      },
+      "messages": {
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Company created.",
+        "updateSuccess": "Company updated.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Company",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyPermissions": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "permissions": "Permissions",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name"
+      },
+      "actions": {
+        "edit": "Edit",
+        "update": "Update"
+      },
+      "modal": {
+        "title": "Permissions: {name}",
+        "columns": {
+          "permission": "Permission",
+          "value": "Value",
+          "flags": "Flags"
+        }
+      },
+      "labels": {
+        "inherited": "Inherited",
+        "overridden": "Overridden",
+        "locked": "Locked"
+      },
+      "messages": {
+        "loadError": "Permissions could not be loaded.",
+        "updateSuccess": "Permissions updated.",
+        "updateError": "Update failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyAdmins": {
+      "columns": {
+        "id": "ID",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "company": "Company",
+        "categories": "Categories",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchFirstName": "Search first name",
+        "searchLastName": "Search last name",
+        "searchEmail": "Search email",
+        "searchMobile": "Search mobile",
+        "selectCompany": "Select company",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Admin",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete admin?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Admin created.",
+        "updateSuccess": "Admin updated.",
+        "deleteSuccess": "Admin deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "New Admin",
+        "editTitle": "Edit Admin"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "companyUsers": {
+      "columns": {
+        "id": "ID",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "role": "Role",
+        "categories": "Categories",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchFirstName": "Search first name",
+        "searchLastName": "Search last name",
+        "searchEmail": "Search email",
+        "searchMobile": "Search mobile",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New User",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete user?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "User created.",
+        "updateSuccess": "User updated.",
+        "deleteSuccess": "User deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "New User",
+        "editTitle": "Edit User"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "customerAdmins": {
+      "columns": {
+        "id": "ID",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "customer": "Customer",
+        "categories": "Categories",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchFirstName": "Search first name",
+        "searchLastName": "Search last name",
+        "searchEmail": "Search email",
+        "searchMobile": "Search mobile",
+        "selectCustomer": "Select customer",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Admin",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete admin?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Admin created.",
+        "updateSuccess": "Admin updated.",
+        "deleteSuccess": "Admin deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "New Admin",
+        "editTitle": "Edit Admin"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partner": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "description": "Description",
+        "categories": "Categories",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "searchDescription": "Search description",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Partner",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete partner?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Partner created.",
+        "updateSuccess": "Partner updated.",
+        "deleteSuccess": "Partner deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Partner",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerPermissions": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "permissions": "Permissions",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name"
+      },
+      "actions": {
+        "edit": "Edit",
+        "update": "Update"
+      },
+      "modal": {
+        "title": "Permissions: {name}",
+        "columns": {
+          "permission": "Permission",
+          "value": "Value",
+          "flags": "Flags"
+        }
+      },
+      "labels": {
+        "inherited": "Inherited",
+        "overridden": "Overridden",
+        "locked": "Locked"
+      },
+      "messages": {
+        "loadError": "Permissions could not be loaded.",
+        "updateSuccess": "Permissions updated.",
+        "updateError": "Update failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerAdmins": {
+      "columns": {
+        "id": "ID",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "partner": "Partner",
+        "categories": "Categories",
+        "createdAt": "Created At",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchFirstName": "Search first name",
+        "searchLastName": "Search last name",
+        "searchEmail": "Search email",
+        "searchMobile": "Search mobile",
+        "selectPartner": "Select partner",
+        "selectCategories": "Select categories",
+        "selectStatus": "Select status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "new": "New Admin",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete admin?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadPartnersError": "Partners could not be loaded.",
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Admin created.",
+        "updateSuccess": "Admin updated.",
+        "deleteSuccess": "Admin deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "New Admin",
+        "editTitle": "Edit Admin"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "product": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "subCategory": "Sub-Category",
+        "company": "Company",
+        "category": "Category",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "searchSubCategory": "Search sub-category",
+        "selectCompany": "Select company",
+        "selectCategory": "Select category",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Product",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete product?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Product created.",
+        "updateSuccess": "Product updated.",
+        "deleteSuccess": "Product deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importMissingSession": "Session not found. Please sign in again.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Product",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productSize": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "selectProduct": "Select product",
+        "selectCompany": "Select company",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Size",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete size?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "createSuccess": "Size created.",
+        "updateSuccess": "Size updated.",
+        "deleteSuccess": "Size deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Size",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productColor": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions",
+        "hex": "Color"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "selectProduct": "Select product",
+        "selectCompany": "Select company",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Color",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete color?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "createSuccess": "Color created.",
+        "updateSuccess": "Color updated.",
+        "deleteSuccess": "Color deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Color",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productMapper": {
+      "columns": {
+        "id": "ID",
+        "customer": "Customer",
+        "product": "Product",
+        "mapper": "Mapped Name",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectCustomer": "Select customer",
+        "selectProduct": "Select product",
+        "selectStatus": "Select status",
+        "searchMapper": "Search mapped name"
+      },
+      "actions": {
+        "new": "New Product Mapper",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete product mapper?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "createSuccess": "Product mapper created.",
+        "updateSuccess": "Product mapper updated.",
+        "deleteSuccess": "Product mapper deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Product Mapper",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productSizeMapper": {
+      "columns": {
+        "id": "ID",
+        "customer": "Customer",
+        "product": "Product",
+        "size": "Size",
+        "mapper": "Mapped Name",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectCustomer": "Select customer",
+        "selectProduct": "Select product",
+        "selectSize": "Select size",
+        "selectStatus": "Select status",
+        "searchMapper": "Search mapped name"
+      },
+      "actions": {
+        "new": "New Size Mapper",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete size mapper?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "loadSizesError": "Sizes could not be loaded.",
+        "createSuccess": "Size mapper created.",
+        "updateSuccess": "Size mapper updated.",
+        "deleteSuccess": "Size mapper deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Size Mapper",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productColorMapper": {
+      "columns": {
+        "id": "ID",
+        "customer": "Customer",
+        "product": "Product",
+        "color": "Color",
+        "mapper": "Mapped Name",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectCustomer": "Select customer",
+        "selectProduct": "Select product",
+        "selectColor": "Select color",
+        "selectStatus": "Select status",
+        "searchMapper": "Search mapped name"
+      },
+      "actions": {
+        "new": "New Color Mapper",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete color mapper?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "loadColorsError": "Colors could not be loaded.",
+        "createSuccess": "Color mapper created.",
+        "updateSuccess": "Color mapper updated.",
+        "deleteSuccess": "Color mapper deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Color Mapper",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPosition": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "image": "Image",
+        "slug": "Slug",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "searchSlug": "Search slug",
+        "selectProduct": "Select product",
+        "selectCompany": "Select company",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Position",
+        "edit": "Edit",
+        "delete": "Delete",
+        "previewImage": "Preview",
+        "confirmDeleteTitle": "Delete position?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "createSuccess": "Position created.",
+        "updateSuccess": "Position updated.",
+        "deleteSuccess": "Position deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Position",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPositionImage": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "position": "Position",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "selectPosition": "Select position",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Image",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete image?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadPositionsError": "Positions could not be loaded.",
+        "createSuccess": "Position image created.",
+        "updateSuccess": "Position image updated.",
+        "deleteSuccess": "Position image deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Position Image",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productAdditionalPrice": {
+      "columns": {
+        "id": "ID",
+        "product": "Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "amount": "Amount",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectProduct": "Select product",
+        "selectCustomer": "Select customer",
+        "selectPartner": "Select partner",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Additional Position Price",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete additional position price?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadProductsError": "Products could not be loaded.",
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadPartnersError": "Partners could not be loaded.",
+        "createSuccess": "Additional position price created.",
+        "updateSuccess": "Additional position price updated.",
+        "deleteSuccess": "Additional position price deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Additional Position Price",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productPrice": {
+      "columns": {
+        "id": "ID",
+        "product": "Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "company": "Company",
+        "size": "Size",
+        "color": "Color",
+        "price": "Price",
+        "sku": "SKU",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectProduct": "Select product",
+        "selectCustomer": "Select customer",
+        "selectPartner": "Select partner",
+        "selectCompany": "Select company",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Price",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete price?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCompaniesError": "Companies could not be loaded.",
+        "loadProductsError": "Products could not be loaded.",
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadPartnersError": "Partners could not be loaded.",
+        "loadSizesError": "Sizes could not be loaded.",
+        "loadColorsError": "Colors could not be loaded.",
+        "createSuccess": "Price created.",
+        "updateSuccess": "Price updated.",
+        "deleteSuccess": "Price deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Price",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "productStock": {
+      "columns": {
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "quantity": "Quantity",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectProduct": "Select product",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Stock",
+        "templateDownload": "Download Template",
+        "bulkImport": "Bulk Import",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete stock?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadProductsError": "Products could not be loaded.",
+        "loadSizesError": "Sizes could not be loaded.",
+        "loadColorsError": "Colors could not be loaded.",
+        "createSuccess": "Stock created.",
+        "updateSuccess": "Stock updated.",
+        "deleteSuccess": "Stock deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importCompletedWithErrors": "Import completed. Failed records: {failed}.",
+        "importCompletedWithErrorsFallback": "Import completed with some errors.",
+        "importSuccess": "Import completed successfully.",
+        "importFailed": "Import failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total {total}, Created {created}, Updated {updated}, Failed {failed}",
+        "noErrors": "No errors found.",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message"
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Stock",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerAssignedPrice": {
+      "columns": {
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "price": "Price",
+        "status": "Status",
+        "createdAt": "Created At"
+      },
+      "filters": {
+        "selectProduct": "Select product",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "selectStatus": "Select status"
+      },
+      "messages": {
+        "loadProductsError": "Products could not be loaded.",
+        "loadSizesError": "Sizes could not be loaded.",
+        "loadColorsError": "Colors could not be loaded.",
+        "partnerMissing": "Partner information missing."
+      },
+      "table": {
+        "noData": "No assigned prices"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
+    "partnerProductPrice": {
+      "columns": {
+        "product": "Product",
+        "customer": "Customer",
+        "assignment": "Assignment",
+        "size": "Size",
+        "color": "Color",
+        "basePrice": "Incoming Price",
+        "price": "Customer Price",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectProduct": "Select product",
+        "selectCustomer": "Select customer",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Customer Price",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete customer price?",
+        "confirmDeleteOk": "Delete"
+      },
+      "values": {
+        "assignmentCustomer": "Customer",
+        "assignmentPartner": "Partner",
+        "readOnly": "Company price"
+      },
+      "messages": {
+        "loadProductsError": "Products could not be loaded.",
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadSizesError": "Sizes could not be loaded.",
+        "loadColorsError": "Colors could not be loaded.",
+        "createSuccess": "Price created.",
+        "updateSuccess": "Price updated.",
+        "deleteSuccess": "Price deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed.",
+        "partnerMissing": "Partner information missing."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Customer Price",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-",
+        "partnerSelf": "Partner"
+      }
+    },
+    "preOrders": {
+      "columns": {
+        "id": "ID",
+        "orderNumber": "Order #",
+        "customer": "Customer",
+        "status": "Status",
+        "total": "Total",
+        "orderDate": "Order Date",
+        "price": "Price",
+        "customerName": "Customer Name",
+        "customerEmail": "Customer Email",
+        "customerPhone": "Customer Phone",
+        "amountPaid": "Amount Paid",
+        "paymentMethod": "Payment Method",
+        "requestedService": "Requested Service",
+        "orderByDate": "Order By",
+        "shipDate": "Ship Date",
+        "taxAmount": "Tax Amount",
+        "shippingAmount": "Shipping Amount",
+        "carrierCode": "Carrier",
+        "serviceCode": "Service Code",
+        "packageCode": "Package Code",
+        "confirmation": "Confirmation",
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchOrderNumber": "Search order number",
+        "searchCustomer": "Search customer",
+        "selectStatus": "Select status",
+        "selectProduct": "Select product",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "orderDate": "Order date",
+        "orderDateRange": "Order date range",
+        "singleDate": "Single date",
+        "dateRange": "Date range",
+        "clearDate": "Clear date filter"
+      },
+      "actions": {
+        "fetch": "Fetch ShipStation",
+        "fetching": "Fetching...",
+        "fetchCountdown": "Fetch ShipStation ({seconds}s)",
+        "approve": "Approve Order",
+        "approveSelected": "Approve Selected",
+        "cancel": "Cancel Order",
+        "confirmApproveTitle": "Approve this order?",
+        "confirmApproveSelectedTitle": "Approve selected orders?",
+        "confirmApproveOk": "Approve",
+        "confirmCancelTitle": "Cancel this order?",
+        "confirmCancelOk": "Cancel"
+      },
+      "messages": {
+        "fetchSuccess": "ShipStation orders fetched.",
+        "fetchError": "Fetch failed.",
+        "loadVariationsError": "Failed to load product variations.",
+        "updateSuccess": "Order item updated.",
+        "updateError": "Failed to update order item.",
+        "approveSuccess": "Order approved successfully.",
+        "approveError": "Failed to approve order.",
+        "cancelSuccess": "Order cancelled successfully.",
+        "cancelError": "Failed to cancel order."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "items": {
+        "columns": {
+          "image_url": "Image",
+          "sku": "SKU",
+          "item": "Item",
+          "quantity": "Qty",
+          "unitPrice": "Unit Price",
+          "taxAmount": "Tax",
+          "shippingAmount": "Shipping",
+          "adjustment": "Type",
+          "options": "Options"
+        },
+        "values": {
+          "adjustment": "Adjustment",
+          "standard": "Standard Item",
+          "noOptions": "No options"
+        },
+        "empty": "No items"
+      },
+      "common": {
+        "none": "-",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "details": {
+        "orderSummary": "Order Summary",
+        "shipment": "Shipment",
+        "weight": "Weight",
+        "residential": "Residential",
+        "verified": "Verification",
+        "shippingAddress": "Shipping Address",
+        "billingAddress": "Billing Address",
+        "address": "Address",
+        "phone": "Phone"
+      }
+    },
+    "orders": {
+      "title": "Orders",
+      "columns": {
+        "id": "ID",
+        "image": "Image",
+        "orderNumber": "Order #",
+        "sku": "SKU",
+        "item": "Item",
+        "quantity": "Quantity",
+        "status": "Status",
+        "options": "Options",
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "price": "Price",
+        "customer": "Customer",
+        "customerName": "Customer Name",
+        "orderDate": "Order Date",
+        "hasDesign": "Design",
+        "actions": "Actions",
+        "notes": "Notes"
+      },
+      "filters": {
+        "searchOrderNumber": "Search order number",
+        "searchSku": "Search SKU",
+        "searchItem": "Search item",
+        "selectStatus": "Select status",
+        "selectProduct": "Select product",
+        "selectSize": "Select size",
+        "selectColor": "Select color",
+        "orderDate": "Order date",
+        "orderDateRange": "Order date range",
+        "singleDate": "Single date",
+        "dateRange": "Date range",
+        "clearDate": "Clear date filter"
+      },
+      "status": {
+        "values": {
+          "newOrder": "New Order",
+          "processing": "Processing",
+          "pdf": "PDF",
+          "completed": "Completed",
+          "shipped": "Shipped",
+          "waitingForDesign": "Waiting for Design",
+          "cancel": "Cancelled"
+        }
+      },
+      "actions": {
+        "cancel": "Cancel Order",
+        "waitingForDesign": "Waiting for Design",
+        "designUpload": "Design Upload",
+        "designUpdate": "Design Update",
+        "viewDetail": "View detail",
+        "editAddress": "Edit billing info",
+        "shippingRates": "Shipping rates",
+        "confirmCancelTitle": "Cancel this order?",
+        "confirmCancelOk": "Cancel",
+        "confirmWaitingTitle": "Move this order to Waiting for Design?",
+        "confirmWaitingOk": "Update",
+        "newOrder": "Mark as New Order",
+        "confirmNewOrderTitle": "Move this order back to New Order?",
+        "confirmNewOrderOk": "Update"
+      },
+      "messages": {
+        "loadVariationsError": "Failed to load product variations.",
+        "statusUpdateSuccess": "Order status updated.",
+        "statusUpdateError": "Failed to update order status.",
+        "addressLoadError": "Unable to load order details.",
+        "addressUpdateSuccess": "Billing information updated.",
+        "addressUpdateError": "Failed to update billing information.",
+        "addressMissingOrder": "Order information is missing."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "values": {
+        "noOptions": "No options"
+      },
+      "common": {
+        "none": "-"
+      },
+      "design": {
+        "title": "Upload / Edit Design",
+        "orderInfo": {
+          "title": "Order Information",
+          "noImage": "No product image",
+          "preview": "Preview",
+          "imageHint": "Imported from the order"
+        },
+        "fields": {
+          "note": "Designer Note",
+          "notePlaceholder": "Add a note for the design team",
+          "positions": "Design Positions",
+          "positionsPlaceholder": "Select product positions",
+          "positionsEmpty": "No positions are configured for this product."
+        },
+        "positions": {
+          "designUploadLabel": "Upload Design",
+          "designUploadHelp": "Supported files: PDF, PNG, JPG, JPEG or WEBP up to 25 MB.",
+          "invalidFileType": "Unsupported file type. Please upload PDF or image files.",
+          "invalidFileSize": "File size must be smaller than {{size}} MB.",
+          "missingFile": "Please upload a design file for each selected position.",
+          "noPreview": "No reference image",
+          "designAreaPlaceholder": "Design preview appears here",
+          "noSelection": "Select at least one position to begin uploading.",
+          "noSelectionError": "Please select at least one position.",
+          "noNewDesignError": "Please upload at least one new design file.",
+          "untitled": "Unnamed position",
+          "deleteLabel": "Delete design",
+          "deleteConfirmTitle": "Are you sure you want to delete this design?",
+          "lockedSelectionWarning": "This position already has a design. Delete it before removing the selection."
+        },
+        "messages": {
+          "missingParams": "Order information is missing. Please reopen this page from the Orders list.",
+          "loadOrderError": "Unable to load order details.",
+          "loadPositionsError": "Unable to load product positions.",
+          "saveSuccess": "Design information saved.",
+          "saveError": "Failed to save design information.",
+          "deleteSuccess": "Design deleted.",
+          "deleteError": "Unable to delete design.",
+          "noItemFound": "The requested order item could not be found."
+        },
+        "actions": {
+          "save": "Save",
+          "saveConfirmTitle": "Do you want to save these design changes?"
+        }
+      },
+      "detail": {
+        "title": "Order Detail",
+        "sections": {
+          "orderInfo": "Order Information",
+          "customer": "Customer",
+          "shipping": "Shipping Service",
+          "billing": "Billing Address",
+          "shippingAddress": "Shipping Address",
+          "totals": "Totals",
+          "package": "Package",
+          "notes": "Notes",
+          "labels": "Labels",
+          "items": "Order Items"
+        },
+        "fields": {
+          "billToName": "Bill To Name",
+          "billToCompany": "Bill To Company",
+          "billToStreet1": "Bill To Address 1",
+          "billToStreet2": "Bill To Address 2",
+          "billToCity": "Bill To City",
+          "billToState": "Bill To State",
+          "billToPostalCode": "Bill To Postal Code",
+          "billToCountry": "Bill To Country",
+          "shipToName": "Ship To Name",
+          "shipToCompany": "Ship To Company",
+          "shipToStreet1": "Ship To Address 1",
+          "shipToStreet2": "Ship To Address 2",
+          "shipToCity": "Ship To City",
+          "shipToState": "Ship To State",
+          "shipToPostalCode": "Ship To Postal Code",
+          "shipToCountry": "Ship To Country",
+          "orderDate": "Order Date",
+          "paymentDate": "Payment Date",
+          "shipDate": "Ship Date",
+          "customerName": "Customer Name",
+          "customerEmail": "Customer Email",
+          "customerUsername": "Customer Username",
+          "requestedService": "Requested Service",
+          "carrierCode": "Carrier Code",
+          "serviceCode": "Service Code",
+          "orderTotal": "Order Total",
+          "amountPaid": "Amount Paid",
+          "taxAmount": "Tax Amount",
+          "shippingAmount": "Shipping Amount",
+          "weight": "Weight",
+          "dimensions": "Dimensions",
+          "confirmation": "Confirmation",
+          "customerNotes": "Customer Notes",
+          "internalNotes": "Internal Notes",
+          "labelSource": "Source",
+          "labelCarrier": "Carrier",
+          "labelService": "Service",
+          "labelRate": "Rate",
+          "labelTracking": "Tracking Number",
+          "labelCreatedAt": "Created At"
+        },
+        "designs": {
+          "title": "Designs",
+          "empty": "No designs found",
+          "unknownPosition": "Unknown position",
+          "noPreview": "No preview image",
+          "positionLabel": "Design Position",
+          "noImage": "No product image",
+          "designAreaPlaceholder": "Design preview appears here"
+        },
+        "messages": {
+          "missingParams": "Order number is missing. Please reopen this page from the Orders list.",
+          "loadOrderError": "Unable to load order detail.",
+          "loadPositionsError": "Unable to load product positions.",
+          "noOrderFound": "The requested order could not be found.",
+          "noItems": "No order items found.",
+          "positionsLoading": "Loading design positions...",
+          "noLabels": "No labels found.",
+          "voidLabelSuccess": "Label voided successfully.",
+          "voidLabelError": "Unable to void label."
+        },
+        "actions": {
+          "viewLabel": "Open label",
+          "voidLabel": "Void label",
+          "voidLabelConfirmTitle": "Void this label?",
+          "voidLabelConfirmOk": "Yes, void"
+        }
+      },
+      "addressEditor": {
+        "title": "Edit Customer & Address",
+        "sections": {
+          "product": "Product Information",
+          "order": "Order Information"
+        },
+        "fields": {
+          "billToName": "Bill To Name",
+          "searchAddress": "Search address",
+          "street1": "Address Line 1",
+          "street2": "Address Line 2",
+          "street3": "Address Line 3",
+          "city": "City",
+          "state": "State / Province",
+          "postalCode": "Postal Code",
+          "country": "Country"
+        },
+        "placeholders": {
+          "billToName": "Enter customer's full name",
+          "street1": "Address line 1",
+          "street2": "Apartment, suite, etc. (optional)",
+          "street3": "Address line 3 (optional)",
+          "searchAddress": "Search address",
+          "city": "City",
+          "state": "State or province",
+          "postalCode": "ZIP / Postal Code",
+          "country": "Select country"
+        },
+        "alerts": {
+          "googleMissing": "Google Places API key is missing. Suggestions are disabled."
+        },
+        "messages": {
+          "noItemFound": "Order details are unavailable."
+        },
+        "validation": {
+          "required": "{field} is required."
+        }
+      },
+      "shippingModal": {
+        "title": "Shipping Rates",
+        "empty": "No order item selected.",
+        "items": {
+          "title": "Order Items",
+          "subtitle": "Child items are listed together.",
+          "total": "Total item amount",
+          "noImage": "No image",
+          "preview": "Preview",
+          "orderAmount": "Order amount",
+          "shippingAmount": "Shipping amount",
+          "taxAmount": "Tax amount",
+          "amountPaid": "Total amount",
+          "orderNumber": "Order number",
+          "quantity": "Quantity",
+          "unitPrice": "Unit Price"
+        },
+        "address": {
+          "title": "Shipping Address"
+        },
+        "package": {
+          "title": "Package Dimensions & Weight",
+          "refresh": "Fetch shipping quotes",
+          "labels": {
+            "weightLb": "Weight (lb)",
+            "weightOz": "Weight (oz)",
+            "lengthIn": "Length (in)",
+            "widthIn": "Width (in)",
+            "heightIn": "Height (in)"
+          },
+          "warning": "Shipping quote is outdated. Please refresh to get updated rates."
+        },
+        "service": {
+          "title": "Carrier Service",
+          "subtitle": "The selection updates the total amount.",
+          "placeholder": "Select a carrier service",
+          "notFound": "No shipping quote found",
+          "zoneLabel": "Zone: {zone}",
+          "deliveryDaysLabel": "Est. Delivery: {days} business days",
+          "deliveryDaysLabelSelector": "{days} business days",
+          "tabs": {
+            "easyjet": "EasyJet Shipping Service",
+            "company": "{name} Shipping Service",
+            "partner": "{name} Shipping Service"
+          }
+        },
+        "summary": {
+          "orderTotal": "Order total",
+          "shipping": "Selected shipping",
+          "grandTotal": "Grand total"
+        },
+        "actions": {
+          "sendToProduction": "Send to Production",
+          "sendSuccess": "Order sent to production.",
+          "sendError": "Order could not be sent to production.",
+          "confirmSendTitle": "Send to production and buy label?",
+          "confirmSendDescription": "We will purchase the selected shipping label and send this order to production. Continue?",
+          "confirmSendOk": "Yes, send"
+        },
+        "errors": {
+          "mustRefreshRates": "Rates are outdated. Please refresh before sending."
+        }
+      }
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "orders": {
+        "title": "Orders",
+        "view": "View Orders",
+        "waitingForDesign": "Waiting for Design",
+        "cancel": "Cancel Orders"
+      },
+      "financial": {
+        "title": "Financial",
+        "report": "Financial Report",
+        "paymentManagement": "Payment Management",
+        "topup": "Wallet Top-Up",
+        "topupList": "Top-Up Requests",
+        "adminTitle": "Financial Admin",
+        "adminTopups": "Top-Up Approvals",
+        "fundingAccounts": "Funding Accounts"
+      },
+      "partner": {
+        "title": "Partners",
+        "partners": "Partners",
+        "admins": "Partner Admins",
+        "permissions": "Permissions"
+      },
+      "productVariation": {
+        "title": "Product Variations",
+        "products": "Products",
+        "sizes": "Sizes",
+        "colors": "Colors",
+        "positions": "Positions",
+        "positionImages": "Position Images",
+        "additionalPrices": "Additional Position Prices",
+        "stock": "Stock",
+        "prices": "Prices",
+        "partnerToCustomerPrices": "Customer Prices",
+        "partnerPrices": "Partner Prices"
+      },
+      "productMapper": {
+        "title": "Product Mapper",
+        "products": "Products",
+        "sizes": "Sizes",
+        "colors": "Colors"
+      },
+      "customer": {
+        "title": "Customer",
+        "customers": "Customers",
+        "admins": "Customer Admins",
+        "permissions": "Permissions"
+      },
+      "order": {
+        "title": "Order",
+        "preOrders": "Pre Orders",
+        "orders": "Orders",
+        "pending": "Pending Orders",
+        "inProduction": "In Production",
+        "completed": "Completed Orders",
+        "shipped": "Shipped Orders"
+      },
+      "company": {
+        "title": "Company",
+        "companies": "Companies",
+        "admins": "Company Admins",
+        "permissions": "Permissions"
+      },
+      "myCompany": {
+        "title": "My Company",
+        "users": "Company Users",
+        "settings": "Company Settings"
+      },
+      "settings": "Settings"
+    },
+    "settings": {
+      "header": {
+        "title": "Workspace settings",
+        "subtitle": "Manage integrations, preferences, and upcoming features from a single place."
+      },
+      "preferences": {
+        "title": "Notification preferences",
+        "subtitle": "Choose how you want to stay informed.",
+        "items": {
+          "productUpdates": {
+            "label": "Product updates",
+            "description": "Release notes, improvements, and upcoming launches."
+          },
+          "securityAlerts": {
+            "label": "Security alerts",
+            "description": "Sign-in alerts, password resets, and policy reminders."
+          },
+          "weeklyDigest": {
+            "label": "Weekly digest",
+            "description": "Performance recap with metrics tailored to your role."
+          }
+        },
+        "feedback": {
+          "updated": "Preference updated"
+        }
+      },
+      "upcoming": {
+        "title": "Coming soon",
+        "subtitle": "We are actively designing these capabilities.",
+        "items": {
+          "auditLog": {
+            "label": "Audit log",
+            "description": "Exportable activity history for compliance-ready reporting."
+          },
+          "alerts": {
+            "label": "Custom alerts",
+            "description": "Threshold-based rules that notify you before SLAs are at risk."
+          },
+          "api": {
+            "label": "Public API tokens",
+            "description": "Scoped tokens to automate settings across environments."
+          }
+        }
+      },
+      "integrations": {
+        "restrictedTitle": "ShipStation is managed by your company",
+        "restrictedDescription": "Contact your EasyJet administrator to request access."
+      }
+    },
+    "profile": {
+      "header": {
+        "uploadTooltip": "Upload or change your profile photo",
+        "changePhoto": "Change Photo",
+        "fallbackRole": "User",
+        "companyTag": "Company"
+      },
+      "info": {
+        "title": "Personal Information",
+        "subtitle": "Update your profile details",
+        "fields": {
+          "firstName": {
+            "label": "First Name"
+          },
+          "lastName": {
+            "label": "Last Name"
+          },
+          "email": {
+            "label": "Email"
+          },
+          "mobile": {
+            "label": "Mobile",
+            "placeholder": "+90..."
+          }
+        },
+        "actions": {
+          "save": "Save"
+        }
+      },
+      "security": {
+        "title": "Security",
+        "subtitle": "Change your password",
+        "fields": {
+          "current": "Current Password",
+          "new": "New Password",
+          "confirm": "Confirm New Password"
+        },
+        "actions": {
+          "clear": "Clear",
+          "update": "Update Password"
+        }
+      },
+      "shipStation": {
+        "title": "ShipStation Connection",
+        "subtitle": "Manage API credentials",
+        "labels": {
+          "apiKey": "API Key",
+          "apiSecret": "API Secret",
+          "label": "Label",
+          "status": "Status",
+          "storeId": "Store ID",
+          "createdAt": "Created",
+          "lastUsed": "Last Used"
+        },
+        "placeholders": {
+          "apiKey": {
+            "edit": "Enter a new key to update (masked by default)",
+            "create": "ShipStation API Key"
+          },
+          "apiSecret": {
+            "edit": "Enter a new secret to rotate (never shown later)",
+            "create": "ShipStation API Secret"
+          },
+          "label": "e.g. Primary, US Store ...",
+          "status": "Select status",
+          "storeId": {
+            "edit": "Store ID cannot be changed",
+            "create": "e.g. my-us-store-01"
+          }
+        },
+        "tooltip": {
+          "storeId": "Store ID can only be set during the first configuration and cannot be changed later."
+        },
+        "note": "Note: API Secret is never shown again—enter it only to rotate. API Key is masked (e.g. ****1234); entering a new value updates it. Secret and key are encrypted with AES-GCM. Store ID is defined once and cannot be changed later.",
+        "buttons": {
+          "verify": "Verify API Key/Secret",
+          "edit": "Edit"
+        }
+      },
+      "buttons": {
+        "changePhoto": "Change Photo"
+      },
+      "roles": {
+        "fallback": "User",
+        "systemadmin": "System Administrator",
+        "companyadmin": "Company Administrator",
+        "companyshipmentworker": "Company Shipment Worker",
+        "companycompletedworker": "Company Completed Worker",
+        "partneradmin": "Partner Administrator",
+        "customeradmin": "Customer Administrator"
+      },
+      "messages": {
+        "avatarTypeError": "Only PNG, JPG or WEBP files are allowed.",
+        "avatarSizeError": "File size must be lower than 5MB.",
+        "avatarUploadSuccess": "Profile photo updated.",
+        "avatarUploadError": "Profile photo could not be uploaded.",
+        "infoUpdateSuccess": "Profile updated.",
+        "passwordMismatch": "New passwords do not match.",
+        "passwordUpdateSuccess": "Password updated.",
+        "passwordUpdateError": "Password could not be updated.",
+        "storeIdRequired": "Store ID is required.",
+        "apiPairRequired": "API Key and API Secret must be provided together.",
+        "shipstationUpdated": "ShipStation credentials updated.",
+        "shipstationCreated": "ShipStation credentials saved.",
+        "shipstationGenericError": "Operation failed.",
+        "verificationMissing": "Provide both API Key and API Secret to verify.",
+        "verificationSuccess": "API Key and API Secret verified.",
+        "verificationError": "Verification failed."
+      }
+    }
+  },
+  "forms": {
+    "common": {
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "validation": {
+        "required": "{field} is required.",
+        "multiRequired": "Select at least one {field}.",
+        "email": "Enter a valid email address.",
+        "storeRequired": "Store selection is required."
+      },
+      "placeholders": {
+        "selectStatus": "Select status",
+        "selectCategories": "Select categories",
+        "selectCompany": "Select company",
+        "selectCustomer": "Select customer",
+        "selectPartner": "Select partner",
+        "selectStore": "Select store"
+      },
+      "roles": {
+        "companyAdmin": "Company Admin",
+        "companyShipmentWorker": "Company Shipment Worker",
+        "companyCompletedWorker": "Company Completed Worker",
+        "partnerAdmin": "Partner Admin",
+        "customerAdmin": "Customer Admin"
+      }
+    },
+    "company": {
+      "labels": {
+        "name": "Company Name",
+        "description": "Description",
+        "categories": "Category",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "status": "Status",
+        "addressSection": "Address",
+        "searchAddress": "Search Address",
+        "addressName": "Name",
+        "addressPhone": "Phone",
+        "addressCompanyName": "Company Name",
+        "addressLine1": "Address Line 1",
+        "cityLocality": "City / Locality",
+        "stateProvince": "State / Province",
+        "postalCode": "Postal Code",
+        "countryCode": "Country Code"
+      },
+      "placeholders": {
+        "name": "e.g. ACME Inc.",
+        "description": "Enter description",
+        "categories": "Select categories",
+        "shipmentMultiplier": "e.g. 15",
+        "searchAddress": "Start typing to search an address",
+        "addressName": "Full name for this address",
+        "addressPhone": "e.g. +1 555 123 4567",
+        "addressCompanyName": "Company or attention",
+        "addressLine1": "Street address",
+        "cityLocality": "City",
+        "stateProvince": "State or province",
+        "postalCode": "ZIP / Postal code",
+        "countryCode": "Country code (e.g. US)"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none)."
+      }
+    },
+    "customer": {
+      "labels": {
+        "name": "Customer Name",
+        "description": "Description",
+        "categories": "Category",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "status": "Status",
+        "store": "Store",
+        "productMultiplier": "Product Markup (%)"
+      },
+      "placeholders": {
+        "name": "e.g. ACME Inc.",
+        "description": "Enter description",
+        "categories": "Select categories",
+        "shipmentMultiplier": "e.g. 15",
+        "productMultiplier": "e.g. 10"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none).",
+        "productMultiplier": "Percentage profit added on top of product prices (leave blank for none)."
+      },
+      "messages": {
+        "storeListLoadError": "Store list could not be loaded."
+      }
+    },
+    "partner": {
+      "labels": {
+        "name": "Partner Name",
+        "description": "Description",
+        "categories": "Category",
+        "shipmentMultiplier": "Shipment Markup (%)",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "e.g. ACME Inc.",
+        "description": "Enter description",
+        "categories": "Select categories",
+        "shipmentMultiplier": "e.g. 15"
+      },
+      "tooltips": {
+        "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none)."
+      }
+    },
+    "product": {
+      "labels": {
+        "name": "Product Name",
+        "type": "Type",
+        "company": "Company",
+        "category": "Category",
+        "subCategory": "Sub-Category",
+        "subCategoryOptional": "Optional sub-category",
+        "optional": "Optional",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "e.g. Hoodie",
+        "type": "e.g. Premium",
+        "subCategory": "Search or create a sub-category"
+      },
+      "actions": {
+        "createSubCategory": "Create \"{name}\"",
+        "createSubCategoryPlaceholder": "Type a name to create a new sub-category",
+        "manageSubCategories": "Manage sub-categories",
+        "newSubCategory": "Create sub-category",
+        "saveSubCategory": "Save sub-category"
+      },
+      "helpers": {
+        "subCategoryHint": "Type a name and press Enter or use the button below to add a new sub-category.",
+        "subCategoryHintNoCategory": "Select a category to manage its sub-categories.",
+        "subCategoryExisting": "\"{name}\" already exists. Select it from the list.",
+        "subCategoryOptionalHint": "Optional sub-categories can be skipped when assigning products."
+      },
+      "manageModal": {
+        "title": "Sub-categories for {category}",
+        "empty": "No sub-categories yet."
+      },
+      "confirms": {
+        "createTitle": "Create sub-category \"{name}\"?",
+        "createContent": "\"{name}\" will be added under \"{category}\".",
+        "updateTitle": "Update sub-category \"{name}\"?",
+        "updateContent": "\"{name}\" will be updated under \"{category}\".",
+        "deleteTitle": "Delete sub-category \"{name}\"?",
+        "deleteContent": "This sub-category will be removed. You can recreate it later."
+      },
+      "messages": {
+        "subCategoryLoadError": "Sub-categories could not be loaded.",
+        "subCategoryCreateSuccess": "Sub-category created.",
+        "subCategoryCreateError": "Sub-category could not be created.",
+        "subCategoryCreateNoCategory": "Select a category before creating a sub-category.",
+        "subCategoryAlreadyExists": "Sub-category \"{name}\" already exists.",
+        "subCategoryUpdateSuccess": "Sub-category updated.",
+        "subCategoryUpdateError": "Sub-category could not be updated.",
+        "subCategoryDeleteSuccess": "Sub-category deleted.",
+        "subCategoryDeleteError": "Sub-category could not be deleted.",
+        "subCategoryManageNoCategory": "Select a category to manage sub-categories.",
+        "subCategoryUnknownCategory": "the selected category"
+      }
+    },
+    "productSize": {
+      "labels": {
+        "name": "Size Name",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "e.g. Large",
+        "product": "Select product"
+      }
+    },
+    "productColor": {
+      "labels": {
+        "name": "Color Name",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status",
+        "hex": "Hex Code"
+      },
+      "placeholders": {
+        "name": "e.g. Red",
+        "product": "Select product",
+        "hex": "e.g. #FFFFFF"
+      },
+      "validation": {
+        "invalidHex": "Enter a valid hex code (e.g. #FFFFFF)."
+      }
+    },
+    "productMapper": {
+      "labels": {
+        "product": "Product",
+        "mapper": "Mapped Name",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "mapper": "e.g. Custom Hoodie"
+      }
+    },
+    "productSizeMapper": {
+      "labels": {
+        "product": "Product",
+        "size": "Size",
+        "mapper": "Mapped Name",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "size": "Select size",
+        "mapper": "e.g. XL Tall"
+      }
+    },
+    "productColorMapper": {
+      "labels": {
+        "product": "Product",
+        "color": "Color",
+        "mapper": "Mapped Name",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "color": "Select color",
+        "mapper": "e.g. Ocean Blue"
+      }
+    },
+    "productPosition": {
+      "labels": {
+        "name": "Position Name",
+        "slug": "Slug",
+        "product": "Product",
+        "company": "Company",
+        "status": "Status",
+        "image": "Image",
+        "designArea": "Printable Area"
+      },
+      "placeholders": {
+        "name": "e.g. Front",
+        "slug": "e.g. front",
+        "product": "Select product"
+      },
+      "buttons": {
+        "selectImage": "Select image"
+      },
+      "designArea": {
+        "title": "Printable Area",
+        "instructions": "Drag and resize the rectangle to mark where customer designs will appear.",
+        "noImageMessage": "Upload an image to start marking the printable area.",
+        "noSelection": "Create a selection to continue.",
+        "emptyState": "Upload a mockup image to enable the selection surface.",
+        "sizeLabel": "{width}% × {height}%",
+        "actions": {
+          "create": "Create Selection",
+          "recenter": "Center Selection",
+          "reset": "Clear"
+        }
+      },
+      "messages": {
+        "invalidImageType": "Only JPG, JPEG, PNG or WEBP files are allowed.",
+        "invalidImageSize": "Image must be smaller than 5 MB."
+      }
+    },
+    "productPositionImage": {
+      "labels": {
+        "name": "Image Name",
+        "position": "Position",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "e.g. Front Mockup",
+        "position": "Select position"
+      }
+    },
+    "productAdditionalPrice": {
+      "labels": {
+        "product": "Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "amount": "Amount",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "customer": "Select customer",
+        "partner": "Select partner",
+        "amount": "Enter amount"
+      },
+      "validation": {
+        "customerOrPartner": "Select either a customer or a partner."
+      }
+    },
+    "productPrice": {
+      "labels": {
+        "product": "Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "company": "Company",
+        "size": "Size",
+        "color": "Color",
+        "price": "Price",
+        "sku": "SKU",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "customer": "Select customer",
+        "partner": "Select partner",
+        "size": "Select size",
+        "color": "Select color",
+        "price": "Enter price",
+        "sku": "Enter SKU"
+      },
+      "validation": {
+        "customerOrPartner": "Select either a customer or a partner."
+      }
+    },
+    "productStock": {
+      "labels": {
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "quantity": "Quantity",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "size": "Select size",
+        "color": "Select color",
+        "quantity": "Enter quantity"
+      }
+    },
+    "partnerProductPrice": {
+      "labels": {
+        "product": "Product",
+        "customer": "Customer",
+        "size": "Size",
+        "color": "Color",
+        "basePrice": "Incoming Price",
+        "loadingBasePrice": "Loading...",
+        "price": "Customer Price",
+        "sku": "SKU",
+        "status": "Status"
+      },
+      "placeholders": {
+        "product": "Select product",
+        "customer": "Select customer",
+        "size": "Select size",
+        "color": "Select color",
+        "price": "Enter customer price",
+        "sku": "Enter SKU"
+      },
+      "messages": {
+        "basePriceLoadError": "Incoming price could not be loaded.",
+        "basePriceNotFound": "Incoming price was not found for this selection.",
+        "dependentListsError": "Related options could not be loaded.",
+        "partnerMissing": "Partner information missing."
+      },
+      "validation": {
+        "priceTooLow": "Price must be at least {price}.",
+        "invalidPrice": "Enter a valid price."
+      }
+    },
+    "companyAdmin": {
+      "labels": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "mobile": "Mobile",
+        "company": "Company",
+        "status": "Status",
+        "role": "Role"
+      }
+    },
+    "companyUser": {
+      "labels": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "mobile": "Mobile",
+        "status": "Status",
+        "role": "Role",
+        "categories": "Categories"
+      }
+    },
+    "customerAdmin": {
+      "labels": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "mobile": "Mobile",
+        "customer": "Customer",
+        "status": "Status",
+        "role": "Role"
+      }
+    },
+    "partnerAdmin": {
+      "labels": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "mobile": "Mobile",
+        "partner": "Partner",
+        "status": "Status",
+        "role": "Role"
+      }
+    }
+  },
+  "rbac": {
+    "forbidden": {
+      "subtitle": "You do not have permission to view this page.",
+      "backToDashboard": "Go to dashboard"
+    }
+  }
+}
