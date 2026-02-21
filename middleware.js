@@ -15,7 +15,7 @@ const PUBLIC_PATHS = [
 const DASHBOARD_PREFIX = "/dashboard";
 
 // Cookie adını backend'deki http-only access token cookie adıyla eşleştir
-const TOKEN_COOKIE_NAME = "accessToken";
+const TOKEN_COOKIE_NAME = "access_token";
 
 export function middleware(req) {
   const { pathname } = req.nextUrl;
