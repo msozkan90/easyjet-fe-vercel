@@ -48,6 +48,34 @@
     "title": "EasyJet'e Hoş Geldiniz",
     "description": "Çoklu dil desteği artık etkin. İçerikleri çeviri sözlüğünden okuyabilirsiniz."
   },
+  "auth": {
+    "login": {
+      "title": "Giriş Yap",
+      "subtitle": "Siparişlerinizi yönetin, takip edin.",
+      "fields": {
+        "email": {
+          "label": "Kullanıcı Adı",
+          "placeholder": "kullanici@ornek.com"
+        },
+        "password": {
+          "label": "Şifre",
+          "placeholder": "••••••••"
+        }
+      },
+      "validation": {
+        "emailRequired": "Lütfen kullanıcı adınızı girin.",
+        "passwordRequired": "Lütfen şifrenizi girin."
+      },
+      "actions": {
+        "submit": "Giriş Yap"
+      },
+      "messages": {
+        "welcome": "Hoş geldiniz!",
+        "loginFailed": "Giriş başarısız",
+        "invalidCredentials": "Kullanıcı adı veya şifre hatalı"
+      }
+    }
+  },
   "dashboard": {
     "stats": {
       "totalOrders": "Toplam Sipariş",

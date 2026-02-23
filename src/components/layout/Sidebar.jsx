@@ -675,7 +675,7 @@ export default function Sidebar({ collapsed }) {
         borderRight: `0px solid ${token.colorSplit}`,
         position: "sticky",
         top: 0,
-        height: `calc(100vh}px)`,
+        height: "100vh",
         background: token.Layout?.headerBg || "#04314b",
       }}
     >

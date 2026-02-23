@@ -48,6 +48,34 @@
     "title": "Welcome to EasyJet",
     "description": "Multi-language support is now available. Read copy from the translation dictionary."
   },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Manage and track your orders.",
+      "fields": {
+        "email": {
+          "label": "Email",
+          "placeholder": "user@example.com"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "••••••••"
+        }
+      },
+      "validation": {
+        "emailRequired": "Please enter your email.",
+        "passwordRequired": "Please enter your password."
+      },
+      "actions": {
+        "submit": "Sign In"
+      },
+      "messages": {
+        "welcome": "Welcome!",
+        "loginFailed": "Login failed",
+        "invalidCredentials": "Invalid username or password"
+      }
+    }
+  },
   "dashboard": {
     "stats": {
       "totalOrders": "Total Orders",

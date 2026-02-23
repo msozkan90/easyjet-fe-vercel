@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }) {
   const { token } = theme.useToken();
 
   return (
-    <Layout style={{ height: "100vh" }}>
+    <Layout hasSider style={{ height: "100vh" }}>
       <Sidebar collapsed={collapsed} />
       <Layout
         style={{ minHeight: 0, display: "flex", flexDirection: "column" }}

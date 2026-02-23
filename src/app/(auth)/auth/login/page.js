@@ -26,9 +26,12 @@ import {
   setListWithSubCategories,
 } from "@/redux/features/categoriesSlice";
 import { RoleEnum } from "@/utils/consts";
+import { useTranslations } from "@/i18n/use-translations";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export default function LoginPage() {
   const { message } = AntdApp.useApp();
+  const t = useTranslations("auth.login");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -58,11 +61,11 @@ export default function LoginPage() {
       } else {
         dispatch(resetCategories());
       }
-      message.success("Hoş geldiniz!");
+      message.success(t("messages.welcome"));
       router.push("/dashboard");
     } catch (e) {
-      dispatch(setAuthError(e?.response?.data?.message || "Giriş başarısız"));
-      message.error("Kullanıcı adı veya şifre hatalı");
+      dispatch(setAuthError(e?.response?.data?.message || t("messages.loginFailed")));
+      message.error(t("messages.invalidCredentials"));
     } finally {
       setLoading(false);
     }
@@ -72,39 +75,55 @@ export default function LoginPage() {
     <Row
       align="middle"
       justify="center"
-      style={{ minHeight: "100vh", background: "#f5f7fa" }}
+      style={{
+        minHeight: "100vh",
+        background: "#f5f7fa",
+        padding: "56px 16px 16px",
+        position: "relative",
+      }}
     >
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+        }}
+      >
+        <LanguageSwitcher size="small" textColor="#344054" />
+      </div>
       <Col xs={22} sm={18} md={12} lg={8}>
         <Card>
           <Typography.Title
             level={3}
             style={{ textAlign: "center", marginBottom: 8 }}
           >
-            Giriş Yap
+            {t("title")}
           </Typography.Title>
           <Typography.Paragraph
             style={{ textAlign: "center", color: "#667085", marginBottom: 24 }}
           >
-            Siparişlerinizi yönetin, takip edin.
+            {t("subtitle")}
           </Typography.Paragraph>
 
           <Form layout="vertical" onFinish={onFinish}>
             <Form.Item
               name="email"
-              label="Kullanıcı Adı"
-              rules={[{ required: true }]}
+              label={t("fields.email.label")}
+              rules={[{ required: true, message: t("validation.emailRequired") }]}
             >
-              <Input placeholder="kullanici@ornek.com" />
+              <Input placeholder={t("fields.email.placeholder")} />
             </Form.Item>
             <Form.Item
               name="password"
-              label="Şifre"
-              rules={[{ required: true }]}
+              label={t("fields.password.label")}
+              rules={[
+                { required: true, message: t("validation.passwordRequired") },
+              ]}
             >
-              <Input.Password placeholder="••••••••" />
+              <Input.Password placeholder={t("fields.password.placeholder")} />
             </Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block>
-              Giriş Yap
+              {t("actions.submit")}
             </Button>
           </Form>
         </Card>

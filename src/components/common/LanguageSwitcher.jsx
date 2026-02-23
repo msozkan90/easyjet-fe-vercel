@@ -4,7 +4,7 @@ import { Select, Space, Typography, message } from "antd";
 import { locales, localeLabels } from "@/i18n/settings";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 
-export function LanguageSwitcher({ size = "middle" }) {
+export function LanguageSwitcher({ size = "middle", textColor = "#ffffffd9" }) {
   const t = useTranslations("common");
   const { locale, changeLocale, isChangingLocale } = useLocaleInfo();
 
@@ -26,7 +26,7 @@ export function LanguageSwitcher({ size = "middle" }) {
 
   return (
     <Space size={8} align="center">
-      <Typography.Text style={{ color: "#ffffffd9" }}>
+      <Typography.Text style={{ color: textColor }}>
         {t("language")}
       </Typography.Text>
       <Select
