@@ -119,12 +119,12 @@ export default function ProductStockPage() {
       },
       {
         title: t("columns.size"),
-        dataIndex: "size_id",
+        dataIndex: "size_name",
         sorter: true,
         filter: {
           type: "select",
           options: sizes.map((size) => ({
-            value: size.id,
+            value: size.name,
             label: size.name,
           })),
           placeholder: t("filters.selectSize"),
@@ -133,12 +133,12 @@ export default function ProductStockPage() {
       },
       {
         title: t("columns.color"),
-        dataIndex: "color_id",
+        dataIndex: "color_name",
         sorter: true,
         filter: {
           type: "select",
           options: colors.map((color) => ({
-            value: color.id,
+            value: color.name,
             label: color.name,
           })),
           placeholder: t("filters.selectColor"),
