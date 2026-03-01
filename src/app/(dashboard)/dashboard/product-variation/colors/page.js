@@ -68,11 +68,25 @@ export default function ProductColorsPage() {
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
     () => [
+      {
+        title: t("columns.product"),
+        dataIndex: "product_id",
+        sorter: true,
+        filter: {
+          type: "select",
+          options: products.map((product) => ({
+            value: product.id,
+            label: product.name,
+          })),
+          placeholder: t("filters.selectProduct"),
+        },
+        render: (_, record) => record?.product?.name || t("common.none"),
+      },
       {
         title: t("columns.name"),
         dataIndex: "name",
@@ -110,20 +124,7 @@ export default function ProductColorsPage() {
           );
         },
       },
-      {
-        title: t("columns.product"),
-        dataIndex: "product_id",
-        sorter: true,
-        filter: {
-          type: "select",
-          options: products.map((product) => ({
-            value: product.id,
-            label: product.name,
-          })),
-          placeholder: t("filters.selectProduct"),
-        },
-        render: (_, record) => record?.product?.name || t("common.none"),
-      },
+
       {
         title: t("columns.status"),
         dataIndex: "status",
@@ -182,7 +183,7 @@ export default function ProductColorsPage() {
         ),
       },
     ],
-    [products, t, tStatus]
+    [products, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -243,7 +244,7 @@ export default function ProductColorsPage() {
       setEditingRow(null);
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -255,7 +256,7 @@ export default function ProductColorsPage() {
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
@@ -272,7 +273,7 @@ export default function ProductColorsPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          t("messages.templateDownloadError")
+          t("messages.templateDownloadError"),
       );
     } finally {
       setTemplateLoading(false);
@@ -309,7 +310,7 @@ export default function ProductColorsPage() {
       const failedCount = resultData?.failed ?? 0;
       if (failedCount > 0) {
         message.warning(
-          t("messages.importCompletedWithErrors", { failed: failedCount })
+          t("messages.importCompletedWithErrors", { failed: failedCount }),
         );
       } else {
         message.success(t("messages.importSuccess"));
@@ -324,7 +325,7 @@ export default function ProductColorsPage() {
         message.warning(t("messages.importCompletedWithErrorsFallback"));
       } else {
         message.error(
-          error?.response?.data?.error?.message || t("messages.importFailed")
+          error?.response?.data?.error?.message || t("messages.importFailed"),
         );
       }
     } finally {
@@ -340,7 +341,7 @@ export default function ProductColorsPage() {
       message: t("import.errorMessage"),
       noErrors: t("import.noErrors"),
     }),
-    [t]
+    [t],
   );
 
   const buildImportSummary = useCallback(
@@ -352,7 +353,7 @@ export default function ProductColorsPage() {
       const failed = resultData?.failed ?? 0;
       return t("import.summary", { total, created, updated, failed });
     },
-    [t]
+    [t],
   );
 
   return (

@@ -68,11 +68,25 @@ export default function ProductPositionsPage() {
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
     () => [
+      {
+        title: t("columns.product"),
+        dataIndex: "product_id",
+        sorter: true,
+        filter: {
+          type: "select",
+          options: products.map((product) => ({
+            value: product.id,
+            label: product.name,
+          })),
+          placeholder: t("filters.selectProduct"),
+        },
+        render: (_, record) => record?.product?.name || t("common.none"),
+      },
       {
         title: t("columns.name"),
         dataIndex: "name",
@@ -98,20 +112,6 @@ export default function ProductPositionsPage() {
             t("common.none")
           );
         },
-      },
-      {
-        title: t("columns.product"),
-        dataIndex: "product_id",
-        sorter: true,
-        filter: {
-          type: "select",
-          options: products.map((product) => ({
-            value: product.id,
-            label: product.name,
-          })),
-          placeholder: t("filters.selectProduct"),
-        },
-        render: (_, record) => record?.product?.name || t("common.none"),
       },
 
       {
@@ -172,7 +172,7 @@ export default function ProductPositionsPage() {
         ),
       },
     ],
-    [products, t, tStatus]
+    [products, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -205,7 +205,7 @@ export default function ProductPositionsPage() {
     } catch (error) {
       console.log(error, "error");
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -217,7 +217,7 @@ export default function ProductPositionsPage() {
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };

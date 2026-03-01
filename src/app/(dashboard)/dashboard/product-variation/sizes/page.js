@@ -66,17 +66,11 @@ export default function ProductSizesPage() {
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
     () => [
-      {
-        title: t("columns.name"),
-        dataIndex: "name",
-        sorter: true,
-        filter: { type: "text", placeholder: t("filters.searchName") },
-      },
       {
         title: t("columns.product"),
         dataIndex: "product_id",
@@ -91,6 +85,13 @@ export default function ProductSizesPage() {
         },
         render: (_, record) => record?.product?.name || t("common.none"),
       },
+      {
+        title: t("columns.name"),
+        dataIndex: "name",
+        sorter: true,
+        filter: { type: "text", placeholder: t("filters.searchName") },
+      },
+
       {
         title: t("columns.status"),
         dataIndex: "status",
@@ -149,7 +150,7 @@ export default function ProductSizesPage() {
         ),
       },
     ],
-    [products, t, tStatus]
+    [products, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -163,8 +164,8 @@ export default function ProductSizesPage() {
           new Set(
             (values?.nameList || [])
               .map((item) => (typeof item === "string" ? item.trim() : ""))
-              .filter(Boolean)
-          )
+              .filter(Boolean),
+          ),
         );
         await ProductSizesAPI.create({
           product_id: values?.product_id,
@@ -179,7 +180,7 @@ export default function ProductSizesPage() {
       setEditingRow(null);
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -191,7 +192,7 @@ export default function ProductSizesPage() {
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
@@ -208,7 +209,7 @@ export default function ProductSizesPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          t("messages.templateDownloadError")
+          t("messages.templateDownloadError"),
       );
     } finally {
       setTemplateLoading(false);
@@ -245,7 +246,7 @@ export default function ProductSizesPage() {
       const failedCount = resultData?.failed ?? 0;
       if (failedCount > 0) {
         message.warning(
-          t("messages.importCompletedWithErrors", { failed: failedCount })
+          t("messages.importCompletedWithErrors", { failed: failedCount }),
         );
       } else {
         message.success(t("messages.importSuccess"));
@@ -260,7 +261,7 @@ export default function ProductSizesPage() {
         message.warning(t("messages.importCompletedWithErrorsFallback"));
       } else {
         message.error(
-          error?.response?.data?.error?.message || t("messages.importFailed")
+          error?.response?.data?.error?.message || t("messages.importFailed"),
         );
       }
     } finally {
@@ -276,7 +277,7 @@ export default function ProductSizesPage() {
       message: t("import.errorMessage"),
       noErrors: t("import.noErrors"),
     }),
-    [t]
+    [t],
   );
 
   const buildImportSummary = useCallback(
@@ -288,7 +289,7 @@ export default function ProductSizesPage() {
       const failed = resultData?.failed ?? 0;
       return t("import.summary", { total, created, updated, failed });
     },
-    [t]
+    [t],
   );
 
   return (
