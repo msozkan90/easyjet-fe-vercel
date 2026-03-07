@@ -12,7 +12,12 @@ import {
   Space,
   Tag,
 } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import ProductStockForm from "@/components/common/forms/ProductStockForm";
@@ -153,6 +158,13 @@ export default function ProductStockPage() {
           value !== null && value !== undefined ? value : t("common.none"),
       },
       {
+        title: t("columns.unit_price"),
+        dataIndex: "average_unit_price",
+        sorter: true,
+        render: (value) =>
+          value !== null && value !== undefined ? value : t("common.none"),
+      },
+      {
         title: t("columns.status"),
         dataIndex: "status",
         width: 140,
@@ -196,14 +208,42 @@ export default function ProductStockPage() {
                 }}
               ></Button>
             </Popover>
-            <Popover content={t("actions.delete")}>
+            <Popover
+              content={
+                record?.status === "active"
+                  ? t("actions.deactivate")
+                  : t("actions.activate")
+              }
+            >
               <Popconfirm
-                title={t("actions.confirmDeleteTitle")}
-                okText={t("actions.confirmDeleteOk")}
-                okButtonProps={{ danger: true }}
-                onConfirm={() => onDelete(record.id)}
+                title={
+                  record?.status === "active"
+                    ? t("actions.confirmDeactivateTitle")
+                    : t("actions.confirmActivateTitle")
+                }
+                okText={
+                  record?.status === "active"
+                    ? t("actions.confirmDeactivateOk")
+                    : t("actions.confirmActivateOk")
+                }
+                okButtonProps={{ danger: record?.status === "active" }}
+                onConfirm={() => onToggleStatus(record)}
               >
-                <Button icon={<DeleteOutlined />} danger></Button>
+                <Button
+                  icon={
+                    record?.status === "active" ? (
+                      <CloseCircleOutlined />
+                    ) : (
+                      <CheckCircleOutlined />
+                    )
+                  }
+                  danger={record?.status === "active"}
+                  style={
+                    record?.status === "inactive"
+                      ? { color: "#389e0d", borderColor: "#b7eb8f" }
+                      : undefined
+                  }
+                ></Button>
               </Popconfirm>
             </Popover>
           </Space>
@@ -217,10 +257,10 @@ export default function ProductStockPage() {
     try {
       if (editingRow) {
         const payload = {
-          status: values.status,
           quantity: values.quantity,
+          unit_price: values.unit_price,
         };
-        await ProductStockAPI.update(editingRow.id, payload);
+        await ProductStockAPI.addStock(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
         tableRef.current?.reload();
       } else {
@@ -238,14 +278,21 @@ export default function ProductStockPage() {
     }
   };
 
-  const onDelete = async (id) => {
+  const onToggleStatus = async (record) => {
+    const currentStatus = record?.status === "active" ? "active" : "inactive";
+    const nextStatus = currentStatus === "active" ? "inactive" : "active";
+
     try {
-      await ProductStockAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
+      await ProductStockAPI.update(record.id, { status: nextStatus });
+      message.success(
+        nextStatus === "active"
+          ? t("messages.activateSuccess")
+          : t("messages.deactivateSuccess")
+      );
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.statusUpdateError")
       );
     }
   };
@@ -428,8 +475,6 @@ export default function ProductStockPage() {
           initialValues={
             editingRow
               ? {
-                  quantity: editingRow?.quantity,
-                  status: editingRow?.status,
                   product_id: editingRow?.product_id ?? editingRow?.product?.id,
                   size_id: editingRow?.size_id ?? editingRow?.size?.id,
                   color_id: editingRow?.color_id ?? editingRow?.color?.id,

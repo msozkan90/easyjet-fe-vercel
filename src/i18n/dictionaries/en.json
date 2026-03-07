@@ -1311,7 +1311,8 @@
         "quantity": "Quantity",
         "status": "Status",
         "createdAt": "Created At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "unit_price": "Unit Price"
       },
       "filters": {
         "selectProduct": "Select product",
@@ -1324,9 +1325,12 @@
         "templateDownload": "Download Template",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
-        "delete": "Delete",
-        "confirmDeleteTitle": "Delete stock?",
-        "confirmDeleteOk": "Delete"
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "confirmActivateTitle": "Activate stock?",
+        "confirmActivateOk": "Activate",
+        "confirmDeactivateTitle": "Deactivate stock?",
+        "confirmDeactivateOk": "Deactivate"
       },
       "messages": {
         "loadProductsError": "Products could not be loaded.",
@@ -1334,8 +1338,9 @@
         "loadColorsError": "Colors could not be loaded.",
         "createSuccess": "Stock created.",
         "updateSuccess": "Stock updated.",
-        "deleteSuccess": "Stock deleted.",
-        "deleteError": "Delete failed.",
+        "activateSuccess": "Stock activated.",
+        "deactivateSuccess": "Stock deactivated.",
+        "statusUpdateError": "Status update failed.",
         "operationFailed": "Operation failed.",
         "templateDownloadSuccess": "Template downloaded.",
         "templateDownloadError": "Template download failed.",
@@ -2425,12 +2430,14 @@
         "size": "Size",
         "color": "Color",
         "quantity": "Quantity",
-        "status": "Status"
+        "status": "Status",
+        "unit_price": "Unit Price"
       },
       "placeholders": {
         "product": "Select product",
         "size": "Select size",
         "color": "Select color",
+        "unit_price": "Enter unit price",
         "quantity": "Enter quantity"
       }
     },

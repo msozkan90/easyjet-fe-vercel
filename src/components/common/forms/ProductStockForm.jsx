@@ -149,7 +149,6 @@ export default function ProductStockForm({
   }, [productId, form]);
 
   const mergedInitialValues = {
-    status: "active",
     ...(initialValues || {}),
   };
 
@@ -259,23 +258,22 @@ export default function ProductStockForm({
       </Form.Item>
 
       <Form.Item
-        name="status"
-        label={tForm("labels.status")}
+        name="unit_price"
+        label={tForm("labels.unit_price")}
         rules={[
           {
             required: true,
             message: tCommon("validation.required", {
-              field: tForm("labels.status"),
+              field: tForm("labels.unit_price"),
             }),
           },
         ]}
       >
-        <Select
-          placeholder={tCommon("placeholders.selectStatus")}
-          options={[
-            { value: "active", label: tStatus("active") },
-            { value: "inactive", label: tStatus("inactive") },
-          ]}
+        <InputNumber
+          min={0.01}
+          step={0.01}
+          style={{ width: "100%" }}
+          placeholder={tForm("placeholders.unit_price")}
         />
       </Form.Item>
 

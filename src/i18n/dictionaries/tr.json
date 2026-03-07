@@ -1170,7 +1170,8 @@
         "quantity": "Adet",
         "status": "Durum",
         "createdAt": "Oluşturulma Tarihi",
-        "actions": "İşlemler"
+        "actions": "İşlemler",
+        "unit_price": "Birim Fiyat"
       },
       "filters": {
         "selectProduct": "Ürün seç",
@@ -1183,9 +1184,12 @@
         "templateDownload": "Şablon İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
-        "delete": "Sil",
-        "confirmDeleteTitle": "Stok silinsin mi?",
-        "confirmDeleteOk": "Sil"
+        "activate": "Aktif Yap",
+        "deactivate": "Pasif Yap",
+        "confirmActivateTitle": "Stok aktif yapılsın mı?",
+        "confirmActivateOk": "Aktif Yap",
+        "confirmDeactivateTitle": "Stok pasif yapılsın mı?",
+        "confirmDeactivateOk": "Pasif Yap"
       },
       "messages": {
         "loadProductsError": "Ürünler yüklenemedi.",
@@ -1193,8 +1197,9 @@
         "loadColorsError": "Renkler yüklenemedi.",
         "createSuccess": "Stok oluşturuldu.",
         "updateSuccess": "Stok güncellendi.",
-        "deleteSuccess": "Stok silindi.",
-        "deleteError": "Silme işlemi başarısız.",
+        "activateSuccess": "Stok aktif yapıldı.",
+        "deactivateSuccess": "Stok pasif yapıldı.",
+        "statusUpdateError": "Durum güncelleme işlemi başarısız.",
         "operationFailed": "İşlem başarısız.",
         "templateDownloadSuccess": "Şablon indirildi.",
         "templateDownloadError": "Şablon indirilemedi.",
@@ -2388,13 +2393,15 @@
         "size": "Beden",
         "color": "Renk",
         "quantity": "Adet",
-        "status": "Durum"
+        "status": "Durum",
+        "unit_price": "Birim Fiyat"
       },
       "placeholders": {
         "product": "Ürün seç",
         "size": "Beden seç",
         "color": "Renk seç",
-        "quantity": "Adet girin"
+        "quantity": "Adet girin",
+        "unit_price": "Birim fiyatı girin"
       }
     },
     "partnerProductPrice": {

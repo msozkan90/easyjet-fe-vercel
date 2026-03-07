@@ -336,6 +336,7 @@ export const ProductStockAPI = {
   list: (query) => api.post("/product-stocks/list", query),
   create: (data) => api.post("/product-stocks", data),
   update: (id, data) => api.put(`/product-stocks/${id}`, data),
+  addStock: (id, data) => api.post(`/product-stocks/${id}/add-stock`, data),
   remove: (id) => api.del(`/product-stocks/${id}`),
   downloadTemplate: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
