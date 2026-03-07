@@ -2,29 +2,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Card,
-  Typography,
-  Space,
-  Form,
-  App as AntdApp,
-  Skeleton,
-  Switch,
-  Divider,
-} from "antd";
-import {
-  SafetyCertificateOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
+import { Form, App as AntdApp } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthAPI, ShipStationAPI } from "@/utils/api";
 import { setUser } from "@/redux/features/authSlice";
 import { useTranslations } from "@/i18n/use-translations";
 import RequireRole from "@/components/common/Access/RequireRole";
 import ShipStationCard from "@/components/settings/ShipStationCard";
+import SettingsHero from "@/components/settings/SettingsHero";
+import SettingsSideMenu from "@/components/settings/SettingsSideMenu";
+import NotificationSettingsTable from "@/components/settings/NotificationSettingsTable";
+import IntegrationsPlaceholder from "@/components/settings/IntegrationsPlaceholder";
+import {
+  SETTINGS_SECTIONS,
+  INITIAL_NOTIFICATION_ROWS,
+} from "@/components/settings/settings.constants";
+import { translateOrFallback } from "@/components/settings/settings.helpers";
 import { filterSourcesByAccess } from "@/utils/apiSourceRules";
-
-const { Title, Text, Paragraph } = Typography;
 
 const INITIAL_LOADING_STATE = {
   sources: true,
@@ -32,11 +26,6 @@ const INITIAL_LOADING_STATE = {
   ship_save: false,
   ship_verify: false,
 };
-
-function translateOrFallback(translator, key, fallback) {
-  const value = translator(key);
-  return value === key ? fallback : value;
-}
 
 export default function SettingsPage() {
   const { message } = AntdApp.useApp();
@@ -52,11 +41,10 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(INITIAL_LOADING_STATE);
   const [isUserLoading, setIsUserLoading] = useState(!user);
-  const [preferences, setPreferences] = useState({
-    productUpdates: true,
-    securityAlerts: true,
-    weeklyDigest: false,
-  });
+  const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS.API_CONF);
+  const [notificationRows, setNotificationRows] = useState(
+    INITIAL_NOTIFICATION_ROWS
+  );
   const [apiSources, setApiSources] = useState([]);
   const [activeSourceId, setActiveSourceId] = useState(null);
   const [credentialsBySource, setCredentialsBySource] = useState({});
@@ -588,14 +576,18 @@ export default function SettingsPage() {
     ]
   );
 
-  const handlePreferenceToggle = useCallback(
-    (key, checked) => {
-      setPreferences((prev) => ({ ...prev, [key]: checked }));
+  const handleNotificationToggle = useCallback(
+    (rowKey, checked) => {
+      setNotificationRows((prev) =>
+        prev.map((row) =>
+          row.key === rowKey ? { ...row, enabled: checked } : row
+        )
+      );
       message.success(
         translateOrFallback(
           tSettings,
           "preferences.feedback.updated",
-          "Preference updated"
+          "Notification preference updated"
         )
       );
     },
@@ -633,6 +625,28 @@ export default function SettingsPage() {
   const activeSourceLabel = formatSourceLabel(activeSource);
   const canVerifyCredentials =
     shouldShowStoreId && hasApiKeyField && hasApiSecretField;
+  const localizedNotificationRows = useMemo(
+    () =>
+      notificationRows.map((row) => ({
+        ...row,
+        event: translateOrFallback(
+          tSettings,
+          `notification.rows.${row.key}.event`,
+          row.key
+        ),
+        channel: translateOrFallback(
+          tSettings,
+          `notification.rows.${row.key}.channel`,
+          "-"
+        ),
+        owner: translateOrFallback(
+          tSettings,
+          `notification.rows.${row.key}.owner`,
+          "-"
+        ),
+      })),
+    [notificationRows, tSettings]
+  );
 
   return (
     <div className="grid gap-4">
@@ -644,267 +658,66 @@ export default function SettingsPage() {
         isLoading={isUserLoading}
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="space-y-4">
-          <PreferencesCard
-            preferences={preferences}
-            onToggle={handlePreferenceToggle}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <div className="xl:col-span-1">
+          <SettingsSideMenu
+            activeKey={activeSection}
+            onChange={setActiveSection}
             tSettings={tSettings}
           />
-          <UpcomingFeaturesCard tSettings={tSettings} />
         </div>
 
-        <div className="xl:col-span-2">
-          <RequireRole
-            anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
-          >
-            {canSeeShipStation && (visibleApiSources.length || loading.sources) ? (
-              <ShipStationCard
-                form={shipForm}
-                credential={credential}
-                isEditing={isEditing}
-                loading={loading}
-                storeList={storeList}
-                onEdit={handleEditShip}
-                onCancel={handleCancelShip}
-                onSave={handleSaveShipstation}
-                onVerify={handleShipstationVerify}
-                tProfile={tProfile}
-                tCommon={tCommon}
-                tForms={tForms}
-                sources={visibleApiSources}
-                activeSourceId={activeSourceId}
-                onSourceChange={handleSourceTabChange}
-                tabsLoading={loading.sources}
-                onValuesChange={handleFormValuesChange}
-                formatSourceLabel={formatSourceLabel}
-                activeSourceLabel={activeSourceLabel}
-                activeSourceFields={activeSourceFields}
-                hasApiKeyField={hasApiKeyField}
-                hasApiSecretField={hasApiSecretField}
-                shouldShowStoreId={shouldShowStoreId}
-                canVerify={canVerifyCredentials}
-                isShipstation={isShipstationActive}
-              />
-            ) : (
-              <IntegrationsPlaceholder tSettings={tSettings} />
-            )}
-          </RequireRole>
+        <div className="xl:col-span-3">
+          {activeSection === SETTINGS_SECTIONS.API_CONF ? (
+            <RequireRole
+              anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
+            >
+              {canSeeShipStation &&
+              (visibleApiSources.length || loading.sources) ? (
+                <ShipStationCard
+                  form={shipForm}
+                  credential={credential}
+                  isEditing={isEditing}
+                  loading={loading}
+                  storeList={storeList}
+                  onEdit={handleEditShip}
+                  onCancel={handleCancelShip}
+                  onSave={handleSaveShipstation}
+                  onVerify={handleShipstationVerify}
+                  tProfile={tProfile}
+                  tCommon={tCommon}
+                  tForms={tForms}
+                  sources={visibleApiSources}
+                  activeSourceId={activeSourceId}
+                  onSourceChange={handleSourceTabChange}
+                  tabsLoading={loading.sources}
+                  onValuesChange={handleFormValuesChange}
+                  formatSourceLabel={formatSourceLabel}
+                  activeSourceLabel={activeSourceLabel}
+                  activeSourceFields={activeSourceFields}
+                  hasApiKeyField={hasApiKeyField}
+                  hasApiSecretField={hasApiSecretField}
+                  shouldShowStoreId={shouldShowStoreId}
+                  canVerify={canVerifyCredentials}
+                  isShipstation={isShipstationActive}
+                />
+              ) : (
+                <IntegrationsPlaceholder tSettings={tSettings} />
+              )}
+            </RequireRole>
+          ) : (
+            <RequireRole
+              anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
+            >
+            <NotificationSettingsTable
+              rows={localizedNotificationRows}
+              onToggle={handleNotificationToggle}
+              tSettings={tSettings}
+            />
+            </RequireRole>
+          )}
         </div>
       </div>
     </div>
-  );
-}
-
-function SettingsHero({ title, subtitle, user, roles, isLoading }) {
-  return (
-    <Card className="shadow-sm !bg-gradient-to-r !from-slate-900 !to-slate-700 text-white overflow-hidden">
-      {isLoading ? (
-        <Skeleton active paragraph={{ rows: 2 }} />
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div>
-            <Title level={3} className="!text-white mb-1 flex items-center gap-2">
-              <SettingOutlined />
-              <span>{title}</span>
-            </Title>
-            <Paragraph className="!text-white/80 mb-0">{subtitle}</Paragraph>
-          </div>
-
-          <Divider className="!my-2 !border-white/20" />
-
-          <Space direction="vertical" size={4} className="text-white/90">
-            <Text className="!text-white text-lg font-semibold">
-              {user
-                ? `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
-                  user.displayName ||
-                  user.email
-                : "-"}
-            </Text>
-            <Space size={[8, 8]} wrap>
-              {roles.map((role) => (
-                <span
-                  key={role}
-                  className="px-3 py-1 rounded-full bg-white/20 text-xs uppercase tracking-wide"
-                >
-                  {role}
-                </span>
-              ))}
-            </Space>
-          </Space>
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function PreferencesCard({ preferences, onToggle, tSettings }) {
-  const title = translateOrFallback(
-    tSettings,
-    "preferences.title",
-    "Notification preferences"
-  );
-  const subtitle = translateOrFallback(
-    tSettings,
-    "preferences.subtitle",
-    "Choose how you want to stay informed."
-  );
-
-  const items = [
-    {
-      key: "productUpdates",
-      label: translateOrFallback(
-        tSettings,
-        "preferences.items.productUpdates.label",
-        "Product updates"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "preferences.items.productUpdates.description",
-        "Release notes, improvements, and upcoming launches."
-      ),
-    },
-    {
-      key: "securityAlerts",
-      label: translateOrFallback(
-        tSettings,
-        "preferences.items.securityAlerts.label",
-        "Security alerts"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "preferences.items.securityAlerts.description",
-        "Sign-in alerts, password resets, and policy reminders."
-      ),
-    },
-    {
-      key: "weeklyDigest",
-      label: translateOrFallback(
-        tSettings,
-        "preferences.items.weeklyDigest.label",
-        "Weekly digest"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "preferences.items.weeklyDigest.description",
-        "Performance recap with metrics tailored to your role."
-      ),
-    },
-  ];
-
-  return (
-    <Card title={title} extra={<Text type="secondary">{subtitle}</Text>} className="shadow-sm">
-      <Space direction="vertical" size="large" className="w-full">
-        {items.map((item) => (
-          <div key={item.key} className="flex items-start justify-between gap-3">
-            <div>
-              <Text strong>{item.label}</Text>
-              <Paragraph type="secondary" className="mb-0">
-                {item.description}
-              </Paragraph>
-            </div>
-            <Switch
-              checked={preferences[item.key]}
-              onChange={(checked) => onToggle(item.key, checked)}
-            />
-          </div>
-        ))}
-      </Space>
-    </Card>
-  );
-}
-
-function UpcomingFeaturesCard({ tSettings }) {
-  const title = translateOrFallback(
-    tSettings,
-    "upcoming.title",
-    "Coming soon"
-  );
-  const subtitle = translateOrFallback(
-    tSettings,
-    "upcoming.subtitle",
-    "We are actively designing these capabilities."
-  );
-
-  const items = [
-    {
-      key: "auditLog",
-      label: translateOrFallback(
-        tSettings,
-        "upcoming.items.auditLog.label",
-        "Audit log"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "upcoming.items.auditLog.description",
-        "Exportable activity history for compliance-ready reporting."
-      ),
-    },
-    {
-      key: "alerts",
-      label: translateOrFallback(
-        tSettings,
-        "upcoming.items.alerts.label",
-        "Custom alerts"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "upcoming.items.alerts.description",
-        "Threshold-based rules that notify you before SLAs are at risk."
-      ),
-    },
-    {
-      key: "api",
-      label: translateOrFallback(
-        tSettings,
-        "upcoming.items.api.label",
-        "Public API tokens"
-      ),
-      description: translateOrFallback(
-        tSettings,
-        "upcoming.items.api.description",
-        "Scoped tokens to automate settings across environments."
-      ),
-    },
-  ];
-
-  return (
-    <Card title={title} extra={<Text type="secondary">{subtitle}</Text>} className="shadow-sm">
-      <Space direction="vertical" size="large" className="w-full">
-        {items.map((item) => (
-          <div key={item.key}>
-            <Text strong>{item.label}</Text>
-            <Paragraph type="secondary" className="mb-0">
-              {item.description}
-            </Paragraph>
-          </div>
-        ))}
-      </Space>
-    </Card>
-  );
-}
-
-function IntegrationsPlaceholder({ tSettings }) {
-  const title = translateOrFallback(
-    tSettings,
-    "integrations.restrictedTitle",
-    "ShipStation is managed by your company"
-  );
-  const description = translateOrFallback(
-    tSettings,
-    "integrations.restrictedDescription",
-    "Contact your EasyJet administrator to request access."
-  );
-
-  return (
-    <Card className="shadow-sm text-center py-16">
-      <Space direction="vertical">
-        <SafetyCertificateOutlined style={{ fontSize: 36, color: "#8c8c8c" }} />
-        <Title level={4}>{title}</Title>
-        <Paragraph type="secondary" className="mb-0">
-          {description}
-        </Paragraph>
-      </Space>
-    </Card>
   );
 }

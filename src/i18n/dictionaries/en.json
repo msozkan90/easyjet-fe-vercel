@@ -1950,6 +1950,41 @@
         "title": "Workspace settings",
         "subtitle": "Manage integrations, preferences, and upcoming features from a single place."
       },
+      "sidebar": {
+        "title": "Settings Menu",
+        "subtitle": "Choose a section to manage.",
+        "items": {
+          "apiConf": "Api Conf",
+          "notification": "Notification"
+        }
+      },
+      "notification": {
+        "title": "Notification Settings",
+        "subtitle": "Control who gets notified and through which channel.",
+        "table": {
+          "event": "Event",
+          "channel": "Channel",
+          "owner": "Owner",
+          "enabled": "Enabled"
+        },
+        "rows": {
+          "order_created": {
+            "event": "Order Created",
+            "channel": "Email",
+            "owner": "Operations"
+          },
+          "order_delayed": {
+            "event": "Order Delayed",
+            "channel": "Push",
+            "owner": "Support"
+          },
+          "sync_failure": {
+            "event": "API Sync Failure",
+            "channel": "Email + Push",
+            "owner": "Engineering"
+          }
+        }
+      },
       "preferences": {
         "title": "Notification preferences",
         "subtitle": "Choose how you want to stay informed.",

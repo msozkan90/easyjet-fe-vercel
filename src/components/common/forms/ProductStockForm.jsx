@@ -87,13 +87,13 @@ export default function ProductStockForm({
         const availableSizeIds = new Set(
           nextSizes
             .map((item) => item?.id)
-            .filter((id) => id !== null && id !== undefined)
+            .filter((id) => id !== null && id !== undefined),
         );
         if (!currentSizeId || !availableSizeIds.has(currentSizeId)) {
           const defaultSize = nextSizes.find(
             (item) =>
               typeof item?.name === "string" &&
-              item.name.trim().toLowerCase() === "standart"
+              item.name.trim().toLowerCase() === "standart",
           );
           if (defaultSize?.id !== undefined) {
             updates.size_id = defaultSize.id;
@@ -106,13 +106,13 @@ export default function ProductStockForm({
         const availableColorIds = new Set(
           nextColors
             .map((item) => item?.id)
-            .filter((id) => id !== null && id !== undefined)
+            .filter((id) => id !== null && id !== undefined),
         );
         if (!currentColorId || !availableColorIds.has(currentColorId)) {
           const defaultColor = nextColors.find(
             (item) =>
               typeof item?.name === "string" &&
-              item.name.trim().toLowerCase() === "standart"
+              item.name.trim().toLowerCase() === "standart",
           );
           if (defaultColor?.id !== undefined) {
             updates.color_id = defaultColor.id;
@@ -235,7 +235,26 @@ export default function ProductStockForm({
           disabled={!productId || isEdit}
         />
       </Form.Item>
-
+      <Form.Item
+        name="stock_alert_threshold"
+        label={tForm("labels.stock_alert_threshold")}
+        rules={[
+          {
+            required: true,
+            message: tCommon("validation.required", {
+              field: tForm("labels.stock_alert_threshold"),
+            }),
+          },
+        ]}
+      >
+        <InputNumber
+          min={0}
+          step={1}
+          precision={0}
+          style={{ width: "100%" }}
+          placeholder={tForm("placeholders.stock_alert_threshold")}
+        />
+      </Form.Item>
       <Form.Item
         name="quantity"
         label={tForm("labels.quantity")}

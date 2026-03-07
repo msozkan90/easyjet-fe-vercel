@@ -1809,6 +1809,41 @@
         "title": "Çalışma alanı ayarları",
         "subtitle": "Tüm entegrasyonları, tercihleri ve gelecek özellikleri tek yerden yönetin."
       },
+      "sidebar": {
+        "title": "Ayarlar Menüsü",
+        "subtitle": "Yönetmek istediğiniz bölümü seçin.",
+        "items": {
+          "apiConf": "Api Conf",
+          "notification": "Bildirim"
+        }
+      },
+      "notification": {
+        "title": "Bildirim Ayarları",
+        "subtitle": "Kimin hangi kanal üzerinden bildirim alacağını yönetin.",
+        "table": {
+          "event": "Olay",
+          "channel": "Kanal",
+          "owner": "Sorumlu",
+          "enabled": "Aktif"
+        },
+        "rows": {
+          "order_created": {
+            "event": "Sipariş Oluşturuldu",
+            "channel": "E-posta",
+            "owner": "Operasyon"
+          },
+          "order_delayed": {
+            "event": "Sipariş Gecikti",
+            "channel": "Push",
+            "owner": "Destek"
+          },
+          "sync_failure": {
+            "event": "API Senkronizasyon Hatası",
+            "channel": "E-posta + Push",
+            "owner": "Mühendislik"
+          }
+        }
+      },
       "preferences": {
         "title": "Bildirim tercihleri",
         "subtitle": "Nasıl haberdar olmak istediğinizi seçin.",

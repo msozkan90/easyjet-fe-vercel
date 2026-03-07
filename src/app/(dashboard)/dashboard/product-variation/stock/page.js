@@ -151,6 +151,13 @@ export default function ProductStockPage() {
         render: (_, record) => record?.color?.name || t("common.none"),
       },
       {
+        title: t("columns.stock_alert_threshold"),
+        dataIndex: "stock_alert_threshold",
+        sorter: true,
+        render: (value) =>
+          value !== null && value !== undefined ? value : t("common.none"),
+      },
+      {
         title: t("columns.quantity"),
         dataIndex: "quantity",
         sorter: true,
@@ -259,6 +266,7 @@ export default function ProductStockPage() {
         const payload = {
           quantity: values.quantity,
           unit_price: values.unit_price,
+          stock_alert_threshold: values.stock_alert_threshold,
         };
         await ProductStockAPI.addStock(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
@@ -478,6 +486,7 @@ export default function ProductStockPage() {
                   product_id: editingRow?.product_id ?? editingRow?.product?.id,
                   size_id: editingRow?.size_id ?? editingRow?.size?.id,
                   color_id: editingRow?.color_id ?? editingRow?.color?.id,
+                  stock_alert_threshold: editingRow?.stock_alert_threshold,
                 }
               : undefined
           }
