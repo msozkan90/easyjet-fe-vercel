@@ -476,3 +476,11 @@ export const ShipStationAPI = {
   listApiSources: () => api.get("/shipstation/api-source/list"),
   quoteRates: (payload) => api.post("/shipstation/rates/quote", payload),
 };
+
+export const NotificationRulesAPI = {
+  list: (payload) => api.post("/notifications/list", payload),
+  create: (payload) => api.post("/notifications", payload),
+  update: (id, payload) => api.put(`/notifications/${id}`, payload),
+  remove: (id) => api.del(`/notifications/${id}`),
+  listRecipientUsers: () => api.get("/notifications/recipient-users"),
+};

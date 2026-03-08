@@ -13,10 +13,7 @@ import SettingsHero from "@/components/settings/SettingsHero";
 import SettingsSideMenu from "@/components/settings/SettingsSideMenu";
 import NotificationSettingsTable from "@/components/settings/NotificationSettingsTable";
 import IntegrationsPlaceholder from "@/components/settings/IntegrationsPlaceholder";
-import {
-  SETTINGS_SECTIONS,
-  INITIAL_NOTIFICATION_ROWS,
-} from "@/components/settings/settings.constants";
+import { SETTINGS_SECTIONS } from "@/components/settings/settings.constants";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
 import { filterSourcesByAccess } from "@/utils/apiSourceRules";
 
@@ -42,9 +39,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(INITIAL_LOADING_STATE);
   const [isUserLoading, setIsUserLoading] = useState(!user);
   const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS.API_CONF);
-  const [notificationRows, setNotificationRows] = useState(
-    INITIAL_NOTIFICATION_ROWS
-  );
   const [apiSources, setApiSources] = useState([]);
   const [activeSourceId, setActiveSourceId] = useState(null);
   const [credentialsBySource, setCredentialsBySource] = useState({});
@@ -576,24 +570,6 @@ export default function SettingsPage() {
     ]
   );
 
-  const handleNotificationToggle = useCallback(
-    (rowKey, checked) => {
-      setNotificationRows((prev) =>
-        prev.map((row) =>
-          row.key === rowKey ? { ...row, enabled: checked } : row
-        )
-      );
-      message.success(
-        translateOrFallback(
-          tSettings,
-          "preferences.feedback.updated",
-          "Notification preference updated"
-        )
-      );
-    },
-    [message, tSettings]
-  );
-
   const heroTitle = translateOrFallback(
     tSettings,
     "header.title",
@@ -625,28 +601,6 @@ export default function SettingsPage() {
   const activeSourceLabel = formatSourceLabel(activeSource);
   const canVerifyCredentials =
     shouldShowStoreId && hasApiKeyField && hasApiSecretField;
-  const localizedNotificationRows = useMemo(
-    () =>
-      notificationRows.map((row) => ({
-        ...row,
-        event: translateOrFallback(
-          tSettings,
-          `notification.rows.${row.key}.event`,
-          row.key
-        ),
-        channel: translateOrFallback(
-          tSettings,
-          `notification.rows.${row.key}.channel`,
-          "-"
-        ),
-        owner: translateOrFallback(
-          tSettings,
-          `notification.rows.${row.key}.owner`,
-          "-"
-        ),
-      })),
-    [notificationRows, tSettings]
-  );
 
   return (
     <div className="grid gap-4">
@@ -709,11 +663,7 @@ export default function SettingsPage() {
             <RequireRole
               anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
             >
-            <NotificationSettingsTable
-              rows={localizedNotificationRows}
-              onToggle={handleNotificationToggle}
-              tSettings={tSettings}
-            />
+              <NotificationSettingsTable tSettings={tSettings} />
             </RequireRole>
           )}
         </div>

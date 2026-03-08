@@ -1820,11 +1820,51 @@
       "notification": {
         "title": "Bildirim Ayarları",
         "subtitle": "Kimin hangi kanal üzerinden bildirim alacağını yönetin.",
+        "actions": {
+          "create": "Oluştur",
+          "confirmDelete": "Bu bildirim kuralı silinsin mi?"
+        },
+        "modal": {
+          "createTitle": "Bildirim Kuralı Oluştur",
+          "editTitle": "Bildirim Kuralı Düzenle"
+        },
+        "fields": {
+          "type": "Bildirim Türü",
+          "channel": "Kanal",
+          "recipients": "Alıcı Kullanıcılar",
+          "checkInterval": "Kontrol Aralığı (dakika)",
+          "nextRunAt": "Sonraki Çalışma Zamanı",
+          "status": "Durum"
+        },
+        "placeholders": {
+          "type": "Bildirim türü seçin",
+          "channel": "Kanal seçin",
+          "recipients": "Alıcı kullanıcıları seçin"
+        },
+        "filters": {
+          "type": "Tür seçin",
+          "channel": "Kanal seçin",
+          "status": "Durum seçin"
+        },
+        "messages": {
+          "loadRecipientsError": "Alıcı kullanıcılar yüklenemedi.",
+          "entityContextMissing": "Bildirim oluşturmak için entity bilgisi eksik.",
+          "createSuccess": "Bildirim kuralı oluşturuldu.",
+          "updateSuccess": "Bildirim kuralı güncellendi.",
+          "deleteSuccess": "Bildirim kuralı silindi.",
+          "deleteError": "Bildirim kuralı silinemedi.",
+          "operationFailed": "Bildirim işlemi başarısız."
+        },
         "table": {
+          "type": "Tür",
           "event": "Olay",
           "channel": "Kanal",
           "owner": "Sorumlu",
-          "enabled": "Aktif"
+          "enabled": "Aktif",
+          "recipients": "Alıcılar",
+          "status": "Durum",
+          "createdAt": "Oluşturulma",
+          "actions": "İşlemler"
         },
         "rows": {
           "order_created": {

@@ -1961,11 +1961,51 @@
       "notification": {
         "title": "Notification Settings",
         "subtitle": "Control who gets notified and through which channel.",
+        "actions": {
+          "create": "Create",
+          "confirmDelete": "Delete this notification rule?"
+        },
+        "modal": {
+          "createTitle": "Create Notification Rule",
+          "editTitle": "Edit Notification Rule"
+        },
+        "fields": {
+          "type": "Notification Type",
+          "channel": "Channel",
+          "recipients": "Recipient Users",
+          "checkInterval": "Check Interval (minutes)",
+          "nextRunAt": "Next Run At",
+          "status": "Status"
+        },
+        "placeholders": {
+          "type": "Select notification type",
+          "channel": "Select channel",
+          "recipients": "Select recipient users"
+        },
+        "filters": {
+          "type": "Select type",
+          "channel": "Select channel",
+          "status": "Select status"
+        },
+        "messages": {
+          "loadRecipientsError": "Recipient users could not be loaded.",
+          "entityContextMissing": "Entity information is missing for notification creation.",
+          "createSuccess": "Notification rule created.",
+          "updateSuccess": "Notification rule updated.",
+          "deleteSuccess": "Notification rule deleted.",
+          "deleteError": "Notification rule could not be deleted.",
+          "operationFailed": "Notification operation failed."
+        },
         "table": {
+          "type": "Type",
           "event": "Event",
           "channel": "Channel",
           "owner": "Owner",
-          "enabled": "Enabled"
+          "enabled": "Enabled",
+          "recipients": "Recipients",
+          "status": "Status",
+          "createdAt": "Created At",
+          "actions": "Actions"
         },
         "rows": {
           "order_created": {
