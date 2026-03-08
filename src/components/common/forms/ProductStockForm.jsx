@@ -17,6 +17,26 @@ export default function ProductStockForm({
   const tForm = useTranslations("forms.productStock");
   const tStatus = useTranslations("common.status");
   const submitButtonLabel = submitText || tCommon("buttons.save");
+  const quantityRules = isEdit
+    ? []
+    : [
+        {
+          required: true,
+          message: tCommon("validation.required", {
+            field: tForm("labels.quantity"),
+          }),
+        },
+      ];
+  const unitPriceRules = isEdit
+    ? []
+    : [
+        {
+          required: true,
+          message: tCommon("validation.required", {
+            field: tForm("labels.unit_price"),
+          }),
+        },
+      ];
 
   const [sizeOptions, setSizeOptions] = useState([]);
   const [colorOptions, setColorOptions] = useState([]);
@@ -258,14 +278,7 @@ export default function ProductStockForm({
       <Form.Item
         name="quantity"
         label={tForm("labels.quantity")}
-        rules={[
-          {
-            required: true,
-            message: tCommon("validation.required", {
-              field: tForm("labels.quantity"),
-            }),
-          },
-        ]}
+        rules={quantityRules}
       >
         <InputNumber
           min={0}
@@ -279,14 +292,7 @@ export default function ProductStockForm({
       <Form.Item
         name="unit_price"
         label={tForm("labels.unit_price")}
-        rules={[
-          {
-            required: true,
-            message: tCommon("validation.required", {
-              field: tForm("labels.unit_price"),
-            }),
-          },
-        ]}
+        rules={unitPriceRules}
       >
         <InputNumber
           min={0.01}

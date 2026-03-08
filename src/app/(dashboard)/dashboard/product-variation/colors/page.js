@@ -264,7 +264,7 @@ export default function ProductColorsPage() {
   const handleTemplateDownload = async (format) => {
     setTemplateLoading(true);
     try {
-      const { blob, filename } = await ProductColorsAPI.downloadTemplate({
+      const { blob, filename } = await ProductColorsAPI.downloadExists({
         format,
         filters: listFilters,
       });
@@ -388,7 +388,7 @@ export default function ProductColorsPage() {
               }}
             >
               <Button loading={templateLoading}>
-                {t("actions.templateDownload")}
+                {t("actions.existsDownload")}
               </Button>
             </Dropdown>
             <Button onClick={handleImportClick} loading={importing}>

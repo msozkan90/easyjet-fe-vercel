@@ -128,7 +128,7 @@ export default function ProductPricesPage() {
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
@@ -279,7 +279,7 @@ export default function ProductPricesPage() {
         ),
       },
     ],
-    [colors, customers, partners, products, sizes, t, tStatus]
+    [colors, customers, partners, products, sizes, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -303,7 +303,7 @@ export default function ProductPricesPage() {
       setEditingRow(null);
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -315,8 +315,27 @@ export default function ProductPricesPage() {
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
+    }
+  };
+
+  const handleExistsDownload = async (format) => {
+    setTemplateLoading(true);
+    try {
+      const { blob, filename } = await ProductPricesAPI.downloadExists({
+        format,
+        filters: listFilters,
+      });
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.templateDownloadSuccess"));
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.templateDownloadError"),
+      );
+    } finally {
+      setTemplateLoading(false);
     }
   };
 
@@ -332,7 +351,7 @@ export default function ProductPricesPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          t("messages.templateDownloadError")
+          t("messages.templateDownloadError"),
       );
     } finally {
       setTemplateLoading(false);
@@ -369,7 +388,7 @@ export default function ProductPricesPage() {
       const failedCount = resultData?.failed ?? 0;
       if (failedCount > 0) {
         message.warning(
-          t("messages.importCompletedWithErrors", { failed: failedCount })
+          t("messages.importCompletedWithErrors", { failed: failedCount }),
         );
       } else {
         message.success(t("messages.importSuccess"));
@@ -384,7 +403,7 @@ export default function ProductPricesPage() {
         message.warning(t("messages.importCompletedWithErrorsFallback"));
       } else {
         message.error(
-          error?.response?.data?.error?.message || t("messages.importFailed")
+          error?.response?.data?.error?.message || t("messages.importFailed"),
         );
       }
     } finally {
@@ -400,7 +419,7 @@ export default function ProductPricesPage() {
       message: t("import.errorMessage"),
       noErrors: t("import.noErrors"),
     }),
-    [t]
+    [t],
   );
 
   const buildImportSummary = useCallback(
@@ -412,7 +431,7 @@ export default function ProductPricesPage() {
       const failed = resultData?.failed ?? 0;
       return t("import.summary", { total, created, updated, failed });
     },
-    [t]
+    [t],
   );
 
   return (
@@ -446,6 +465,19 @@ export default function ProductPricesPage() {
                   { key: "csv", label: "CSV" },
                   { key: "xlsx", label: "XLSX" },
                 ],
+                onClick: ({ key }) => handleExistsDownload(key),
+              }}
+            >
+              <Button loading={templateLoading}>
+                {t("actions.existsDownload")}
+              </Button>
+            </Dropdown>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "csv", label: "CSV" },
+                  { key: "xlsx", label: "XLSX" },
+                ],
                 onClick: ({ key }) => handleTemplateDownload(key),
               }}
             >
@@ -453,6 +485,7 @@ export default function ProductPricesPage() {
                 {t("actions.templateDownload")}
               </Button>
             </Dropdown>
+
             <Button onClick={handleImportClick} loading={importing}>
               {t("actions.bulkImport")}
             </Button>

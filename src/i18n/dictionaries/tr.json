@@ -759,6 +759,7 @@
       "actions": {
         "new": "Yeni Ürün",
         "templateDownload": "Template İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu Import",
         "edit": "Düzenle",
         "delete": "Sil",
@@ -823,6 +824,7 @@
       "actions": {
         "new": "Yeni Beden",
         "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
@@ -887,6 +889,7 @@
       "actions": {
         "new": "Yeni Renk",
         "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
@@ -1042,6 +1045,7 @@
       "actions": {
         "new": "Yeni Ek Pozisyon Fiyatı",
         "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
@@ -1114,6 +1118,7 @@
       "actions": {
         "new": "Yeni Fiyat",
         "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
@@ -1171,7 +1176,8 @@
         "status": "Durum",
         "createdAt": "Oluşturulma Tarihi",
         "actions": "İşlemler",
-        "unit_price": "Birim Fiyat"
+        "unit_price": "Birim Fiyat",
+        "stock_alert_threshold": "Stok Uyarı Sınırı"
       },
       "filters": {
         "selectProduct": "Ürün seç",
@@ -1182,6 +1188,7 @@
       "actions": {
         "new": "Yeni Stok",
         "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "activate": "Aktif Yap",
@@ -1839,7 +1846,8 @@
         "placeholders": {
           "type": "Bildirim türü seçin",
           "channel": "Kanal seçin",
-          "recipients": "Alıcı kullanıcıları seçin"
+          "recipients": "Alıcı kullanıcıları seçin",
+          "nextRunAt": "Sonraki çalışma tarihini seçin"
         },
         "filters": {
           "type": "Tür seçin",
@@ -1864,6 +1872,7 @@
           "recipients": "Alıcılar",
           "status": "Durum",
           "createdAt": "Oluşturulma",
+          "nextRunAt": "Sonraki Çalışma Zamanı",
           "actions": "İşlemler"
         },
         "rows": {
@@ -2469,14 +2478,16 @@
         "color": "Renk",
         "quantity": "Adet",
         "status": "Durum",
-        "unit_price": "Birim Fiyat"
+        "unit_price": "Birim Fiyat",
+        "stock_alert_threshold": "Stok Uyarı Sınırı"
       },
       "placeholders": {
         "product": "Ürün seç",
         "size": "Beden seç",
         "color": "Renk seç",
         "quantity": "Adet girin",
-        "unit_price": "Birim fiyatı girin"
+        "unit_price": "Birim fiyatı girin",
+        "stock_alert_threshold": "Stok uyarı sınırını girin"
       }
     },
     "partnerProductPrice": {

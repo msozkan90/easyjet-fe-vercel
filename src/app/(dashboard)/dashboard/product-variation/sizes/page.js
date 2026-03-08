@@ -200,7 +200,7 @@ export default function ProductSizesPage() {
   const handleTemplateDownload = async (format) => {
     setTemplateLoading(true);
     try {
-      const { blob, filename } = await ProductSizesAPI.downloadTemplate({
+      const { blob, filename } = await ProductSizesAPI.downloadExists({
         format,
         filters: listFilters,
       });
@@ -324,7 +324,7 @@ export default function ProductSizesPage() {
               }}
             >
               <Button loading={templateLoading}>
-                {t("actions.templateDownload")}
+                {t("actions.existsDownload")}
               </Button>
             </Dropdown>
             <Button onClick={handleImportClick} loading={importing}>

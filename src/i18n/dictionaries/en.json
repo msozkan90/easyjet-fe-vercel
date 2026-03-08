@@ -759,6 +759,7 @@
       "actions": {
         "new": "New Product",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
@@ -823,6 +824,7 @@
       "actions": {
         "new": "New Size",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
@@ -887,6 +889,7 @@
       "actions": {
         "new": "New Color",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
@@ -1183,6 +1186,7 @@
       "actions": {
         "new": "New Additional Position Price",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
@@ -1255,6 +1259,7 @@
       "actions": {
         "new": "New Price",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
@@ -1312,7 +1317,8 @@
         "status": "Status",
         "createdAt": "Created At",
         "actions": "Actions",
-        "unit_price": "Unit Price"
+        "unit_price": "Unit Price",
+        "stock_alert_threshold": "Stock Alert Limit"
       },
       "filters": {
         "selectProduct": "Select product",
@@ -1323,6 +1329,7 @@
       "actions": {
         "new": "New Stock",
         "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
         "activate": "Activate",
@@ -1980,7 +1987,8 @@
         "placeholders": {
           "type": "Select notification type",
           "channel": "Select channel",
-          "recipients": "Select recipient users"
+          "recipients": "Select recipient users",
+          "nextRunAt": "Select next run date"
         },
         "filters": {
           "type": "Select type",
@@ -2005,6 +2013,7 @@
           "recipients": "Recipients",
           "status": "Status",
           "createdAt": "Created At",
+          "nextRunAt": "Next Run At",
           "actions": "Actions"
         },
         "rows": {
@@ -2506,14 +2515,16 @@
         "color": "Color",
         "quantity": "Quantity",
         "status": "Status",
-        "unit_price": "Unit Price"
+        "unit_price": "Unit Price",
+        "stock_alert_threshold": "Stock Alert Limit"
       },
       "placeholders": {
         "product": "Select product",
         "size": "Select size",
         "color": "Select color",
         "unit_price": "Enter unit price",
-        "quantity": "Enter quantity"
+        "quantity": "Enter quantity",
+        "stock_alert_threshold": "Enter stock alert limit"
       }
     },
     "partnerProductPrice": {

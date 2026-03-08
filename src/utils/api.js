@@ -221,7 +221,7 @@ export const ProductsAPI = {
   create: (data) => api.post("/products", data),
   update: (id, data) => api.put(`/products/${id}`, data),
   remove: (id) => api.del(`/products/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/products/export", {
@@ -248,7 +248,7 @@ export const ProductSizesAPI = {
   create: (data) => api.post("/product-sizes", data),
   update: (id, data) => api.put(`/product-sizes/${id}`, data),
   remove: (id) => api.del(`/product-sizes/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-sizes/export", {
@@ -275,7 +275,7 @@ export const ProductColorsAPI = {
   create: (data) => api.post("/product-colors", data),
   update: (id, data) => api.put(`/product-colors/${id}`, data),
   remove: (id) => api.del(`/product-colors/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-colors/export", {
@@ -310,7 +310,7 @@ export const ProductAdditionalPricesAPI = {
   create: (data) => api.post("/product-additional-prices", data),
   update: (id, data) => api.put(`/product-additional-prices/${id}`, data),
   remove: (id) => api.del(`/product-additional-prices/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-additional-prices/export", {
@@ -338,13 +338,22 @@ export const ProductStockAPI = {
   update: (id, data) => api.put(`/product-stocks/${id}`, data),
   addStock: (id, data) => api.post(`/product-stocks/${id}/add-stock`, data),
   remove: (id) => api.del(`/product-stocks/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-stocks/export", {
       data: payload,
       config,
       fallbackFilename: `product-stocks-template.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-stocks/export-template", {
+      data: payload,
+      config,
+      fallbackFilename: `product-prices-template.${format}`,
     });
   },
   import: (fileOrFormData, options = {}) => {
@@ -366,10 +375,19 @@ export const ProductPricesAPI = {
   create: (data) => api.post("/product-prices", data),
   update: (id, data) => api.put(`/product-prices/${id}`, data),
   remove: (id) => api.del(`/product-prices/${id}`),
-  downloadTemplate: (params = {}, config = {}) => {
+  downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-prices/export", {
+      data: payload,
+      config,
+      fallbackFilename: `product-prices-template.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-prices/export-template", {
       data: payload,
       config,
       fallbackFilename: `product-prices-template.${format}`,

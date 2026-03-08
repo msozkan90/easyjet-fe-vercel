@@ -259,7 +259,7 @@ export default function ProductAdditionalPricesPage() {
     setTemplateLoading(true);
     try {
       const { blob, filename } =
-        await ProductAdditionalPricesAPI.downloadTemplate({
+        await ProductAdditionalPricesAPI.downloadExists({
           format,
           filters: listFilters,
         });
@@ -384,7 +384,7 @@ export default function ProductAdditionalPricesPage() {
               }}
             >
               <Button loading={templateLoading}>
-                {t("actions.templateDownload")}
+                {t("actions.existsDownload")}
               </Button>
             </Dropdown>
             <Button onClick={handleImportClick} loading={importing}>

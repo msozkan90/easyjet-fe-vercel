@@ -63,6 +63,12 @@ const toRecipientOption = (item) => {
   return { value: id, label };
 };
 
+const toOptionalDate = (value) => {
+  if (!value) return undefined;
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.toDate() : undefined;
+};
+
 export default function NotificationSettingsTable({ tSettings }) {
   const { message } = AntdApp.useApp();
   const user = useSelector((state) => state.auth.user);
@@ -179,6 +185,7 @@ export default function NotificationSettingsTable({ tSettings }) {
       status: "active",
       recipient_user_ids: [],
       check_interval_minutes: undefined,
+      next_run_at: undefined,
     });
     setOpen(true);
   }, [entityContext, form, message, tSettings]);
@@ -199,6 +206,7 @@ export default function NotificationSettingsTable({ tSettings }) {
         channel: record?.channel || "email",
         recipient_user_ids: recipientUserIds,
         check_interval_minutes: record?.check_interval_minutes,
+        next_run_at: record?.next_run_at ? dayjs(record.next_run_at) : undefined,
         status: record?.status || "active",
       });
       setOpen(true);
@@ -242,6 +250,7 @@ export default function NotificationSettingsTable({ tSettings }) {
           channel: values.channel || undefined,
           recipient_user_ids: values.recipient_user_ids,
           check_interval_minutes: values.check_interval_minutes || undefined,
+          next_run_at: toOptionalDate(values.next_run_at),
           status: values.status || undefined,
         };
 
@@ -272,6 +281,7 @@ export default function NotificationSettingsTable({ tSettings }) {
           entity_id: entityContext.entity_id,
           recipient_user_ids: values.recipient_user_ids,
           check_interval_minutes: values.check_interval_minutes || undefined,
+          next_run_at: toOptionalDate(values.next_run_at),
           status: values.status || undefined,
         };
 
@@ -399,6 +409,16 @@ export default function NotificationSettingsTable({ tSettings }) {
         dataIndex: "created_at",
         key: "created_at",
         sorter: true,
+        render: (value) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-"),
+      },
+      {
+        title: translateOrFallback(
+          tSettings,
+          "notification.table.nextRunAt",
+          "Next Run At"
+        ),
+        dataIndex: "next_run_at",
+        key: "next_run_at",
         render: (value) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-"),
       },
       {
@@ -551,6 +571,25 @@ export default function NotificationSettingsTable({ tSettings }) {
             name="check_interval_minutes"
           >
             <InputNumber min={1} style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item
+            label={translateOrFallback(
+              tSettings,
+              "notification.fields.nextRunAt",
+              "Next Run At"
+            )}
+            name="next_run_at"
+          >
+            <DatePicker
+              showTime
+              style={{ width: "100%" }}
+              placeholder={translateOrFallback(
+                tSettings,
+                "notification.placeholders.nextRunAt",
+                "Select next run date"
+              )}
+            />
           </Form.Item>
 
           <Form.Item

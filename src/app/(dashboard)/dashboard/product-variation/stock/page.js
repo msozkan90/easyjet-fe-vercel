@@ -153,6 +153,7 @@ export default function ProductStockPage() {
       {
         title: t("columns.stock_alert_threshold"),
         dataIndex: "stock_alert_threshold",
+        width: 140,
         sorter: true,
         render: (value) =>
           value !== null && value !== undefined ? value : t("common.none"),
@@ -264,10 +265,14 @@ export default function ProductStockPage() {
     try {
       if (editingRow) {
         const payload = {
-          quantity: values.quantity,
-          unit_price: values.unit_price,
           stock_alert_threshold: values.stock_alert_threshold,
         };
+        if (values.quantity !== undefined && values.quantity !== null) {
+          payload.quantity = values.quantity;
+        }
+        if (values.unit_price !== undefined && values.unit_price !== null) {
+          payload.unit_price = values.unit_price;
+        }
         await ProductStockAPI.addStock(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
         tableRef.current?.reload();
@@ -323,6 +328,26 @@ export default function ProductStockPage() {
       setTemplateLoading(false);
     }
   };
+
+    const handleExistsDownload = async (format) => {
+    setTemplateLoading(true);
+    try {
+      const { blob, filename } = await ProductStockAPI.downloadExists({
+        format,
+        filters: listFilters,
+      });
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.templateDownloadSuccess"));
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.templateDownloadError")
+      );
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
 
   const handleFiltersChange = useCallback((filters) => {
     setListFilters(filters || {});
@@ -423,6 +448,19 @@ export default function ProductStockPage() {
         onFiltersChange={handleFiltersChange}
         toolbarRight={
           <Space>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "csv", label: "CSV" },
+                  { key: "xlsx", label: "XLSX" },
+                ],
+                onClick: ({ key }) => handleExistsDownload(key),
+              }}
+            >
+              <Button loading={templateLoading}>
+                {t("actions.existsDownload")}
+              </Button>
+            </Dropdown>
             <Dropdown
               menu={{
                 items: [
