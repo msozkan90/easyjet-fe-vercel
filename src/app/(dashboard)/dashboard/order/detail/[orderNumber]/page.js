@@ -113,6 +113,12 @@ const AddressBlock = ({ title, rows }) => (
 
 const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
   const detail = label?.label_detail || {};
+  const ssSource = [
+    "shipStationCompany",
+    "shipStationCustomer",
+    "shipStationPartner",
+  ];
+  const source = label?.source;
   const statusValue = detail?.status || label?.status;
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
   const statusColor = LABEL_STATUS_COLORS[statusKey] || "default";
@@ -153,16 +159,34 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoField
           label={tDesign("fields.labelCarrier")}
-          value={detail?.carrier || tOrders("common.none")}
+          value={
+            source
+              ? ssSource.includes(source)
+                ? detail?.label_detail?.carrier_code
+                : detail?.carrier || tOrders("common.none")
+              : tOrders("common.none")
+          }
         />
         <InfoField
           label={tDesign("fields.labelService")}
-          value={detail?.service || tOrders("common.none")}
+          value={
+            source
+              ? ssSource.includes(source)
+                ? detail?.label_detail?.service_code
+                : detail?.service || tOrders("common.none")
+              : tOrders("common.none")
+          }
         />
         <InfoField label={tDesign("fields.labelRate")} value={rateText} />
         <InfoField
           label={tDesign("fields.labelTracking")}
-          value={detail?.trackingNumber || tOrders("common.none")}
+          value={
+            source
+              ? ssSource.includes(source)
+                ? detail?.label_detail?.trackingNumber
+                : detail?.tracking_number
+              : tOrders("common.none")
+          }
         />
         <InfoField label={tDesign("fields.labelCreatedAt")} value={createdAt} />
       </div>
@@ -642,7 +666,15 @@ export default function OrderDetailPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "customerAdmin", "companyCompletedWorker", "companyShipmentWorker", "partnerAdmin"]}>
+    <RequireRole
+      anyOfRoles={[
+        "companyAdmin",
+        "customerAdmin",
+        "companyCompletedWorker",
+        "companyShipmentWorker",
+        "partnerAdmin",
+      ]}
+    >
       <div className="min-h-full bg-slate-50/70 p-4 md:p-6">
         {!orderNumber ? (
           <Alert
