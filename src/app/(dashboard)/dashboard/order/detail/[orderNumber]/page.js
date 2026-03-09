@@ -113,11 +113,6 @@ const AddressBlock = ({ title, rows }) => (
 
 const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
   const detail = label?.label_detail || {};
-  const ssSource = [
-    "shipStationCompany",
-    "shipStationCustomer",
-    "shipStationPartner",
-  ];
   const source = label?.source;
   const statusValue = detail?.status || label?.status;
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
@@ -135,6 +130,15 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
   );
   const canVoid =
     detail?.status === "PURCHASED" || detail?.status === "completed";
+  const carrierValue =
+    detail?.carrier_code || detail?.carrier || tOrders("common.none");
+  const serviceValue =
+    detail?.service_code || detail?.service || tOrders("common.none");
+  const trackingValue =
+    detail?.tracking_number ||
+    detail?.trackingNumber ||
+    label?.tracking_number ||
+    tOrders("common.none");
 
   return (
     <Card
@@ -159,34 +163,16 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoField
           label={tDesign("fields.labelCarrier")}
-          value={
-            source
-              ? ssSource.includes(source)
-                ? detail?.label_detail?.carrier_code
-                : detail?.carrier || tOrders("common.none")
-              : tOrders("common.none")
-          }
+          value={source ? carrierValue : tOrders("common.none")}
         />
         <InfoField
           label={tDesign("fields.labelService")}
-          value={
-            source
-              ? ssSource.includes(source)
-                ? detail?.label_detail?.service_code
-                : detail?.service || tOrders("common.none")
-              : tOrders("common.none")
-          }
+          value={source ? serviceValue : tOrders("common.none")}
         />
         <InfoField label={tDesign("fields.labelRate")} value={rateText} />
         <InfoField
           label={tDesign("fields.labelTracking")}
-          value={
-            source
-              ? ssSource.includes(source)
-                ? detail?.label_detail?.trackingNumber
-                : detail?.tracking_number
-              : tOrders("common.none")
-          }
+          value={source ? trackingValue : tOrders("common.none")}
         />
         <InfoField label={tDesign("fields.labelCreatedAt")} value={createdAt} />
       </div>
