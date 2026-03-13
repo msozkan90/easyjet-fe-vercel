@@ -463,6 +463,15 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
+              {
+                key: "refund-remake-orders",
+                icon: <ApartmentOutlined />,
+                label: (
+                  <Link href="/dashboard/orders/refund-remake">
+                    {tSidebar("order.refundRemake")}
+                  </Link>
+                ),
+              },
 
               {
                 key: "cancel-orders",
@@ -518,6 +527,19 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
+              ...(isCompanyAdmin
+                ? [
+                    {
+                      key: "orders-affiliated-refund-remake",
+                      icon: <ShoppingCartOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/affiliated/refund-remake">
+                          {tSidebar("order.refundRemake")}
+                        </Link>
+                      ),
+                    },
+                  ]
+                : []),
             ],
           },
         ]

@@ -162,6 +162,14 @@ export const OrdersAPI = {
   
 };
 
+export const RefundRemakeRequestsAPI = {
+  list: (payload) => api.post("/refund-remake-requests/list", payload),
+  details: (id) => api.get(`/refund-remake-requests/${id}`),
+  create: (payload) => api.post("/refund-remake-requests", payload),
+  updateStatus: (id, payload) =>
+    api.post(`/refund-remake-requests/${id}/status`, payload),
+};
+
 export const NestShipperAPI = {
   quoteRates: (payload) => api.post("/nestshipper/rates/quote", payload),
 };

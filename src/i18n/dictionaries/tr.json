@@ -1740,6 +1740,120 @@
         }
       }
     },
+    "refundRemake": {
+      "title": "İade / Yeniden Üretim Talepleri",
+      "columns": {
+        "requestType": "Talep Tipi",
+        "status": "Durum",
+        "order": "Sipariş # / Sipariş ID",
+        "createdAt": "Oluşturulma",
+        "updatedAt": "Güncellenme",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "orderId": "Sipariş ID",
+        "requestType": "Talep tipi",
+        "status": "Durum"
+      },
+      "requestType": {
+        "refund": "İade",
+        "remake": "Yeniden Üretim"
+      },
+      "status": {
+        "pending": "Bekliyor",
+        "completed": "Tamamlandı",
+        "canceled": "İptal"
+      },
+      "actions": {
+        "viewDetail": "Detayı görüntüle",
+        "viewOrderDetail": "Sipariş detayını görüntüle",
+        "createRequest": "Talep oluştur",
+        "complete": "Tamamla",
+        "cancel": "İptal Et",
+        "completeConfirm": "Bu talep tamamlandı olarak işaretlensin mi?",
+        "cancelModalTitle": "Talebi İptal Et",
+        "cancelConfirm": "Talebi İptal Et",
+        "backToList": "Listeye dön",
+        "submit": "Gönder"
+      },
+      "messages": {
+        "listLoadError": "İade/yeniden üretim talepleri yüklenemedi.",
+        "detailLoadError": "Talep detayı yüklenemedi.",
+        "createSuccess": "İade/yeniden üretim talebi oluşturuldu.",
+        "createError": "İade/yeniden üretim talebi oluşturulamadı.",
+        "statusUpdateSuccess": "Talep durumu güncellendi.",
+        "statusUpdateError": "Talep durumu güncellenemedi.",
+        "noData": "Talep bulunamadı.",
+        "noItems": "Seçili ürün bulunamadı.",
+        "noImages": "Görsel yok.",
+        "missingOrderId": "Sipariş bilgisi eksik.",
+        "selectAtLeastOneItem": "En az bir sipariş kalemi seçin.",
+        "invalidQuantity": "{orderItemId} için adet geçersiz. Maks: {maxQuantity}",
+        "tooManyImages": "En fazla {max} görsel yüklenebilir.",
+        "imageConversionError": "Görseller hazırlanamadı.",
+        "imageTypeError": "Sadece PNG/JPG/JPEG/WEBP görseller kabul edilir.",
+        "imageSizeError": "Görsel boyutu {maxMb} MB'den küçük olmalıdır.",
+        "noOrderItems": "Talep edilebilir sipariş kalemi bulunamadı."
+      },
+      "create": {
+        "title": "İade / Yeniden Üretim Talebi Oluştur",
+        "orderMeta": "Sipariş: {orderNumber}",
+        "fields": {
+          "requestType": "Talep Tipi",
+          "responsibleEntity": "Sorumlu Varlık",
+          "description": "Açıklama",
+          "images": "Görseller"
+        },
+        "placeholders": {
+          "description": "Opsiyonel açıklama",
+          "optionalPrice": "Opsiyonel"
+        },
+        "actions": {
+          "submit": "Talep Oluştur",
+          "upload": "Görsel yükle"
+        },
+        "columns": {
+          "select": "Seç",
+          "item": "Sipariş Kalemi",
+          "maxQuantity": "Maks Adet",
+          "quantity": "Adet",
+          "price": "Fiyat"
+        }
+      },
+      "validation": {
+        "requestTypeRequired": "Talep tipi zorunludur.",
+        "responsibleEntityRequired": "Sorumlu varlık zorunludur.",
+        "descriptionMax": "Açıklama en fazla 1000 karakter olabilir.",
+        "rejectReasonRequired": "Red nedeni zorunludur."
+      },
+      "detail": {
+        "sections": {
+          "items": "Seçilen Kalemler",
+          "images": "Görseller"
+        },
+        "fields": {
+          "id": "ID",
+          "order": "Sipariş",
+          "requestType": "Talep Tipi",
+          "status": "Durum",
+          "responsibleEntity": "Sorumlu Varlık",
+          "createdAt": "Oluşturulma",
+          "updatedAt": "Güncellenme",
+          "description": "Açıklama",
+          "rejectReason": "Red Nedeni"
+        },
+        "items": {
+          "orderItem": "Sipariş Kalemi ID",
+          "sku": "SKU",
+          "product": "Ürün",
+          "quantity": "Adet",
+          "price": "Fiyat"
+        }
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "sidebar": {
       "dashboard": "Kontrol Paneli",
       "orders": {
@@ -1796,7 +1910,8 @@
         "pending": "Bekleyen Siparişler",
         "inProduction": "Üretimdeki Siparişler",
         "completed": "Tamamlanan Siparişler",
-        "shipped": "Kargolanmış Siparişler"
+        "shipped": "Kargolanmış Siparişler",
+        "refundRemake": "İade / Yeniden Üretim"
       },
       "company": {
         "title": "Firma",

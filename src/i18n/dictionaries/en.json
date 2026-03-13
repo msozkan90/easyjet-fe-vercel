@@ -1881,6 +1881,120 @@
         }
       }
     },
+    "refundRemake": {
+      "title": "Refund / Remake Requests",
+      "columns": {
+        "requestType": "Request Type",
+        "status": "Status",
+        "order": "Order # / Order ID",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "orderId": "Order ID",
+        "requestType": "Request type",
+        "status": "Status"
+      },
+      "requestType": {
+        "refund": "Refund",
+        "remake": "Remake"
+      },
+      "status": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "canceled": "Canceled"
+      },
+      "actions": {
+        "viewDetail": "View detail",
+        "viewOrderDetail": "View order detail",
+        "createRequest": "Create request",
+        "complete": "Complete",
+        "cancel": "Cancel",
+        "completeConfirm": "Mark this request as completed?",
+        "cancelModalTitle": "Cancel Request",
+        "cancelConfirm": "Cancel Request",
+        "backToList": "Back to list",
+        "submit": "Submit"
+      },
+      "messages": {
+        "listLoadError": "Refund/remake requests could not be loaded.",
+        "detailLoadError": "Request detail could not be loaded.",
+        "createSuccess": "Refund/remake request created.",
+        "createError": "Refund/remake request could not be created.",
+        "statusUpdateSuccess": "Request status updated.",
+        "statusUpdateError": "Request status could not be updated.",
+        "noData": "No request found.",
+        "noItems": "No selected item found.",
+        "noImages": "No images.",
+        "missingOrderId": "Order information is missing.",
+        "selectAtLeastOneItem": "Select at least one order item.",
+        "invalidQuantity": "Invalid quantity for {orderItemId}. Max: {maxQuantity}",
+        "tooManyImages": "Maximum {max} images are allowed.",
+        "imageConversionError": "Images could not be prepared.",
+        "imageTypeError": "Only PNG/JPG/JPEG/WEBP images are allowed.",
+        "imageSizeError": "Image must be smaller than {maxMb} MB.",
+        "noOrderItems": "No requestable order item found."
+      },
+      "create": {
+        "title": "Create Refund / Remake Request",
+        "orderMeta": "Order: {orderNumber}",
+        "fields": {
+          "requestType": "Request Type",
+          "responsibleEntity": "Responsible Entity",
+          "description": "Description",
+          "images": "Images"
+        },
+        "placeholders": {
+          "description": "Optional description",
+          "optionalPrice": "Optional"
+        },
+        "actions": {
+          "submit": "Create Request",
+          "upload": "Upload image"
+        },
+        "columns": {
+          "select": "Select",
+          "item": "Order Item",
+          "maxQuantity": "Max Qty",
+          "quantity": "Quantity",
+          "price": "Price"
+        }
+      },
+      "validation": {
+        "requestTypeRequired": "Request type is required.",
+        "responsibleEntityRequired": "Responsible entity is required.",
+        "descriptionMax": "Description must be at most 1000 characters.",
+        "rejectReasonRequired": "Reject reason is required."
+      },
+      "detail": {
+        "sections": {
+          "items": "Selected Items",
+          "images": "Images"
+        },
+        "fields": {
+          "id": "ID",
+          "order": "Order",
+          "requestType": "Request Type",
+          "status": "Status",
+          "responsibleEntity": "Responsible Entity",
+          "createdAt": "Created At",
+          "updatedAt": "Updated At",
+          "description": "Description",
+          "rejectReason": "Reject Reason"
+        },
+        "items": {
+          "orderItem": "Order Item ID",
+          "sku": "SKU",
+          "product": "Product",
+          "quantity": "Quantity",
+          "price": "Price"
+        }
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "sidebar": {
       "dashboard": "Dashboard",
       "orders": {
@@ -1937,7 +2051,8 @@
         "pending": "Pending Orders",
         "inProduction": "In Production",
         "completed": "Completed Orders",
-        "shipped": "Shipped Orders"
+        "shipped": "Shipped Orders",
+        "refundRemake": "Refund / Remake"
       },
       "company": {
         "title": "Company",
