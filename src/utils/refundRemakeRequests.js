@@ -145,10 +145,29 @@ export const normalizeRefundRemakeItems = (detail) => {
 export const normalizeRefundRemakeImages = (detail) => {
   const source = detail?.images ?? detail?.image_urls ?? detail?.image_url ?? [];
   if (Array.isArray(source)) {
-    return source.filter(Boolean);
+    return source
+      .map((item) => {
+        if (typeof item === "string") return { url: item, sortOrder: 0 };
+        if (!item || typeof item !== "object") return null;
+        const url = item?.image_url || item?.url || item?.src;
+        if (!url) return null;
+        return {
+          url,
+          sortOrder: Number.isFinite(Number(item?.sort_order))
+            ? Number(item.sort_order)
+            : 0,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => item.url);
   }
   if (typeof source === "string" && source.trim()) {
     return [source];
+  }
+  if (source && typeof source === "object") {
+    const singleUrl = source?.image_url || source?.url || source?.src;
+    return singleUrl ? [singleUrl] : [];
   }
   return [];
 };
@@ -180,4 +199,3 @@ export const collectRequestableOrderItemsFromRow = (row) => {
   });
   return Array.from(unique.values());
 };
-
