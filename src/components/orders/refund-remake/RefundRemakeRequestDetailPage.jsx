@@ -16,6 +16,7 @@ import {
   Spin,
   Table,
   Tag,
+  Tooltip,
 } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -60,7 +61,7 @@ export default function RefundRemakeRequestDetailPage({
       setDetail(extractRefundRemakeEntityFromResponse(response));
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.detailLoadError")
+        error?.response?.data?.error?.message || t("messages.detailLoadError"),
       );
     } finally {
       setLoading(false);
@@ -71,7 +72,10 @@ export default function RefundRemakeRequestDetailPage({
     loadDetail();
   }, [loadDetail]);
 
-  const requestItems = useMemo(() => normalizeRefundRemakeItems(detail), [detail]);
+  const requestItems = useMemo(
+    () => normalizeRefundRemakeItems(detail),
+    [detail],
+  );
   const images = useMemo(() => normalizeRefundRemakeImages(detail), [detail]);
 
   const updateStatus = useCallback(
@@ -84,13 +88,14 @@ export default function RefundRemakeRequestDetailPage({
         await loadDetail();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.statusUpdateError")
+          error?.response?.data?.error?.message ||
+            t("messages.statusUpdateError"),
         );
       } finally {
         setStatusUpdating(false);
       }
     },
-    [loadDetail, message, requestId, t]
+    [loadDetail, message, requestId, t],
   );
 
   const handleCancelSubmit = useCallback(async () => {
@@ -112,22 +117,75 @@ export default function RefundRemakeRequestDetailPage({
 
   const itemColumns = useMemo(
     () => [
-      { title: t("detail.items.orderItem"), dataIndex: "orderItemId" },
-      { title: t("detail.items.sku"), dataIndex: "sku", render: (value) => value || "-" },
+      {
+        title: t("detail.items.image"),
+        dataIndex: "imageUrl",
+        width: 92,
+        render: (value) =>
+          value ? <Image src={value} width={50} alt="order-item-image" /> : "-",
+      },
+      {
+        title: t("detail.items.sku"),
+        dataIndex: "sku",
+        render: (value) => value || "-",
+      },
       {
         title: t("detail.items.product"),
         dataIndex: "productName",
         render: (value) => value || "-",
+      },
+      {
+        title: t("detail.items.options"),
+        dataIndex: "options",
+        width: 260,
+        render: (options) => {
+          if (!Array.isArray(options) || options.length === 0) return "-";
+          return (
+            <Space direction="vertical" size={0}>
+              {options.map((option, index) => {
+                const name = option?.name || "-";
+                const value = option?.value || "-";
+                const text = `${name}: ${value}`;
+                return (
+                  <Tooltip title={text} key={`${name}-${value}-${index}`}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        maxWidth: 220,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{name}: </span>
+                      {value}
+                    </span>
+                  </Tooltip>
+                );
+              })}
+            </Space>
+          );
+        },
       },
       { title: t("detail.items.quantity"), dataIndex: "quantity" },
       {
         title: t("detail.items.price"),
         dataIndex: "price",
         render: (value) =>
-          value === undefined || value === null ? "-" : Number(value).toFixed(2),
+          value === undefined || value === null
+            ? "-"
+            : Number(value).toFixed(2),
+      },
+      {
+        title: t("detail.items.lineTotal"),
+        dataIndex: "lineTotal",
+        render: (value) =>
+          value === undefined || value === null
+            ? "-"
+            : Number(value).toFixed(2),
       },
     ],
-    [t]
+    [t],
   );
 
   return (
@@ -135,7 +193,9 @@ export default function RefundRemakeRequestDetailPage({
       <Space direction="vertical" style={{ width: "100%" }} size="middle">
         <Space wrap>
           <Link href={backHref}>
-            <Button icon={<ArrowLeftOutlined />}>{t("actions.backToList")}</Button>
+            <Button icon={<ArrowLeftOutlined />}>
+              {t("actions.backToList")}
+            </Button>
           </Link>
           {allowStatusActions ? (
             <>
@@ -172,9 +232,6 @@ export default function RefundRemakeRequestDetailPage({
           ) : (
             <Space direction="vertical" style={{ width: "100%" }} size="large">
               <Descriptions column={2} bordered size="small">
-                <Descriptions.Item label={t("detail.fields.id")}>
-                  {detail?.id || "-"}
-                </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.order")}>
                   {detail?.order?.order_number || detail?.order_id || "-"}
                 </Descriptions.Item>
@@ -189,25 +246,35 @@ export default function RefundRemakeRequestDetailPage({
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.responsibleEntity")}>
-                  {detail?.responsible_entity?.entity_name ||
-                    detail?.responsible_entity?.name ||
-                    detail?.responsible_entity_id ||
-                    "-"}
+                  {detail?.responsible_entity_name || "-"}
+                </Descriptions.Item>
+                <Descriptions.Item label={t("detail.fields.company")}>
+                  {detail?.company_name || "-"}
+                </Descriptions.Item>
+                <Descriptions.Item label={t("detail.fields.customer")}>
+                  {detail?.customer_name || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.createdAt")}>
-                  {detail?.created_at ? moment(detail.created_at).format("LLL") : "-"}
+                  {detail?.created_at
+                    ? moment(detail.created_at).format("LLL")
+                    : "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.updatedAt")}>
-                  {detail?.updated_at ? moment(detail.updated_at).format("LLL") : "-"}
+                  {detail?.updated_at
+                    ? moment(detail.updated_at).format("LLL")
+                    : "-"}
                 </Descriptions.Item>
+              </Descriptions>
+              <Descriptions column={1} bordered size="small">
                 <Descriptions.Item label={t("detail.fields.description")}>
                   {detail?.description || "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label={t("detail.fields.rejectReason")} span={2}>
+                <Descriptions.Item
+                  label={t("detail.fields.rejectReason")}
+                >
                   {isCanceled ? detail?.reject_reason || "-" : "-"}
                 </Descriptions.Item>
               </Descriptions>
-
               <Card type="inner" title={t("detail.sections.items")}>
                 <Table
                   rowKey="orderItemId"
@@ -224,7 +291,12 @@ export default function RefundRemakeRequestDetailPage({
                   <Image.PreviewGroup>
                     <Space wrap>
                       {images.map((url, index) => (
-                        <Image key={`${url}-${index}`} src={url} width={110} alt="request-image" />
+                        <Image
+                          key={`${url}-${index}`}
+                          src={url}
+                          width={110}
+                          alt="request-image"
+                        />
                       ))}
                     </Space>
                   </Image.PreviewGroup>
@@ -252,7 +324,9 @@ export default function RefundRemakeRequestDetailPage({
           <Form.Item
             name="reject_reason"
             label={t("detail.fields.rejectReason")}
-            rules={[{ required: true, message: t("validation.rejectReasonRequired") }]}
+            rules={[
+              { required: true, message: t("validation.rejectReasonRequired") },
+            ]}
           >
             <Input.TextArea rows={4} maxLength={1000} showCount />
           </Form.Item>

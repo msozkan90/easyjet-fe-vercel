@@ -6,12 +6,14 @@ import {
   App as AntdApp,
   Checkbox,
   Form,
+  Image,
   Input,
   InputNumber,
   Modal,
   Select,
   Space,
   Table,
+  Tooltip,
   Upload,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -29,12 +31,13 @@ const normalizeUploadEvent = (event) => {
   return event?.fileList || [];
 };
 
-const toOptionalFiniteNumber = (value) => {
-  if (value === undefined || value === null || value === "") {
-    return undefined;
-  }
+const formatPriceDisplay = (value) => {
   const num = Number(value);
-  return Number.isFinite(num) ? num : undefined;
+  if (!Number.isFinite(num)) return "-";
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 export default function RefundRemakeCreateModal({
@@ -61,7 +64,6 @@ export default function RefundRemakeCreateModal({
         checked: true,
         quantity: item?.initialQuantity || 1,
         maxQuantity: item?.maxQuantity || 1,
-        price: toOptionalFiniteNumber(item?.initialPrice),
       };
     });
     setItemSelections(initial);
@@ -96,6 +98,23 @@ export default function RefundRemakeCreateModal({
         ),
       },
       {
+        title: t("create.columns.image"),
+        dataIndex: "imageUrl",
+        width: 78,
+        render: (value) =>
+          value ? (
+            <Image
+              src={value}
+              alt="order-item"
+              width={44}
+              height={44}
+              style={{ borderRadius: 8, objectFit: "cover" }}
+            />
+          ) : (
+            <span style={{ color: "#8c8c8c", fontSize: 12 }}>{t("common.none")}</span>
+          ),
+      },
+      {
         title: t("create.columns.item"),
         dataIndex: "productName",
         render: (_, record) => (
@@ -106,6 +125,42 @@ export default function RefundRemakeCreateModal({
             </span>
           </Space>
         ),
+      },
+      {
+        title: t("create.columns.options"),
+        dataIndex: "options",
+        width: 230,
+        render: (options) => {
+          if (!Array.isArray(options) || options.length === 0) {
+            return <span style={{ color: "#8c8c8c" }}>{t("common.none")}</span>;
+          }
+          return (
+            <Space direction="vertical" size={0}>
+              {options.map((option, index) => {
+                const name = option?.name ?? t("common.none");
+                const value = option?.value ?? t("common.none");
+                const key = `${name}-${value}-${index}`;
+                const displayText = `${name}: ${value}`;
+                return (
+                  <Tooltip title={displayText} key={key}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        maxWidth: 190,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{name}: </span>
+                      {value}
+                    </span>
+                  </Tooltip>
+                );
+              })}
+            </Space>
+          );
+        },
       },
       {
         title: t("create.columns.maxQuantity"),
@@ -134,21 +189,8 @@ export default function RefundRemakeCreateModal({
       {
         title: t("create.columns.price"),
         dataIndex: "price",
-        width: 170,
-        render: (_, record) => (
-          <InputNumber
-            min={0}
-            precision={2}
-            style={{ width: "100%" }}
-            value={itemSelections?.[record.orderItemId]?.price}
-            onChange={(value) =>
-              updateItemSelection(record.orderItemId, {
-                price: toOptionalFiniteNumber(value),
-              })
-            }
-            placeholder={t("create.placeholders.optionalPrice")}
-          />
-        ),
+        width: 130,
+        render: (_, record) => formatPriceDisplay(record?.initialPrice),
       },
     ],
     [itemSelections, t, updateItemSelection]
@@ -188,12 +230,7 @@ export default function RefundRemakeCreateModal({
         );
         return;
       }
-      const nextEntry = { quantity };
-      const price = toOptionalFiniteNumber(selection?.price);
-      if (price !== undefined) {
-        nextEntry.price = price;
-      }
-      order_items[orderItemId] = nextEntry;
+      order_items[orderItemId] = { quantity };
     }
 
     const uploadList = extractUploadFileList(values?.images);
@@ -224,12 +261,8 @@ export default function RefundRemakeCreateModal({
       order_items,
       responsible_entity_id: values.responsible_entity_id,
       request_type: String(values.request_type || "refund").toLowerCase(),
+      description: String(values.description || "").trim(),
     };
-
-    const description = String(values.description || "").trim();
-    if (description) {
-      payload.description = description;
-    }
     if (images.length) {
       payload.images = images;
     }
@@ -252,6 +285,17 @@ export default function RefundRemakeCreateModal({
       return false;
     },
     [message, t]
+  );
+
+  const validateImagesRequired = useCallback(
+    async (_, value) => {
+      const uploadList = extractUploadFileList(value);
+      if (uploadList.length > 0) {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error(t("validation.imagesRequired")));
+    },
+    [t]
   );
 
   return (
@@ -302,7 +346,14 @@ export default function RefundRemakeCreateModal({
           <Form.Item
             name="description"
             label={t("create.fields.description")}
-            rules={[{ max: 1000, message: t("validation.descriptionMax") }]}
+            rules={[
+              {
+                required: true,
+                whitespace: true,
+                message: t("validation.descriptionRequired"),
+              },
+              { max: 1000, message: t("validation.descriptionMax") },
+            ]}
           >
             <Input.TextArea
               rows={3}
@@ -316,13 +367,20 @@ export default function RefundRemakeCreateModal({
             label={t("create.fields.images")}
             valuePropName="fileList"
             getValueFromEvent={normalizeUploadEvent}
+            rules={[{ validator: validateImagesRequired }]}
           >
             <Upload
+              className="refund-remake-create-upload"
               multiple
-              listType="picture"
+              listType="picture-card"
               maxCount={MAX_IMAGE_COUNT}
               accept={ACCEPT_ATTR}
               beforeUpload={validateImageFile}
+              showUploadList={{
+                showPreviewIcon: false,
+                showRemoveIcon: true,
+                showDownloadIcon: false,
+              }}
             >
               <Space>
                 <UploadOutlined />
@@ -342,6 +400,11 @@ export default function RefundRemakeCreateModal({
           scroll={{ x: true }}
         />
       </Space>
+      <style jsx global>{`
+        .refund-remake-create-upload .ant-upload-list-item-name {
+          display: none !important;
+        }
+      `}</style>
     </Modal>
   );
 }

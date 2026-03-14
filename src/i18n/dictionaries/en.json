@@ -1943,10 +1943,12 @@
           "requestType": "Request Type",
           "responsibleEntity": "Responsible Entity",
           "description": "Description",
-          "images": "Images"
+          "images": "Images",
+          "customer" : "Customer",
+          "company" : "Company"
         },
         "placeholders": {
-          "description": "Optional description",
+          "description": "Enter description",
           "optionalPrice": "Optional"
         },
         "actions": {
@@ -1955,7 +1957,9 @@
         },
         "columns": {
           "select": "Select",
+          "image": "Image",
           "item": "Order Item",
+          "options": "Options",
           "maxQuantity": "Max Qty",
           "quantity": "Quantity",
           "price": "Price"
@@ -1964,6 +1968,8 @@
       "validation": {
         "requestTypeRequired": "Request type is required.",
         "responsibleEntityRequired": "Responsible entity is required.",
+        "descriptionRequired": "Description is required.",
+        "imagesRequired": "At least one image is required.",
         "descriptionMax": "Description must be at most 1000 characters.",
         "rejectReasonRequired": "Reject reason is required."
       },
@@ -1981,14 +1987,19 @@
           "createdAt": "Created At",
           "updatedAt": "Updated At",
           "description": "Description",
-          "rejectReason": "Reject Reason"
+          "rejectReason": "Reject Reason",
+          "customer" : "Customer",
+          "company" : "Company"
         },
         "items": {
           "orderItem": "Order Item ID",
+          "image": "Image",
           "sku": "SKU",
           "product": "Product",
+          "options": "Options",
           "quantity": "Quantity",
-          "price": "Price"
+          "price": "Price",
+          "lineTotal": "Line Total"
         }
       },
       "common": {

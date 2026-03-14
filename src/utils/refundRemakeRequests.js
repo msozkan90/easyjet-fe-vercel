@@ -104,12 +104,29 @@ const normalizeSingleRequestItem = (rawItem = {}, keyHint) => {
     quantity || 1
   );
   const initialPrice = asFiniteNumber(rawItem?.price ?? rawItem?.unit_price);
+  const lineTotal = asFiniteNumber(rawItem?.line_total ?? rawItem?.total_price);
+  const imageUrl =
+    rawItem?.image_url ||
+    rawItem?.image?.url ||
+    rawItem?.image?.image_url ||
+    rawItem?.product?.image_url ||
+    rawItem?.product?.images?.[0]?.image_url ||
+    rawItem?.product?.images?.[0]?.url ||
+    "";
+  const options = Array.isArray(rawItem?.options)
+    ? rawItem.options
+    : Array.isArray(rawItem?.selected_options)
+    ? rawItem.selected_options
+    : [];
   return {
     key: key ? String(key) : "",
     orderItemId: key ? String(key) : "",
     quantity,
     maxQuantity,
     price: initialPrice,
+    lineTotal,
+    imageUrl,
+    options,
     sku: rawItem?.sku || rawItem?.order_item?.sku || rawItem?.item?.sku || "",
     productName:
       rawItem?.product_name ||
@@ -130,13 +147,13 @@ export const normalizeRefundRemakeItems = (detail) => {
   if (Array.isArray(source)) {
     return source
       .map((item) => normalizeSingleRequestItem(item))
-      .filter((item) => item.orderItemId);
+      .filter((item) => item.orderItemId || item.sku || item.productName);
   }
 
   if (source && typeof source === "object") {
     return Object.entries(source)
       .map(([key, item]) => normalizeSingleRequestItem(item, key))
-      .filter((item) => item.orderItemId);
+      .filter((item) => item.orderItemId || item.sku || item.productName);
   }
 
   return [];
@@ -177,11 +194,22 @@ const toCandidateOrderItem = (record = {}) => {
   if (!id) return null;
   const maxQuantity = toPositiveInteger(record?.quantity, 0);
   if (!maxQuantity) return null;
-  const price = asFiniteNumber(record?.price);
+  const price = asFiniteNumber(record?.price ?? record?.unit_price);
+  const imageUrl =
+    record?.image_url ||
+    record?.image?.url ||
+    record?.image?.image_url ||
+    record?.preview_image_url ||
+    record?.product?.image_url ||
+    record?.product?.images?.[0]?.image_url ||
+    record?.product?.images?.[0]?.url ||
+    "";
   return {
     orderItemId: String(id),
     sku: record?.sku || "",
     productName: record?.product?.name || record?.name || "",
+    imageUrl,
+    options: Array.isArray(record?.options) ? record.options : [],
     maxQuantity,
     initialQuantity: 1,
     initialPrice: price,

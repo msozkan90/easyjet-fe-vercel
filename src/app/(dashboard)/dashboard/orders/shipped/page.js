@@ -31,7 +31,7 @@ export default function ShippedOrdersPage() {
     if (entityId && entityName) {
       options.push({
         value: entityId,
-        label: `${entityName} - ${entityId}`,
+        label: `${entityName}`,
       });
     }
     const companyId = user?.parent_entity?.company?.id;
@@ -39,7 +39,7 @@ export default function ShippedOrdersPage() {
     if (companyId && companyName && !options.some((item) => item.value === companyId)) {
       options.push({
         value: companyId,
-        label: `${companyName} - ${companyId}`,
+        label: `${companyName}`,
       });
     }
     return options;

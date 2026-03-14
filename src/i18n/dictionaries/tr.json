@@ -1802,10 +1802,12 @@
           "requestType": "Talep Tipi",
           "responsibleEntity": "Sorumlu Varlık",
           "description": "Açıklama",
-          "images": "Görseller"
+          "images": "Görseller",
+          "company": "Firma",
+          "customer": "Müşteri"
         },
         "placeholders": {
-          "description": "Opsiyonel açıklama",
+          "description": "Açıklama girin",
           "optionalPrice": "Opsiyonel"
         },
         "actions": {
@@ -1814,7 +1816,9 @@
         },
         "columns": {
           "select": "Seç",
+          "image": "Görsel",
           "item": "Sipariş Kalemi",
+          "options": "Seçenekler",
           "maxQuantity": "Maks Adet",
           "quantity": "Adet",
           "price": "Fiyat"
@@ -1823,6 +1827,8 @@
       "validation": {
         "requestTypeRequired": "Talep tipi zorunludur.",
         "responsibleEntityRequired": "Sorumlu varlık zorunludur.",
+        "descriptionRequired": "Açıklama zorunludur.",
+        "imagesRequired": "En az bir görsel zorunludur.",
         "descriptionMax": "Açıklama en fazla 1000 karakter olabilir.",
         "rejectReasonRequired": "Red nedeni zorunludur."
       },
@@ -1840,14 +1846,19 @@
           "createdAt": "Oluşturulma",
           "updatedAt": "Güncellenme",
           "description": "Açıklama",
-          "rejectReason": "Red Nedeni"
+          "rejectReason": "Red Nedeni",
+          "company": "Firma",
+          "customer": "Müşteri"
         },
         "items": {
           "orderItem": "Sipariş Kalemi ID",
+          "image": "Görsel",
           "sku": "SKU",
           "product": "Ürün",
+          "options": "Seçenekler",
           "quantity": "Adet",
-          "price": "Fiyat"
+          "price": "Fiyat",
+          "lineTotal": "Satır Toplamı"
         }
       },
       "common": {
