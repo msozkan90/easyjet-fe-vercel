@@ -6,6 +6,9 @@ const RULE_OPERATORS = {
   "<": (left, right) => Number(left) < Number(right),
   "<=": (left, right) => Number(left) <= Number(right),
   in: (left, right) => {
+    if (Array.isArray(left) && Array.isArray(right)) {
+      return left.some((leftItem) => right.some((rightItem) => rightItem === leftItem));
+    }
     if (Array.isArray(right)) {
       return right.some((item) => item === left);
     }
@@ -31,7 +34,17 @@ const getValueByPath = (source, path) => {
   return normalizedPath
     .map((segment) => segment.trim())
     .filter(Boolean)
-    .reduce((acc, segment) => (acc == null ? acc : acc[segment]), source);
+    .reduce((acc, segment) => {
+      if (Array.isArray(acc)) {
+        return acc
+          .flatMap((item) => {
+            if (item == null || typeof item !== "object") return [];
+            const value = item[segment];
+            return Array.isArray(value) ? value : value === undefined ? [] : [value];
+          });
+      }
+      return acc == null ? acc : acc[segment];
+    }, source);
 };
 
 const shouldApplyRuleGroup = (rule, entityType) => {
