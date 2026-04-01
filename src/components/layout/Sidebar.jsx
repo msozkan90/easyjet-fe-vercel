@@ -38,6 +38,24 @@ export default function Sidebar({ collapsed }) {
   const isShipmentWorker = roles.includes("companyshipmentworker");
   const isPartnerAdmin = roles.includes("partneradmin");
   const isCustomerAdmin = roles.includes("customeradmin");
+  const userCategoryNames = new Set(
+    (user?.user_categories || [])
+      .map((category) => {
+        if (!category) return null;
+        if (typeof category === "string") return category.trim().toLowerCase();
+        return String(category?.name || "").trim().toLowerCase();
+      })
+      .filter(Boolean),
+  );
+  const hasTransferOrderCategory =
+    userCategoryNames.has("dtf") || userCategoryNames.has("uvdtf");
+  const hasStandardProductVariationCategory =
+    userCategoryNames.has("print") ||
+    userCategoryNames.has("apparel") ||
+    userCategoryNames.has("engraving");
+  const hasTransferOrdersAccess =
+    hasTransferOrderCategory &&
+    (isCompanyAdmin || isPartnerAdmin || isCustomerAdmin);
   const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector(
     (s) => s.categories?.listWithSubCategories,
@@ -266,77 +284,100 @@ export default function Sidebar({ collapsed }) {
               },
             ],
           },
-          {
-            key: "product-variation",
-            icon: <AppstoreOutlined />,
-            label: tSidebar("productVariation.title"),
-            children: [
-              {
-                key: "product-variation-products",
-                icon: <AppstoreOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/products">
-                    {tSidebar("productVariation.products")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-variation-sizes",
-                icon: <TagsOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/sizes">
-                    {tSidebar("productVariation.sizes")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-variation-colors",
-                icon: <BgColorsOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/colors">
-                    {tSidebar("productVariation.colors")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-variation-positions",
-                icon: <GatewayOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/positions">
-                    {tSidebar("productVariation.positions")}
-                  </Link>
-                ),
-              },
-
-              {
-                key: "product-variation-additional-prices",
-                icon: <DollarCircleOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/additional-prices">
-                    {tSidebar("productVariation.additionalPrices")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-variation-stock",
-                icon: <DollarOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/stock">
-                    {tSidebar("productVariation.stock")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-variation-prices",
-                icon: <DollarOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/prices">
-                    {tSidebar("productVariation.prices")}
-                  </Link>
-                ),
-              },
-            ],
-          },
+          ...(hasStandardProductVariationCategory
+            ? [
+                {
+                  key: "product-variation",
+                  icon: <AppstoreOutlined />,
+                  label: tSidebar("productVariation.title"),
+                  children: [
+                    {
+                      key: "product-variation-products",
+                      icon: <AppstoreOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/products">
+                          {tSidebar("productVariation.products")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-sizes",
+                      icon: <TagsOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/sizes">
+                          {tSidebar("productVariation.sizes")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-colors",
+                      icon: <BgColorsOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/colors">
+                          {tSidebar("productVariation.colors")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-positions",
+                      icon: <GatewayOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/positions">
+                          {tSidebar("productVariation.positions")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-additional-prices",
+                      icon: <DollarCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/additional-prices">
+                          {tSidebar("productVariation.additionalPrices")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-stock",
+                      icon: <DollarOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/stock">
+                          {tSidebar("productVariation.stock")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-prices",
+                      icon: <DollarOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/prices">
+                          {tSidebar("productVariation.prices")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
+          ...(hasTransferOrderCategory
+            ? [
+                {
+                  key: "transfer-product-variation",
+                  icon: <AppstoreOutlined />,
+                  label: tSidebar("transferProductVariation.title"),
+                  children: [
+                    {
+                      key: "transfer-product-variation-products",
+                      icon: <AppstoreOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-product-variation/products">
+                          {tSidebar("transferProductVariation.products")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
         ]
       : []),
     ...(isCompanyAdmin
@@ -489,6 +530,46 @@ export default function Sidebar({ collapsed }) {
               //     <Link href="/dashboard/customer/admins">Customer Admins</Link>
               //   ),
               // },
+            ],
+          },
+          ...(hasTransferOrdersAccess
+            ? [
+                {
+                  key: "transfer-orders",
+                  icon: <ShoppingCartOutlined />,
+                  label: tSidebar("order.transferOrders"),
+                  children: [
+                    {
+                      key: "transfer-order-pool",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders">
+                          {tSidebar("order.transferOrderPool")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ]
+      : []),
+    ...(hasTransferOrdersAccess && !isCustomerAdmin
+      ? [
+          {
+            key: "transfer-orders-shortcut",
+            icon: <ShoppingCartOutlined />,
+            label: tSidebar("order.transferOrders"),
+            children: [
+              {
+                key: "transfer-orders-shortcut-pool",
+                icon: <ApartmentOutlined />,
+                label: (
+                  <Link href="/dashboard/transfer-orders">
+                    {tSidebar("order.transferOrderPool")}
+                  </Link>
+                ),
+              },
             ],
           },
         ]

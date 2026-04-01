@@ -206,6 +206,10 @@ export default function SettingsPage() {
     return (source?.name || "").toLowerCase() === "shipstation_api";
   }, []);
 
+  const isShopifySource = useCallback((source) => {
+    return (source?.name || "").toLowerCase() === "shopify_api";
+  }, []);
+
   const resetShipstationState = useCallback(() => {
     setCredentialsBySource({});
     setEditingSources({});
@@ -446,6 +450,7 @@ export default function SettingsPage() {
         const secretProvided = hasApiSecretField && !!values.api_secret;
 
         const isShipstation = isShipstationSource(source);
+        const isShopify = isShopifySource(source);
         const resolvedStoreId = values.store_id ?? credential?.store_id ?? "";
 
         if (isShipstation && hasOwnApiKeyCustomerAdmin && !resolvedStoreId) {
@@ -487,6 +492,17 @@ export default function SettingsPage() {
           }
         });
 
+        if (isShopify) {
+          const rawStoreId = `${values.store_id ?? credential?.store_id ?? ""}`.trim();
+          const rawAccessKey = `${values.access_key ?? ""}`.trim();
+          payload.store_id = rawStoreId;
+          payload.api_key = rawStoreId;
+          if (rawAccessKey) {
+            payload.api_secret = rawAccessKey;
+          }
+          delete payload.access_key;
+        }
+
         if (!credential) {
           await ShipStationAPI.create(payload);
           message.success(tProfile("messages.shipstationCreated"));
@@ -513,6 +529,7 @@ export default function SettingsPage() {
       credentialsBySource,
       getSourceById,
       hasOwnApiKeyCustomerAdmin,
+      isShopifySource,
       isShipstationSource,
       loadShipStation,
       message,

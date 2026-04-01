@@ -27,7 +27,6 @@ const normalizeUser = (raw) => {
     manager: ["orders.read", "orders.write"],
     staff: ["orders.read"],
   };
-
   return {
     ...raw,
     // UI rahat kullansın diye:

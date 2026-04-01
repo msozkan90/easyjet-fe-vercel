@@ -805,6 +805,48 @@
         "none": "-"
       }
     },
+    "transferProduct": {
+      "columns": {
+        "name": "Ad",
+        "category": "Kategori",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchName": "Ad ara",
+        "selectCategory": "Kategori seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Transfer Ürün",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Transfer ürün silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadCategoriesError": "Kategoriler yüklenemedi.",
+        "createSuccess": "Transfer ürün oluşturuldu.",
+        "updateSuccess": "Transfer ürün güncellendi.",
+        "deleteSuccess": "Transfer ürün silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "modal": {
+        "createTitle": "Transfer Ürün Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "validation": {
+        "nameRequired": "Ad zorunludur",
+        "categoryRequired": "Kategori zorunludur"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "productSize": {
       "columns": {
         "id": "Kimlik",
@@ -1902,6 +1944,10 @@
         "partnerToCustomerPrices": "Müşteri Fiyatları",
         "partnerPrices": "Partner Fiyatları"
       },
+      "transferProductVariation": {
+        "title": "Transfer Ürün Varyasyonları",
+        "products": "Ürünler"
+      },
       "productMapper": {
         "title": "Ürün Eşleştirici",
         "products": "Ürünler",
@@ -1917,6 +1963,8 @@
       "order": {
         "title": "Sipariş",
         "preOrders": "Ön Siparişler",
+        "transferOrders": "Transfer Siparişler",
+        "transferOrderPool": "Transfer Sipariş Havuzu",
         "orders": "Siparişler",
         "pending": "Bekleyen Siparişler",
         "inProduction": "Üretimdeki Siparişler",

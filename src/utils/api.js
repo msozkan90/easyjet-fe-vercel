@@ -117,6 +117,10 @@ export const OrdersAPI = {
   preList: (query) => api.post("/order-pools/list", query),
   preUpdate: (id, data) => api.put(`/order-pools/${id}`, data),
   preCancel: (id) => api.del(`/order-pools/${id}`),
+  transferPreList: (query) => api.post("/transfer-order-pools/list", query),
+  transferPreUpdate: (id, data) => api.put(`/transfer-order-pools/${id}`, data),
+  transferPreCancel: (id) => api.del(`/transfer-order-pools/${id}`),
+  transferManualFetch: (data = {}) => api.post("/transfer-order-pools/orders/manual", data),
 
   // order list
   create: (data) => api.post("/orders", data),
@@ -249,6 +253,13 @@ export const ProductsAPI = {
       options.config || options.multipartConfig
     );
   },
+};
+
+export const TransferProductsAPI = {
+  list: (query) => api.post("/transfer-products/list", query),
+  create: (data) => api.post("/transfer-products", data),
+  update: (id, data) => api.put(`/transfer-products/${id}`, data),
+  remove: (id) => api.del(`/transfer-products/${id}`),
 };
 
 export const ProductSizesAPI = {

@@ -9,6 +9,7 @@ import { useTranslations } from "@/i18n/use-translations";
 export default function RequireRole({
   anyOfRoles = [],
   anyOfPerms = [],
+  anyOfCategories = [],
   children,
 }) {
   const user = useSelector((s) => s.auth.user);
@@ -16,7 +17,21 @@ export default function RequireRole({
   const grantedByRole = anyOfRoles.length === 0 || hasAnyRole(user, anyOfRoles);
   const grantedByPerm =
     anyOfPerms.length === 0 || anyOfPerms.some((p) => can(user, p));
-  const granted = grantedByRole && grantedByPerm;
+  const categoryNames = new Set(
+    (user?.user_categories || [])
+      .map((category) => {
+        if (!category) return null;
+        if (typeof category === "string") return category.trim().toLowerCase();
+        return String(category?.name || "").trim().toLowerCase();
+      })
+      .filter(Boolean),
+  );
+  const grantedByCategory =
+    anyOfCategories.length === 0 ||
+    anyOfCategories.some((name) =>
+      categoryNames.has(String(name || "").trim().toLowerCase()),
+    );
+  const granted = grantedByRole && grantedByPerm && grantedByCategory;
 
   if (!granted) {
     return (

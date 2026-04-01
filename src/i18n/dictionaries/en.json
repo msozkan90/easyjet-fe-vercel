@@ -805,6 +805,48 @@
         "none": "-"
       }
     },
+    "transferProduct": {
+      "columns": {
+        "name": "Name",
+        "category": "Category",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchName": "Search name",
+        "selectCategory": "Select category",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Transfer Product",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete transfer product?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadCategoriesError": "Categories could not be loaded.",
+        "createSuccess": "Transfer product created.",
+        "updateSuccess": "Transfer product updated.",
+        "deleteSuccess": "Transfer product deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "modal": {
+        "createTitle": "Create Transfer Product",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "categoryRequired": "Category is required"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "productSize": {
       "columns": {
         "id": "ID",
@@ -2043,6 +2085,10 @@
         "partnerToCustomerPrices": "Customer Prices",
         "partnerPrices": "Partner Prices"
       },
+      "transferProductVariation": {
+        "title": "Transfer Products Variation",
+        "products": "Products"
+      },
       "productMapper": {
         "title": "Product Mapper",
         "products": "Products",
@@ -2058,6 +2104,8 @@
       "order": {
         "title": "Order",
         "preOrders": "Pre Orders",
+        "transferOrders": "Transfer Orders",
+        "transferOrderPool": "Transfer Order Pool",
         "orders": "Orders",
         "pending": "Pending Orders",
         "inProduction": "In Production",
