@@ -6,7 +6,6 @@ import {
   Button,
   Space,
   App as AntdApp,
-  Image,
   Select,
   Tooltip,
   Popconfirm,
@@ -14,11 +13,12 @@ import {
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { OrdersAPI, ProductVariationAPI } from "@/utils/api";
+import { OrdersAPI } from "@/utils/api";
+import { fetchGenericList } from "@/utils/fetchGenericList";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
-import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -44,8 +44,8 @@ export default function OrdersPage() {
   const [pulling, setPulling] = useState(false);
   const [cooldownEnd, setCooldownEnd] = useState(null);
   const [remainingSec, setRemainingSec] = useState(0);
-  const [productVariations, setProductVariations] = useState([]);
-  const [variationsLoading, setVariationsLoading] = useState(false);
+  const [transferProducts, setTransferProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
   const [rowSelections, setRowSelections] = useState({});
   const [cellLoading, setCellLoading] = useState({});
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -72,12 +72,14 @@ export default function OrdersPage() {
 
   useEffect(() => {
     let active = true;
-    const loadProductVariations = async () => {
-      setVariationsLoading(true);
+    const loadTransferProducts = async () => {
+      setProductsLoading(true);
       try {
-        const response = await ProductVariationAPI.list();
+        const list = await fetchGenericList("transfer_product", {
+          filters: { status: "active" },
+        });
         if (active) {
-          setProductVariations(response?.data || []);
+          setTransferProducts(Array.isArray(list) ? list : []);
         }
       } catch (error) {
         if (active) {
@@ -88,11 +90,11 @@ export default function OrdersPage() {
         }
       } finally {
         if (active) {
-          setVariationsLoading(false);
+          setProductsLoading(false);
         }
       }
     };
-    loadProductVariations();
+    loadTransferProducts();
     return () => {
       active = false;
     };
@@ -100,52 +102,13 @@ export default function OrdersPage() {
 
   const productOptions = useMemo(
     () =>
-      (productVariations || [])
+      (transferProducts || [])
         .filter((product) => product?.id)
         .map((product) => ({
           value: product.id,
           label: product.name,
         })),
-    [productVariations]
-  );
-
-  const productMap = useMemo(() => {
-    const map = new Map();
-    (productVariations || []).forEach((product) => {
-      if (product?.id === undefined || product?.id === null) return;
-      const key = String(product.id);
-      map.set(product.id, product);
-      map.set(key, product);
-    });
-    return map;
-  }, [productVariations]);
-
-  const getSizeOptions = useCallback(
-    (productId) => {
-      if (!productId) return [];
-      const product = productMap.get(productId);
-      return (product?.sizes || [])
-        .filter((size) => size?.id)
-        .map((size) => ({
-          value: size.id,
-          label: size.name,
-        }));
-    },
-    [productMap]
-  );
-
-  const getColorOptions = useCallback(
-    (productId) => {
-      if (!productId) return [];
-      const product = productMap.get(productId);
-      return (product?.colors || [])
-        .filter((color) => color?.id)
-        .map((color) => ({
-          value: color.id,
-          label: color.name,
-        }));
-    },
-    [productMap]
+    [transferProducts]
   );
 
   const baseRequest = useMemo(
@@ -238,64 +201,6 @@ export default function OrdersPage() {
     });
   }, []);
 
-  const getSelectionSnapshot = useCallback(
-    (record, overrides = {}) => {
-      if (!record?.id) {
-        return {
-          productId: null,
-          sizeId: null,
-          colorId: null,
-        };
-      }
-      const currentOverrides = rowSelections?.[record.id] || {};
-      const merged = { ...currentOverrides, ...overrides };
-      const readValue = (key, field) =>
-        hasOwn.call(merged, key)
-          ? merged[key]
-          : getNormalizedRecordValue(record, field);
-      return {
-        productId: readValue("productId", "product"),
-        sizeId: readValue("sizeId", "size"),
-        colorId: readValue("colorId", "color"),
-      };
-    },
-    [rowSelections]
-  );
-
-  const findProductPrice = useCallback(
-    (productId, sizeId, colorId) => {
-      if (
-        productId === null ||
-        productId === undefined ||
-        sizeId === null ||
-        sizeId === undefined ||
-        colorId === null ||
-        colorId === undefined
-      ) {
-        return undefined;
-      }
-      const product =
-        productMap.get(productId) || productMap.get(String(productId));
-      if (!product) return undefined;
-      const normalize = (value) =>
-        value === undefined || value === null ? null : String(value);
-      const targetSize = normalize(sizeId);
-      const targetColor = normalize(colorId);
-      const match = (product?.prices || []).find(
-        (entry) =>
-          normalize(entry?.size_id) === targetSize &&
-          normalize(entry?.color_id) === targetColor
-      );
-      if (!match) return undefined;
-      const value = match?.price;
-      if (value === undefined || value === null || value === "") {
-        return undefined;
-      }
-      return value;
-    },
-    [productMap]
-  );
-
   const setCellLoadingState = useCallback((rowId, field, nextState) => {
     if (!rowId || !field) return;
     const key = `${rowId}-${field}`;
@@ -365,117 +270,23 @@ export default function OrdersPage() {
         ? overrides.productId
         : getNormalizedRecordValue(record, "product");
       if (prevProduct === nextNormalized) return;
-
-      const prevSize = hasOwn.call(overrides || {}, "sizeId")
-        ? overrides.sizeId
-        : getNormalizedRecordValue(record, "size");
-      const prevColor = hasOwn.call(overrides || {}, "colorId")
-        ? overrides.colorId
-        : getNormalizedRecordValue(record, "color");
-
       setRowSelectionFields(record.id, {
         productId: nextNormalized,
-        sizeId: null,
-        colorId: null,
       });
 
       handlePreOrderUpdate(
         record,
         {
-          product_id: nextNormalized,
-          size_id: null,
-          color_id: null,
+          transfer_product_id: nextNormalized,
         },
         "product",
         () =>
           setRowSelectionFields(record.id, {
             productId: prevProduct,
-            sizeId: prevSize,
-            colorId: prevColor,
           })
       );
     },
     [handlePreOrderUpdate, rowSelections, setRowSelectionFields]
-  );
-
-  const handleSizeSelect = useCallback(
-    (record, nextValue) => {
-      if (!record?.id) return;
-      const overrides = rowSelections?.[record.id];
-      const nextNormalized = normalizeId(nextValue);
-      const prevSize = hasOwn.call(overrides || {}, "sizeId")
-        ? overrides.sizeId
-        : getNormalizedRecordValue(record, "size");
-      if (prevSize === nextNormalized) return;
-
-      setRowSelectionFields(record.id, { sizeId: nextNormalized });
-
-      const snapshot = getSelectionSnapshot(record, {
-        sizeId: nextNormalized,
-      });
-      const resolvedPrice = findProductPrice(
-        snapshot.productId,
-        snapshot.sizeId,
-        snapshot.colorId
-      );
-      const payload = {  product_id: snapshot.productId, size_id: nextNormalized, color_id: snapshot.colorId };
-      if (resolvedPrice !== undefined) {
-        payload.price = resolvedPrice;
-      }
-
-      handlePreOrderUpdate(record, payload, "size", () =>
-        setRowSelectionFields(record.id, {
-          sizeId: prevSize
-        })
-      );
-    },
-    [
-      findProductPrice,
-      getSelectionSnapshot,
-      handlePreOrderUpdate,
-      rowSelections,
-      setRowSelectionFields,
-    ]
-  );
-
-  const handleColorSelect = useCallback(
-    (record, nextValue) => {
-      if (!record?.id) return;
-      const overrides = rowSelections?.[record.id];
-      const nextNormalized = normalizeId(nextValue);
-      const prevColor = hasOwn.call(overrides || {}, "colorId")
-        ? overrides.colorId
-        : getNormalizedRecordValue(record, "color");
-      if (prevColor === nextNormalized) return;
-
-      setRowSelectionFields(record.id, { colorId: nextNormalized });
-
-      const snapshot = getSelectionSnapshot(record, {
-        colorId: nextNormalized,
-      });
-      const resolvedPrice = findProductPrice(
-        snapshot.productId,
-        snapshot.sizeId,
-        snapshot.colorId
-      );
-      const payload = {  product_id: snapshot.productId, size_id: snapshot.sizeId, color_id: nextNormalized};
-      if (resolvedPrice !== undefined) {
-        payload.price = resolvedPrice;
-      }
-
-      handlePreOrderUpdate(record, payload, "color", () =>
-        setRowSelectionFields(record.id, {
-          colorId: prevColor,
-        })
-      );
-    },
-    [
-      findProductPrice,
-      getSelectionSnapshot,
-      handlePreOrderUpdate,
-      rowSelections,
-      setRowSelectionFields,
-    ]
   );
 
   const onRowSelectionChange = useCallback((keys, rows) => {
@@ -579,42 +390,8 @@ export default function OrdersPage() {
   const formatDateTime = (value) =>
     value ? moment(value).format("LLL") : t("common.none");
 
-  const formatAmount = (value) => {
-    if (value === null || value === undefined || value === "") {
-      return t("common.none");
-    }
-    const numericValue = Number(value);
-    if (Number.isNaN(numericValue)) {
-      return value;
-    }
-    return numericValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
   const columns = useMemo(() => {
-    const baseColumns = [
-      {
-        title: t("items.columns.image_url"),
-        dataIndex: "image_url",
-        render: (value) =>
-          value ? (
-            <Image
-              loading="lazy"
-              src={value}
-              alt="Item"
-              preview={{ mask: <EyeOutlined /> }}
-              style={{
-                maxWidth: "45px",
-                maxHeight: "45px",
-                objectFit: "contain",
-              }}
-            />
-          ) : (
-            t("common.none")
-          ),
-      },
+    return [
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
@@ -625,24 +402,15 @@ export default function OrdersPage() {
         },
       },
       {
-        title: t("items.columns.sku"),
-        dataIndex: "sku",
+        title: t("items.columns.item"),
+        dataIndex: "name",
+        width: 420,
         filter: {
           type: "text",
-          placeholder: t("filters.searchSku"),
+          placeholder: t("filters.searchItem"),
         },
         render: (value) => value || t("common.none"),
       },
-      // {
-      //   title: t("items.columns.item"),
-      //   dataIndex: "name",
-      //   width: 500,
-      //   filter: {
-      //     type: "text",
-      //     placeholder: t("filters.searchItem"),
-      //   },
-      //   render: (value) => value || t("common.none"),
-      // },
       {
         title: t("items.columns.quantity"),
         dataIndex: "quantity",
@@ -686,12 +454,27 @@ export default function OrdersPage() {
       {
         title: t("columns.product"),
         dataIndex: "product",
-        render: (_, record) => record?.product?.name || t("common.none"),
-      },
-      {
-        title: t("columns.price"),
-        dataIndex: "price",
-        sorter: true,
+        render: (_, record) => {
+          const overrides = rowSelections?.[record.id];
+          const normalizedProductId = hasOwn.call(overrides || {}, "productId")
+            ? overrides.productId
+            : getNormalizedRecordValue(record, "product");
+          const loading = productsLoading || isCellLoading(record.id, "product");
+          return (
+            <Select
+              showSearch
+              allowClear
+              optionFilterProp="label"
+              placeholder={t("filters.selectProduct")}
+              options={productOptions}
+              value={toSelectValue(normalizedProductId)}
+              loading={loading}
+              disabled={loading}
+              onChange={(value) => handleProductSelect(record, value)}
+              style={{ minWidth: 180 }}
+            />
+          );
+        },
       },
       {
         title: t("columns.customerName"),
@@ -757,24 +540,17 @@ export default function OrdersPage() {
         },
       },
     ];
-    return baseColumns.filter(
-      (column) => column?.dataIndex !== "size" && column?.dataIndex !== "color",
-    );
   }, [
     bulkApproving,
-    getColorOptions,
-    getSizeOptions,
-    handleColorSelect,
     handleCancelOrder,
     handleProductSelect,
     handleSingleApprove,
-    handleSizeSelect,
     isCellLoading,
     isRowActionLoading,
     productOptions,
+    productsLoading,
     rowSelections,
     t,
-    variationsLoading,
   ]);
 
   const fetchButtonLabel = pulling
@@ -793,12 +569,15 @@ export default function OrdersPage() {
   );
 
   const getRowClassName = useCallback((record) => {
-    const price = record?.price;
-    if (price === null || price === undefined || price === "") {
+    const overrides = rowSelections?.[record?.id];
+    const normalizedProductId = hasOwn.call(overrides || {}, "productId")
+      ? overrides.productId
+      : getNormalizedRecordValue(record, "product");
+    if (normalizedProductId === null || normalizedProductId === undefined) {
       return "missing-price-row";
     }
     return "";
-  }, []);
+  }, [rowSelections]);
 
   const tableProps = useMemo(
     () => ({
@@ -811,7 +590,7 @@ export default function OrdersPage() {
   return (
     <RequireRole
       anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
-      anyOfCategories={["Dtf", "Uvdtf"]}
+      anyOfCategories={["Transfers"]}
     >
       <CrudTable
         ref={tableRef}

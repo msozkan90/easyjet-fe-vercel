@@ -809,6 +809,7 @@
       "columns": {
         "name": "Name",
         "category": "Category",
+        "subCategory": "Sub-Category",
         "status": "Status",
         "createdAt": "Created At",
         "actions": "Actions"

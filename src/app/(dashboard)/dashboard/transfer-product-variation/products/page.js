@@ -5,18 +5,16 @@ import moment from "moment";
 import {
   App as AntdApp,
   Button,
-  Form,
-  Input,
   Modal,
   Popconfirm,
   Popover,
-  Select,
   Space,
   Tag,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
+import ProductForm from "@/components/common/forms/ProductForm";
 import { CategoriesAPI, TransferProductsAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
@@ -30,9 +28,7 @@ export default function TransferProductsPage() {
 
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [form] = Form.useForm();
 
   useEffect(() => {
     let active = true;
@@ -99,6 +95,12 @@ export default function TransferProductsPage() {
         render: (_, record) => record?.category?.name || t("common.none"),
       },
       {
+        title: t("columns.subCategory"),
+        dataIndex: "sub_category_id",
+        sorter: true,
+        render: (_, record) => record?.subCategory?.name || t("common.none"),
+      },
+      {
         title: t("columns.status"),
         dataIndex: "status",
         width: 140,
@@ -137,11 +139,6 @@ export default function TransferProductsPage() {
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
-                  form.setFieldsValue({
-                    category_id: record?.category_id || undefined,
-                    name: record?.name || "",
-                    status: record?.status || "active",
-                  });
                   setOpen(true);
                 }}
               />
@@ -160,26 +157,21 @@ export default function TransferProductsPage() {
         ),
       },
     ],
-    [categories, form, t, tStatus],
+    [categories, t, tStatus],
   );
 
   const openCreateModal = () => {
     setEditingRow(null);
-    form.setFieldsValue({ category_id: undefined, name: "", status: "active" });
     setOpen(true);
   };
 
   const closeModal = () => {
     setOpen(false);
     setEditingRow(null);
-    form.resetFields();
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
-      const values = await form.validateFields();
-      setSubmitting(true);
-
       if (editingRow) {
         await TransferProductsAPI.update(editingRow.id, values);
         message.success(t("messages.updateSuccess"));
@@ -192,10 +184,7 @@ export default function TransferProductsPage() {
       tableRef.current?.setPage?.(1);
       tableRef.current?.reload?.();
     } catch (error) {
-      if (error?.errorFields) return;
       message.error(error?.response?.data?.error?.message || t("messages.operationFailed"));
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -212,7 +201,7 @@ export default function TransferProductsPage() {
   return (
     <RequireRole
       anyOfRoles={["companyAdmin"]}
-      anyOfCategories={["Dtf", "Uvdtf"]}
+      anyOfCategories={["Transfers"]}
     >
       <CrudTable
         ref={tableRef}
@@ -234,45 +223,36 @@ export default function TransferProductsPage() {
       <Modal
         open={open}
         onCancel={closeModal}
-        onOk={onSubmit}
-        okButtonProps={{ loading: submitting }}
-        okText={editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")}
         title={editingRow ? t("modal.editTitle", { name: editingRow?.name || "" }) : t("modal.createTitle")}
+        footer={null}
+        destroyOnHidden
       >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label={t("columns.category")}
-            name="category_id"
-            rules={[{ required: true, message: t("validation.categoryRequired") }]}
-          >
-            <Select
-              showSearch
-              optionFilterProp="label"
-              placeholder={t("filters.selectCategory")}
-              options={categories.map((category) => ({
-                value: category.id,
-                label: category.name,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={t("columns.name")}
-            name="name"
-            rules={[{ required: true, message: t("validation.nameRequired") }]}
-          >
-            <Input maxLength={200} />
-          </Form.Item>
-
-          <Form.Item label={t("columns.status")} name="status">
-            <Select
-              options={[
-                { value: "active", label: tStatus("active") },
-                { value: "inactive", label: tStatus("inactive") },
-              ]}
-            />
-          </Form.Item>
-        </Form>
+        <ProductForm
+          onFinish={onSubmit}
+          submitText={
+            editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
+          }
+          categories={categories}
+          initialValues={
+            editingRow
+              ? {
+                  name: editingRow?.name,
+                  category_id:
+                    editingRow?.category_id ?? editingRow?.category?.id,
+                  sub_category_id:
+                    editingRow?.sub_category_id ??
+                    editingRow?.subCategory?.id,
+                  sub_category_name:
+                    editingRow?.sub_category?.name ??
+                    editingRow?.subCategory?.name ??
+                    undefined,
+                  sub_category:
+                    editingRow?.sub_category ?? editingRow?.subCategory,
+                  status: editingRow?.status,
+                }
+              : undefined
+          }
+        />
       </Modal>
     </RequireRole>
   );

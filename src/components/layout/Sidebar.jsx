@@ -48,7 +48,7 @@ export default function Sidebar({ collapsed }) {
       .filter(Boolean),
   );
   const hasTransferOrderCategory =
-    userCategoryNames.has("dtf") || userCategoryNames.has("uvdtf");
+    userCategoryNames.has("transfers");
   const hasStandardProductVariationCategory =
     userCategoryNames.has("print") ||
     userCategoryNames.has("apparel") ||

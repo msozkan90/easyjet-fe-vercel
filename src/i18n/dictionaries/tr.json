@@ -809,6 +809,7 @@
       "columns": {
         "name": "Ad",
         "category": "Kategori",
+        "subCategory": "Alt Kategori",
         "status": "Durum",
         "createdAt": "Oluşturulma Tarihi",
         "actions": "İşlemler"
