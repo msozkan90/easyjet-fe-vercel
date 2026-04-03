@@ -548,6 +548,15 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    {
+                      key: "transfer-order-list",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders">
+                          {tSidebar("order.transferOrdersList")}
+                        </Link>
+                      ),
+                    },
                   ],
                 },
               ]
@@ -567,6 +576,15 @@ export default function Sidebar({ collapsed }) {
                 label: (
                   <Link href="/dashboard/transfer-orders">
                     {tSidebar("order.transferOrderPool")}
+                  </Link>
+                ),
+              },
+              {
+                key: "transfer-orders-shortcut-list",
+                icon: <ApartmentOutlined />,
+                label: (
+                  <Link href="/dashboard/transfer-orders/orders">
+                    {tSidebar("order.transferOrdersList")}
                   </Link>
                 ),
               },

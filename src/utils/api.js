@@ -166,6 +166,18 @@ export const OrdersAPI = {
   
 };
 
+export const TransferOrdersAPI = {
+  create: (data) => api.post("/transfer-orders", data),
+  list: (payload) => api.post("/transfer-orders/list", payload),
+  detail: (orderNumber) =>
+    api.get(`/transfer-orders/${encodeURIComponent(orderNumber)}`),
+  update: (id, data) => api.put(`/transfer-orders/${id}`, data),
+  remove: (id) => api.del(`/transfer-orders/${id}`),
+  itemsList: (payload) => api.post("/transfer-orders/items/list", payload),
+  updateItem: (id, data) => api.put(`/transfer-orders/items/${id}`, data),
+  removeItem: (id) => api.del(`/transfer-orders/items/${id}`),
+};
+
 export const RefundRemakeRequestsAPI = {
   list: (payload) => api.post("/refund-remake-requests/list", payload),
   details: (id) => api.get(`/refund-remake-requests/${id}`),

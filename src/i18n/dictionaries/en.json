@@ -2107,6 +2107,7 @@
         "preOrders": "Pre Orders",
         "transferOrders": "Transfer Orders",
         "transferOrderPool": "Transfer Order Pool",
+        "transferOrdersList": "Transfer Orders List",
         "orders": "Orders",
         "pending": "Pending Orders",
         "inProduction": "In Production",

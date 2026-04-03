@@ -13,7 +13,7 @@ import {
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { OrdersAPI } from "@/utils/api";
+import { OrdersAPI, TransferOrdersAPI } from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
@@ -163,6 +163,15 @@ export default function OrdersPage() {
   const request = useCallback(
     async (params) => {
       const result = await baseRequest(params);
+      if (Array.isArray(result?.data)) {
+        result.data = [...result.data].sort((a, b) => {
+          const aProductId = getNormalizedRecordValue(a, "product");
+          const bProductId = getNormalizedRecordValue(b, "product");
+          const aMissing = aProductId === null || aProductId === undefined ? 1 : 0;
+          const bMissing = bProductId === null || bProductId === undefined ? 1 : 0;
+          return bMissing - aMissing;
+        });
+      }
       clearSelectionOverrides();
       resetSelections();
       return result;
@@ -306,9 +315,9 @@ export default function OrdersPage() {
       try {
         const payload = records.map((item) => ({
           order_number: item?.order_number,
-          order_pool_item_id: item?.id,
+          transfer_order_pool_item_id: item?.id,
         }));
-        await OrdersAPI.create(payload);
+        await TransferOrdersAPI.create(payload);
         message.success(t("messages.approveSuccess"));
         if (isBulk) {
           resetSelections();

@@ -1966,6 +1966,7 @@
         "preOrders": "Ön Siparişler",
         "transferOrders": "Transfer Siparişler",
         "transferOrderPool": "Transfer Sipariş Havuzu",
+        "transferOrdersList": "Transfer Siparişler Listesi",
         "orders": "Siparişler",
         "pending": "Bekleyen Siparişler",
         "inProduction": "Üretimdeki Siparişler",
