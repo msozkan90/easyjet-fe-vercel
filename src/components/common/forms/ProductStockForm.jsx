@@ -5,6 +5,12 @@ import { Form, InputNumber, Select } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 
+const DEFAULT_OPTION_NAMES = new Set(["standart", "standard"]);
+
+const isDefaultOptionName = (value) =>
+  typeof value === "string" &&
+  DEFAULT_OPTION_NAMES.has(value.trim().toLowerCase());
+
 export default function ProductStockForm({
   initialValues,
   onFinish,
@@ -111,9 +117,7 @@ export default function ProductStockForm({
         );
         if (!currentSizeId || !availableSizeIds.has(currentSizeId)) {
           const defaultSize = nextSizes.find(
-            (item) =>
-              typeof item?.name === "string" &&
-              item.name.trim().toLowerCase() === "standart",
+            (item) => isDefaultOptionName(item?.name),
           );
           if (defaultSize?.id !== undefined) {
             updates.size_id = defaultSize.id;
@@ -130,9 +134,7 @@ export default function ProductStockForm({
         );
         if (!currentColorId || !availableColorIds.has(currentColorId)) {
           const defaultColor = nextColors.find(
-            (item) =>
-              typeof item?.name === "string" &&
-              item.name.trim().toLowerCase() === "standart",
+            (item) => isDefaultOptionName(item?.name),
           );
           if (defaultColor?.id !== undefined) {
             updates.color_id = defaultColor.id;

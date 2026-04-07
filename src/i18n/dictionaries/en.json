@@ -848,6 +848,52 @@
         "none": "-"
       }
     },
+    "transferProductPrice": {
+      "columns": {
+        "transferProduct": "Transfer Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "price": "Price",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectTransferProduct": "Select transfer product",
+        "selectCustomer": "Select customer",
+        "selectPartner": "Select partner",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Transfer Product Price",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete transfer product price?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "loadTransferProductsError": "Transfer products could not be loaded.",
+        "loadCustomersError": "Customers could not be loaded.",
+        "loadPartnersError": "Partners could not be loaded.",
+        "createSuccess": "Transfer product price created.",
+        "updateSuccess": "Transfer product price updated.",
+        "deleteSuccess": "Transfer product price deleted.",
+        "deleteError": "Delete failed.",
+        "operationFailed": "Operation failed."
+      },
+      "table": {
+        "noData": "No data"
+      },
+      "modal": {
+        "createTitle": "Create Transfer Product Price",
+        "editTitle": "Edit: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "productSize": {
       "columns": {
         "id": "ID",
@@ -2088,7 +2134,8 @@
       },
       "transferProductVariation": {
         "title": "Transfer Products Variation",
-        "products": "Products"
+        "products": "Products",
+        "prices": "Prices"
       },
       "productMapper": {
         "title": "Product Mapper",
@@ -2679,6 +2726,24 @@
         "color": "Select color",
         "price": "Enter price",
         "sku": "Enter SKU"
+      },
+      "validation": {
+        "customerOrPartner": "Select either a customer or a partner."
+      }
+    },
+    "transferProductPrice": {
+      "labels": {
+        "transferProduct": "Transfer Product",
+        "customer": "Customer",
+        "partner": "Partner",
+        "price": "Price",
+        "status": "Status"
+      },
+      "placeholders": {
+        "transferProduct": "Select transfer product",
+        "customer": "Select customer",
+        "partner": "Select partner",
+        "price": "Enter price"
       },
       "validation": {
         "customerOrPartner": "Select either a customer or a partner."

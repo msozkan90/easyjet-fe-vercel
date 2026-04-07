@@ -19,6 +19,7 @@ const categoriesSlice = createSlice({
       s.error = null;
     },
     setListWithSubCategories: (s, { payload }) => {
+    console.log("setListWithSubCategories",payload);
       s.listWithSubCategories = normalizePayload(payload);
       s.status = "succeeded";
       s.error = null;

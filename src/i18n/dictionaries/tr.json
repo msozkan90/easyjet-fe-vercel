@@ -848,6 +848,52 @@
         "none": "-"
       }
     },
+    "transferProductPrice": {
+      "columns": {
+        "transferProduct": "Transfer Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "price": "Fiyat",
+        "status": "Durum",
+        "createdAt": "Oluşturulma Tarihi",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectTransferProduct": "Transfer ürün seç",
+        "selectCustomer": "Müşteri seç",
+        "selectPartner": "Partner seç",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Transfer Ürün Fiyatı",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Transfer ürün fiyatı silinsin mi?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "loadTransferProductsError": "Transfer ürünler yüklenemedi.",
+        "loadCustomersError": "Müşteriler yüklenemedi.",
+        "loadPartnersError": "Partnerler yüklenemedi.",
+        "createSuccess": "Transfer ürün fiyatı oluşturuldu.",
+        "updateSuccess": "Transfer ürün fiyatı güncellendi.",
+        "deleteSuccess": "Transfer ürün fiyatı silindi.",
+        "deleteError": "Silme işlemi başarısız.",
+        "operationFailed": "İşlem başarısız."
+      },
+      "table": {
+        "noData": "Kayıt bulunamadı"
+      },
+      "modal": {
+        "createTitle": "Transfer Ürün Fiyatı Oluştur",
+        "editTitle": "Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "common": {
+        "none": "-"
+      }
+    },
     "productSize": {
       "columns": {
         "id": "Kimlik",
@@ -1947,7 +1993,8 @@
       },
       "transferProductVariation": {
         "title": "Transfer Ürün Varyasyonları",
-        "products": "Ürünler"
+        "products": "Ürünler",
+        "prices": "Fiyatlar"
       },
       "productMapper": {
         "title": "Ürün Eşleştirici",
@@ -2642,6 +2689,24 @@
         "color": "Renk seç",
         "price": "Fiyat girin",
         "sku": "Stok kodu girin"
+      },
+      "validation": {
+        "customerOrPartner": "Müşteri veya partner alanlarından birini seçmelisiniz."
+      }
+    },
+    "transferProductPrice": {
+      "labels": {
+        "transferProduct": "Transfer Ürün",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "price": "Fiyat",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "transferProduct": "Transfer ürün seç",
+        "customer": "Müşteri seç",
+        "partner": "Partner seç",
+        "price": "Fiyat girin"
       },
       "validation": {
         "customerOrPartner": "Müşteri veya partner alanlarından birini seçmelisiniz."

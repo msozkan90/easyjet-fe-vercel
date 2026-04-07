@@ -53,12 +53,14 @@ export default function Sidebar({ collapsed }) {
     userCategoryNames.has("print") ||
     userCategoryNames.has("apparel") ||
     userCategoryNames.has("engraving");
-  const hasTransferOrdersAccess =
-    hasTransferOrderCategory &&
-    (isCompanyAdmin || isPartnerAdmin || isCustomerAdmin);
   const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector(
-    (s) => s.categories?.listWithSubCategories,
+
+    (s) => { s?.categories?.listWithSubCategories
+
+      return s?.categories?.listWithSubCategories
+    },
+
   );
   const { token } = theme.useToken();
   const tSidebar = useTranslations("dashboard.sidebar");
@@ -91,6 +93,35 @@ export default function Sidebar({ collapsed }) {
   const filteredCategories = categoriesList.filter((category) =>
     userCategoryIds.has(String(category?.id)),
   );
+
+
+  const transferCategories = filteredCategories.filter((category) => {
+    const categoryName = String(category?.name || "").trim().toLowerCase();
+    return categoryName === "transfers";
+  });
+
+
+  const transferOrderSubCategoryMenuItems = transferCategories.flatMap((category) => {
+    const subCategories = Array.isArray(category?.sub_categories)
+      ? category.sub_categories
+      : [];
+
+    return subCategories
+      .filter((subCategory) => subCategory?.id)
+      .map((subCategory) => ({
+        key: `transfer-order-list-sub-${category.id}-${subCategory.id}`,
+        icon: <TagsOutlined />,
+        label: (
+          <Link
+            href={`/dashboard/transfer-orders/orders?subCategoryId=${encodeURIComponent(
+              subCategory.id
+            )}`}
+          >
+            {subCategory.name || tSidebar("order.transferOrdersList")}
+          </Link>
+        ),
+      }));
+  });
 
   const buildCategoryMenuItems = () =>
     filteredCategories.map((category) => {
@@ -374,6 +405,15 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    {
+                      key: "transfer-product-variation-prices",
+                      icon: <DollarOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-product-variation/prices">
+                          {tSidebar("transferProductVariation.prices")}
+                        </Link>
+                      ),
+                    },
                   ],
                 },
               ]
@@ -532,7 +572,7 @@ export default function Sidebar({ collapsed }) {
               // },
             ],
           },
-          ...(hasTransferOrdersAccess
+          ...(isCustomerAdmin
             ? [
                 {
                   key: "transfer-orders",
@@ -551,9 +591,27 @@ export default function Sidebar({ collapsed }) {
                     {
                       key: "transfer-order-list",
                       icon: <ApartmentOutlined />,
+                      label: tSidebar("order.transferOrdersList"),
+                      children: transferOrderSubCategoryMenuItems.length
+                        ? transferOrderSubCategoryMenuItems
+                        : [
+                            {
+                              key: "transfer-order-list-default",
+                              icon: <ApartmentOutlined />,
+                              label: (
+                                <Link href="/dashboard/transfer-orders/orders">
+                                  {tSidebar("order.transferOrdersList")}
+                                </Link>
+                              ),
+                            },
+                          ],
+                    },
+                    {
+                      key: "transfer-order-cancel",
+                      icon: <CloseCircleOutlined />,
                       label: (
-                        <Link href="/dashboard/transfer-orders/orders">
-                          {tSidebar("order.transferOrdersList")}
+                        <Link href="/dashboard/transfer-orders/orders/cancel">
+                          {tSidebar("orders.cancel")}
                         </Link>
                       ),
                     },
@@ -561,35 +619,6 @@ export default function Sidebar({ collapsed }) {
                 },
               ]
             : []),
-        ]
-      : []),
-    ...(hasTransferOrdersAccess && !isCustomerAdmin
-      ? [
-          {
-            key: "transfer-orders-shortcut",
-            icon: <ShoppingCartOutlined />,
-            label: tSidebar("order.transferOrders"),
-            children: [
-              {
-                key: "transfer-orders-shortcut-pool",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/transfer-orders">
-                    {tSidebar("order.transferOrderPool")}
-                  </Link>
-                ),
-              },
-              {
-                key: "transfer-orders-shortcut-list",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/transfer-orders/orders">
-                    {tSidebar("order.transferOrdersList")}
-                  </Link>
-                ),
-              },
-            ],
-          },
         ]
       : []),
     ...(isCompanyAdmin || isPartnerAdmin

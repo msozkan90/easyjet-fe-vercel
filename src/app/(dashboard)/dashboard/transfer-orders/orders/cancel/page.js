@@ -2,18 +2,11 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
-import {
-  ClockCircleOutlined,
-  CloseOutlined,
-  EditOutlined,
-  FileSearchOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import { useSearchParams } from "next/navigation";
+import { EditOutlined, FileSearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { TransferOrdersAPI } from "@/utils/api";
-import TransferOrdersStatusListPage from "./TransferOrdersStatusListPage";
+import TransferOrdersStatusListPage from "../TransferOrdersStatusListPage";
 
 const toNullableString = (value) => {
   if (value === undefined || value === null) return null;
@@ -24,10 +17,9 @@ const toNullableString = (value) => {
   return value;
 };
 
-export default function TransferOrdersPage() {
+export default function CancelTransferOrdersPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
-  const searchParams = useSearchParams();
   const tableRef = useRef(null);
   const [editForm] = Form.useForm();
   const [rowActionLoading, setRowActionLoading] = useState({});
@@ -87,17 +79,13 @@ export default function TransferOrdersPage() {
       setEditingRecord(record);
       setEditModalOpen(true);
       setEditModalLoading(true);
-      setEditingDetail(null);
       try {
         const response = await TransferOrdersAPI.detail(orderNumber);
         const detail = response?.data;
         setEditingDetail(detail);
         setAddressFormValues(detail || {});
       } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message ||
-            t("messages.addressLoadError"),
-        );
+        message.error(error?.response?.data?.error?.message || t("messages.addressLoadError"));
         handleEditModalClose();
       } finally {
         setEditModalLoading(false);
@@ -108,10 +96,7 @@ export default function TransferOrdersPage() {
 
   const handleAddressSave = useCallback(async () => {
     const transferOrderId = editingDetail?.id ?? editingRecord?.transfer_order_id;
-    if (!transferOrderId) {
-      message.error(t("messages.addressMissingOrder"));
-      return;
-    }
+    if (!transferOrderId) return;
     let values;
     try {
       values = await editForm.validateFields();
@@ -134,10 +119,7 @@ export default function TransferOrdersPage() {
       handleEditModalClose();
       tableRef.current?.reload?.();
     } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message ||
-          t("messages.addressUpdateError"),
-      );
+      message.error(error?.response?.data?.error?.message || t("messages.addressUpdateError"));
     } finally {
       setEditModalSaving(false);
     }
@@ -146,40 +128,21 @@ export default function TransferOrdersPage() {
   const handleStatusUpdate = useCallback(
     async (record, status) => {
       if (!record?.id || !status) return;
-      const actionKey = status === "cancel" ? "cancel" : status;
-      setRowActionLoadingState(record.id, actionKey, true);
+      setRowActionLoadingState(record.id, status, true);
       try {
         await TransferOrdersAPI.updateItem(record.id, { status });
         message.success(t("messages.statusUpdateSuccess"));
         tableRef.current?.reload?.();
       } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message ||
-            t("messages.statusUpdateError"),
-        );
+        message.error(error?.response?.data?.error?.message || t("messages.statusUpdateError"));
       } finally {
-        setRowActionLoadingState(record.id, actionKey, false);
+        setRowActionLoadingState(record.id, status, false);
       }
     },
     [message, setRowActionLoadingState, t],
   );
 
-  const editingOrder = useMemo(
-    () => editingDetail ?? editingRecord ?? null,
-    [editingDetail, editingRecord],
-  );
-
-  const subCategoryId = useMemo(() => {
-    const raw = searchParams?.get("subCategoryId");
-    if (typeof raw !== "string") return undefined;
-    const trimmed = raw.trim();
-    return trimmed || undefined;
-  }, [searchParams]);
-
-  const fixedFilters = useMemo(
-    () => (subCategoryId ? { sub_category_id: subCategoryId } : undefined),
-    [subCategoryId],
-  );
+  const editingOrder = useMemo(() => editingDetail ?? editingRecord ?? null, [editingDetail, editingRecord]);
 
   const columnsBuilder = useCallback(
     (baseColumns) => [
@@ -188,33 +151,23 @@ export default function TransferOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 220,
+        width: 150,
         render: (_, record) => {
           const isParentRow = Boolean(record?.__hasChildren) && !record?.__isChild;
           const rowId = record?.id;
-          const cancelLoading = isRowActionLoading(rowId, "cancel");
-          const waitingLoading = isRowActionLoading(rowId, "waitingForDesign");
           const newOrderLoading = isRowActionLoading(rowId, "newOrder");
           const canUpdateItem = !isParentRow && Boolean(rowId);
-          const disableActions =
-            !canUpdateItem || cancelLoading || waitingLoading || newOrderLoading;
-          const showWaitingAction = canUpdateItem && record?.status === "newOrder";
-          const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
+          const disableActions = !canUpdateItem || newOrderLoading;
           const canEditRecord = Boolean(record?.transfer_order_id);
           const orderNumber = record?.order_number;
-          const canViewDetail = Boolean(orderNumber);
-          const detailHref = canViewDetail
-            ? `/dashboard/transfer-orders/orders/${orderNumber}`
-            : "";
-
           return (
             <Space wrap>
               <Popover content={t("actions.viewDetail")}>
                 <Button
                   icon={<FileSearchOutlined />}
                   type="default"
-                  disabled={!canViewDetail}
-                  href={detailHref}
+                  disabled={!orderNumber}
+                  href={orderNumber ? `/dashboard/transfer-orders/orders/${orderNumber}` : ""}
                 />
               </Popover>
               <Popover content={t("actions.editAddress")}>
@@ -225,85 +178,36 @@ export default function TransferOrdersPage() {
                   onClick={() => handleOpenAddressEditor(record)}
                 />
               </Popover>
-              <Popover content={t("actions.cancel")}>
+              <Popover content={t("actions.newOrder")}>
                 <Popconfirm
-                  title={t("actions.confirmCancelTitle")}
-                  okText={t("actions.confirmCancelOk")}
-                  okButtonProps={{ danger: true, loading: cancelLoading }}
+                  title={t("actions.confirmNewOrderTitle")}
+                  okText={t("actions.confirmNewOrderOk")}
+                  okButtonProps={{ type: "primary", loading: newOrderLoading }}
                   disabled={disableActions}
-                  onConfirm={() => handleStatusUpdate(record, "cancel")}
+                  onConfirm={() => handleStatusUpdate(record, "newOrder")}
                 >
                   <Button
-                    icon={<CloseOutlined />}
+                    icon={<PlusOutlined />}
                     type="primary"
-                    danger
-                    loading={cancelLoading}
+                    loading={newOrderLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
               </Popover>
-              {showWaitingAction ? (
-                <Popover content={t("actions.waitingForDesign")}>
-                  <Popconfirm
-                    title={t("actions.confirmWaitingTitle")}
-                    okText={t("actions.confirmWaitingOk")}
-                    okButtonProps={{ type: "primary", loading: waitingLoading }}
-                    disabled={disableActions}
-                    onConfirm={() =>
-                      handleStatusUpdate(record, "waitingForDesign")
-                    }
-                  >
-                    <Button
-                      icon={<ClockCircleOutlined />}
-                      type="primary"
-                      color="orange"
-                      variant="solid"
-                      loading={waitingLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
-              {showNewOrderAction ? (
-                <Popover content={t("actions.newOrder")}>
-                  <Popconfirm
-                    title={t("actions.confirmNewOrderTitle")}
-                    okText={t("actions.confirmNewOrderOk")}
-                    okButtonProps={{ type: "primary", loading: newOrderLoading }}
-                    disabled={disableActions}
-                    onConfirm={() => handleStatusUpdate(record, "newOrder")}
-                  >
-                    <Button
-                      icon={<PlusOutlined />}
-                      type="primary"
-                      loading={newOrderLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
             </Space>
           );
         },
       },
     ],
-    [
-      handleOpenAddressEditor,
-      handleStatusUpdate,
-      isRowActionLoading,
-      t,
-    ],
+    [handleOpenAddressEditor, handleStatusUpdate, isRowActionLoading, t],
   );
 
   return (
     <>
       <TransferOrdersStatusListPage
-        key={subCategoryId ? `transfer-orders-sub-${subCategoryId}` : "transfer-orders-all"}
-        listApiFn={TransferOrdersAPI.pendingItemsList}
-        allowedStatuses={["newOrder", "waitingForDesign"]}
-        initialFilters={{ status: ["newOrder", "waitingForDesign"] }}
-        fixedFilters={fixedFilters}
-        showOptionsInsteadOfSku
+        listApiFn={TransferOrdersAPI.cancelItemsList}
+        allowedStatuses={["cancel"]}
+        initialFilters={{ status: ["cancel"] }}
         columnsBuilder={columnsBuilder}
         tableRefExternal={tableRef}
       />
@@ -316,11 +220,7 @@ export default function TransferOrdersPage() {
         editForm={editForm}
         editingOrder={editingOrder}
         onAddressSelect={() => {}}
-        orderDateLabel={
-          editingOrder?.order_date
-            ? new Date(editingOrder.order_date).toLocaleString()
-            : "-"
-        }
+        orderDateLabel={editingOrder?.order_date ? new Date(editingOrder.order_date).toLocaleString() : "-"}
         zIndex={1500}
       />
     </>

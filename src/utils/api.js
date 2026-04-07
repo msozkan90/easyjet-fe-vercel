@@ -174,6 +174,8 @@ export const TransferOrdersAPI = {
   update: (id, data) => api.put(`/transfer-orders/${id}`, data),
   remove: (id) => api.del(`/transfer-orders/${id}`),
   itemsList: (payload) => api.post("/transfer-orders/items/list", payload),
+  pendingItemsList: (payload) => api.post("/transfer-orders/items/pending/list", payload),
+  cancelItemsList: (payload) => api.post("/transfer-orders/items/cancel/list", payload),
   updateItem: (id, data) => api.put(`/transfer-orders/items/${id}`, data),
   removeItem: (id) => api.del(`/transfer-orders/items/${id}`),
 };
@@ -272,6 +274,13 @@ export const TransferProductsAPI = {
   create: (data) => api.post("/transfer-products", data),
   update: (id, data) => api.put(`/transfer-products/${id}`, data),
   remove: (id) => api.del(`/transfer-products/${id}`),
+};
+
+export const TransferProductPricesAPI = {
+  list: (query) => api.post("/transfer-product-prices/list", query),
+  create: (data) => api.post("/transfer-product-prices", data),
+  update: (id, data) => api.put(`/transfer-product-prices/${id}`, data),
+  remove: (id) => api.del(`/transfer-product-prices/${id}`),
 };
 
 export const ProductSizesAPI = {

@@ -27,7 +27,7 @@ function AuthBootstrap() {
         const me = await AuthAPI.me();
         dispatch(setUser(me));
         const roleName = me?.data?.role?.name;
-        if (roleName === RoleEnum.COMPANY_COMPLETED_WORKER) {
+        if (roleName === RoleEnum.COMPANY_COMPLETED_WORKER || roleName === RoleEnum.CUSTOMER_ADMIN) {
           try {
             dispatch(setCategoriesLoading());
             const categories = await CategoriesAPI.listWithSubCategories();
