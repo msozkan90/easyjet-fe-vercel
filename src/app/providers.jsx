@@ -8,6 +8,7 @@ import "@ant-design/v5-patch-for-react-19";
 import { useEffect } from "react";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
 import { setUser } from "@/redux/features/authSlice";
+import { TransferDesignUploadQueueProvider } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 import {
   resetCategories,
   setCategoriesError,
@@ -62,8 +63,10 @@ export function Providers({ children }) {
           token: { borderRadius: 8 },
         }}
       >
-        <AuthBootstrap />
-        {children}
+        <TransferDesignUploadQueueProvider>
+          <AuthBootstrap />
+          {children}
+        </TransferDesignUploadQueueProvider>
       </ConfigProvider>
     </Provider>
   );

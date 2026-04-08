@@ -176,6 +176,11 @@ export const TransferOrdersAPI = {
   itemsList: (payload) => api.post("/transfer-orders/items/list", payload),
   pendingItemsList: (payload) => api.post("/transfer-orders/items/pending/list", payload),
   cancelItemsList: (payload) => api.post("/transfer-orders/items/cancel/list", payload),
+  uploadDesigns: (payload, config = {}) =>
+    api.postMultipart("/transfer-orders/designs", payload, config),
+  uploadDesignProgress: (uploadId) =>
+    api.get(`/transfer-orders/designs/progress/${encodeURIComponent(uploadId)}`),
+  deleteDesign: (id) => api.del(`/transfer-orders/designs/${encodeURIComponent(id)}`),
   updateItem: (id, data) => api.put(`/transfer-orders/items/${id}`, data),
   removeItem: (id) => api.del(`/transfer-orders/items/${id}`),
 };

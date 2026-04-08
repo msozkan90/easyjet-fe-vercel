@@ -8,6 +8,7 @@ import {
   Button,
   DatePicker,
   Input,
+  Popover,
   Select,
   Space,
   Tag,
@@ -43,6 +44,33 @@ const formatAmount = (value, fallback) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+};
+
+const renderTruncatedWithPopover = (value, fallback, maxWidth = 240) => {
+  if (!value) return fallback;
+  return (
+    <Popover
+      content={
+        <div style={{ maxWidth: 480, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          {value}
+        </div>
+      }
+      trigger="hover"
+    >
+      <span
+        style={{
+          display: "inline-block",
+          maxWidth,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          verticalAlign: "bottom",
+        }}
+      >
+        {value}
+      </span>
+    </Popover>
+  );
 };
 
 export default function TransferOrdersStatusListPage({
@@ -343,7 +371,7 @@ export default function TransferOrdersStatusListPage({
         },
         render: (value, record) => {
           if (record?.__hasChildren && !record?.__isChild) return null;
-          return value || t("common.none");
+          return renderTruncatedWithPopover(value, t("common.none"), 220);
         },
       },
       {
@@ -405,6 +433,22 @@ export default function TransferOrdersStatusListPage({
         title: t("columns.customerName"),
         dataIndex: "bill_to_name",
         render: (value) => value || t("common.none"),
+      },
+      {
+        title: "Notes",
+        dataIndex: "notes",
+        render: (value, record) => {
+          if (record?.__isChild) return null;
+          return renderTruncatedWithPopover(value, t("common.none"), 260);
+        },
+      },
+      {
+        title: "Designer Notes",
+        dataIndex: "designer_notes",
+        render: (value, record) => {
+          if (record?.__isChild) return null;
+          return renderTruncatedWithPopover(value, t("common.none"), 260);
+        },
       },
       {
         title: t("columns.orderDate"),

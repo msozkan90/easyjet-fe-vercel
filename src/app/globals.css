@@ -41,11 +41,19 @@ body,
   background-color: rgba(24, 144, 255, 0.08);
 }
 .ant-table-row.orders-nested-row:hover > td {
-  background-color: rgba(24, 144, 255, 0.16) !important;
+  background-color: rgba(24, 144, 255, 0.1) !important;
+}
+
+.ant-table-row.orders-parent-row > td {
+  background-color: rgba(43, 156, 255, 0.200)   !important;
 }
 
 .ant-table-row.orders-parent-row:hover > td {
-  background-color: rgba(24, 144, 255, 0.16) !important;
+  background-color: rgba(43, 156, 255, 0.200)  !important;
+}
+
+.ant-table-row.orders-child-row > td {
+  background-color: rgba(24, 144, 255, 0.08);
 }
 
 .orders-cell-strong {

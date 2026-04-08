@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
 import {
   ClockCircleOutlined,
@@ -8,12 +8,14 @@ import {
   EditOutlined,
   FileSearchOutlined,
   PlusOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import TransferOrdersStatusListPage from "./TransferOrdersStatusListPage";
+import { useTransferDesignUploadQueue } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 
 const toNullableString = (value) => {
   if (value === undefined || value === null) return null;
@@ -27,8 +29,11 @@ const toNullableString = (value) => {
 export default function TransferOrdersPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
+  const router = useRouter();
+  const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
   const searchParams = useSearchParams();
   const tableRef = useRef(null);
+  const designUploadInputRef = useRef(null);
   const [editForm] = Form.useForm();
   const [rowActionLoading, setRowActionLoading] = useState({});
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -36,6 +41,8 @@ export default function TransferOrdersPage() {
   const [editModalSaving, setEditModalSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [editingDetail, setEditingDetail] = useState(null);
+  const [designUploadTarget, setDesignUploadTarget] = useState(null);
+  const handledSuccessUploadIdsRef = useRef(new Set());
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
     if (!rowId || !action) return;
@@ -181,6 +188,55 @@ export default function TransferOrdersPage() {
     [subCategoryId],
   );
 
+  const handleOpenDesignUpload = useCallback(
+    (record) => {
+      if (!subCategoryId) {
+        message.error("Sub category is required for design upload.");
+        return;
+      }
+      const transferOrderId = record?.transfer_order_id;
+      if (!transferOrderId) return;
+      setDesignUploadTarget({
+        orderId: transferOrderId,
+        orderNumber: record?.order_number || "-",
+      });
+      designUploadInputRef.current?.click?.();
+    },
+    [message, subCategoryId],
+  );
+
+  const handleDesignUploadInputChange = useCallback(
+    (event) => {
+      const files = event?.target?.files ? Array.from(event.target.files) : [];
+      const target = designUploadTarget;
+      event.target.value = "";
+      if (!target || !subCategoryId || !files.length) return;
+      enqueueUploads({
+        orderId: target.orderId,
+        orderNumber: target.orderNumber,
+        subCategoryId,
+        files,
+      });
+      setDesignUploadTarget(null);
+    },
+    [designUploadTarget, enqueueUploads, subCategoryId],
+  );
+
+  useEffect(() => {
+    if (!subCategoryId) return;
+    let hasNewSuccess = false;
+    for (const task of uploadTasks || []) {
+      if (task?.status !== "success") continue;
+      if (String(task?.subCategoryId || "") !== String(subCategoryId)) continue;
+      if (handledSuccessUploadIdsRef.current.has(task.id)) continue;
+      handledSuccessUploadIdsRef.current.add(task.id);
+      hasNewSuccess = true;
+    }
+    if (hasNewSuccess) {
+      tableRef.current?.reload?.();
+    }
+  }, [subCategoryId, uploadTasks]);
+
   const columnsBuilder = useCallback(
     (baseColumns) => [
       ...baseColumns,
@@ -201,10 +257,11 @@ export default function TransferOrdersPage() {
           const showWaitingAction = canUpdateItem && record?.status === "newOrder";
           const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
           const canEditRecord = Boolean(record?.transfer_order_id);
+          const canUploadDesign = Boolean(isParentRow && record?.transfer_order_id && subCategoryId);
           const orderNumber = record?.order_number;
           const canViewDetail = Boolean(orderNumber);
           const detailHref = canViewDetail
-            ? `/dashboard/transfer-orders/orders/${orderNumber}`
+            ? `/dashboard/transfer-orders/orders/${encodeURIComponent(orderNumber)}`
             : "";
 
           return (
@@ -214,7 +271,10 @@ export default function TransferOrdersPage() {
                   icon={<FileSearchOutlined />}
                   type="default"
                   disabled={!canViewDetail}
-                  href={detailHref}
+                  onClick={() => {
+                    if (!canViewDetail) return;
+                    router.push(detailHref);
+                  }}
                 />
               </Popover>
               <Popover content={t("actions.editAddress")}>
@@ -225,6 +285,16 @@ export default function TransferOrdersPage() {
                   onClick={() => handleOpenAddressEditor(record)}
                 />
               </Popover>
+              {isParentRow ? (
+                <Popover content={t("actions.designUpload")}>
+                  <Button
+                    icon={<UploadOutlined />}
+                    type="default"
+                    disabled={!canUploadDesign}
+                    onClick={() => handleOpenDesignUpload(record)}
+                  />
+                </Popover>
+              ) : null}
               <Popover content={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
@@ -288,15 +358,26 @@ export default function TransferOrdersPage() {
       },
     ],
     [
+      handleOpenDesignUpload,
       handleOpenAddressEditor,
       handleStatusUpdate,
       isRowActionLoading,
+      router,
+      subCategoryId,
       t,
     ],
   );
 
   return (
     <>
+      <input
+        ref={designUploadInputRef}
+        type="file"
+        multiple
+        accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif"
+        style={{ display: "none" }}
+        onChange={handleDesignUploadInputChange}
+      />
       <TransferOrdersStatusListPage
         key={subCategoryId ? `transfer-orders-sub-${subCategoryId}` : "transfer-orders-all"}
         listApiFn={TransferOrdersAPI.pendingItemsList}
