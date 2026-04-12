@@ -1,8 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
 import {
+  App as AntdApp,
+  Button,
+  Descriptions,
+  Form,
+  Modal,
+  Popconfirm,
+  Popover,
+  Radio,
+  Space,
+  Upload,
+} from "antd";
+import {
+  CheckCircleOutlined,
   ClockCircleOutlined,
   CloseOutlined,
   EditOutlined,
@@ -42,6 +54,11 @@ export default function TransferOrdersPage() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [editingDetail, setEditingDetail] = useState(null);
   const [designUploadTarget, setDesignUploadTarget] = useState(null);
+  const [productionModalOpen, setProductionModalOpen] = useState(false);
+  const [productionSubmitting, setProductionSubmitting] = useState(false);
+  const [productionRecord, setProductionRecord] = useState(null);
+  const [productionOption, setProductionOption] = useState("local_pickup");
+  const [productionLabelFiles, setProductionLabelFiles] = useState([]);
   const handledSuccessUploadIdsRef = useRef(new Set());
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
@@ -258,6 +275,7 @@ export default function TransferOrdersPage() {
           const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
           const canEditRecord = Boolean(record?.transfer_order_id);
           const canUploadDesign = Boolean(isParentRow && record?.transfer_order_id && subCategoryId);
+          const canSendToProduction = Boolean(isParentRow && record?.transfer_order_id);
           const orderNumber = record?.order_number;
           const canViewDetail = Boolean(orderNumber);
           const detailHref = canViewDetail
@@ -292,6 +310,22 @@ export default function TransferOrdersPage() {
                     type="default"
                     disabled={!canUploadDesign}
                     onClick={() => handleOpenDesignUpload(record)}
+                  />
+                </Popover>
+              ) : null}
+              {isParentRow ? (
+                <Popover content={t("actions.sendToProduction")}>
+                  <Button
+                    icon={<CheckCircleOutlined />}
+                    type="primary"
+                    disabled={!canSendToProduction}
+                    onClick={() => {
+                      if (!canSendToProduction) return;
+                      setProductionRecord(record);
+                      setProductionOption("local_pickup");
+                      setProductionLabelFiles([]);
+                      setProductionModalOpen(true);
+                    }}
                   />
                 </Popover>
               ) : null}
@@ -368,6 +402,53 @@ export default function TransferOrdersPage() {
     ],
   );
 
+  const handleProductionModalClose = useCallback(() => {
+    setProductionModalOpen(false);
+    setProductionSubmitting(false);
+    setProductionRecord(null);
+    setProductionOption("local_pickup");
+    setProductionLabelFiles([]);
+  }, []);
+
+  const handleSendToProduction = useCallback(async () => {
+    const transferOrderId = productionRecord?.transfer_order_id;
+    if (!transferOrderId) return;
+
+    if (productionOption === "has_label" && productionLabelFiles.length === 0) {
+      message.error(t("productionModal.validation.labelImageRequired"));
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append("transfer_order_id", String(transferOrderId));
+    payload.append("label_purchase_option", productionOption);
+    if (productionOption === "has_label" && productionLabelFiles[0]?.originFileObj) {
+      payload.append("label_image", productionLabelFiles[0].originFileObj);
+    }
+
+    setProductionSubmitting(true);
+    try {
+      await TransferOrdersAPI.sendToProduction(payload);
+      message.success(t("productionModal.messages.success"));
+      handleProductionModalClose();
+      tableRef.current?.reload?.();
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("productionModal.messages.error"),
+      );
+    } finally {
+      setProductionSubmitting(false);
+    }
+  }, [
+    handleProductionModalClose,
+    message,
+    productionLabelFiles,
+    productionOption,
+    productionRecord,
+    t,
+  ]);
+
   return (
     <>
       <input
@@ -404,6 +485,88 @@ export default function TransferOrdersPage() {
         }
         zIndex={1500}
       />
+      <Modal
+        open={productionModalOpen}
+        onCancel={handleProductionModalClose}
+        title={t("productionModal.title")}
+        onOk={handleSendToProduction}
+        okText={t("productionModal.actions.send")}
+        confirmLoading={productionSubmitting}
+        destroyOnHidden
+      >
+        <Descriptions
+          size="small"
+          bordered
+          column={1}
+          items={[
+            {
+              key: "order_number",
+              label: t("productionModal.summary.orderNumber"),
+              children: productionRecord?.order_number || "-",
+            },
+            {
+              key: "customer_name",
+              label: t("productionModal.summary.customerName"),
+              children: productionRecord?.bill_to_name || "-",
+            },
+            {
+              key: "item_count",
+              label: t("productionModal.summary.itemCount"),
+              children:
+                productionRecord?.item_count ??
+                productionRecord?.children?.length ??
+                "-",
+            },
+          ]}
+        />
+
+        <div className="mt-4">
+          <div className="mb-2 font-medium">
+            {t("productionModal.fields.labelPurchaseOption")}
+          </div>
+          <Radio.Group
+            value={productionOption}
+            onChange={(event) => {
+              const next = event?.target?.value;
+              setProductionOption(next);
+              if (next !== "has_label") {
+                setProductionLabelFiles([]);
+              }
+            }}
+          >
+            <Space direction="vertical">
+              <Radio value="local_pickup">
+                {t("productionModal.options.localPickup")}
+              </Radio>
+              <Radio value="has_label">
+                {t("productionModal.options.hasLabel")}
+              </Radio>
+              <Radio value="no_label">
+                {t("productionModal.options.noLabel")}
+              </Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+
+        {productionOption === "has_label" ? (
+          <div className="mt-4">
+            <div className="mb-2 font-medium">
+              {t("productionModal.fields.labelImage")}
+            </div>
+            <Upload
+              accept="image/*"
+              maxCount={1}
+              fileList={productionLabelFiles}
+              beforeUpload={() => false}
+              onChange={({ fileList }) => setProductionLabelFiles(fileList)}
+            >
+              <Button icon={<UploadOutlined />}>
+                {t("productionModal.actions.uploadLabel")}
+              </Button>
+            </Upload>
+          </div>
+        ) : null}
+      </Modal>
     </>
   );
 }

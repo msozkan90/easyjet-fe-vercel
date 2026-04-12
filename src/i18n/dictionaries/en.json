@@ -810,6 +810,7 @@
         "name": "Name",
         "category": "Category",
         "subCategory": "Sub-Category",
+        "withoutDesign": "Without Design",
         "status": "Status",
         "createdAt": "Created At",
         "actions": "Actions"
@@ -817,6 +818,9 @@
       "filters": {
         "searchName": "Search name",
         "selectCategory": "Select category",
+        "selectWithoutDesign": "Select without design",
+        "withoutDesignYes": "Yes",
+        "withoutDesignNo": "No",
         "selectStatus": "Select status"
       },
       "actions": {
@@ -1675,6 +1679,8 @@
         "price": "Price",
         "customer": "Customer",
         "customerName": "Customer Name",
+        "barcode": "Barcode",
+        "localPickup": "Local Pickup",
         "orderDate": "Order Date",
         "hasDesign": "Design",
         "actions": "Actions",
@@ -1700,9 +1706,13 @@
           "processing": "Processing",
           "pdf": "PDF",
           "completed": "Completed",
+          "downloaded": "Downloaded",
+          "printed": "Printed",
           "shipped": "Shipped",
           "waitingForDesign": "Waiting for Design",
-          "cancel": "Cancelled"
+          "cancel": "Cancelled",
+          "refund": "Refund",
+          "remake": "Remake"
         }
       },
       "actions": {
@@ -1710,6 +1720,7 @@
         "waitingForDesign": "Waiting for Design",
         "designUpload": "Design Upload",
         "designUpdate": "Design Update",
+        "sendToProduction": "Send To Production",
         "viewDetail": "View detail",
         "editAddress": "Edit billing info",
         "shippingRates": "Shipping rates",
@@ -1738,6 +1749,34 @@
       },
       "common": {
         "none": "-"
+      },
+      "productionModal": {
+        "title": "Send To Production",
+        "summary": {
+          "orderNumber": "Order #",
+          "customerName": "Customer Name",
+          "itemCount": "Item Count"
+        },
+        "fields": {
+          "labelPurchaseOption": "Label Purchase Option",
+          "labelImage": "Label Image"
+        },
+        "options": {
+          "localPickup": "Local Pickup",
+          "hasLabel": "I Have Label",
+          "noLabel": "I Do Not Have Label"
+        },
+        "actions": {
+          "uploadLabel": "Upload image",
+          "send": "Send to production"
+        },
+        "messages": {
+          "success": "Transfer order sent to production.",
+          "error": "Transfer order could not be sent to production."
+        },
+        "validation": {
+          "labelImageRequired": "Label image is required when 'I Have Label' is selected."
+        }
       },
       "design": {
         "title": "Upload / Edit Design",
@@ -2452,6 +2491,7 @@
         "addressName": "Name",
         "addressPhone": "Phone",
         "addressCompanyName": "Company Name",
+        "fullfillmentLocation": "Fulfillment Location",
         "addressLine1": "Address Line 1",
         "cityLocality": "City / Locality",
         "stateProvince": "State / Province",
@@ -2467,6 +2507,7 @@
         "addressName": "Full name for this address",
         "addressPhone": "e.g. +1 555 123 4567",
         "addressCompanyName": "Company or attention",
+        "fullfillmentLocation": "e.g. Main warehouse",
         "addressLine1": "Street address",
         "cityLocality": "City",
         "stateProvince": "State or province",
@@ -2529,6 +2570,7 @@
         "subCategory": "Sub-Category",
         "subCategoryOptional": "Optional sub-category",
         "optional": "Optional",
+        "withoutDesign": "Without design",
         "status": "Status"
       },
       "placeholders": {

@@ -615,6 +615,15 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    {
+                      key: "transfer-order-production",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders/in-production">
+                          {tSidebar("order.inProduction")}
+                        </Link>
+                      ),
+                    },
                   ],
                 },
               ]

@@ -24,6 +24,7 @@ export default function ProductForm({
   onFinish,
   submitText,
   categories = [],
+  showWithoutDesign = false,
 }) {
   const [form] = Form.useForm();
   const [manageForm] = Form.useForm();
@@ -559,6 +560,16 @@ export default function ProductForm({
             ]}
           />
         </Form.Item>
+
+        {showWithoutDesign ? (
+          <Form.Item
+            name="without_design"
+            valuePropName="checked"
+            label={tForm("labels.withoutDesign")}
+          >
+            <Switch />
+          </Form.Item>
+        ) : null}
 
         <Form.Item className="mb-0">
           <button

@@ -11,7 +11,13 @@ import {
   Space,
   Tag,
 } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import ProductForm from "@/components/common/forms/ProductForm";
@@ -67,6 +73,7 @@ export default function TransferProductsPage() {
       filterMap: {
         name: "q",
         category_id: "category_id",
+        without_design: "without_design",
       },
     },
     normalizeListAndMeta,
@@ -99,6 +106,25 @@ export default function TransferProductsPage() {
         dataIndex: "sub_category_id",
         sorter: true,
         render: (_, record) => record?.subCategory?.name || t("common.none"),
+      },
+      {
+        title: t("columns.withoutDesign"),
+        dataIndex: "without_design",
+        sorter: true,
+        filter: {
+          type: "select",
+          options: [
+            { value: true, label: t("filters.withoutDesignYes") },
+            { value: false, label: t("filters.withoutDesignNo") },
+          ],
+          placeholder: t("filters.selectWithoutDesign"),
+        },
+        render: (value) =>
+          value ? (
+            <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
+          ) : (
+            <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
+          ),
       },
       {
         title: t("columns.status"),
@@ -211,6 +237,7 @@ export default function TransferProductsPage() {
         initialFilters={{
           name: "",
           category_id: undefined,
+          without_design: undefined,
           status: undefined,
         }}
         toolbarRight={
@@ -248,10 +275,12 @@ export default function TransferProductsPage() {
                     undefined,
                   sub_category:
                     editingRow?.sub_category ?? editingRow?.subCategory,
+                  without_design: !!editingRow?.without_design,
                   status: editingRow?.status,
                 }
               : undefined
           }
+          showWithoutDesign
         />
       </Modal>
     </RequireRole>

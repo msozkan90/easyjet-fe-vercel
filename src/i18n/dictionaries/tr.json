@@ -810,6 +810,7 @@
         "name": "Ad",
         "category": "Kategori",
         "subCategory": "Alt Kategori",
+        "withoutDesign": "Tasarımsız",
         "status": "Durum",
         "createdAt": "Oluşturulma Tarihi",
         "actions": "İşlemler"
@@ -817,6 +818,9 @@
       "filters": {
         "searchName": "Ad ara",
         "selectCategory": "Kategori seç",
+        "selectWithoutDesign": "Tasarım durumunu seç",
+        "withoutDesignYes": "Evet",
+        "withoutDesignNo": "Hayır",
         "selectStatus": "Durum seç"
       },
       "actions": {
@@ -1534,6 +1538,8 @@
         "price": "Fiyat",
         "customer": "Müşteri",
         "customerName": "Müşteri Adı",
+        "barcode": "Barkod",
+        "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
         "hasDesign": "Tasarım",
         "actions": "İşlemler",
@@ -1559,9 +1565,13 @@
           "processing": "İşleniyor",
           "pdf": "PDF",
           "completed": "Tamamlandı",
+          "downloaded": "İndirildi",
+          "printed": "Yazdırıldı",
           "shipped": "Gönderildi",
           "waitingForDesign": "Tasarım Bekleniyor",
-          "cancel": "İptal"
+          "cancel": "İptal",
+          "refund": "İade",
+          "remake": "Yeniden Üretim"
         }
       },
       "actions": {
@@ -1569,6 +1579,7 @@
         "waitingForDesign": "Tasarım Beklemeye Al",
         "designUpload": "Tasarım Yükle",
         "designUpdate": "Tasarımı Güncelle",
+        "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
         "editAddress": "Adres Düzenle",
         "shippingRates": "Kargo fiyatları",
@@ -1597,6 +1608,34 @@
       },
       "common": {
         "none": "-"
+      },
+      "productionModal": {
+        "title": "Üretime Gönder",
+        "summary": {
+          "orderNumber": "Sipariş #",
+          "customerName": "Müşteri Adı",
+          "itemCount": "Kalem Sayısı"
+        },
+        "fields": {
+          "labelPurchaseOption": "Label Satın Alma Seçeneği",
+          "labelImage": "Label Görseli"
+        },
+        "options": {
+          "localPickup": "Local Pickup",
+          "hasLabel": "I Have Label",
+          "noLabel": "I Do Not Have Label"
+        },
+        "actions": {
+          "uploadLabel": "Görsel Yükle",
+          "send": "Üretime Gönder"
+        },
+        "messages": {
+          "success": "Transfer siparişi üretime gönderildi.",
+          "error": "Transfer siparişi üretime gönderilemedi."
+        },
+        "validation": {
+          "labelImageRequired": "'I Have Label' seçildiğinde label görseli zorunludur."
+        }
       },
       "design": {
         "title": "Tasarım Yükle / Düzenle",
@@ -2452,6 +2491,7 @@
         "addressName": "İsim",
         "addressPhone": "Telefon",
         "addressCompanyName": "Şirket Adı",
+        "fullfillmentLocation": "Fulfillment Lokasyonu",
         "addressLine1": "Adres Satırı 1",
         "cityLocality": "Şehir / İlçe",
         "stateProvince": "Eyalet / İl",
@@ -2467,6 +2507,7 @@
         "addressName": "Bu adres için ad",
         "addressPhone": "örn. +90 555 123 4567",
         "addressCompanyName": "Şirket veya dikkat",
+        "fullfillmentLocation": "örn. Ana depo",
         "addressLine1": "Sokak / cadde adresi",
         "cityLocality": "Şehir",
         "stateProvince": "Eyalet veya il",
@@ -2529,6 +2570,7 @@
         "subCategory": "Alt Kategori",
         "subCategoryOptional": "Opsiyonel alt kategori",
         "optional": "Opsiyonel",
+        "withoutDesign": "Tasarımsız",
         "status": "Durum"
       },
       "placeholders": {

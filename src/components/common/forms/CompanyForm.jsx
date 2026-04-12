@@ -221,6 +221,16 @@ export default function CompanyForm({
 
             <Form.Item
               className="md:flex-1"
+              name={["address", "fullfillment_location"]}
+              label={tForm("labels.fullfillmentLocation")}
+            >
+              <Input placeholder={tForm("placeholders.fullfillmentLocation")} />
+            </Form.Item>
+          </div>
+
+          <div className="flex flex-col gap-4 md:flex-row">
+            <Form.Item
+              className="md:flex-1"
               name={["address", "address_line1"]}
               label={tForm("labels.addressLine1")}
               rules={[
