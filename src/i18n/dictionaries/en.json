@@ -1720,6 +1720,7 @@
         "waitingForDesign": "Waiting for Design",
         "designUpload": "Design Upload",
         "designUpdate": "Design Update",
+        "downloadDesigns": "Download Designs",
         "sendToProduction": "Send To Production",
         "viewDetail": "View detail",
         "editAddress": "Edit billing info",
@@ -1739,7 +1740,10 @@
         "addressLoadError": "Unable to load order details.",
         "addressUpdateSuccess": "Billing information updated.",
         "addressUpdateError": "Failed to update billing information.",
-        "addressMissingOrder": "Order information is missing."
+        "addressMissingOrder": "Order information is missing.",
+        "designDownloadStarted": "Design download started. Status list will refresh automatically.",
+        "transferItemsPrintedSuccess": "Transfer order items moved to printed status.",
+        "transferItemsPrintedError": "Transfer order items could not be moved to printed status."
       },
       "table": {
         "noData": "No data"

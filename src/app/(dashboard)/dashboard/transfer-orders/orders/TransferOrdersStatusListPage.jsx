@@ -37,7 +37,6 @@ const { RangePicker } = DatePicker;
 
 const createDefaultToolbarFilters = () => ({
   order_number: "",
-  sku: "",
   status: [],
   order_date: undefined,
 });
@@ -97,12 +96,12 @@ export default function TransferOrdersStatusListPage({
   allowedStatuses = [],
   enableStatusFilter = true,
   columnsBuilder,
+  rowActionsRenderer,
   tableRefExternal,
   initialFilters: initialFiltersProp,
   fixedFilters,
   requireRoles = ["companyAdmin", "partnerAdmin", "customerAdmin"],
   toolbarRight,
-  showOptionsInsteadOfSku = false,
 }) {
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
@@ -215,11 +214,6 @@ export default function TransferOrdersStatusListPage({
     setQuickFilters((prev) => ({ ...prev, order_number: value }));
   }, []);
 
-  const handleSkuChange = useCallback((event) => {
-    const value = event?.target?.value ?? "";
-    setQuickFilters((prev) => ({ ...prev, sku: value }));
-  }, []);
-
   const handleStatusChange = useCallback(
     (value) => {
       const arr = Array.isArray(value) ? value : value ? [value] : [];
@@ -256,7 +250,6 @@ export default function TransferOrdersStatusListPage({
 
       const nextState = {
         order_number: nextFilters?.order_number ?? "",
-        sku: nextFilters?.sku ?? "",
         status:
           Array.isArray(nextFilters?.status) && nextFilters.status.length
             ? [...nextFilters.status]
@@ -272,7 +265,6 @@ export default function TransferOrdersStatusListPage({
           prev.order_date.lte === nextState.order_date.lte);
       if (
         prev.order_number === nextState.order_number &&
-        prev.sku === nextState.sku &&
         dateEqual &&
         prev.status.length === nextState.status.length &&
         prev.status.every((v, idx) => v === nextState.status[idx])
@@ -286,7 +278,6 @@ export default function TransferOrdersStatusListPage({
   const handleToolbarSearch = useCallback(() => {
     applyFilterPatch({
       order_number: quickFilters.order_number || "",
-      sku: quickFilters.sku || "",
       status:
         Array.isArray(quickFilters.status) && quickFilters.status.length
           ? [...quickFilters.status]
@@ -332,11 +323,9 @@ export default function TransferOrdersStatusListPage({
   const columns = useMemo(() => {
     const showDetailAction = typeof columnsBuilder !== "function";
     const isPendingList = listApiFn === TransferOrdersAPI.pendingItemsList;
-    const isProductionList = listApiFn === TransferOrdersAPI.productionItemsList;
-    const showItemCountColumn = !isPendingList && !isProductionList;
-    const showLocalPickupColumn = listApiFn === TransferOrdersAPI.pendingItemsList;
-    const showDesignColumn = listApiFn === TransferOrdersAPI.pendingItemsList;
-    const showBarcodeColumn = isPendingList || isProductionList;
+    const showLocalPickupColumn = isPendingList;
+    const showDesignColumn = isPendingList;
+    const showBarcodeColumn = true;
     const baseColumns = [
       ...(showBarcodeColumn
         ? [
@@ -415,54 +404,6 @@ export default function TransferOrdersStatusListPage({
           placeholder: t("filters.searchOrderNumber"),
         },
       },
-      ...(!isProductionList
-        ? [
-            {
-              title: showOptionsInsteadOfSku ? t("columns.options") : t("columns.sku"),
-              dataIndex: "sku",
-              filter: {
-                type: "text",
-                placeholder: showOptionsInsteadOfSku ? t("filters.searchItem") : t("filters.searchSku"),
-              },
-              render: (value, record) => {
-                if (record?.__hasChildren && !record?.__isChild) return null;
-                if (!showOptionsInsteadOfSku) {
-                  return value || t("common.none");
-                }
-                const options = record?.options;
-                if (!Array.isArray(options) || options.length === 0) {
-                  return t("values.noOptions");
-                }
-                return (
-                  <Space direction="vertical" size={0}>
-                    {options.map((option, index) => {
-                      const name = option?.name ?? t("common.none");
-                      const optionValue = option?.value ?? t("common.none");
-                      const key = `${name}-${optionValue}-${index}`;
-                      const displayText = `${name}: ${optionValue}`;
-                      return (
-                        <Tooltip title={displayText} key={key}>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              maxWidth: 240,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            <span style={{ fontWeight: "bold" }}>{name}: </span>
-                            {optionValue}
-                          </span>
-                        </Tooltip>
-                      );
-                    })}
-                  </Space>
-                );
-              },
-            },
-          ]
-        : []),
       {
         title: "Name",
         dataIndex: "name",
@@ -483,20 +424,6 @@ export default function TransferOrdersStatusListPage({
           return record?.product?.name || t("common.none");
         },
       },
-      ...(showItemCountColumn
-        ? [
-            {
-              title: "Item Count",
-              dataIndex: "item_count",
-              render: (_, record) => {
-                if (record?.__hasChildren && !record?.__isChild) {
-                  return record?.item_count ?? record?.children?.length ?? t("common.none");
-                }
-                return null;
-              },
-            },
-          ]
-        : []),
       {
         title: t("columns.quantity"),
         dataIndex: "quantity",
@@ -601,15 +528,34 @@ export default function TransferOrdersStatusListPage({
             {
               title: t("columns.actions"),
               key: "actions",
-              width: 120,
+              width: rowActionsRenderer ? 220 : 120,
               render: (_, record) => {
+                const isParentRow =
+                  Boolean(record?.children?.length) && !record?.__isChild;
+                const extraActions =
+                  typeof rowActionsRenderer === "function"
+                    ? rowActionsRenderer({
+                        record,
+                        isParentRow,
+                        reload: () => tableRef.current?.reload?.(),
+                      })
+                    : null;
+                const hasExtraActions = Array.isArray(extraActions)
+                  ? extraActions.length > 0
+                  : Boolean(extraActions);
+                const orderNumber = record?.order_number;
+                const canViewDetail = Boolean(orderNumber);
+                if (!hasExtraActions && !canViewDetail) return null;
                 return (
                   <Space>
-                    <Tooltip title={t("actions.viewDetail")}>
-                      <Link href={`/dashboard/transfer-orders/orders/${record?.order_number || ""}`}>
-                        <Button icon={<FileSearchOutlined />} />
-                      </Link>
-                    </Tooltip>
+                    {canViewDetail ? (
+                      <Tooltip title={t("actions.viewDetail")}>
+                        <Link href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}>
+                          <Button icon={<FileSearchOutlined />} />
+                        </Link>
+                      </Tooltip>
+                    ) : null}
+                    {extraActions}
                   </Space>
                 );
               },
@@ -635,11 +581,12 @@ export default function TransferOrdersStatusListPage({
     columnsBuilder,
     enableStatusFilter,
     listApiFn,
-    showOptionsInsteadOfSku,
     statusLabels,
     statusOptions,
     t,
     handleBarcodeDownload,
+    rowActionsRenderer,
+    tableRef,
   ]);
 
   const getRowClassName = useCallback((record, _index, indent = 0) => {
@@ -676,7 +623,6 @@ export default function TransferOrdersStatusListPage({
         initialPageSize={10}
         initialFilters={{
           order_number: "",
-          sku: "",
           name: "",
           status: Array.isArray(initialFiltersProp?.status)
             ? initialFiltersProp.status
@@ -691,13 +637,6 @@ export default function TransferOrdersStatusListPage({
               value={quickFilters.order_number}
               onChange={handleOrderNumberChange}
               style={{ minWidth: 180 }}
-            />
-            <Input
-              allowClear
-              placeholder={t("filters.searchSku")}
-              value={quickFilters.sku}
-              onChange={handleSkuChange}
-              style={{ minWidth: 160 }}
             />
             {enableStatusFilter && statusOptions.length ? (
               <Select

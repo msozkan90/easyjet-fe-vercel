@@ -176,6 +176,22 @@ export const TransferOrdersAPI = {
   itemsList: (payload) => api.post("/transfer-orders/items/list", payload),
   pendingItemsList: (payload) => api.post("/transfer-orders/items/pending/list", payload),
   productionItemsList: (payload) => api.post("/transfer-orders/items/production/list", payload),
+  affilatedProductionItemsList: (payload) =>
+    api.post("/transfer-orders/items/affilated/production/list", payload),
+  workerCompletedItemsList: (payload) =>
+    api.post("/transfer-orders/items/worker/completed/list", payload),
+  markWorkerItemsPrinted: (payload) =>
+    api.post("/transfer-orders/items/completed-worker/printed", payload),
+  workerCompletedDownloadUrl: (params = {}) => {
+    const search = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") return;
+      search.set(String(key), String(value));
+    });
+    const base = String(http?.defaults?.baseURL || "").replace(/\/$/, "");
+    const query = search.toString();
+    return `${base}/transfer-orders/items/worker/completed/download${query ? `?${query}` : ""}`;
+  },
   cancelItemsList: (payload) => api.post("/transfer-orders/items/cancel/list", payload),
   sendToProduction: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/production", payload, config),

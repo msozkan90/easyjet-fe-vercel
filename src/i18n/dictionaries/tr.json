@@ -1579,6 +1579,7 @@
         "waitingForDesign": "Tasarım Beklemeye Al",
         "designUpload": "Tasarım Yükle",
         "designUpdate": "Tasarımı Güncelle",
+        "downloadDesigns": "Tasarımları İndir",
         "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
         "editAddress": "Adres Düzenle",
@@ -1598,7 +1599,10 @@
         "addressLoadError": "Sipariş detayları yüklenemedi.",
         "addressUpdateSuccess": "Fatura bilgileri güncellendi.",
         "addressUpdateError": "Fatura bilgileri güncellenemedi.",
-        "addressMissingOrder": "Sipariş bilgisi eksik."
+        "addressMissingOrder": "Sipariş bilgisi eksik.",
+        "designDownloadStarted": "Tasarım indirme başlatıldı. Durum listesi otomatik yenilenecek.",
+        "transferItemsPrintedSuccess": "Transfer order itemları printed durumuna alındı.",
+        "transferItemsPrintedError": "Transfer order itemları printed durumuna alınamadı."
       },
       "table": {
         "noData": "Kayıt bulunamadı"

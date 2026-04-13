@@ -48,11 +48,13 @@ export default function Sidebar({ collapsed }) {
       .filter(Boolean),
   );
   const hasTransferOrderCategory =
-    userCategoryNames.has("transfers");
+    userCategoryNames.has("transfer") || userCategoryNames.has("transfers");
   const hasStandardProductVariationCategory =
     userCategoryNames.has("print") ||
     userCategoryNames.has("apparel") ||
     userCategoryNames.has("engraving");
+  const showCompanyOrdersMenu = isCompanyAdmin && hasStandardProductVariationCategory;
+  const showCompanyTransferOrdersMenu = isCompanyAdmin && hasTransferOrderCategory;
   const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector(
 
@@ -94,10 +96,17 @@ export default function Sidebar({ collapsed }) {
     userCategoryIds.has(String(category?.id)),
   );
 
-
   const transferCategories = filteredCategories.filter((category) => {
     const categoryName = String(category?.name || "").trim().toLowerCase();
-    return categoryName === "transfers";
+    return categoryName === "transfer" || categoryName === "transfers";
+  });
+  const standardCategories = filteredCategories.filter((category) => {
+    const categoryName = String(category?.name || "").trim().toLowerCase();
+    return (
+      categoryName === "print" ||
+      categoryName === "engraving" ||
+      categoryName === "apparel"
+    );
   });
 
 
@@ -124,7 +133,7 @@ export default function Sidebar({ collapsed }) {
   });
 
   const buildCategoryMenuItems = () =>
-    filteredCategories.map((category) => {
+    standardCategories.map((category) => {
       const subCategories = Array.isArray(category?.sub_categories)
         ? category.sub_categories
         : [];
@@ -184,6 +193,48 @@ export default function Sidebar({ collapsed }) {
       };
     });
 
+  const buildTransferCategoryMenuItems = () =>
+    transferCategories.map((category) => {
+      const subCategories = Array.isArray(category?.sub_categories)
+        ? category.sub_categories
+        : [];
+
+      return {
+        key: `transfer-category-${category.id}`,
+        icon: <AppstoreOutlined />,
+        label: category.name || "Transfer",
+        children: subCategories
+          .filter((subCategory) => subCategory?.id)
+          .map((subCategory) => ({
+            key: `transfer-subcategory-${category.id}-${subCategory.id}`,
+            icon: <TagsOutlined />,
+            label: subCategory.name || "Sub Category",
+            children: [
+              {
+                key: `transfer-subcategory-${category.id}-${subCategory.id}-view-order`,
+                label: (
+                  <Link
+                    href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/view-order`}
+                  >
+                    View Order
+                  </Link>
+                ),
+              },
+              {
+                key: `transfer-subcategory-${category.id}-${subCategory.id}-printer`,
+                label: (
+                  <Link
+                    href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/printer`}
+                  >
+                    Printer
+                  </Link>
+                ),
+              },
+            ],
+          })),
+      };
+    });
+
   const buildShipmentOrdersMenuItem = () => ({
     key: "shipment-orders",
     icon: <ShoppingCartOutlined />,
@@ -207,6 +258,7 @@ export default function Sidebar({ collapsed }) {
       label: <Link href="/dashboard">{tSidebar("dashboard")}</Link>,
     },
     ...(isCompanyCompletedWorker ? buildCategoryMenuItems() : []),
+    ...(isCompanyCompletedWorker ? buildTransferCategoryMenuItems() : []),
     ...(isShipmentWorker ? [buildShipmentOrdersMenuItem()] : []),
     ...(isFinancialUser
       ? [
@@ -494,85 +546,81 @@ export default function Sidebar({ collapsed }) {
               },
             ],
           },
-          {
-            key: "order",
-            icon: <ApartmentOutlined />,
-            label: tSidebar("order.title"),
-            children: [
-              {
-                key: "order-pool",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/pre-orders">
-                    {tSidebar("order.preOrders")}
-                  </Link>
-                ),
-              },
-              {
-                key: "pending-orders",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/pending">
-                    {tSidebar("order.pending")}
-                  </Link>
-                ),
-              },
-              {
-                key: "in-production-orders",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/in-production">
-                    {tSidebar("order.inProduction")}
-                  </Link>
-                ),
-              },
-              {
-                key: "completed-orders",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/completed">
-                    {tSidebar("order.completed")}
-                  </Link>
-                ),
-              },
-              {
-                key: "shipped-orders",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/shipped">
-                    {tSidebar("order.shipped")}
-                  </Link>
-                ),
-              },
-              {
-                key: "refund-remake-orders",
-                icon: <ApartmentOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/refund-remake">
-                    {tSidebar("order.refundRemake")}
-                  </Link>
-                ),
-              },
-
-              {
-                key: "cancel-orders",
-                icon: <CloseCircleOutlined />,
-                label: (
-                  <Link href="/dashboard/orders/cancel">
-                    {tSidebar("orders.cancel")}
-                  </Link>
-                ),
-              },
-              // {
-              //   key: "customer-admins",
-              //   icon: <TeamOutlined />,
-              //   label: (
-              //     <Link href="/dashboard/customer/admins">Customer Admins</Link>
-              //   ),
-              // },
-            ],
-          },
-          ...(isCustomerAdmin
+          ...(hasStandardProductVariationCategory
+            ? [
+                {
+                  key: "order",
+                  icon: <ApartmentOutlined />,
+                  label: tSidebar("order.title"),
+                  children: [
+                    {
+                      key: "order-pool",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/pre-orders">
+                          {tSidebar("order.preOrders")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "pending-orders",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/pending">
+                          {tSidebar("order.pending")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "in-production-orders",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/in-production">
+                          {tSidebar("order.inProduction")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "completed-orders",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/completed">
+                          {tSidebar("order.completed")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "shipped-orders",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/shipped">
+                          {tSidebar("order.shipped")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "refund-remake-orders",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/refund-remake">
+                          {tSidebar("order.refundRemake")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "cancel-orders",
+                      icon: <CloseCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/orders/cancel">
+                          {tSidebar("orders.cancel")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
+          ...(hasTransferOrderCategory
             ? [
                 {
                   key: "transfer-orders",
@@ -630,7 +678,7 @@ export default function Sidebar({ collapsed }) {
             : []),
         ]
       : []),
-    ...(isCompanyAdmin || isPartnerAdmin
+    ...(isPartnerAdmin || showCompanyOrdersMenu
       ? [
           {
             key: "orders-affiliated",
@@ -677,6 +725,26 @@ export default function Sidebar({ collapsed }) {
                     },
                   ]
                 : []),
+            ],
+          },
+        ]
+      : []),
+    ...(showCompanyTransferOrdersMenu
+      ? [
+          {
+            key: "transfer-orders-affiliated",
+            icon: <ShoppingCartOutlined />,
+            label: tSidebar("order.transferOrders"),
+            children: [
+              {
+                key: "transfer-orders-affiliated-production",
+                icon: <ShoppingCartOutlined />,
+                label: (
+                  <Link href="/dashboard/transfer-orders/affiliated/production">
+                    {tSidebar("order.inProduction")}
+                  </Link>
+                ),
+              },
             ],
           },
         ]
