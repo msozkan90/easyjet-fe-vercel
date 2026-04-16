@@ -2,12 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   App as AntdApp,
   Button,
   Card,
   Empty,
-  Descriptions,
   Image,
   Input,
   Spin,
@@ -22,7 +20,7 @@ const STATUS_COLORS = {
   newOrder: "geekblue",
   processing: "purple",
   downloaded: "blue",
-  printed: "cyan",
+  printed: "green",
   shipped: "gold",
   waitingForDesign: "orange",
   cancel: "red",
@@ -31,13 +29,9 @@ const STATUS_COLORS = {
 };
 
 const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
+  if (value === null || value === undefined || value === "") return fallback;
   const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
+  if (Number.isNaN(numericValue)) return value;
   return numericValue.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -118,69 +112,74 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
   );
 };
 
-export default function TransferPrinterOrderSearchPage({ categoryId, subCategoryId }) {
+export default function TransferShippedPrinterSearchPage() {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
 
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
-  const [printing, setPrinting] = useState(false);
   const [searched, setSearched] = useState(false);
   const [items, setItems] = useState([]);
   const [orderSummary, setOrderSummary] = useState(null);
-  const [designGroups, setDesignGroups] = useState([]);
 
-  const handlePastePrint = useCallback(
+  const handleSearch = useCallback(
     async (rawOrderNumber) => {
       const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
       if (!nextOrderNumber) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
-      if (!categoryId || !subCategoryId) return;
 
       setSearching(true);
-      setPrinting(true);
+      setSearched(true);
+
       try {
-        const response = await TransferOrdersAPI.markWorkerItemsPrinted({
-          order_number: nextOrderNumber,
-          category_id: categoryId,
-          sub_category_id: subCategoryId,
+        const response = await TransferOrdersAPI.workerShippedItemsList({
+          pagination: { page: 1, pageSize: 200 },
+          filters: {
+            order_number: nextOrderNumber,
+            status: ["printed", "shipped"],
+          },
         });
-        const payload = response?.data || null;
 
-        if (payload?.transfer_order) {
-          setOrderSummary({
-            order_number: payload?.transfer_order?.order_number || null,
-            bill_to_name: payload?.transfer_order?.bill_to_name || null,
-            status: payload?.transfer_order?.order_status || null,
-            barcode_url: payload?.transfer_order?.barcode_url || null,
-            order_date: payload?.transfer_order?.order_date || null,
-            delivery_method: payload?.transfer_order?.delivery_method || null,
-            local_pickup: Boolean(payload?.transfer_order?.local_pickup),
-          });
-        }
+        const payload = response?.data;
+        const rows = Array.isArray(payload?.items)
+          ? payload.items
+          : Array.isArray(payload?.data?.items)
+            ? payload.data.items
+            : [];
 
-        const nextItems = Array.isArray(payload?.items) ? payload.items : [];
-        setItems(nextItems);
-        setDesignGroups(Array.isArray(payload?.design_groups) ? payload.design_groups : []);
-        setSearched(true);
-        message.success(tOrders("messages.transferItemsPrintedSuccess"));
+        const parentRows = rows.filter(
+          (row) => Array.isArray(row?.children) && row.children.length > 0,
+        );
+        const flatItems = parentRows.length
+          ? parentRows.flatMap((parent) => parent.children || [])
+          : rows.filter((row) => !row?.__hasChildren);
+        const summarySource = parentRows[0] || flatItems[0] || rows[0] || null;
+
+        setItems(Array.isArray(flatItems) ? flatItems : []);
+        setOrderSummary(
+          summarySource
+            ? {
+                order_number: summarySource?.order_number || null,
+                bill_to_name: summarySource?.bill_to_name || null,
+                status: summarySource?.status || null,
+                barcode_url: summarySource?.barcode_url || null,
+                order_date: summarySource?.order_date || null,
+                fullfillment_location: summarySource?.fullfillment_location || null,
+              }
+            : null,
+        );
       } catch (error) {
         setItems([]);
         setOrderSummary(null);
-        setDesignGroups([]);
-        setSearched(true);
-        message.error(
-          error?.response?.data?.error?.message || tOrders("messages.transferItemsPrintedError"),
-        );
+        message.error(error?.response?.data?.error?.message || tOrders("messages.loadListError"));
       } finally {
         setSearching(false);
-        setPrinting(false);
       }
     },
-    [categoryId, message, orderNumber, subCategoryId, tOrders],
+    [message, orderNumber, tOrders],
   );
 
   const statusTag = useMemo(() => {
@@ -191,7 +190,7 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
   }, [orderSummary?.status, tOrders]);
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
+    <RequireRole anyOfRoles={["companyShipmentWorker"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
           Printer
@@ -201,23 +200,21 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
           <Input.Search
             allowClear
             enterButton={
-              <Button type="primary" loading={searching || printing}>
+              <Button type="primary" loading={searching}>
                 {tCommonActions("search")}
               </Button>
             }
             placeholder={tOrders("filters.searchOrderNumber")}
             value={orderNumber}
             onChange={(event) => setOrderNumber(event.target.value)}
+            onSearch={handleSearch}
             onPaste={(event) => {
-              const pasted = event?.clipboardData?.getData("text");
-              const nextOrderNumber = String(pasted || "").trim();
-              if (!nextOrderNumber) return;
+              const pastedValue = event?.clipboardData?.getData("text") || "";
+              const normalizedOrderNumber = String(pastedValue).trim();
+              if (!normalizedOrderNumber) return;
               event.preventDefault();
-              setOrderNumber(nextOrderNumber);
-              void handlePastePrint(nextOrderNumber);
-            }}
-            onSearch={(value) => {
-              void handlePastePrint(value);
+              setOrderNumber(normalizedOrderNumber);
+              void handleSearch(normalizedOrderNumber);
             }}
           />
         </Card>
@@ -249,67 +246,6 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
                 />
               ) : null}
             </div>
-            {orderSummary?.delivery_method ? (
-              <Alert
-                className="mt-3"
-                type="info"
-                showIcon
-                message={`${tOrders("columns.deliveryMethod")}: ${orderSummary.delivery_method}`}
-              />
-            ) : null}
-          </Card>
-        ) : null}
-
-        {designGroups.length ? (
-          <Card className="rounded-2xl border border-slate-100">
-            <Descriptions
-              size="small"
-              bordered
-              column={1}
-              items={[
-                {
-                  key: "design_groups",
-                  label: tOrders("detail.designs.title"),
-                  children: (
-                    <div className="space-y-4">
-                      {designGroups.map((group) => {
-                        const groupDesigns = Array.isArray(group?.designs) ? group.designs : [];
-                        return (
-                          <div key={String(group?.sub_category_id || "sub-category")} className="space-y-2">
-                            <Typography.Text strong>
-                              {group?.sub_category_name || tOrders("common.none")}
-                            </Typography.Text>
-                            {groupDesigns.length ? (
-                              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                {groupDesigns.map((design) => (
-                                  <Image
-                                    key={String(design?.id || design?.design_url)}
-                                    src={design?.design_url}
-                                    alt="transfer-design"
-                                    style={{
-                                      width: "100%",
-                                      maxHeight: 220,
-                                      objectFit: "cover",
-                                      borderRadius: 8,
-                                      border: "1px solid #f1f5f9",
-                                    }}
-                                    preview
-                                  />
-                                ))}
-                              </div>
-                            ) : (
-                              <Typography.Text type="secondary">
-                                {tOrders("detail.designs.empty")}
-                              </Typography.Text>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ),
-                },
-              ]}
-            />
           </Card>
         ) : null}
 

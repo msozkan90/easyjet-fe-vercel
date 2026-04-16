@@ -180,6 +180,8 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/items/affilated/production/list", payload),
   workerCompletedItemsList: (payload) =>
     api.post("/transfer-orders/items/worker/completed/list", payload),
+  workerShippedItemsList: (payload) =>
+    api.post("/transfer-orders/items/worker/shipped/list", payload),
   markWorkerItemsPrinted: (payload) =>
     api.post("/transfer-orders/items/completed-worker/printed", payload),
   workerCompletedDownloadUrl: (params = {}) => {

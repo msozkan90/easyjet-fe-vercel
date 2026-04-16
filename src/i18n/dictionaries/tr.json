@@ -1539,6 +1539,7 @@
         "customer": "Müşteri",
         "customerName": "Müşteri Adı",
         "barcode": "Barkod",
+        "deliveryMethod": "Teslimat Yöntemi",
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
         "hasDesign": "Tasarım",

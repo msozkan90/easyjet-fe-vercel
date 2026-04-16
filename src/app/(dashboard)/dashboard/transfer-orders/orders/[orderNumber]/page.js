@@ -245,7 +245,13 @@ export default function TransferOrderDetailPage() {
 
   return (
     <RequireRole
-      anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
+      anyOfRoles={[
+        "companyAdmin",
+        "companyCompletedWorker",
+        "companyShipmentWorker",
+        "partnerAdmin",
+        "customerAdmin",
+      ]}
       anyOfCategories={["Transfers"]}
     >
       <Row gutter={[16, 16]}>

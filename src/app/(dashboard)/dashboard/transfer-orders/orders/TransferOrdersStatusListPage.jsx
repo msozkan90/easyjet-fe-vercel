@@ -323,7 +323,8 @@ export default function TransferOrdersStatusListPage({
   const columns = useMemo(() => {
     const showDetailAction = typeof columnsBuilder !== "function";
     const isPendingList = listApiFn === TransferOrdersAPI.pendingItemsList;
-    const showLocalPickupColumn = isPendingList;
+    const showDeliveryMethodColumn = true;
+    const showLocalPickupColumn = true;
     const showDesignColumn = isPendingList;
     const showBarcodeColumn = true;
     const baseColumns = [
@@ -466,14 +467,26 @@ export default function TransferOrdersStatusListPage({
         dataIndex: "bill_to_name",
         render: (value) => value || t("common.none"),
       },
+      ...(showDeliveryMethodColumn
+        ? [
+            {
+              title: t("columns.deliveryMethod"),
+              dataIndex: "delivery_method",
+              render: (value, record) => {
+                if (record?.__isChild) return null;
+                return value || t("common.none");
+              },
+            },
+          ]
+        : []),
       ...(showLocalPickupColumn
         ? [
             {
               title: t("columns.localPickup"),
-              dataIndex: "fullfillment_location",
+              dataIndex: "local_pickup",
               render: (value, record) => {
                 if (record?.__isChild) return null;
-                return value ? (
+                return Boolean(value) ? (
                   <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
                 ) : (
                   <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
@@ -613,7 +626,6 @@ export default function TransferOrdersStatusListPage({
     }),
     [getRowClassName, t],
   );
-
   return (
     <RequireRole anyOfRoles={requireRoles}>
       <CrudTable

@@ -1680,6 +1680,7 @@
         "customer": "Customer",
         "customerName": "Customer Name",
         "barcode": "Barcode",
+        "deliveryMethod": "Delivery Method",
         "localPickup": "Local Pickup",
         "orderDate": "Order Date",
         "hasDesign": "Design",

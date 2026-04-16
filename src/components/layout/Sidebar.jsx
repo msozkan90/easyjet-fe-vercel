@@ -251,6 +251,22 @@ export default function Sidebar({ collapsed }) {
     ],
   });
 
+  const buildShipmentTransferOrdersMenuItem = () => ({
+    key: "shipment-transfer-orders",
+    icon: <ShoppingCartOutlined />,
+    label: tSidebar("order.transferOrders"),
+    children: [
+      {
+        key: "shipment-transfer-orders-view-order",
+        label: <Link href="/dashboard/transfer-orders/view-order">View Order</Link>,
+      },
+      {
+        key: "shipment-transfer-orders-printer",
+        label: <Link href="/dashboard/transfer-orders/printer">Printer</Link>,
+      },
+    ],
+  });
+
   const items = [
     {
       key: "dashboard",
@@ -259,7 +275,8 @@ export default function Sidebar({ collapsed }) {
     },
     ...(isCompanyCompletedWorker ? buildCategoryMenuItems() : []),
     ...(isCompanyCompletedWorker ? buildTransferCategoryMenuItems() : []),
-    ...(isShipmentWorker ? [buildShipmentOrdersMenuItem()] : []),
+    ...(isShipmentWorker && hasStandardProductVariationCategory ? [buildShipmentOrdersMenuItem()] : []),
+    ...(isShipmentWorker && hasTransferOrderCategory ? [buildShipmentTransferOrdersMenuItem()] : []),
     ...(isFinancialUser
       ? [
           {
