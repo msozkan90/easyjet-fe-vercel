@@ -181,7 +181,6 @@ export default function PendingOrdersPage() {
 
   const handleOpenAddressEditor = useCallback(
     async (record) => {
-      console.log(record, "record222");
       if (
         !record?.id &&
         (record?.status !== "newOrder" || record?.status !== "waitingForDesign")

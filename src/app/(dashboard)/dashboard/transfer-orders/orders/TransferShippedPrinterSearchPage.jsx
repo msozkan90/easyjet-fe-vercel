@@ -13,6 +13,7 @@ import {
   Typography,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
+import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
@@ -122,6 +123,8 @@ export default function TransferShippedPrinterSearchPage() {
   const [searched, setSearched] = useState(false);
   const [items, setItems] = useState([]);
   const [orderSummary, setOrderSummary] = useState(null);
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [shippingModalRecord, setShippingModalRecord] = useState(null);
 
   const handleSearch = useCallback(
     async (rawOrderNumber) => {
@@ -135,45 +138,56 @@ export default function TransferShippedPrinterSearchPage() {
       setSearched(true);
 
       try {
-        const response = await TransferOrdersAPI.workerShippedItemsList({
-          pagination: { page: 1, pageSize: 200 },
-          filters: {
-            order_number: nextOrderNumber,
-            status: ["printed", "shipped"],
-          },
+        const response = await TransferOrdersAPI.shipWorkerItems({
+          order_number: nextOrderNumber,
         });
+        const payload = response?.data || {};
+        const transferOrder = payload?.transfer_order || null;
+        const scopedItems = Array.isArray(payload?.items) ? payload.items : [];
+        const requiresLabelCreation = payload?.requires_label_creation === true;
 
-        const payload = response?.data;
-        const rows = Array.isArray(payload?.items)
-          ? payload.items
-          : Array.isArray(payload?.data?.items)
-            ? payload.data.items
-            : [];
-
-        const parentRows = rows.filter(
-          (row) => Array.isArray(row?.children) && row.children.length > 0,
-        );
-        const flatItems = parentRows.length
-          ? parentRows.flatMap((parent) => parent.children || [])
-          : rows.filter((row) => !row?.__hasChildren);
-        const summarySource = parentRows[0] || flatItems[0] || rows[0] || null;
-
-        setItems(Array.isArray(flatItems) ? flatItems : []);
+        setItems(scopedItems);
         setOrderSummary(
-          summarySource
+          transferOrder
             ? {
-                order_number: summarySource?.order_number || null,
-                bill_to_name: summarySource?.bill_to_name || null,
-                status: summarySource?.status || null,
-                barcode_url: summarySource?.barcode_url || null,
-                order_date: summarySource?.order_date || null,
-                fullfillment_location: summarySource?.fullfillment_location || null,
+                id: transferOrder?.id || null,
+                order_number: transferOrder?.order_number || null,
+                bill_to_name: transferOrder?.bill_to_name || null,
+                status: transferOrder?.order_status || null,
+                barcode_url: transferOrder?.barcode_url || null,
+                order_date: transferOrder?.order_date || null,
+                fullfillment_location: transferOrder?.fullfillment_location || null,
+                local_pickup: Boolean(transferOrder?.local_pickup),
+                shipping_address: transferOrder?.shipping_address || null,
               }
             : null,
         );
+
+        if (requiresLabelCreation && transferOrder?.id) {
+          const orderTotal =
+            scopedItems.reduce((sum, item) => {
+              const unitPrice = Number(item?.price);
+              const quantity = Number(item?.quantity ?? 1);
+              if (!Number.isFinite(unitPrice)) return sum;
+              return sum + unitPrice * (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+            }, 0) || 0;
+
+          setShippingModalRecord({
+            ...transferOrder,
+            order_total: orderTotal,
+            items: scopedItems,
+          });
+          setShippingModalOpen(true);
+          message.warning("Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.");
+        } else {
+          setShippingModalRecord(null);
+          setShippingModalOpen(false);
+        }
       } catch (error) {
         setItems([]);
         setOrderSummary(null);
+        setShippingModalRecord(null);
+        setShippingModalOpen(false);
         message.error(error?.response?.data?.error?.message || tOrders("messages.loadListError"));
       } finally {
         setSearching(false);
@@ -181,6 +195,21 @@ export default function TransferShippedPrinterSearchPage() {
     },
     [message, orderNumber, tOrders],
   );
+
+  const handleCreateLabelSuccess = useCallback(() => {
+    const latestOrderNumber =
+      orderSummary?.order_number || shippingModalRecord?.order_number || orderNumber;
+    setShippingModalOpen(false);
+    setShippingModalRecord(null);
+    if (latestOrderNumber) {
+      void handleSearch(latestOrderNumber);
+    }
+  }, [
+    handleSearch,
+    orderNumber,
+    orderSummary?.order_number,
+    shippingModalRecord?.order_number,
+  ]);
 
   const statusTag = useMemo(() => {
     if (!orderSummary?.status) return null;
@@ -261,6 +290,13 @@ export default function TransferShippedPrinterSearchPage() {
           <Empty description={tOrders("messages.noItems")} />
         ) : null}
       </div>
+      <TransferShippingRatesModal
+        open={shippingModalOpen}
+        transferOrder={shippingModalRecord}
+        orderTotal={Number(shippingModalRecord?.order_total || 0)}
+        onClose={() => setShippingModalOpen(false)}
+        onLabelCreated={handleCreateLabelSuccess}
+      />
     </RequireRole>
   );
 }
