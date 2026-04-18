@@ -242,11 +242,11 @@ export default function Sidebar({ collapsed }) {
     children: [
       {
         key: "shipment-orders-view-order",
-        label: <Link href="/dashboard/orders/view-order">View Order</Link>,
+        label: <Link href="/dashboard/orders/view-order">{tSidebar("orders.view")}</Link>,
       },
       {
         key: "shipment-orders-printer",
-        label: <Link href="/dashboard/orders/printer">Printer</Link>,
+        label: <Link href="/dashboard/orders/printer">{tSidebar("orders.printer")}</Link>,
       },
     ],
   });
@@ -258,11 +258,11 @@ export default function Sidebar({ collapsed }) {
     children: [
       {
         key: "shipment-transfer-orders-view-order",
-        label: <Link href="/dashboard/transfer-orders/view-order">View Order</Link>,
+        label: <Link href="/dashboard/transfer-orders/view-order">{tSidebar("order.viewOrder")}</Link>,
       },
       {
         key: "shipment-transfer-orders-printer",
-        label: <Link href="/dashboard/transfer-orders/printer">Printer</Link>,
+        label: <Link href="/dashboard/transfer-orders/printer">{tSidebar("order.printer")}</Link>,
       },
     ],
   });

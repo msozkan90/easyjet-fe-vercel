@@ -1544,7 +1544,8 @@
         "orderDate": "Sipariş Tarihi",
         "hasDesign": "Tasarım",
         "actions": "İşlemler",
-        "notes": "Notlar"
+        "notes": "Notlar",
+        "designerNotes": "Tasarımcı Notları"
       },
       "filters": {
         "searchOrderNumber": "Sipariş numarası ara",
@@ -1591,7 +1592,8 @@
         "confirmWaitingOk": "Güncelle",
         "newOrder": "Yeni Siparişe Al",
         "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
-        "confirmNewOrderOk": "Güncelle"
+        "confirmNewOrderOk": "Güncelle",
+        "download": "İndir"
       },
       "messages": {
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
@@ -1603,7 +1605,9 @@
         "addressMissingOrder": "Sipariş bilgisi eksik.",
         "designDownloadStarted": "Tasarım indirme başlatıldı. Durum listesi otomatik yenilenecek.",
         "transferItemsPrintedSuccess": "Transfer order itemları printed durumuna alındı.",
-        "transferItemsPrintedError": "Transfer order itemları printed durumuna alınamadı."
+        "transferItemsPrintedError": "Transfer order itemları printed durumuna alınamadı.",
+        "transferLabelRequired": "Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.",
+        "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur."
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -1871,6 +1875,155 @@
         "errors": {
           "mustRefreshRates": "Fiyatlar güncel değil. Lütfen göndermeden önce yenileyin."
         }
+      },
+      "workerPrinter": {
+        "title": "Printer"
+      },
+      "workerShipmentPrinter": {
+        "title": "Printer"
+      },
+      "transferDetail": {
+        "header": {
+          "orderNumber": "Transfer Sipariş #{orderNumber}"
+        },
+        "fields": {
+          "orderName": "Sipariş Adı",
+          "currency": "Para Birimi",
+          "orderTotal": "Sipariş Toplamı"
+        },
+        "sections": {
+          "priceSummary": "Fiyat Özeti",
+          "items": "Kalemler",
+          "uploadedDesigns": "Yüklenen Tasarımlar"
+        },
+        "priceSummary": {
+          "itemPrices": "Ürün Fiyatları",
+          "designPrices": "Tasarım Fiyatları",
+          "combined": "Toplam"
+        },
+        "placeholders": {
+          "designerNotes": "Tasarımcı notu ekleyin..."
+        },
+        "designCard": {
+          "size": "Boyut",
+          "price": "Fiyat"
+        },
+        "preview": {
+          "preparing": "Önizleme hazırlanıyor...",
+          "empty": "Önizleme yok",
+          "alt": "tasarım"
+        },
+        "actions": {
+          "saveNotes": "Notları Kaydet",
+          "open": "Aç",
+          "delete": "Sil",
+          "deleteConfirmTitle": "Bu tasarım silinsin mi?",
+          "deleteConfirmDescription": "Kayıt silinir ve dosya depolamadan kaldırılır."
+        },
+        "messages": {
+          "loadError": "Transfer sipariş detayı yüklenemedi.",
+          "designDeleteSuccess": "Tasarım başarıyla silindi.",
+          "designDeleteError": "Tasarım silinemedi.",
+          "designerNotesSaved": "Tasarımcı notları kaydedildi.",
+          "designerNotesSaveError": "Tasarımcı notları kaydedilemedi.",
+          "notFound": "Transfer siparişi bulunamadı.",
+          "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı."
+        }
+      },
+      "transferShippingModal": {
+        "title": "Transfer Label Oluştur",
+        "tabs": {
+          "easyjet": "EasyJet",
+          "company": "Company",
+          "partner": "Partner"
+        },
+        "actions": {
+          "createLabel": "Label Oluştur"
+        },
+        "items": {
+          "title": "Transfer Kalemleri",
+          "subtitle": "Sipariş kalemleri ve kargo hazırlığı",
+          "itemCount": "Kalem Sayısı"
+        },
+        "designs": {
+          "title": "Yüklenen Tasarımlar",
+          "subtitle": "Transfer sipariş tasarımları gruplu olarak gösterilir",
+          "size": "Boyut"
+        },
+        "preview": {
+          "preparing": "Önizleme hazırlanıyor...",
+          "empty": "Önizleme yok"
+        },
+        "package": {
+          "title": "Paket",
+          "refreshRates": "Fiyatları Yenile",
+          "weightLb": "Ağırlık (lb)",
+          "weightOz": "Ağırlık (oz)",
+          "lengthIn": "Uzunluk (in)",
+          "widthIn": "Genişlik (in)",
+          "heightIn": "Yükseklik (in)"
+        },
+        "service": {
+          "title": "Kargo Servisi",
+          "subtitle": "Kargo fiyatlarını seçin ve inceleyin",
+          "selectPlaceholder": "Kargo servisi seçin",
+          "zoneLabel": "Bölge",
+          "deliveryDaysLabel": "Teslimat günü"
+        },
+        "address": {
+          "title": "Kargo Adresi",
+          "phone": "Telefon",
+          "email": "E-posta"
+        },
+        "summary": {
+          "selectedShippingRate": "Seçilen Kargo Ücreti",
+          "selectedService": "Seçilen Servis"
+        },
+        "validation": {
+          "packageDimensionsRequired": "Length, width ve height zorunludur.",
+          "weightExclusive": "Sadece bir ağırlık alanı girin: lb veya oz.",
+          "shippingSourceInvalid": "Geçerli kargo kaynağı bulunamadı.",
+          "selectRateFirst": "Önce bir kargo fiyatı seçin."
+        },
+        "messages": {
+          "transferOrderNotFound": "Transfer siparişi bulunamadı.",
+          "addressUpdated": "Kargo adresi güncellendi.",
+          "addressUpdateError": "Adres güncellenemedi.",
+          "noRatesFound": "Bu seçenek için fiyat bulunamadı.",
+          "rateQuoteError": "Fiyatlar alınamadı.",
+          "labelCreated": "Label başarıyla oluşturuldu.",
+          "labelCreateError": "Label oluşturulamadı."
+        }
+      },
+      "transferUploadQueue": {
+        "title": "Transfer Yüklemeleri",
+        "subtitle": "Uygulama içinde gezinirken yüklemeler devam eder.",
+        "status": {
+          "queued": "Sırada",
+          "uploading": "Yükleniyor",
+          "preparing": "Hazırlanıyor",
+          "saving": "Kaydediliyor",
+          "success": "Tamamlandı",
+          "failed": "Başarısız",
+          "canceled": "İptal Edildi"
+        },
+        "badges": {
+          "uploading": "Yükleniyor: {count}",
+          "queued": "Sırada: {count}"
+        },
+        "fields": {
+          "order": "Sipariş"
+        },
+        "actions": {
+          "clearFinished": "Tamamlananları Temizle",
+          "retry": "Tekrar Dene",
+          "cancel": "İptal",
+          "remove": "Kaldır"
+        },
+        "messages": {
+          "uploadFailed": "Yükleme başarısız",
+          "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
+        }
       }
     },
     "refundRemake": {
@@ -2004,7 +2157,8 @@
         "title": "Siparişler",
         "view": "Siparişleri Görüntüle",
         "waitingForDesign": "Tasarım Bekleyenler",
-        "cancel": "İptal Siparişler"
+        "cancel": "İptal Siparişler",
+        "printer": "Printer"
       },
       "financial": {
         "title": "Finans",
@@ -2063,7 +2217,9 @@
         "inProduction": "Üretimdeki Siparişler",
         "completed": "Tamamlanan Siparişler",
         "shipped": "Kargolanmış Siparişler",
-        "refundRemake": "İade / Yeniden Üretim"
+        "refundRemake": "İade / Yeniden Üretim",
+        "viewOrder": "Siparişleri Görüntüle",
+        "printer": "Printer"
       },
       "company": {
         "title": "Firma",

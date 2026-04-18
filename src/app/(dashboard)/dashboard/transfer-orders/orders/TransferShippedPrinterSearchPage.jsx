@@ -1,17 +1,23 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import moment from "moment";
 import {
   App as AntdApp,
   Button,
   Card,
+  Col,
+  Descriptions,
   Empty,
   Image,
   Input,
+  Row,
+  Space,
   Spin,
   Tag,
   Typography,
 } from "antd";
+import { ExportOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
@@ -39,6 +45,21 @@ const formatAmount = (value, fallback = "-") => {
   });
 };
 
+const formatCurrency = (value, currency = "USD") => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return "-";
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency || "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  } catch {
+    return formatAmount(numericValue);
+  }
+};
+
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
     return rawOptions
@@ -56,6 +77,52 @@ const normalizeOptions = (rawOptions) => {
   }
   return [];
 };
+
+function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1 / 1",
+          borderRadius: 8,
+          overflow: "hidden",
+          background: "#f5f5f5",
+          border: "1px solid #f0f0f0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography.Text type="secondary">{emptyText}</Typography.Text>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        aspectRatio: "1 / 1",
+        borderRadius: 8,
+        overflow: "hidden",
+        background: "#f5f5f5",
+        border: "1px solid #f0f0f0",
+      }}
+    >
+      <img
+        src={src}
+        alt={alt || preparingText}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+    </div>
+  );
+}
 
 const TransferOrderItemCard = ({ item, tOrders }) => {
   const options = normalizeOptions(item?.options);
@@ -116,15 +183,32 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
 export default function TransferShippedPrinterSearchPage() {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
+  const tDetail = useTranslations("dashboard.orders.transferDetail");
   const tCommonActions = useTranslations("common.actions");
+  const autoDownloadedLabelRef = useRef("");
 
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [items, setItems] = useState([]);
   const [orderSummary, setOrderSummary] = useState(null);
+  const [transferLabel, setTransferLabel] = useState(null);
+  const [designGroups, setDesignGroups] = useState([]);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
+
+  const triggerLabelDownload = useCallback((labelUrl, selectedOrderNumber) => {
+    if (!labelUrl) return;
+    if (typeof document === "undefined") return;
+    const anchor = document.createElement("a");
+    anchor.href = labelUrl;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.download = `${selectedOrderNumber || "transfer-order"}-label.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  }, []);
 
   const handleSearch = useCallback(
     async (rawOrderNumber) => {
@@ -145,8 +229,11 @@ export default function TransferShippedPrinterSearchPage() {
         const transferOrder = payload?.transfer_order || null;
         const scopedItems = Array.isArray(payload?.items) ? payload.items : [];
         const requiresLabelCreation = payload?.requires_label_creation === true;
+        const latestLabel = payload?.transfer_label || null;
 
         setItems(scopedItems);
+        setTransferLabel(latestLabel);
+        setDesignGroups(Array.isArray(transferOrder?.design_groups) ? transferOrder.design_groups : []);
         setOrderSummary(
           transferOrder
             ? {
@@ -154,6 +241,7 @@ export default function TransferShippedPrinterSearchPage() {
                 order_number: transferOrder?.order_number || null,
                 bill_to_name: transferOrder?.bill_to_name || null,
                 status: transferOrder?.order_status || null,
+                currency: transferOrder?.currency || "USD",
                 barcode_url: transferOrder?.barcode_url || null,
                 order_date: transferOrder?.order_date || null,
                 fullfillment_location: transferOrder?.fullfillment_location || null,
@@ -162,6 +250,14 @@ export default function TransferShippedPrinterSearchPage() {
               }
             : null,
         );
+
+        if (payload?.shipped === true && latestLabel?.label_url) {
+          const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
+          if (autoDownloadedLabelRef.current !== labelIdentity) {
+            autoDownloadedLabelRef.current = labelIdentity;
+            triggerLabelDownload(latestLabel.label_url, transferOrder?.order_number || nextOrderNumber);
+          }
+        }
 
         if (requiresLabelCreation && transferOrder?.id) {
           const orderTotal =
@@ -178,7 +274,7 @@ export default function TransferShippedPrinterSearchPage() {
             items: scopedItems,
           });
           setShippingModalOpen(true);
-          message.warning("Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.");
+          message.warning(tOrders("messages.transferLabelRequired"));
         } else {
           setShippingModalRecord(null);
           setShippingModalOpen(false);
@@ -186,6 +282,8 @@ export default function TransferShippedPrinterSearchPage() {
       } catch (error) {
         setItems([]);
         setOrderSummary(null);
+        setTransferLabel(null);
+        setDesignGroups([]);
         setShippingModalRecord(null);
         setShippingModalOpen(false);
         message.error(error?.response?.data?.error?.message || tOrders("messages.loadListError"));
@@ -193,7 +291,7 @@ export default function TransferShippedPrinterSearchPage() {
         setSearching(false);
       }
     },
-    [message, orderNumber, tOrders],
+    [message, orderNumber, tOrders, triggerLabelDownload],
   );
 
   const handleCreateLabelSuccess = useCallback(() => {
@@ -222,7 +320,7 @@ export default function TransferShippedPrinterSearchPage() {
     <RequireRole anyOfRoles={["companyShipmentWorker"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
-          Printer
+          {tOrders("workerShipmentPrinter.title")}
         </Typography.Title>
 
         <Card className="rounded-2xl">
@@ -275,6 +373,101 @@ export default function TransferShippedPrinterSearchPage() {
                 />
               ) : null}
             </div>
+          </Card>
+        ) : null}
+
+        {transferLabel ? (
+          <Card className="rounded-2xl border border-slate-100" title={tOrders("detail.fields.labels")}>
+            <Descriptions column={{ xs: 1, sm: 2, md: 3 }} size="small" bordered>
+              <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
+                {transferLabel?.source || tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
+                {transferLabel?.shipping_price != null
+                  ? formatCurrency(transferLabel.shipping_price, orderSummary?.currency || "USD")
+                  : tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.fields.labelCreatedAt")}>
+                {transferLabel?.created_at ? moment(transferLabel.created_at).format("LLL") : tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.fields.labelTracking")}>
+                {transferLabel?.tracking_number || tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.actions.viewLabel")} span={2}>
+                {transferLabel?.label_url ? (
+                  <Button
+                    icon={<ExportOutlined />}
+                    onClick={() =>
+                      triggerLabelDownload(
+                        transferLabel.label_url,
+                        orderSummary?.order_number || orderNumber,
+                      )
+                    }
+                  >
+                    {tOrders("actions.download")}
+                  </Button>
+                ) : (
+                  tOrders("common.none")
+                )}
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
+        ) : null}
+
+        {designGroups.length ? (
+          <Card title={tDetail("sections.uploadedDesigns")}>
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              {designGroups.map((group, groupIndex) => (
+                <Card
+                  key={group?.sub_category_id || `group-${groupIndex}`}
+                  type="inner"
+                  title={group?.sub_category_name || "-"}
+                  extra={
+                    <Typography.Text strong>
+                      {formatCurrency(group?.total_price, orderSummary?.currency || "USD")}
+                    </Typography.Text>
+                  }
+                >
+                  <Row gutter={[12, 12]}>
+                    {(Array.isArray(group?.designs) ? group.designs : []).map((design) => (
+                      <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
+                        <Card size="small" styles={{ body: { padding: 10 } }}>
+                          <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                            <LazyPreviewImage
+                              src={design?.design_url}
+                              alt={`design-${design?.id}`}
+                              preparingText={tDetail("preview.preparing")}
+                              emptyText={tDetail("preview.empty")}
+                            />
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                              {tDetail("designCard.size")}: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
+                            </Typography.Text>
+                            <Typography.Text strong>
+                              {tDetail("designCard.price")}: {formatCurrency(design?.price, orderSummary?.currency || "USD")}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                              {design?.created_at ? moment(design.created_at).format("LLL") : "-"}
+                            </Typography.Text>
+                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                              <Button
+                                size="small"
+                                icon={<ExportOutlined />}
+                                onClick={() => {
+                                  if (!design?.design_url) return;
+                                  window.open(design.design_url, "_blank", "noopener,noreferrer");
+                                }}
+                              >
+                                {tDetail("actions.open")}
+                              </Button>
+                            </div>
+                          </Space>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </Card>
+              ))}
+            </Space>
           </Card>
         ) : null}
 

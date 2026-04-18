@@ -23,6 +23,7 @@ import {
 import RequireRole from "@/components/common/Access/RequireRole";
 import { TransferOrdersAPI } from "@/utils/api";
 import { DeleteOutlined, ExportOutlined, SaveOutlined } from "@ant-design/icons";
+import { useTranslations } from "@/i18n/use-translations";
 
 const STATUS_COLORS = {
   newOrder: "blue",
@@ -60,7 +61,7 @@ const formatCurrency = (value, currency = "USD") => {
   }
 };
 
-function LazyPreviewImage({ src, alt }) {
+function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
   const containerRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -104,9 +105,9 @@ function LazyPreviewImage({ src, alt }) {
       }}
     >
       {!visible ? (
-        <Typography.Text type="secondary">Preparing preview...</Typography.Text>
+        <Typography.Text type="secondary">{preparingText}</Typography.Text>
       ) : !src || failed ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No preview" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />
       ) : (
         <img
           src={src}
@@ -123,6 +124,8 @@ function LazyPreviewImage({ src, alt }) {
 
 export default function TransferOrderDetailPage() {
   const { message } = AntdApp.useApp();
+  const tOrders = useTranslations("dashboard.orders");
+  const tDetail = useTranslations("dashboard.orders.transferDetail");
   const params = useParams();
   const orderNumber = useMemo(() => String(params?.orderNumber || ""), [params]);
 
@@ -147,12 +150,12 @@ export default function TransferOrderDetailPage() {
     } catch (error) {
       setDetail(null);
       message.error(
-        error?.response?.data?.error?.message || "Failed to load transfer order detail",
+        error?.response?.data?.error?.message || tDetail("messages.loadError"),
       );
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [message, orderNumber]);
+  }, [message, orderNumber, tDetail]);
 
   useEffect(() => {
     void loadDetail();
@@ -164,41 +167,45 @@ export default function TransferOrderDetailPage() {
       setDeletingDesignId(designId);
       try {
         await TransferOrdersAPI.deleteDesign(designId);
-        message.success("Design deleted successfully");
+        message.success(tDetail("messages.designDeleteSuccess"));
         await loadDetail({ silent: true });
       } catch (error) {
-        message.error(error?.response?.data?.error?.message || "Failed to delete design");
+        message.error(error?.response?.data?.error?.message || tDetail("messages.designDeleteError"));
       } finally {
         setDeletingDesignId(null);
       }
     },
-    [loadDetail, message],
+    [loadDetail, message, tDetail],
   );
 
   const itemColumns = useMemo(
     () => [
       {
-        title: "Name",
+        title: tOrders("columns.item"),
         dataIndex: "name",
-        render: (value) => value || "-",
+        render: (value) => value || tOrders("common.none"),
       },
       {
-        title: "Product",
+        title: tOrders("columns.product"),
         dataIndex: "transfer_product",
-        render: (_, record) => record?.transfer_product?.name || "-",
+        render: (_, record) => record?.transfer_product?.name || tOrders("common.none"),
       },
       {
-        title: "Qty",
+        title: tOrders("columns.quantity"),
         dataIndex: "quantity",
         width: 80,
       },
       {
-        title: "Status",
+        title: tOrders("columns.status"),
         dataIndex: "status",
-        render: (value) => <Tag color={STATUS_COLORS[value] || "default"}>{value || "-"}</Tag>,
+        render: (value) => (
+          <Tag color={STATUS_COLORS[value] || "default"}>
+            {value ? tOrders(`status.values.${value}`) || value : tOrders("common.none")}
+          </Tag>
+        ),
       },
     ],
-    [],
+    [tOrders],
   );
 
   const handleSaveDesignerNotes = useCallback(async () => {
@@ -208,14 +215,14 @@ export default function TransferOrderDetailPage() {
       await TransferOrdersAPI.update(detail.id, {
         designer_notes: designerNotesDraft?.trim() ? designerNotesDraft.trim() : null,
       });
-      message.success("Designer notes saved");
+      message.success(tDetail("messages.designerNotesSaved"));
       await loadDetail({ silent: true });
     } catch (error) {
-      message.error(error?.response?.data?.error?.message || "Failed to save designer notes");
+      message.error(error?.response?.data?.error?.message || tDetail("messages.designerNotesSaveError"));
     } finally {
       setSavingDesignerNotes(false);
     }
-  }, [designerNotesDraft, detail?.id, loadDetail, message]);
+  }, [designerNotesDraft, detail?.id, loadDetail, message, tDetail]);
 
   const designGroups = useMemo(
     () => (Array.isArray(detail?.design_groups) ? detail.design_groups : []),
@@ -226,6 +233,7 @@ export default function TransferOrderDetailPage() {
     () => Number(detail?.design_total_price || 0),
     [detail?.design_total_price],
   );
+  const transferLabel = useMemo(() => detail?.transfer_label || null, [detail?.transfer_label]);
   const itemTotalPrice = useMemo(() => {
     const items = Array.isArray(detail?.items) ? detail.items : [];
     return items.reduce((sum, item) => sum + Number(item?.price || 0), 0);
@@ -240,7 +248,7 @@ export default function TransferOrderDetailPage() {
   }
 
   if (!detail) {
-    return <Empty description="Transfer order not found" />;
+    return <Empty description={tDetail("messages.notFound")} />;
   }
 
   return (
@@ -258,37 +266,73 @@ export default function TransferOrderDetailPage() {
         <Col span={24}>
           <Card>
             <Typography.Title level={4} style={{ marginTop: 0 }}>
-              Transfer Order #{detail?.order_number || "-"}
+              {tDetail("header.orderNumber", { orderNumber: detail?.order_number || "-" })}
             </Typography.Title>
             <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered size="small">
-              <Descriptions.Item label="Order Name">{detail?.order_name || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Status">
+              <Descriptions.Item label={tDetail("fields.orderName")}>{detail?.order_name || "-"}</Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.status")}>
                 <Tag color={STATUS_COLORS[detail?.order_status] || "default"}>
-                  {detail?.order_status || "-"}
+                  {detail?.order_status
+                    ? tOrders(`status.values.${detail?.order_status}`) || detail?.order_status
+                    : tOrders("common.none")}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Customer">{detail?.bill_to_name || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Order Date">
+              <Descriptions.Item label={tOrders("columns.customerName")}>{detail?.bill_to_name || "-"}</Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.orderDate")}>
                 {detail?.order_date ? moment(detail.order_date).format("LLL") : "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="Currency">{detail?.currency || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Order Total">{formatAmount(detail?.order_total)}</Descriptions.Item>
-              <Descriptions.Item label="Notes">{detail?.notes || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Designer Notes" span={2}>
+              <Descriptions.Item label={tDetail("fields.currency")}>{detail?.currency || "-"}</Descriptions.Item>
+              <Descriptions.Item label={tDetail("fields.orderTotal")}>{formatAmount(detail?.order_total)}</Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.notes")}>{detail?.notes || "-"}</Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.designerNotes")} span={2}>
                 {detail?.designer_notes || "-"}
               </Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
 
+        {transferLabel ? (
+          <Col span={24}>
+            <Card title={tOrders("detail.fields.labels")}>
+              <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered size="small">
+                <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
+                  {transferLabel?.source || tOrders("common.none")}
+                </Descriptions.Item>
+                <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
+                  {transferLabel?.shipping_price != null
+                    ? formatCurrency(transferLabel.shipping_price, detail?.currency)
+                    : tOrders("common.none")}
+                </Descriptions.Item>
+                <Descriptions.Item label={tOrders("detail.fields.labelCreatedAt")}>
+                  {transferLabel?.created_at ? moment(transferLabel.created_at).format("LLL") : tOrders("common.none")}
+                </Descriptions.Item>
+                <Descriptions.Item label={tOrders("detail.actions.viewLabel")} span={3}>
+                  {transferLabel?.label_url ? (
+                    <Button
+                      icon={<ExportOutlined />}
+                      onClick={() => {
+                        window.open(transferLabel.label_url, "_blank", "noopener,noreferrer");
+                      }}
+                    >
+                      {tOrders("actions.download")}
+                    </Button>
+                  ) : (
+                    tOrders("common.none")
+                  )}
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          </Col>
+        ) : null}
+
         <Col span={24}>
-          <Card title="Designer Notes">
+          <Card title={tOrders("columns.designerNotes")}>
             <Space direction="vertical" style={{ width: "100%" }} size={12}>
               <Input.TextArea
                 rows={4}
                 value={designerNotesDraft}
                 onChange={(event) => setDesignerNotesDraft(event?.target?.value || "")}
-                placeholder="Add designer notes..."
+                placeholder={tDetail("placeholders.designerNotes")}
               />
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
@@ -297,7 +341,7 @@ export default function TransferOrderDetailPage() {
                   onClick={handleSaveDesignerNotes}
                   loading={savingDesignerNotes}
                 >
-                  Save Notes
+                  {tDetail("actions.saveNotes")}
                 </Button>
               </div>
             </Space>
@@ -305,23 +349,23 @@ export default function TransferOrderDetailPage() {
         </Col>
 
         <Col span={24}>
-          <Card title="Price Summary">
+          <Card title={tDetail("sections.priceSummary")}>
             <Row gutter={[16, 16]}>
               <Col xs={24} md={8}>
                 <Statistic
-                  title="Item Prices"
+                  title={tDetail("priceSummary.itemPrices")}
                   value={formatCurrency(itemTotalPrice, detail?.currency)}
                 />
               </Col>
               <Col xs={24} md={8}>
                 <Statistic
-                  title="Design Prices"
+                  title={tDetail("priceSummary.designPrices")}
                   value={formatCurrency(designTotalPrice, detail?.currency)}
                 />
               </Col>
               <Col xs={24} md={8}>
                 <Statistic
-                  title="Combined"
+                  title={tDetail("priceSummary.combined")}
                   value={formatCurrency(itemTotalPrice + designTotalPrice, detail?.currency)}
                 />
               </Col>
@@ -330,7 +374,7 @@ export default function TransferOrderDetailPage() {
         </Col>
 
         <Col span={24}>
-          <Card title="Items">
+          <Card title={tDetail("sections.items")}>
             <Table
               rowKey="id"
               columns={itemColumns}
@@ -341,9 +385,9 @@ export default function TransferOrderDetailPage() {
         </Col>
 
         <Col span={24}>
-          <Card title="Uploaded Designs by Sub Category">
+          <Card title={tDetail("sections.uploadedDesigns")}>
             {!designGroups.length ? (
-              <Empty description="No uploaded designs" />
+              <Empty description={tDetail("messages.noUploadedDesigns")} />
             ) : (
               <Space direction="vertical" size={16} style={{ width: "100%" }}>
                 {designGroups.map((group, groupIndex) => (
@@ -362,12 +406,17 @@ export default function TransferOrderDetailPage() {
                         <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
                           <Card size="small" styles={{ body: { padding: 10 } }}>
                             <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                              <LazyPreviewImage src={design?.design_url} alt={`design-${design?.id}`} />
+                              <LazyPreviewImage
+                                src={design?.design_url}
+                                alt={`design-${design?.id}`}
+                                preparingText={tDetail("preview.preparing")}
+                                emptyText={tDetail("preview.empty")}
+                              />
                               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                Size: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
+                                {tDetail("designCard.size")}: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
                               </Typography.Text>
                               <Typography.Text strong>
-                                Price: {formatCurrency(design?.price, detail?.currency)}
+                                {tDetail("designCard.price")}: {formatCurrency(design?.price, detail?.currency)}
                               </Typography.Text>
                               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                 {design?.created_at ? moment(design.created_at).format("LLL") : "-"}
@@ -382,12 +431,12 @@ export default function TransferOrderDetailPage() {
                                       window.open(design.design_url, "_blank", "noopener,noreferrer");
                                     }}
                                   >
-                                    Open
+                                    {tDetail("actions.open")}
                                   </Button>
                                   <Popconfirm
-                                    title="Delete this design?"
-                                    description="This will delete the record and remove the file from storage."
-                                    okText="Delete"
+                                    title={tDetail("actions.deleteConfirmTitle")}
+                                    description={tDetail("actions.deleteConfirmDescription")}
+                                    okText={tDetail("actions.delete")}
                                     okButtonProps={{ danger: true, loading: deletingDesignId === design?.id }}
                                     onConfirm={() => handleDeleteDesign(design?.id)}
                                   >
@@ -397,7 +446,7 @@ export default function TransferOrderDetailPage() {
                                       icon={<DeleteOutlined />}
                                       loading={deletingDesignId === design?.id}
                                     >
-                                      Delete
+                                      {tDetail("actions.delete")}
                                     </Button>
                                   </Popconfirm>
                                 </Space>

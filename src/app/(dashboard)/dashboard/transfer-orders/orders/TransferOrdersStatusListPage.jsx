@@ -356,7 +356,7 @@ export default function TransferOrdersStatusListPage({
                               const src = info?.image?.url || value;
                               void handleBarcodeDownload(src, record?.order_number);
                             }}
-                            title="Download"
+                            title={t("actions.download")}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(event) => {
@@ -406,11 +406,11 @@ export default function TransferOrdersStatusListPage({
         },
       },
       {
-        title: "Name",
+        title: t("columns.item"),
         dataIndex: "name",
         filter: {
           type: "text",
-          placeholder: "Search name",
+          placeholder: t("filters.searchItem"),
         },
         render: (value, record) => {
           if (record?.__hasChildren && !record?.__isChild) return null;
@@ -511,7 +511,7 @@ export default function TransferOrdersStatusListPage({
           ]
         : []),
       {
-        title: "Notes",
+        title: t("columns.notes"),
         dataIndex: "notes",
         render: (value, record) => {
           if (record?.__isChild) return null;
@@ -519,7 +519,7 @@ export default function TransferOrdersStatusListPage({
         },
       },
       {
-        title: "Designer Notes",
+        title: t("columns.designerNotes"),
         dataIndex: "designer_notes",
         render: (value, record) => {
           if (record?.__isChild) return null;

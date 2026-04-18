@@ -208,7 +208,7 @@ export default function TransferOrdersPage() {
   const handleOpenDesignUpload = useCallback(
     (record) => {
       if (!subCategoryId) {
-        message.error("Sub category is required for design upload.");
+        message.error(t("messages.subCategoryRequiredForDesignUpload"));
         return;
       }
       const transferOrderId = record?.transfer_order_id;
@@ -219,7 +219,7 @@ export default function TransferOrdersPage() {
       });
       designUploadInputRef.current?.click?.();
     },
-    [message, subCategoryId],
+    [message, subCategoryId, t],
   );
 
   const handleDesignUploadInputChange = useCallback(

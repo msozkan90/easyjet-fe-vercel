@@ -1685,7 +1685,8 @@
         "orderDate": "Order Date",
         "hasDesign": "Design",
         "actions": "Actions",
-        "notes": "Notes"
+        "notes": "Notes",
+        "designerNotes": "Designer Notes"
       },
       "filters": {
         "searchOrderNumber": "Search order number",
@@ -1732,7 +1733,8 @@
         "confirmWaitingOk": "Update",
         "newOrder": "Mark as New Order",
         "confirmNewOrderTitle": "Move this order back to New Order?",
-        "confirmNewOrderOk": "Update"
+        "confirmNewOrderOk": "Update",
+        "download": "Download"
       },
       "messages": {
         "loadVariationsError": "Failed to load product variations.",
@@ -1744,7 +1746,9 @@
         "addressMissingOrder": "Order information is missing.",
         "designDownloadStarted": "Design download started. Status list will refresh automatically.",
         "transferItemsPrintedSuccess": "Transfer order items moved to printed status.",
-        "transferItemsPrintedError": "Transfer order items could not be moved to printed status."
+        "transferItemsPrintedError": "Transfer order items could not be moved to printed status.",
+        "transferLabelRequired": "Label is missing. You need to create a shipping label.",
+        "subCategoryRequiredForDesignUpload": "Sub category is required for design upload."
       },
       "table": {
         "noData": "No data"
@@ -2012,6 +2016,155 @@
         "errors": {
           "mustRefreshRates": "Rates are outdated. Please refresh before sending."
         }
+      },
+      "workerPrinter": {
+        "title": "Printer"
+      },
+      "workerShipmentPrinter": {
+        "title": "Printer"
+      },
+      "transferDetail": {
+        "header": {
+          "orderNumber": "Transfer Order #{orderNumber}"
+        },
+        "fields": {
+          "orderName": "Order Name",
+          "currency": "Currency",
+          "orderTotal": "Order Total"
+        },
+        "sections": {
+          "priceSummary": "Price Summary",
+          "items": "Items",
+          "uploadedDesigns": "Uploaded Designs"
+        },
+        "priceSummary": {
+          "itemPrices": "Item Prices",
+          "designPrices": "Design Prices",
+          "combined": "Combined"
+        },
+        "placeholders": {
+          "designerNotes": "Add designer notes..."
+        },
+        "designCard": {
+          "size": "Size",
+          "price": "Price"
+        },
+        "preview": {
+          "preparing": "Preparing preview...",
+          "empty": "No preview",
+          "alt": "design"
+        },
+        "actions": {
+          "saveNotes": "Save Notes",
+          "open": "Open",
+          "delete": "Delete",
+          "deleteConfirmTitle": "Delete this design?",
+          "deleteConfirmDescription": "This will delete the record and remove the file from storage."
+        },
+        "messages": {
+          "loadError": "Failed to load transfer order detail",
+          "designDeleteSuccess": "Design deleted successfully",
+          "designDeleteError": "Failed to delete design",
+          "designerNotesSaved": "Designer notes saved",
+          "designerNotesSaveError": "Failed to save designer notes",
+          "notFound": "Transfer order not found",
+          "noUploadedDesigns": "No uploaded designs"
+        }
+      },
+      "transferShippingModal": {
+        "title": "Create Transfer Label",
+        "tabs": {
+          "easyjet": "EasyJet",
+          "company": "Company",
+          "partner": "Partner"
+        },
+        "actions": {
+          "createLabel": "Create Label"
+        },
+        "items": {
+          "title": "Transfer Items",
+          "subtitle": "Order items and shipping preparation",
+          "itemCount": "Item Count"
+        },
+        "designs": {
+          "title": "Uploaded Designs",
+          "subtitle": "Transfer order designs grouped",
+          "size": "Size"
+        },
+        "preview": {
+          "preparing": "Preparing preview...",
+          "empty": "No preview"
+        },
+        "package": {
+          "title": "Package",
+          "refreshRates": "Refresh Rates",
+          "weightLb": "Weight (lb)",
+          "weightOz": "Weight (oz)",
+          "lengthIn": "Length (in)",
+          "widthIn": "Width (in)",
+          "heightIn": "Height (in)"
+        },
+        "service": {
+          "title": "Carrier Service",
+          "subtitle": "Select and review shipping rates",
+          "selectPlaceholder": "Select carrier service",
+          "zoneLabel": "Zone",
+          "deliveryDaysLabel": "Delivery days"
+        },
+        "address": {
+          "title": "Shipping Address",
+          "phone": "Phone",
+          "email": "Email"
+        },
+        "summary": {
+          "selectedShippingRate": "Selected Shipping Rate",
+          "selectedService": "Selected Service"
+        },
+        "validation": {
+          "packageDimensionsRequired": "Length, width and height are required.",
+          "weightExclusive": "Enter exactly one weight field: lb or oz.",
+          "shippingSourceInvalid": "Valid shipping source not found.",
+          "selectRateFirst": "Select a shipping rate first."
+        },
+        "messages": {
+          "transferOrderNotFound": "Transfer order not found.",
+          "addressUpdated": "Shipping address updated.",
+          "addressUpdateError": "Address could not be updated.",
+          "noRatesFound": "No rates found for this option.",
+          "rateQuoteError": "Rates could not be quoted.",
+          "labelCreated": "Label created successfully.",
+          "labelCreateError": "Label could not be created."
+        }
+      },
+      "transferUploadQueue": {
+        "title": "Transfer Uploads",
+        "subtitle": "Uploads continue while you navigate inside the app.",
+        "status": {
+          "queued": "Queued",
+          "uploading": "Uploading",
+          "preparing": "Preparing",
+          "saving": "Saving",
+          "success": "Completed",
+          "failed": "Failed",
+          "canceled": "Canceled"
+        },
+        "badges": {
+          "uploading": "Uploading: {count}",
+          "queued": "Queued: {count}"
+        },
+        "fields": {
+          "order": "Order"
+        },
+        "actions": {
+          "clearFinished": "Clear Finished",
+          "retry": "Retry",
+          "cancel": "Cancel",
+          "remove": "Remove"
+        },
+        "messages": {
+          "uploadFailed": "Upload failed",
+          "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
+        }
       }
     },
     "refundRemake": {
@@ -2077,8 +2230,8 @@
           "responsibleEntity": "Responsible Entity",
           "description": "Description",
           "images": "Images",
-          "customer" : "Customer",
-          "company" : "Company"
+          "customer": "Customer",
+          "company": "Company"
         },
         "placeholders": {
           "description": "Enter description",
@@ -2121,8 +2274,8 @@
           "updatedAt": "Updated At",
           "description": "Description",
           "rejectReason": "Reject Reason",
-          "customer" : "Customer",
-          "company" : "Company"
+          "customer": "Customer",
+          "company": "Company"
         },
         "items": {
           "orderItem": "Order Item ID",
@@ -2145,7 +2298,8 @@
         "title": "Orders",
         "view": "View Orders",
         "waitingForDesign": "Waiting for Design",
-        "cancel": "Cancel Orders"
+        "cancel": "Cancel Orders",
+        "printer": "Printer"
       },
       "financial": {
         "title": "Financial",
@@ -2204,7 +2358,9 @@
         "inProduction": "In Production",
         "completed": "Completed Orders",
         "shipped": "Shipped Orders",
-        "refundRemake": "Refund / Remake"
+        "refundRemake": "Refund / Remake",
+        "viewOrder": "View Order",
+        "printer": "Printer"
       },
       "company": {
         "title": "Company",

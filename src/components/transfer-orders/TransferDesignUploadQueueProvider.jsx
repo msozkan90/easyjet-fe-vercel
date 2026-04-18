@@ -17,21 +17,12 @@ import {
   RedoOutlined,
 } from "@ant-design/icons";
 import { TransferOrdersAPI } from "@/utils/api";
+import { useTranslations } from "@/i18n/use-translations";
 
 const MAX_CONCURRENT_UPLOADS = 3;
 const DEFAULT_POLL_INTERVAL_MS = 3000;
 const PENDING_POLL_INTERVAL_MS = 4000;
 const SAVING_POLL_INTERVAL_MS = 2000;
-
-const STATUS_META = {
-  queued: { label: "Queued", color: "default" },
-  uploading: { label: "Uploading", color: "processing" },
-  preparing: { label: "Hazırlanıyor", color: "processing" },
-  saving: { label: "Kaydediliyor", color: "processing" },
-  success: { label: "Completed", color: "success" },
-  failed: { label: "Failed", color: "error" },
-  canceled: { label: "Canceled", color: "warning" },
-};
 
 const TransferDesignUploadQueueContext = createContext(null);
 
@@ -52,6 +43,7 @@ const formatBytes = (value) => {
 };
 
 export function TransferDesignUploadQueueProvider({ children }) {
+  const tQueue = useTranslations("dashboard.orders.transferUploadQueue");
   const [tasks, setTasks] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
   const controllersRef = useRef(new Map());
@@ -195,7 +187,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
           finishedAt: Date.now(),
           errorMessage: canceled
             ? null
-            : error?.response?.data?.error?.message || error?.message || "Upload failed",
+            : error?.response?.data?.error?.message || error?.message || tQueue("messages.uploadFailed"),
         });
       } finally {
         pollStopped = true;
@@ -205,7 +197,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
         controllersRef.current.delete(taskId);
       }
     },
-    [updateTask],
+    [tQueue, updateTask],
   );
 
   useEffect(() => {
@@ -302,7 +294,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
     const handler = (event) => {
       event.preventDefault();
-      event.returnValue = "Uploads are still in progress. Are you sure you want to leave this page?";
+      event.returnValue = tQueue("messages.beforeUnload");
       return event.returnValue;
     };
 
@@ -333,6 +325,18 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
   const queuedCount = tasks.filter((task) => task.status === "queued").length;
   const uploadingCount = tasks.filter((task) => task.status === "uploading").length;
+  const statusMeta = useMemo(
+    () => ({
+      queued: { label: tQueue("status.queued"), color: "default" },
+      uploading: { label: tQueue("status.uploading"), color: "processing" },
+      preparing: { label: tQueue("status.preparing"), color: "processing" },
+      saving: { label: tQueue("status.saving"), color: "processing" },
+      success: { label: tQueue("status.success"), color: "success" },
+      failed: { label: tQueue("status.failed"), color: "error" },
+      canceled: { label: tQueue("status.canceled"), color: "warning" },
+    }),
+    [tQueue],
+  );
 
   return (
     <TransferDesignUploadQueueContext.Provider value={value}>
@@ -354,10 +358,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
             title={
               <Space>
                 <Badge status={hasOngoingUploads ? "processing" : "default"} />
-                <span>Transfer Uploads</span>
+                <span>{tQueue("title")}</span>
                 <Tag>{tasks.length}</Tag>
-                {uploadingCount ? <Tag color="processing">Uploading: {uploadingCount}</Tag> : null}
-                {queuedCount ? <Tag color="default">Queued: {queuedCount}</Tag> : null}
+                {uploadingCount ? <Tag color="processing">{tQueue("badges.uploading", { count: uploadingCount })}</Tag> : null}
+                {queuedCount ? <Tag color="default">{tQueue("badges.queued", { count: queuedCount })}</Tag> : null}
               </Space>
             }
             extra={
@@ -369,9 +373,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
           >
             <Space direction="vertical" size="small" style={{ width: "100%" }}>
               <Space style={{ width: "100%", justifyContent: "space-between" }}>
-                <Typography.Text type="secondary">Uploads continue while you navigate inside the app.</Typography.Text>
+                <Typography.Text type="secondary">{tQueue("subtitle")}</Typography.Text>
                 <Button size="small" icon={<DeleteOutlined />} onClick={clearFinished}>
-                  Clear Finished
+                  {tQueue("actions.clearFinished")}
                 </Button>
               </Space>
 
@@ -379,10 +383,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
                 const isPreparing = task.status === "uploading" && task.serverStatus === "pending";
                 const isSaving = task.status === "uploading" && task.serverStatus === "saving";
                 const meta = isPreparing
-                  ? STATUS_META.preparing
+                  ? statusMeta.preparing
                   : isSaving
-                    ? STATUS_META.saving
-                    : STATUS_META[task.status] || STATUS_META.queued;
+                    ? statusMeta.saving
+                    : statusMeta[task.status] || statusMeta.queued;
                 const canCancel = task.status === "queued" || task.status === "uploading";
                 const canRetry = task.status === "failed" || task.status === "canceled";
                 const canRemove = !canCancel;
@@ -396,9 +400,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
                         </Typography.Text>
                         <Tag color={meta.color}>{meta.label}</Tag>
                       </Space>
-                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        Order: {task.orderNumber} • {formatBytes(task.fileSize)}
-                      </Typography.Text>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {tQueue("fields.order")}: {task.orderNumber} • {formatBytes(task.fileSize)}
+                        </Typography.Text>
                       <Progress
                         percent={task.status === "queued" ? 0 : task.progress}
                         size="small"
@@ -413,7 +417,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
                       <Space style={{ width: "100%", justifyContent: "flex-end" }}>
                         {canRetry ? (
                           <Button size="small" icon={<RedoOutlined />} onClick={() => retryUpload(task.id)}>
-                            Retry
+                            {tQueue("actions.retry")}
                           </Button>
                         ) : null}
                         {canCancel ? (
@@ -423,12 +427,12 @@ export function TransferDesignUploadQueueProvider({ children }) {
                             icon={<CloseOutlined />}
                             onClick={() => cancelUpload(task.id)}
                           >
-                            Cancel
+                            {tQueue("actions.cancel")}
                           </Button>
                         ) : null}
                         {canRemove ? (
                           <Button size="small" icon={<DeleteOutlined />} onClick={() => removeTask(task.id)}>
-                            Remove
+                            {tQueue("actions.remove")}
                           </Button>
                         ) : null}
                       </Space>

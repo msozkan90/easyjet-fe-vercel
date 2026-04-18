@@ -194,7 +194,7 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
-          Printer
+          {tOrders("workerPrinter.title")}
         </Typography.Title>
 
         <Card className="rounded-2xl">
