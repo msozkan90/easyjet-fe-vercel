@@ -18,3 +18,4 @@ export const refreshWalletBalance = async (dispatch) => {
     // Balance fetch failure should not block UI flows
   }
 };
+
