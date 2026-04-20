@@ -233,6 +233,10 @@ export default function TransferOrderDetailPage() {
     () => Number(detail?.design_total_price || 0),
     [detail?.design_total_price],
   );
+  const canDeleteDesign = useMemo(
+    () => detail?.order_status === "newOrder",
+    [detail?.order_status],
+  );
   const transferLabel = useMemo(() => detail?.transfer_label || null, [detail?.transfer_label]);
   const itemTotalPrice = useMemo(() => {
     const items = Array.isArray(detail?.items) ? detail.items : [];
@@ -433,22 +437,24 @@ export default function TransferOrderDetailPage() {
                                   >
                                     {tDetail("actions.open")}
                                   </Button>
-                                  <Popconfirm
-                                    title={tDetail("actions.deleteConfirmTitle")}
-                                    description={tDetail("actions.deleteConfirmDescription")}
-                                    okText={tDetail("actions.delete")}
-                                    okButtonProps={{ danger: true, loading: deletingDesignId === design?.id }}
-                                    onConfirm={() => handleDeleteDesign(design?.id)}
-                                  >
-                                    <Button
-                                      danger
-                                      size="small"
-                                      icon={<DeleteOutlined />}
-                                      loading={deletingDesignId === design?.id}
+                                  {canDeleteDesign ? (
+                                    <Popconfirm
+                                      title={tDetail("actions.deleteConfirmTitle")}
+                                      description={tDetail("actions.deleteConfirmDescription")}
+                                      okText={tDetail("actions.delete")}
+                                      okButtonProps={{ danger: true, loading: deletingDesignId === design?.id }}
+                                      onConfirm={() => handleDeleteDesign(design?.id)}
                                     >
-                                      {tDetail("actions.delete")}
-                                    </Button>
-                                  </Popconfirm>
+                                      <Button
+                                        danger
+                                        size="small"
+                                        icon={<DeleteOutlined />}
+                                        loading={deletingDesignId === design?.id}
+                                      >
+                                        {tDetail("actions.delete")}
+                                      </Button>
+                                    </Popconfirm>
+                                  ) : null}
                                 </Space>
                               </div>
                             </Space>
