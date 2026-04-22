@@ -24,6 +24,8 @@ const AddressEditorModal = ({
   onAddressSelect,
   orderDateLabel,
   zIndex = 1300,
+  showRecipientFields = false,
+  showBillToName = true,
 }) => {
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
@@ -69,20 +71,47 @@ const AddressEditorModal = ({
           </Descriptions>
           <Divider />
           <Form layout="vertical" form={editForm}>
-            <Form.Item
-              label={t("addressEditor.fields.billToName")}
-              name="bill_to_name"
-              rules={[
-                {
-                  required: true,
-                  message: t("addressEditor.validation.required", {
-                    field: t("addressEditor.fields.billToName"),
-                  }),
-                },
-              ]}
-            >
-              <Input placeholder={t("addressEditor.placeholders.billToName")} />
-            </Form.Item>
+            {showBillToName ? (
+              <Form.Item
+                label={t("addressEditor.fields.billToName")}
+                name="bill_to_name"
+                rules={[
+                  {
+                    required: true,
+                    message: t("addressEditor.validation.required", {
+                      field: t("addressEditor.fields.billToName"),
+                    }),
+                  },
+                ]}
+              >
+                <Input placeholder={t("addressEditor.placeholders.billToName")} />
+              </Form.Item>
+            ) : null}
+            {showRecipientFields ? (
+              <Space align="start" size="middle" style={{ width: "100%" }} wrap>
+                <Form.Item
+                  label={t("detail.fields.shipToName")}
+                  name="ship_to_name"
+                  style={{ flex: 1, minWidth: 180 }}
+                >
+                  <Input placeholder={t("detail.fields.shipToName")} />
+                </Form.Item>
+                <Form.Item
+                  label={t("detail.fields.shipToCompany")}
+                  name="ship_to_company"
+                  style={{ flex: 1, minWidth: 180 }}
+                >
+                  <Input placeholder={t("detail.fields.shipToCompany")} />
+                </Form.Item>
+                <Form.Item
+                  label={t("detail.fields.shipToPhone")}
+                  name="ship_to_phone"
+                  style={{ flex: 1, minWidth: 180 }}
+                >
+                  <Input placeholder={t("detail.fields.shipToPhone")} />
+                </Form.Item>
+              </Space>
+            ) : null}
             <Form.Item label={t("addressEditor.fields.searchAddress")}>
               <GooglePlacesAutocomplete
                 placeholder={t("addressEditor.placeholders.searchAddress")}

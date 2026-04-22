@@ -1734,7 +1734,8 @@
         "newOrder": "Mark as New Order",
         "confirmNewOrderTitle": "Move this order back to New Order?",
         "confirmNewOrderOk": "Update",
-        "download": "Download"
+        "download": "Download",
+        "manualOrder": "Manual Order"
       },
       "messages": {
         "loadVariationsError": "Failed to load product variations.",
@@ -1748,7 +1749,8 @@
         "transferItemsPrintedSuccess": "Transfer order items moved to printed status.",
         "transferItemsPrintedError": "Transfer order items could not be moved to printed status.",
         "transferLabelRequired": "Label is missing. You need to create a shipping label.",
-        "subCategoryRequiredForDesignUpload": "Sub category is required for design upload."
+        "subCategoryRequiredForDesignUpload": "Sub category is required for design upload.",
+        "subCategoryRequiredForManualOrder": "Sub category is required for manual transfer order."
       },
       "table": {
         "noData": "No data"
@@ -1785,6 +1787,48 @@
         },
         "validation": {
           "labelImageRequired": "Label image is required when 'I Have Label' is selected."
+        }
+      },
+      "manualOrderModal": {
+        "title": "Create Manual Transfer Order",
+        "fields": {
+          "orderNumber": "Order Number",
+          "orderDate": "Order Date",
+          "shipToName": "Ship To Name",
+          "shipToCompany": "Ship To Company",
+          "shipToStreet1": "Ship To Address 1",
+          "shipToStreet2": "Ship To Address 2",
+          "shipToCity": "Ship To City",
+          "shipToState": "Ship To State",
+          "shipToPostalCode": "Ship To Postal Code",
+          "shipToCountry": "Ship To Country",
+          "shipToPhone": "Ship To Phone",
+          "address": "Shipping Address",
+          "localPickup": "Local Pickup",
+          "notes": "Notes",
+          "items": "Transfer Order Items",
+          "itemName": "Item Name",
+          "transferProduct": "Transfer Product"
+        },
+        "placeholders": {
+          "orderNumber": "Enter order number",
+          "transferProduct": "Select transfer product"
+        },
+        "actions": {
+          "create": "Create",
+          "addItem": "Add Item",
+          "removeItem": "Remove"
+        },
+        "validation": {
+          "orderNumberRequired": "Order number is required.",
+          "orderDateRequired": "Order date is required.",
+          "itemsRequired": "At least one item is required.",
+          "itemNameRequired": "Item name is required.",
+          "transferProductRequired": "Transfer product is required."
+        },
+        "messages": {
+          "success": "Manual transfer order created.",
+          "error": "Manual transfer order could not be created."
         }
       },
       "design": {
@@ -1862,6 +1906,7 @@
           "shipToStreet2": "Ship To Address 2",
           "shipToCity": "Ship To City",
           "shipToState": "Ship To State",
+          "shipToPhone": "Ship To Phone",
           "shipToPostalCode": "Ship To Postal Code",
           "shipToCountry": "Ship To Country",
           "orderDate": "Order Date",

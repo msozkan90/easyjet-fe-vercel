@@ -1593,7 +1593,8 @@
         "newOrder": "Yeni Siparişe Al",
         "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
         "confirmNewOrderOk": "Güncelle",
-        "download": "İndir"
+        "download": "İndir",
+        "manualOrder": "Manuel Order"
       },
       "messages": {
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
@@ -1607,7 +1608,8 @@
         "transferItemsPrintedSuccess": "Transfer order itemları printed durumuna alındı.",
         "transferItemsPrintedError": "Transfer order itemları printed durumuna alınamadı.",
         "transferLabelRequired": "Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.",
-        "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur."
+        "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur.",
+        "subCategoryRequiredForManualOrder": "Manuel transfer order için alt kategori zorunludur."
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -1644,6 +1646,48 @@
         },
         "validation": {
           "labelImageRequired": "'I Have Label' seçildiğinde label görseli zorunludur."
+        }
+      },
+      "manualOrderModal": {
+        "title": "Manuel Transfer Order Oluştur",
+        "fields": {
+          "orderNumber": "Order Number",
+          "orderDate": "Order Date",
+          "shipToName": "Ship To Name",
+          "shipToCompany": "Ship To Company",
+          "shipToStreet1": "Ship To Address 1",
+          "shipToStreet2": "Ship To Address 2",
+          "shipToCity": "Ship To City",
+          "shipToState": "Ship To State",
+          "shipToPostalCode": "Ship To Postal Code",
+          "shipToCountry": "Ship To Country",
+          "shipToPhone": "Teslimat Telefonu",
+          "address": "Teslimat Adresi",
+          "localPickup": "Local Pickup",
+          "notes": "Notes",
+          "items": "Transfer Order Kalemleri",
+          "itemName": "Item Name",
+          "transferProduct": "Transfer Product"
+        },
+        "placeholders": {
+          "orderNumber": "Order number girin",
+          "transferProduct": "Transfer product seçin"
+        },
+        "actions": {
+          "create": "Oluştur",
+          "addItem": "Kalem Ekle",
+          "removeItem": "Kaldır"
+        },
+        "validation": {
+          "orderNumberRequired": "Order number zorunludur.",
+          "orderDateRequired": "Order date zorunludur.",
+          "itemsRequired": "En az bir kalem zorunludur.",
+          "itemNameRequired": "Item name zorunludur.",
+          "transferProductRequired": "Transfer product zorunludur."
+        },
+        "messages": {
+          "success": "Manuel transfer order oluşturuldu.",
+          "error": "Manuel transfer order oluşturulamadı."
         }
       },
       "design": {
@@ -1721,6 +1765,7 @@
           "shipToStreet2": "Teslimat Adresi 2",
           "shipToCity": "Teslimat Şehri",
           "shipToState": "Teslimat Eyaleti",
+          "shipToPhone": "Teslimat Telefonu",
           "shipToPostalCode": "Teslimat Posta Kodu",
           "shipToCountry": "Teslimat Ülkesi",
           "orderDate": "Sipariş Tarihi",

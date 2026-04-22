@@ -168,6 +168,7 @@ export const OrdersAPI = {
 
 export const TransferOrdersAPI = {
   create: (data) => api.post("/transfer-orders", data),
+  createManual: (data) => api.post("/transfer-orders/manual", data),
   list: (payload) => api.post("/transfer-orders/list", payload),
   detail: (orderNumber) =>
     api.get(`/transfer-orders/${encodeURIComponent(orderNumber)}`),
