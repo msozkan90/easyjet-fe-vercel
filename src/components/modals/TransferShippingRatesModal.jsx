@@ -76,7 +76,10 @@ const formatCurrency = (value, currency = "USD") => {
 const getRateKey = (rate) =>
   [
     rate?.carrier || "carrier",
-    rate?.carrierServiceId || rate?.serviceCode || rate?.serviceName || "service",
+    rate?.carrierServiceId ||
+      rate?.serviceCode ||
+      rate?.serviceName ||
+      "service",
     rate?.packageTypeId || "pkg",
   ].join("-");
 
@@ -203,9 +206,12 @@ export default function TransferShippingRatesModal({
   const hasSystemApi = Boolean(companyInfo?.permissions?.CAN_USE_NS_SHIPMENT);
   const tabs = useMemo(() => {
     const items = [];
-    if (hasSystemApi) items.push({ key: SERVICE_TABS.EASYJET, label: tModal("tabs.easyjet") });
-    if (hasCompanySSApi) items.push({ key: SERVICE_TABS.COMPANY, label: tModal("tabs.company") });
-    if (hasPartnerSSApi) items.push({ key: SERVICE_TABS.PARTNER, label: tModal("tabs.partner") });
+    if (hasSystemApi)
+      items.push({ key: SERVICE_TABS.EASYJET, label: tModal("tabs.easyjet") });
+    if (hasCompanySSApi)
+      items.push({ key: SERVICE_TABS.COMPANY, label: tModal("tabs.company") });
+    if (hasPartnerSSApi)
+      items.push({ key: SERVICE_TABS.PARTNER, label: tModal("tabs.partner") });
     return items;
   }, [hasCompanySSApi, hasPartnerSSApi, hasSystemApi, tModal]);
 
@@ -214,7 +220,10 @@ export default function TransferShippingRatesModal({
     [transferOrder?.items],
   );
   const designGroups = useMemo(
-    () => (Array.isArray(transferOrder?.design_groups) ? transferOrder.design_groups : []),
+    () =>
+      Array.isArray(transferOrder?.design_groups)
+        ? transferOrder.design_groups
+        : [],
     [transferOrder?.design_groups],
   );
 
@@ -245,13 +254,16 @@ export default function TransferShippingRatesModal({
       [...activeRates].sort((a, b) => {
         const left = Number(a?.amount);
         const right = Number(b?.amount);
-        return (Number.isFinite(left) ? left : Number.POSITIVE_INFINITY) -
-          (Number.isFinite(right) ? right : Number.POSITIVE_INFINITY);
+        return (
+          (Number.isFinite(left) ? left : Number.POSITIVE_INFINITY) -
+          (Number.isFinite(right) ? right : Number.POSITIVE_INFINITY)
+        );
       }),
     [activeRates],
   );
   const selectedRate = useMemo(
-    () => activeRates.find((rate) => getRateKey(rate) === selectedRateKey) || null,
+    () =>
+      activeRates.find((rate) => getRateKey(rate) === selectedRateKey) || null,
     [activeRates, selectedRateKey],
   );
 
@@ -277,7 +289,17 @@ export default function TransferShippingRatesModal({
       return false;
     }
     return true;
-  }, [activeTab, heightIn, lengthIn, message, tModal, transferOrder?.id, weightLb, weightOz, widthIn]);
+  }, [
+    activeTab,
+    heightIn,
+    lengthIn,
+    message,
+    tModal,
+    transferOrder?.id,
+    weightLb,
+    weightOz,
+    widthIn,
+  ]);
 
   const handleAddressSave = useCallback(async () => {
     setSavingAddress(true);
@@ -319,7 +341,10 @@ export default function TransferShippingRatesModal({
       message.success(tModal("messages.addressUpdated"));
       setAddressEditorOpen(false);
     } catch (error) {
-      message.error(error?.response?.data?.error?.message || tModal("messages.addressUpdateError"));
+      message.error(
+        error?.response?.data?.error?.message ||
+          tModal("messages.addressUpdateError"),
+      );
     } finally {
       setSavingAddress(false);
     }
@@ -329,13 +354,18 @@ export default function TransferShippingRatesModal({
     (payload) => {
       if (!payload) return;
       const updates = {};
-      if (payload.street1 !== undefined) updates.ship_to_street1 = payload.street1;
-      if (payload.street2 !== undefined) updates.ship_to_street2 = payload.street2;
-      if (payload.street3 !== undefined) updates.ship_to_street3 = payload.street3;
+      if (payload.street1 !== undefined)
+        updates.ship_to_street1 = payload.street1;
+      if (payload.street2 !== undefined)
+        updates.ship_to_street2 = payload.street2;
+      if (payload.street3 !== undefined)
+        updates.ship_to_street3 = payload.street3;
       if (payload.city !== undefined) updates.ship_to_city = payload.city;
       if (payload.state !== undefined) updates.ship_to_state = payload.state;
-      if (payload.postalCode !== undefined) updates.ship_to_postal_code = payload.postalCode;
-      if (payload.country !== undefined) updates.ship_to_country = payload.country;
+      if (payload.postalCode !== undefined)
+        updates.ship_to_postal_code = payload.postalCode;
+      if (payload.country !== undefined)
+        updates.ship_to_country = payload.country;
       if (Object.keys(updates).length) {
         form.setFieldsValue(updates);
       }
@@ -345,10 +375,18 @@ export default function TransferShippingRatesModal({
 
   const renderAddress = useCallback(() => {
     const addressLines = [
-      [addressInfo?.ship_to_street1, addressInfo?.ship_to_street2, addressInfo?.ship_to_street3]
+      [
+        addressInfo?.ship_to_street1,
+        addressInfo?.ship_to_street2,
+        addressInfo?.ship_to_street3,
+      ]
         .filter(Boolean)
         .join(", "),
-      [addressInfo?.ship_to_city, addressInfo?.ship_to_state, addressInfo?.ship_to_postal_code]
+      [
+        addressInfo?.ship_to_city,
+        addressInfo?.ship_to_state,
+        addressInfo?.ship_to_postal_code,
+      ]
         .filter(Boolean)
         .join(", "),
       addressInfo?.ship_to_country,
@@ -357,15 +395,26 @@ export default function TransferShippingRatesModal({
     return (
       <div className="space-y-1 text-sm text-gray-700">
         <div className="font-semibold text-gray-900">
-          {addressInfo?.ship_to_name || addressInfo?.bill_to_name || transferOrder?.bill_to_name || "-"}
+          {addressInfo?.ship_to_name ||
+            addressInfo?.bill_to_name ||
+            transferOrder?.bill_to_name ||
+            "-"}
         </div>
         {addressLines.length
           ? addressLines.map((line, idx) => (
               <div key={`${line}-${idx}`}>{line}</div>
             ))
           : "-"}
-        {addressInfo?.ship_to_phone ? <div>{tModal("address.phone")}: {addressInfo.ship_to_phone}</div> : null}
-        {addressInfo?.customer_email ? <div>{tModal("address.email")}: {addressInfo.customer_email}</div> : null}
+        {addressInfo?.ship_to_phone ? (
+          <div>
+            {tModal("address.phone")}: {addressInfo.ship_to_phone}
+          </div>
+        ) : null}
+        {addressInfo?.customer_email ? (
+          <div>
+            {tModal("address.email")}: {addressInfo.customer_email}
+          </div>
+        ) : null}
       </div>
     );
   }, [addressInfo, tModal, transferOrder?.bill_to_name]);
@@ -377,19 +426,26 @@ export default function TransferShippingRatesModal({
       const response = await TransferOrdersAPI.workerShippingQuoteRates({
         transfer_order_id: transferOrder.id,
         source: SOURCE_BY_TAB[activeTab],
-        ...(Number(weightOz) > 0 ? { weightOz: Number(weightOz) } : { weightLb: Number(weightLb) }),
+        ...(Number(weightOz) > 0
+          ? { weightOz: Number(weightOz) }
+          : { weightLb: Number(weightLb) }),
         lengthIn: Number(lengthIn),
         widthIn: Number(widthIn),
         heightIn: Number(heightIn),
       });
-      const rates = Array.isArray(response?.data?.rates) ? response.data.rates : [];
+      const rates = Array.isArray(response?.data?.rates)
+        ? response.data.rates
+        : [];
       setRatesByTab((prev) => ({ ...prev, [activeTab]: rates }));
       setSelectedRateKey(rates.length ? getRateKey(rates[0]) : null);
       if (!rates.length) {
         message.warning(tModal("messages.noRatesFound"));
       }
     } catch (error) {
-      message.error(error?.response?.data?.error?.message || tModal("messages.rateQuoteError"));
+      message.error(
+        error?.response?.data?.error?.message ||
+          tModal("messages.rateQuoteError"),
+      );
     } finally {
       setLoadingRates(false);
     }
@@ -413,7 +469,7 @@ export default function TransferShippingRatesModal({
     }
     setCreatingLabel(true);
     try {
-      await TransferOrdersAPI.createWorkerShipmentLabel({
+      const response = await TransferOrdersAPI.createWorkerShipmentLabel({
         transfer_order_id: transferOrder.id,
         order_price: Number(orderTotal || 0),
         shipping_price: Number(selectedRate.amount || 0),
@@ -432,9 +488,12 @@ export default function TransferShippingRatesModal({
         source: SOURCE_BY_TAB[activeTab],
       });
       message.success(tModal("messages.labelCreated"));
-      onLabelCreated?.();
+      onLabelCreated?.(response?.data || null);
     } catch (error) {
-      message.error(error?.response?.data?.error?.message || tModal("messages.labelCreateError"));
+      message.error(
+        error?.response?.data?.error?.message ||
+          tModal("messages.labelCreateError"),
+      );
     } finally {
       setCreatingLabel(false);
     }
@@ -464,7 +523,12 @@ export default function TransferShippingRatesModal({
         <Button key="close" onClick={onClose}>
           {tCommonActions("close")}
         </Button>,
-        <Button key="create" type="primary" loading={creatingLabel} onClick={handleCreateLabel}>
+        <Button
+          key="create"
+          type="primary"
+          loading={creatingLabel}
+          onClick={handleCreateLabel}
+        >
           {tModal("actions.createLabel")}
         </Button>,
       ]}
@@ -483,12 +547,14 @@ export default function TransferShippingRatesModal({
               </div>
               <div>
                 <Tag className="rounded-full" color="geekblue">
-                  {tOrders("columns.orderNumber")}: {transferOrder?.order_number || "-"}
+                  {tOrders("columns.orderNumber")}:{" "}
+                  {transferOrder?.order_number || "-"}
                 </Tag>
               </div>
               <div>
                 <Tag className="rounded-full" color="gold">
-                  {tOrders("columns.customerName")}: {transferOrder?.bill_to_name || "-"}
+                  {tOrders("columns.customerName")}:{" "}
+                  {transferOrder?.bill_to_name || "-"}
                 </Tag>
               </div>
               <div>
@@ -509,7 +575,8 @@ export default function TransferShippingRatesModal({
                     {item?.name || "-"}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {tOrders("columns.product")}: {item?.transfer_product?.name || "-"}
+                    {tOrders("columns.product")}:{" "}
+                    {item?.transfer_product?.name || "-"}
                   </div>
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
@@ -520,8 +587,13 @@ export default function TransferShippingRatesModal({
                 <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                   <div className="font-semibold text-gray-900">
                     {tOrders("columns.status")}:{" "}
-                    <Tag color={STATUS_COLORS[item?.status] || "default"} style={{ marginInlineEnd: 0 }}>
-                      {item?.status ? tOrders(`status.values.${item.status}`) || item.status : "-"}
+                    <Tag
+                      color={STATUS_COLORS[item?.status] || "default"}
+                      style={{ marginInlineEnd: 0 }}
+                    >
+                      {item?.status
+                        ? tOrders(`status.values.${item.status}`) || item.status
+                        : "-"}
                     </Tag>
                   </div>
                 </div>
@@ -532,13 +604,20 @@ export default function TransferShippingRatesModal({
 
         {designGroups.length ? (
           <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
-            <Typography.Title level={4} style={{ marginTop: 0, marginBottom: 8 }}>
+            <Typography.Title
+              level={4}
+              style={{ marginTop: 0, marginBottom: 8 }}
+            >
               {tModal("designs.title")}
             </Typography.Title>
             <Typography.Text type="secondary">
               {tModal("designs.subtitle")}
             </Typography.Text>
-            <Space direction="vertical" size={16} style={{ width: "100%", marginTop: 16 }}>
+            <Space
+              direction="vertical"
+              size={16}
+              style={{ width: "100%", marginTop: 16 }}
+            >
               {designGroups.map((group, groupIndex) => (
                 <Card
                   key={group?.sub_category_id || `group-${groupIndex}`}
@@ -546,29 +625,49 @@ export default function TransferShippingRatesModal({
                   title={group?.sub_category_name || "-"}
                 >
                   <Row gutter={[12, 12]}>
-                    {(Array.isArray(group?.designs) ? group.designs : []).map((design) => (
-                      <Col xs={12} sm={8} md={6} lg={3} key={design?.id}>
-                        <Card size="small" styles={{ body: { padding: 10 } }}>
-                          <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                            <LazyPreviewImage
-                              src={design?.design_url}
-                              alt={`design-${design?.id}`}
-                              preparingText={tModal("preview.preparing")}
-                              emptyText={tModal("preview.empty")}
-                            />
-                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                              {tModal("designs.size")}: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
-                            </Typography.Text>
-                            <Typography.Text strong>
-                              {tOrders("columns.price")}: {formatCurrency(design?.price, transferOrder?.currency)}
-                            </Typography.Text>
-                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                              {design?.created_at ? new Date(design.created_at).toLocaleString() : "-"}
-                            </Typography.Text>
-                          </Space>
-                        </Card>
-                      </Col>
-                    ))}
+                    {(Array.isArray(group?.designs) ? group.designs : []).map(
+                      (design) => (
+                        <Col xs={12} sm={8} md={6} lg={3} key={design?.id}>
+                          <Card size="small" styles={{ body: { padding: 10 } }}>
+                            <Space
+                              direction="vertical"
+                              size={8}
+                              style={{ width: "100%" }}
+                            >
+                              <LazyPreviewImage
+                                src={design?.design_url}
+                                alt={`design-${design?.id}`}
+                                preparingText={tModal("preview.preparing")}
+                                emptyText={tModal("preview.empty")}
+                              />
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {tModal("designs.size")}:{" "}
+                                {formatAmount(design?.width)}" x{" "}
+                                {formatAmount(design?.height)}"
+                              </Typography.Text>
+                              <Typography.Text strong>
+                                {tOrders("columns.price")}:{" "}
+                                {formatCurrency(
+                                  design?.price,
+                                  transferOrder?.currency,
+                                )}
+                              </Typography.Text>
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {design?.created_at
+                                  ? new Date(design.created_at).toLocaleString()
+                                  : "-"}
+                              </Typography.Text>
+                            </Space>
+                          </Card>
+                        </Col>
+                      ),
+                    )}
                   </Row>
                 </Card>
               ))}
@@ -597,13 +696,25 @@ export default function TransferShippingRatesModal({
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {tModal("package.weightLb")}
                 </div>
-                <InputNumber placeholder="0" min={0} style={{ width: "100%" }} value={weightLb} onChange={setWeightLb} />
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  value={weightLb}
+                  onChange={setWeightLb}
+                />
               </div>
               <div className="space-y-1">
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {tModal("package.weightOz")}
                 </div>
-                <InputNumber placeholder="0" min={0} style={{ width: "100%" }} value={weightOz} onChange={setWeightOz} />
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  value={weightOz}
+                  onChange={setWeightOz}
+                />
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
@@ -611,19 +722,37 @@ export default function TransferShippingRatesModal({
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {tModal("package.lengthIn")}
                 </div>
-                <InputNumber placeholder="0" min={0} style={{ width: "100%" }} value={lengthIn} onChange={setLengthIn} />
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  value={lengthIn}
+                  onChange={setLengthIn}
+                />
               </div>
               <div className="space-y-1">
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {tModal("package.widthIn")}
                 </div>
-                <InputNumber placeholder="0" min={0} style={{ width: "100%" }} value={widthIn} onChange={setWidthIn} />
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  value={widthIn}
+                  onChange={setWidthIn}
+                />
               </div>
               <div className="space-y-1">
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {tModal("package.heightIn")}
                 </div>
-                <InputNumber placeholder="0" min={0} style={{ width: "100%" }} value={heightIn} onChange={setHeightIn} />
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  value={heightIn}
+                  onChange={setHeightIn}
+                />
               </div>
             </div>
           </div>
@@ -663,7 +792,8 @@ export default function TransferShippingRatesModal({
               <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
                 <div className="flex flex-wrap justify-between gap-2">
                   <span className="font-semibold text-gray-900">
-                    {selectedRate.carrier} • {selectedRate.serviceName || selectedRate.serviceCode}
+                    {selectedRate.carrier} •{" "}
+                    {selectedRate.serviceName || selectedRate.serviceCode}
                   </span>
                   <span className="text-base font-semibold text-gray-900">
                     $ {formatAmount(selectedRate.amount, "0.00")}
@@ -676,7 +806,8 @@ export default function TransferShippingRatesModal({
                 ) : null}
                 {selectedRate.deliveryDays ? (
                   <div className="text-xs text-gray-500">
-                    {tModal("service.deliveryDaysLabel")}: {selectedRate.deliveryDays}
+                    {tModal("service.deliveryDaysLabel")}:{" "}
+                    {selectedRate.deliveryDays}
                   </div>
                 ) : null}
               </div>
@@ -704,8 +835,12 @@ export default function TransferShippingRatesModal({
 
           <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">{tModal("summary.selectedShippingRate")}</span>
-              <span className="text-base font-semibold text-gray-900">$ {formatAmount(shippingAmount, "0.00")}</span>
+              <span className="text-gray-600">
+                {tModal("summary.selectedShippingRate")}
+              </span>
+              <span className="text-base font-semibold text-gray-900">
+                $ {formatAmount(shippingAmount, "0.00")}
+              </span>
             </div>
             <Typography.Text type="secondary">
               {tModal("summary.selectedService")}:{" "}
@@ -726,7 +861,9 @@ export default function TransferShippingRatesModal({
         editingOrder={transferOrder}
         onAddressSelect={handleAddressSelect}
         orderDateLabel={
-          transferOrder?.order_date ? new Date(transferOrder.order_date).toLocaleString() : "-"
+          transferOrder?.order_date
+            ? new Date(transferOrder.order_date).toLocaleString()
+            : "-"
         }
         zIndex={1500}
       />

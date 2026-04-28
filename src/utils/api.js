@@ -35,7 +35,7 @@ const sanitizeFilters = (filters) => {
       value !== undefined &&
       value !== null &&
       value !== "" &&
-      !(Array.isArray(value) && value.length === 0)
+      !(Array.isArray(value) && value.length === 0),
   );
   if (!entries.length) return undefined;
   return Object.fromEntries(entries);
@@ -106,7 +106,8 @@ export const WalletTopupsAPI = {
     api.postMultipart("/wallet/topups", payload, config),
   list: (payload) => api.post("/wallet/topups/list", payload),
   getById: (id) => api.get(`/wallet/topups/${id}`),
-  cancel: (id, payload = {}) => api.post(`/wallet/topups/${id}/cancel`, payload),
+  cancel: (id, payload = {}) =>
+    api.post(`/wallet/topups/${id}/cancel`, payload),
   approve: (id, payload = {}) =>
     api.post(`/wallet/topups/${id}/approve`, payload),
   reject: (id, payload) => api.post(`/wallet/topups/${id}/reject`, payload),
@@ -120,7 +121,8 @@ export const OrdersAPI = {
   transferPreList: (query) => api.post("/transfer-order-pools/list", query),
   transferPreUpdate: (id, data) => api.put(`/transfer-order-pools/${id}`, data),
   transferPreCancel: (id) => api.del(`/transfer-order-pools/${id}`),
-  transferManualFetch: (data = {}) => api.post("/transfer-order-pools/orders/manual", data),
+  transferManualFetch: (data = {}) =>
+    api.post("/transfer-order-pools/orders/manual", data),
 
   // order list
   create: (data) => api.post("/orders", data),
@@ -163,7 +165,6 @@ export const OrdersAPI = {
 
   // Label
   voidLabel: (data) => api.post("/orders/labels/void", data),
-  
 };
 
 export const TransferOrdersAPI = {
@@ -175,8 +176,10 @@ export const TransferOrdersAPI = {
   update: (id, data) => api.put(`/transfer-orders/${id}`, data),
   remove: (id) => api.del(`/transfer-orders/${id}`),
   itemsList: (payload) => api.post("/transfer-orders/items/list", payload),
-  pendingItemsList: (payload) => api.post("/transfer-orders/items/pending/list", payload),
-  productionItemsList: (payload) => api.post("/transfer-orders/items/production/list", payload),
+  pendingItemsList: (payload) =>
+    api.post("/transfer-orders/items/pending/list", payload),
+  productionItemsList: (payload) =>
+    api.post("/transfer-orders/items/production/list", payload),
   affilatedProductionItemsList: (payload) =>
     api.post("/transfer-orders/items/affilated/production/list", payload),
   workerCompletedItemsList: (payload) =>
@@ -191,6 +194,8 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/items/worker/shipped/address", payload),
   createWorkerShipmentLabel: (payload) =>
     api.post("/transfer-orders/items/worker/shipped/label", payload),
+  voidWorkerShipmentLabel: (payload) =>
+    api.post("/transfer-orders/items/worker/shipped/label/void", payload),
   markWorkerItemsPrinted: (payload) =>
     api.post("/transfer-orders/items/completed-worker/printed", payload),
   workerCompletedDownloadUrl: (params = {}) => {
@@ -203,14 +208,18 @@ export const TransferOrdersAPI = {
     const query = search.toString();
     return `${base}/transfer-orders/items/worker/completed/download${query ? `?${query}` : ""}`;
   },
-  cancelItemsList: (payload) => api.post("/transfer-orders/items/cancel/list", payload),
+  cancelItemsList: (payload) =>
+    api.post("/transfer-orders/items/cancel/list", payload),
   sendToProduction: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/production", payload, config),
   uploadDesigns: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/designs", payload, config),
   uploadDesignProgress: (uploadId) =>
-    api.get(`/transfer-orders/designs/progress/${encodeURIComponent(uploadId)}`),
-  deleteDesign: (id) => api.del(`/transfer-orders/designs/${encodeURIComponent(id)}`),
+    api.get(
+      `/transfer-orders/designs/progress/${encodeURIComponent(uploadId)}`,
+    ),
+  deleteDesign: (id) =>
+    api.del(`/transfer-orders/designs/${encodeURIComponent(id)}`),
   updateItem: (id, data) => api.put(`/transfer-orders/items/${id}`, data),
   removeItem: (id) => api.del(`/transfer-orders/items/${id}`),
 };
@@ -299,7 +308,7 @@ export const ProductsAPI = {
     return api.postMultipart(
       `/products/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };
@@ -340,7 +349,7 @@ export const ProductSizesAPI = {
     return api.postMultipart(
       `/product-sizes/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };
@@ -367,7 +376,7 @@ export const ProductColorsAPI = {
     return api.postMultipart(
       `/product-colors/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };
@@ -402,7 +411,7 @@ export const ProductAdditionalPricesAPI = {
     return api.postMultipart(
       `/product-additional-prices/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };
@@ -439,7 +448,7 @@ export const ProductStockAPI = {
     return api.postMultipart(
       `/product-stocks/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };
@@ -476,7 +485,7 @@ export const ProductPricesAPI = {
     return api.postMultipart(
       `/product-prices/import`,
       payload,
-      options.config || options.multipartConfig
+      options.config || options.multipartConfig,
     );
   },
 };

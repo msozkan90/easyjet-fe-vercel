@@ -11,6 +11,7 @@ import {
   Empty,
   Image,
   Input,
+  Popconfirm,
   Row,
   Space,
   Spin,
@@ -132,16 +133,22 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
     : tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      bodyStyle={{ padding: 20 }}
+    >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
           <Tag color="gold">
-            {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
+            {tOrders("columns.quantity")}:{" "}
+            {item?.quantity ?? tOrders("common.none")}
           </Tag>
-          <Tag color="green">{tOrders("columns.price")}: {formatAmount(item?.price)}</Tag>
+          <Tag color="green">
+            {tOrders("columns.price")}: {formatAmount(item?.price)}
+          </Tag>
           <Tag color={STATUS_COLORS[statusKey] || "default"}>
             {tOrders("columns.status")}: {statusLabel}
           </Tag>
@@ -149,17 +156,27 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.product")}</Typography.Text>
-            <div className="font-medium">{item?.product?.name || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.product")}
+            </Typography.Text>
+            <div className="font-medium">
+              {item?.product?.name || tOrders("common.none")}
+            </div>
           </div>
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.notes")}</Typography.Text>
-            <div className="font-medium">{item?.notes || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.notes")}
+            </Typography.Text>
+            <div className="font-medium">
+              {item?.notes || tOrders("common.none")}
+            </div>
           </div>
         </div>
 
         <div>
-          <Typography.Text type="secondary">{tOrders("columns.options")}</Typography.Text>
+          <Typography.Text type="secondary">
+            {tOrders("columns.options")}
+          </Typography.Text>
           {options.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
               {options.map((option, index) => (
@@ -167,7 +184,8 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
                   key={`${option?.name || "option"}-${index}`}
                   className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
                 >
-                  {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
+                  {option?.name || tOrders("common.none")}:{" "}
+                  {option?.value || tOrders("common.none")}
                 </span>
               ))}
             </div>
@@ -196,6 +214,7 @@ export default function TransferShippedPrinterSearchPage() {
   const [designGroups, setDesignGroups] = useState([]);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
+  const [voidingLabelId, setVoidingLabelId] = useState(null);
 
   const triggerLabelDownload = useCallback((labelUrl, selectedOrderNumber) => {
     if (!labelUrl) return;
@@ -233,7 +252,11 @@ export default function TransferShippedPrinterSearchPage() {
 
         setItems(scopedItems);
         setTransferLabel(latestLabel);
-        setDesignGroups(Array.isArray(transferOrder?.design_groups) ? transferOrder.design_groups : []);
+        setDesignGroups(
+          Array.isArray(transferOrder?.design_groups)
+            ? transferOrder.design_groups
+            : [],
+        );
         setOrderSummary(
           transferOrder
             ? {
@@ -244,7 +267,8 @@ export default function TransferShippedPrinterSearchPage() {
                 currency: transferOrder?.currency || "USD",
                 barcode_url: transferOrder?.barcode_url || null,
                 order_date: transferOrder?.order_date || null,
-                fullfillment_location: transferOrder?.fullfillment_location || null,
+                fullfillment_location:
+                  transferOrder?.fullfillment_location || null,
                 local_pickup: Boolean(transferOrder?.local_pickup),
                 shipping_address: transferOrder?.shipping_address || null,
               }
@@ -255,7 +279,10 @@ export default function TransferShippedPrinterSearchPage() {
           const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
           if (autoDownloadedLabelRef.current !== labelIdentity) {
             autoDownloadedLabelRef.current = labelIdentity;
-            triggerLabelDownload(latestLabel.label_url, transferOrder?.order_number || nextOrderNumber);
+            triggerLabelDownload(
+              latestLabel.label_url,
+              transferOrder?.order_number || nextOrderNumber,
+            );
           }
         }
 
@@ -265,7 +292,11 @@ export default function TransferShippedPrinterSearchPage() {
               const unitPrice = Number(item?.price);
               const quantity = Number(item?.quantity ?? 1);
               if (!Number.isFinite(unitPrice)) return sum;
-              return sum + unitPrice * (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+              return (
+                sum +
+                unitPrice *
+                  (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+              );
             }, 0) || 0;
 
           setShippingModalRecord({
@@ -286,7 +317,10 @@ export default function TransferShippedPrinterSearchPage() {
         setDesignGroups([]);
         setShippingModalRecord(null);
         setShippingModalOpen(false);
-        message.error(error?.response?.data?.error?.message || tOrders("messages.loadListError"));
+        message.error(
+          error?.response?.data?.error?.message ||
+            tOrders("messages.loadListError"),
+        );
       } finally {
         setSearching(false);
       }
@@ -294,19 +328,46 @@ export default function TransferShippedPrinterSearchPage() {
     [message, orderNumber, tOrders, triggerLabelDownload],
   );
 
-  const handleCreateLabelSuccess = useCallback(() => {
-    const latestOrderNumber =
-      orderSummary?.order_number || shippingModalRecord?.order_number || orderNumber;
+  const handleCreateLabelSuccess = useCallback((payload) => {
+    const latestLabel = payload?.transfer_label || null;
+    if (latestLabel) {
+      setTransferLabel(latestLabel);
+    }
     setShippingModalOpen(false);
     setShippingModalRecord(null);
-    if (latestOrderNumber) {
-      void handleSearch(latestOrderNumber);
+  }, []);
+
+  const handleVoidLabel = useCallback(async () => {
+    const transferOrderId = orderSummary?.id || shippingModalRecord?.id;
+    const labelId = transferLabel?.id || transferLabel?.label_id;
+    if (!transferOrderId || !labelId) {
+      message.error(tOrders("detail.messages.voidLabelError"));
+      return;
+    }
+
+    setVoidingLabelId(String(labelId));
+    try {
+      await TransferOrdersAPI.voidWorkerShipmentLabel({
+        transfer_order_id: transferOrderId,
+        label_id: labelId,
+      });
+      message.success(tOrders("detail.messages.voidLabelSuccess"));
+      setTransferLabel(null);
+      autoDownloadedLabelRef.current = "";
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          tOrders("detail.messages.voidLabelError"),
+      );
+    } finally {
+      setVoidingLabelId(null);
     }
   }, [
-    handleSearch,
-    orderNumber,
-    orderSummary?.order_number,
-    shippingModalRecord?.order_number,
+    message,
+    orderSummary?.id,
+    shippingModalRecord?.id,
+    tOrders,
+    transferLabel,
   ]);
 
   const statusTag = useMemo(() => {
@@ -360,7 +421,8 @@ export default function TransferShippedPrinterSearchPage() {
                   {orderSummary?.order_number || tOrders("common.none")}
                 </Typography.Title>
                 <Typography.Text type="secondary">
-                  {tOrders("columns.customerName")}: {orderSummary?.bill_to_name || tOrders("common.none")}
+                  {tOrders("columns.customerName")}:{" "}
+                  {orderSummary?.bill_to_name || tOrders("common.none")}
                 </Typography.Text>
                 <div>{statusTag}</div>
               </div>
@@ -377,38 +439,108 @@ export default function TransferShippedPrinterSearchPage() {
         ) : null}
 
         {transferLabel ? (
-          <Card className="rounded-2xl border border-slate-100" title={tOrders("detail.fields.labels")}>
-            <Descriptions column={{ xs: 1, sm: 2, md: 3 }} size="small" bordered>
+          <Card
+            className="rounded-2xl border border-slate-100"
+            title={tOrders("detail.fields.labels")}
+          >
+            <Descriptions
+              column={{ xs: 1, sm: 2, md: 3 }}
+              size="small"
+              bordered
+            >
               <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
                 {transferLabel?.source || tOrders("common.none")}
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
-                {transferLabel?.shipping_price != null
-                  ? formatCurrency(transferLabel.shipping_price, orderSummary?.currency || "USD")
-                  : tOrders("common.none")}
+                {transferLabel?.base_shipping_price != null ? (
+                  <Space direction="vertical" size={0}>
+                    <Typography.Text>
+                      Price:{" "}
+                      {formatCurrency(
+                        transferLabel.base_shipping_price,
+                        orderSummary?.currency || "USD",
+                      )}
+                    </Typography.Text>
+                    <Typography.Text>
+                      Total:{" "}
+                      {formatCurrency(
+                        transferLabel.shipment_total_price ??
+                          transferLabel.shipping_price,
+                        orderSummary?.currency || "USD",
+                      )}
+                      {transferLabel?.shipment_multiplier != null
+                        ? ` x ${formatAmount(transferLabel.shipment_multiplier)}`
+                        : ""}
+                    </Typography.Text>
+                  </Space>
+                ) : transferLabel?.shipping_price != null ? (
+                  formatCurrency(
+                    transferLabel.shipping_price,
+                    orderSummary?.currency || "USD",
+                  )
+                ) : (
+                  tOrders("common.none")
+                )}
               </Descriptions.Item>
-              <Descriptions.Item label={tOrders("detail.fields.labelCreatedAt")}>
-                {transferLabel?.created_at ? moment(transferLabel.created_at).format("LLL") : tOrders("common.none")}
+              <Descriptions.Item
+                label={tOrders("detail.fields.labelCreatedAt")}
+              >
+                {transferLabel?.created_at
+                  ? moment(transferLabel.created_at).format("LLL")
+                  : tOrders("common.none")}
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("detail.fields.labelTracking")}>
                 {transferLabel?.tracking_number || tOrders("common.none")}
               </Descriptions.Item>
-              <Descriptions.Item label={tOrders("detail.actions.viewLabel")} span={2}>
-                {transferLabel?.label_url ? (
-                  <Button
-                    icon={<ExportOutlined />}
-                    onClick={() =>
-                      triggerLabelDownload(
-                        transferLabel.label_url,
-                        orderSummary?.order_number || orderNumber,
-                      )
-                    }
-                  >
-                    {tOrders("actions.download")}
-                  </Button>
-                ) : (
-                  tOrders("common.none")
-                )}
+              <Descriptions.Item
+                label={tOrders("detail.actions.viewLabel")}
+                span={2}
+              >
+                <Space wrap>
+                  {transferLabel?.label_url ? (
+                    <Button
+                      icon={<ExportOutlined />}
+                      onClick={() =>
+                        triggerLabelDownload(
+                          transferLabel.label_url,
+                          orderSummary?.order_number || orderNumber,
+                        )
+                      }
+                    >
+                      {tOrders("actions.download")}
+                    </Button>
+                  ) : (
+                    tOrders("common.none")
+                  )}
+                  {(transferLabel?.id || transferLabel?.label_id) &&
+                  orderSummary?.status !== "shipped" ? (
+                    <Popconfirm
+                      title={tOrders("detail.actions.voidLabelConfirmTitle")}
+                      okText={tOrders("detail.actions.voidLabelConfirmOk")}
+                      okButtonProps={{
+                        danger: true,
+                        loading:
+                          voidingLabelId ===
+                          String(
+                            transferLabel?.id || transferLabel?.label_id || "",
+                          ),
+                      }}
+                      onConfirm={handleVoidLabel}
+                    >
+                      <Button
+                        danger
+                        loading={
+                          voidingLabelId ===
+                          String(
+                            transferLabel?.id || transferLabel?.label_id || "",
+                          )
+                        }
+                      >
+                        {tOrders("detail.actions.voidLabel")}
+                      </Button>
+                    </Popconfirm>
+                  ) : null}
+                </Space>
               </Descriptions.Item>
             </Descriptions>
           </Card>
@@ -424,46 +556,78 @@ export default function TransferShippedPrinterSearchPage() {
                   title={group?.sub_category_name || "-"}
                   extra={
                     <Typography.Text strong>
-                      {formatCurrency(group?.total_price, orderSummary?.currency || "USD")}
+                      {formatCurrency(
+                        group?.total_price,
+                        orderSummary?.currency || "USD",
+                      )}
                     </Typography.Text>
                   }
                 >
                   <Row gutter={[12, 12]}>
-                    {(Array.isArray(group?.designs) ? group.designs : []).map((design) => (
-                      <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
-                        <Card size="small" styles={{ body: { padding: 10 } }}>
-                          <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                            <LazyPreviewImage
-                              src={design?.design_url}
-                              alt={`design-${design?.id}`}
-                              preparingText={tDetail("preview.preparing")}
-                              emptyText={tDetail("preview.empty")}
-                            />
-                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                              {tDetail("designCard.size")}: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
-                            </Typography.Text>
-                            <Typography.Text strong>
-                              {tDetail("designCard.price")}: {formatCurrency(design?.price, orderSummary?.currency || "USD")}
-                            </Typography.Text>
-                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                              {design?.created_at ? moment(design.created_at).format("LLL") : "-"}
-                            </Typography.Text>
-                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                              <Button
-                                size="small"
-                                icon={<ExportOutlined />}
-                                onClick={() => {
-                                  if (!design?.design_url) return;
-                                  window.open(design.design_url, "_blank", "noopener,noreferrer");
+                    {(Array.isArray(group?.designs) ? group.designs : []).map(
+                      (design) => (
+                        <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
+                          <Card size="small" styles={{ body: { padding: 10 } }}>
+                            <Space
+                              direction="vertical"
+                              size={8}
+                              style={{ width: "100%" }}
+                            >
+                              <LazyPreviewImage
+                                src={design?.design_url}
+                                alt={`design-${design?.id}`}
+                                preparingText={tDetail("preview.preparing")}
+                                emptyText={tDetail("preview.empty")}
+                              />
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {tDetail("designCard.size")}:{" "}
+                                {formatAmount(design?.width)}" x{" "}
+                                {formatAmount(design?.height)}"
+                              </Typography.Text>
+                              <Typography.Text strong>
+                                {tDetail("designCard.price")}:{" "}
+                                {formatCurrency(
+                                  design?.price,
+                                  orderSummary?.currency || "USD",
+                                )}
+                              </Typography.Text>
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {design?.created_at
+                                  ? moment(design.created_at).format("LLL")
+                                  : "-"}
+                              </Typography.Text>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
                                 }}
                               >
-                                {tDetail("actions.open")}
-                              </Button>
-                            </div>
-                          </Space>
-                        </Card>
-                      </Col>
-                    ))}
+                                <Button
+                                  size="small"
+                                  icon={<ExportOutlined />}
+                                  onClick={() => {
+                                    if (!design?.design_url) return;
+                                    window.open(
+                                      design.design_url,
+                                      "_blank",
+                                      "noopener,noreferrer",
+                                    );
+                                  }}
+                                >
+                                  {tDetail("actions.open")}
+                                </Button>
+                              </div>
+                            </Space>
+                          </Card>
+                        </Col>
+                      ),
+                    )}
                   </Row>
                 </Card>
               ))}
@@ -474,7 +638,11 @@ export default function TransferShippedPrinterSearchPage() {
         {items.length ? (
           <div className="grid gap-6">
             {items.map((item) => (
-              <TransferOrderItemCard key={item?.id} item={item} tOrders={tOrders} />
+              <TransferOrderItemCard
+                key={item?.id}
+                item={item}
+                tOrders={tOrders}
+              />
             ))}
           </div>
         ) : null}
