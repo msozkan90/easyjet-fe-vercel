@@ -79,7 +79,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
       try {
         const formData = new FormData();
-        formData.append("order_id", currentTask.orderId);
+        formData.append("transfer_order_id", currentTask.orderId);
         formData.append("sub_category_id", currentTask.subCategoryId);
         formData.append("upload_id", currentTask.id);
         formData.append("design_files", currentTask.file);
