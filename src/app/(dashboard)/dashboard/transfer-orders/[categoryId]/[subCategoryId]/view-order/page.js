@@ -83,6 +83,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
       requireRoles={["companyAdmin", "companyCompletedWorker"]}
       tableRefExternal={tableRef}
       rowActionsRenderer={rowActionsRenderer}
+      showTransferOrderIdCopy
     />
   );
 }

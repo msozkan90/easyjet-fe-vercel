@@ -45,7 +45,7 @@ const toNullableString = (value) => {
 };
 
 export default function TransferOrdersPage() {
-  const { message } = AntdApp.useApp();
+  const { message, modal } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
   const router = useRouter();
   const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
@@ -685,6 +685,16 @@ export default function TransferOrdersPage() {
     t,
   ]);
 
+  const handleConfirmSendToProduction = useCallback(() => {
+    modal.confirm({
+      title: t("shippingRates.actions.confirmSendTitle"),
+      content: t("shippingRates.actions.confirmSendDescription"),
+      okText: t("shippingRates.actions.confirmSendOk"),
+      cancelText: "Cancel",
+      onOk: handleSendToProduction,
+    });
+  }, [handleSendToProduction, modal, t]);
+
   return (
     <>
       <input
@@ -751,7 +761,7 @@ export default function TransferOrdersPage() {
         open={productionModalOpen}
         onCancel={handleProductionModalClose}
         title={t("productionModal.title")}
-        onOk={handleSendToProduction}
+        onOk={handleConfirmSendToProduction}
         okText={t("productionModal.actions.send")}
         confirmLoading={productionSubmitting}
         destroyOnHidden

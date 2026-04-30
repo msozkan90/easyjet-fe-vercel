@@ -305,13 +305,19 @@ export default function Sidebar({ collapsed }) {
                       ),
                     },
                     {
-                      key: "payment-management",
+                      key: "transfer-payment-management",
                       icon: <BankOutlined />,
-                      label: (
-                        <Link href="/dashboard/payment-management">
-                          {tSidebar("financial.paymentManagement")}
-                        </Link>
-                      ),
+                      label: tSidebar("financial.transferPaymentManagement"),
+                      children: [
+                        {
+                          key: "transfer-payment-management-pending",
+                          label: (
+                            <Link href="/dashboard/payment-management">
+                              {tSidebar("financial.paymentStatuses.pending")}
+                            </Link>
+                          ),
+                        },
+                      ],
                     },
                   ]
                 : []),

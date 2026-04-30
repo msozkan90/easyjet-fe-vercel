@@ -2213,7 +2213,11 @@
         "topupList": "Bakiye Yükleme Talepleri",
         "adminTitle": "Finans Admin",
         "adminTopups": "Bakiye Yükleme Onayları",
-        "fundingAccounts": "Fonlama Hesapları"
+        "fundingAccounts": "Fonlama Hesapları",
+        "transferPaymentManagement": "Transfer Ödemeleri",
+        "paymentStatuses": {
+          "pending": "Bekleyenler"
+        }
       },
       "partner": {
         "title": "Partnerler",

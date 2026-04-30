@@ -124,6 +124,7 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
   const tCommonActions = useTranslations("common.actions");
 
   const [orderNumber, setOrderNumber] = useState("");
+  const [transferOrderId, setTransferOrderId] = useState("");
   const [searching, setSearching] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -132,9 +133,11 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
   const [designGroups, setDesignGroups] = useState([]);
 
   const handlePastePrint = useCallback(
-    async (rawOrderNumber) => {
-      const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
-      if (!nextOrderNumber) {
+    async (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
@@ -144,13 +147,15 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
       setPrinting(true);
       try {
         const response = await TransferOrdersAPI.markWorkerItemsPrinted({
-          order_number: nextOrderNumber,
+          transfer_order_id: nextTransferOrderId,
           category_id: categoryId,
           sub_category_id: subCategoryId,
         });
         const payload = response?.data || null;
 
         if (payload?.transfer_order) {
+          setOrderNumber(payload?.transfer_order?.order_number || "");
+          setTransferOrderId(nextTransferOrderId);
           setOrderSummary({
             order_number: payload?.transfer_order?.order_number || null,
             bill_to_name: payload?.transfer_order?.bill_to_name || null,
@@ -180,7 +185,21 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
         setPrinting(false);
       }
     },
-    [categoryId, message, orderNumber, subCategoryId, tOrders],
+    [categoryId, message, orderNumber, subCategoryId, tOrders, transferOrderId],
+  );
+
+  const confirmPrint = useCallback(
+    (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
+        message.warning(tOrders("filters.searchOrderNumber"));
+        return;
+      }
+      void handlePastePrint(nextTransferOrderId);
+    },
+    [handlePastePrint, message, orderNumber, tOrders, transferOrderId],
   );
 
   const statusTag = useMemo(() => {
@@ -207,17 +226,22 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
             }
             placeholder={tOrders("filters.searchOrderNumber")}
             value={orderNumber}
-            onChange={(event) => setOrderNumber(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              setOrderNumber(value);
+              setTransferOrderId(value);
+            }}
             onPaste={(event) => {
               const pasted = event?.clipboardData?.getData("text");
               const nextOrderNumber = String(pasted || "").trim();
               if (!nextOrderNumber) return;
               event.preventDefault();
               setOrderNumber(nextOrderNumber);
-              void handlePastePrint(nextOrderNumber);
+              setTransferOrderId(nextOrderNumber);
+              confirmPrint(nextOrderNumber);
             }}
-            onSearch={(value) => {
-              void handlePastePrint(value);
+            onSearch={() => {
+              confirmPrint();
             }}
           />
         </Card>

@@ -210,6 +210,10 @@ export const TransferOrdersAPI = {
   },
   cancelItemsList: (payload) =>
     api.post("/transfer-orders/items/cancel/list", payload),
+  paymentPendingList: (payload) =>
+    api.post("/transfer-orders/payments/pending/list", payload),
+  createPaymentRequest: (payload) =>
+    api.post("/transfer-orders/payments/request", payload),
   sendToProduction: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/production", payload, config),
   uploadDesigns: (payload, config = {}) =>

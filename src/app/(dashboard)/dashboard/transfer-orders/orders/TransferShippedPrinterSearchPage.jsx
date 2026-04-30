@@ -206,6 +206,7 @@ export default function TransferShippedPrinterSearchPage() {
   const autoDownloadedLabelRef = useRef("");
 
   const [orderNumber, setOrderNumber] = useState("");
+  const [transferOrderId, setTransferOrderId] = useState("");
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [items, setItems] = useState([]);
@@ -230,9 +231,11 @@ export default function TransferShippedPrinterSearchPage() {
   }, []);
 
   const handleSearch = useCallback(
-    async (rawOrderNumber) => {
-      const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
-      if (!nextOrderNumber) {
+    async (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
@@ -242,7 +245,7 @@ export default function TransferShippedPrinterSearchPage() {
 
       try {
         const response = await TransferOrdersAPI.shipWorkerItems({
-          order_number: nextOrderNumber,
+          transfer_order_id: nextTransferOrderId,
         });
         const payload = response?.data || {};
         const transferOrder = payload?.transfer_order || null;
@@ -257,6 +260,8 @@ export default function TransferShippedPrinterSearchPage() {
             ? transferOrder.design_groups
             : [],
         );
+        setOrderNumber(transferOrder?.order_number || "");
+        setTransferOrderId(nextTransferOrderId);
         setOrderSummary(
           transferOrder
             ? {
@@ -281,7 +286,7 @@ export default function TransferShippedPrinterSearchPage() {
             autoDownloadedLabelRef.current = labelIdentity;
             triggerLabelDownload(
               latestLabel.label_url,
-              transferOrder?.order_number || nextOrderNumber,
+              transferOrder?.order_number || nextTransferOrderId,
             );
           }
         }
@@ -325,7 +330,21 @@ export default function TransferShippedPrinterSearchPage() {
         setSearching(false);
       }
     },
-    [message, orderNumber, tOrders, triggerLabelDownload],
+    [message, orderNumber, tOrders, transferOrderId, triggerLabelDownload],
+  );
+
+  const confirmShipSearch = useCallback(
+    (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
+        message.warning(tOrders("filters.searchOrderNumber"));
+        return;
+      }
+      void handleSearch(nextTransferOrderId);
+    },
+    [handleSearch, message, orderNumber, tOrders, transferOrderId],
   );
 
   const handleCreateLabelSuccess = useCallback((payload) => {
@@ -394,15 +413,20 @@ export default function TransferShippedPrinterSearchPage() {
             }
             placeholder={tOrders("filters.searchOrderNumber")}
             value={orderNumber}
-            onChange={(event) => setOrderNumber(event.target.value)}
-            onSearch={handleSearch}
+            onChange={(event) => {
+              const value = event.target.value;
+              setOrderNumber(value);
+              setTransferOrderId(value);
+            }}
+            onSearch={() => confirmShipSearch()}
             onPaste={(event) => {
               const pastedValue = event?.clipboardData?.getData("text") || "";
               const normalizedOrderNumber = String(pastedValue).trim();
               if (!normalizedOrderNumber) return;
               event.preventDefault();
               setOrderNumber(normalizedOrderNumber);
-              void handleSearch(normalizedOrderNumber);
+              setTransferOrderId(normalizedOrderNumber);
+              confirmShipSearch(normalizedOrderNumber);
             }}
           />
         </Card>
@@ -513,6 +537,7 @@ export default function TransferShippedPrinterSearchPage() {
                     tOrders("common.none")
                   )}
                   {(transferLabel?.id || transferLabel?.label_id) &&
+                  transferLabel?.source !== "self_label" &&
                   orderSummary?.status !== "shipped" ? (
                     <Popconfirm
                       title={tOrders("detail.actions.voidLabelConfirmTitle")}

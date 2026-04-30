@@ -12,6 +12,7 @@ import {
   Form,
   InputNumber,
   Modal,
+  Popconfirm,
   Row,
   Select,
   Space,
@@ -523,14 +524,19 @@ export default function TransferShippingRatesModal({
         <Button key="close" onClick={onClose}>
           {tCommonActions("close")}
         </Button>,
-        <Button
+        <Popconfirm
           key="create"
-          type="primary"
-          loading={creatingLabel}
-          onClick={handleCreateLabel}
+          title="Create shipping label for this transfer order?"
+          okText={tModal("actions.createLabel")}
+          cancelText={tCommonActions("cancel")}
+          okButtonProps={{ type: "primary", loading: creatingLabel }}
+          disabled={creatingLabel}
+          onConfirm={handleCreateLabel}
         >
-          {tModal("actions.createLabel")}
-        </Button>,
+          <Button type="primary" loading={creatingLabel}>
+            {tModal("actions.createLabel")}
+          </Button>
+        </Popconfirm>,
       ]}
     >
       <Space direction="vertical" style={{ width: "100%" }} size={16}>

@@ -311,6 +311,7 @@ export default function TransferOrderDetailPage() {
   const canVoidTransferLabel =
     isCompanyUser &&
     Boolean(transferLabelId) &&
+    transferLabel?.source !== "self_label" &&
     detail?.order_status !== "shipped";
   const itemTotalPrice = useMemo(() => {
     const items = Array.isArray(detail?.items) ? detail.items : [];

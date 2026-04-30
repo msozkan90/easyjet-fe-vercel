@@ -5,6 +5,7 @@ import moment from "moment";
 import dayjs from "dayjs";
 import Link from "next/link";
 import {
+  App as AntdApp,
   Button,
   DatePicker,
   Image,
@@ -19,6 +20,7 @@ import {
   CheckOutlined,
   CloseOutlined,
   CloseCircleOutlined,
+  CopyOutlined,
   DownloadOutlined,
   EyeOutlined,
   FileSearchOutlined,
@@ -102,7 +104,9 @@ export default function TransferOrdersStatusListPage({
   fixedFilters,
   requireRoles = ["companyAdmin", "partnerAdmin", "customerAdmin"],
   toolbarRight,
+  showTransferOrderIdCopy = false,
 }) {
+  const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
   const internalTableRef = useRef(null);
@@ -320,6 +324,20 @@ export default function TransferOrdersStatusListPage({
     }
   }, []);
 
+  const handleCopyTransferOrderId = useCallback(
+    async (transferOrderId) => {
+      const value = String(transferOrderId || "").trim();
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        message.success("Transfer order id copied.");
+      } catch {
+        message.error("Transfer order id could not be copied.");
+      }
+    },
+    [message],
+  );
+
   const columns = useMemo(() => {
     const showDetailAction = typeof columnsBuilder !== "function";
     const isPendingList = listApiFn === TransferOrdersAPI.pendingItemsList;
@@ -403,6 +421,28 @@ export default function TransferOrdersStatusListPage({
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
+        },
+        render: (value, record) => {
+          const transferOrderId = record?.transfer_order_id;
+          return (
+            <Space size={4}>
+              {showTransferOrderIdCopy && transferOrderId ? (
+                <Tooltip title="Copy transfer order id">
+                  <Button
+                    size="small"
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      void handleCopyTransferOrderId(transferOrderId);
+                    }}
+                  />
+                </Tooltip>
+              ) : null}
+              <span>{value || t("common.none")}</span>
+            </Space>
+          );
         },
       },
       {
@@ -598,7 +638,9 @@ export default function TransferOrdersStatusListPage({
     statusOptions,
     t,
     handleBarcodeDownload,
+    handleCopyTransferOrderId,
     rowActionsRenderer,
+    showTransferOrderIdCopy,
     tableRef,
   ]);
 

@@ -2354,7 +2354,11 @@
         "topupList": "Top-Up Requests",
         "adminTitle": "Financial Admin",
         "adminTopups": "Top-Up Approvals",
-        "fundingAccounts": "Funding Accounts"
+        "fundingAccounts": "Funding Accounts",
+        "transferPaymentManagement": "Transfer Payments",
+        "paymentStatuses": {
+          "pending": "Pending"
+        }
       },
       "partner": {
         "title": "Partners",
