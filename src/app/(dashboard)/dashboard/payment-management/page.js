@@ -6,6 +6,7 @@ import {
   App as AntdApp,
   Button,
   Popconfirm,
+  Select,
   Space,
   Tag,
   Tooltip,
@@ -47,10 +48,10 @@ const listAll = async (apiFn) => {
 export default function TransferPaymentManagementPage() {
   const { message } = AntdApp.useApp();
   const tableRef = useRef(null);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowMap, setSelectedRowMap] = useState({});
   const [customerOptions, setCustomerOptions] = useState([]);
   const [partnerOptions, setPartnerOptions] = useState([]);
+  const [entityFilter, setEntityFilter] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -99,8 +100,25 @@ export default function TransferPaymentManagementPage() {
     [],
   );
 
+  const entityOptions = useMemo(
+    () => [
+      ...customerOptions.map((option) => ({
+        value: `customer:${option.value}`,
+        label: `Customer: ${option.label}`,
+      })),
+      ...partnerOptions.map((option) => ({
+        value: `partner:${option.value}`,
+        label: `Partner: ${option.label}`,
+      })),
+    ],
+    [customerOptions, partnerOptions],
+  );
+
   const request = useCallback(
     async (ctx) => {
+      if (!ctx?.filters?.customer_id && !ctx?.filters?.partner_id) {
+        return { list: [], total: 0 };
+      }
       const result = await listRequest(ctx);
       const list = (result?.list || []).map((row) => {
         const order = row?.transfer_order || {};
@@ -124,12 +142,41 @@ export default function TransferPaymentManagementPage() {
           children,
         };
       });
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
       return { ...result, list };
     },
     [listRequest],
   );
+
+  const selectedRowKeys = useMemo(
+    () => Object.keys(selectedRowMap),
+    [selectedRowMap],
+  );
+
+  const selectedRows = useMemo(
+    () => Object.values(selectedRowMap),
+    [selectedRowMap],
+  );
+
+  const handleEntityFilterChange = useCallback((value) => {
+    setEntityFilter(value || null);
+    setSelectedRowMap({});
+
+    if (!value) {
+      tableRef.current?.setFilters?.({
+        customer_id: undefined,
+        partner_id: undefined,
+      });
+      tableRef.current?.setPage?.(1);
+      return;
+    }
+
+    const [type, id] = String(value).split(":");
+    tableRef.current?.setFilters?.({
+      customer_id: type === "customer" ? id : undefined,
+      partner_id: type === "partner" ? id : undefined,
+    });
+    tableRef.current?.setPage?.(1);
+  }, []);
 
   const selectedTotal = useMemo(
     () =>
@@ -141,6 +188,10 @@ export default function TransferPaymentManagementPage() {
   );
 
   const handleCreatePaymentRequest = async () => {
+    if (!entityFilter) {
+      message.warning("Select one customer or partner");
+      return;
+    }
     const transferOrderIds = selectedRows
       .map((row) => row?.transfer_order_id)
       .filter(Boolean);
@@ -157,8 +208,7 @@ export default function TransferPaymentManagementPage() {
       message.success(
         `Payment request created. Group: ${resp?.data?.group_id || "-"}`,
       );
-      setSelectedRowKeys([]);
-      setSelectedRows([]);
+      setSelectedRowMap({});
       tableRef.current?.reload();
     } catch (error) {
       message.error(
@@ -205,23 +255,11 @@ export default function TransferPaymentManagementPage() {
       {
         title: "Customer",
         dataIndex: "customer_id",
-        filter: {
-          type: "select",
-          placeholder: "Customer",
-          options: customerOptions,
-          width: 260,
-        },
         render: (_, record) => (record?.__isChild ? null : record?.customer?.name || "-"),
       },
       {
         title: "Partner",
         dataIndex: "partner_id",
-        filter: {
-          type: "select",
-          placeholder: "Partner",
-          options: partnerOptions,
-          width: 260,
-        },
         render: (_, record) => (record?.__isChild ? null : record?.partner?.name || "-"),
       },
       {
@@ -280,7 +318,7 @@ export default function TransferPaymentManagementPage() {
         },
       },
     ],
-    [customerOptions, partnerOptions],
+    [],
   );
 
   return (
@@ -307,25 +345,60 @@ export default function TransferPaymentManagementPage() {
               getCheckboxProps: (record) => ({
                 disabled: Boolean(record?.__isChild),
               }),
-              onChange: (keys, rows) => {
-                setSelectedRowKeys(keys);
-                setSelectedRows(rows.filter((row) => !row?.__isChild));
+              onSelect: (record, selected) => {
+                if (record?.__isChild) return;
+                setSelectedRowMap((prev) => {
+                  const next = { ...prev };
+                  if (selected) {
+                    next[record.id] = record;
+                  } else {
+                    delete next[record.id];
+                  }
+                  return next;
+                });
+              },
+              onSelectAll: (selected, _selectedRows, changeRows) => {
+                setSelectedRowMap((prev) => {
+                  const next = { ...prev };
+                  (changeRows || [])
+                    .filter((row) => !row?.__isChild)
+                    .forEach((row) => {
+                      if (selected) {
+                        next[row.id] = row;
+                      } else {
+                        delete next[row.id];
+                      }
+                    });
+                  return next;
+                });
               },
             },
           }}
+          toolbarLeft={
+            <Select
+              allowClear
+              showSearch
+              value={entityFilter}
+              placeholder="Select customer or partner"
+              options={entityOptions}
+              optionFilterProp="label"
+              onChange={handleEntityFilterChange}
+              style={{ minWidth: 320 }}
+            />
+          }
           toolbarRight={
             <Popconfirm
               title="Create payment request for selected transfer orders?"
               okText="Create"
               cancelText="Cancel"
               okButtonProps={{ type: "primary", loading: submitting }}
-              disabled={!selectedRows.length || submitting}
+              disabled={!entityFilter || !selectedRows.length || submitting}
               onConfirm={handleCreatePaymentRequest}
             >
               <Button
                 type="primary"
                 icon={<DollarOutlined />}
-                disabled={!selectedRows.length}
+                disabled={!entityFilter || !selectedRows.length}
                 loading={submitting}
               >
                 Create Payment Request

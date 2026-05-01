@@ -413,14 +413,14 @@ export default function TransferOrderDetailPage() {
                           detail?.currency,
                         )}
                       </Typography.Text>
-                      <Typography.Text>
+                      { transferLabel?.source === "shipStationCompany" && <Typography.Text>
                         With Multiplier:{" "}
                         {formatCurrency(
                           transferLabel.shipment_total_price ??
                             transferLabel.shipping_price,
                           detail?.currency,
                         )}
-                      </Typography.Text>
+                      </Typography.Text> }
                     </Space>
                   ) : transferLabel?.shipping_price != null ? (
                     formatCurrency(

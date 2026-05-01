@@ -97,6 +97,18 @@
       "adminTopups": {
         "title": "Top-Up Approvals"
       },
+      "transferPayments": {
+        "title": "Processing Transfer Payments",
+        "columns": {
+          "receipt": "Receipt"
+        },
+        "actions": {
+          "downloadReceipt": "Download unpaid receipt"
+        },
+        "messages": {
+          "receiptError": "Receipt could not be generated."
+        }
+      },
       "transactions": {
         "title": "Wallet Transactions",
         "currentBalance": "Current Balance",

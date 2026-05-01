@@ -293,17 +293,21 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
-              ...(isCompanyAdmin
+              ...(isCompanyAdmin || isCustomerAdmin
                 ? [
-                    {
-                      key: "financial-report",
-                      icon: <LineChartOutlined />,
-                      label: (
-                        <Link href="/dashboard/financial-report">
-                          {tSidebar("financial.report")}
-                        </Link>
-                      ),
-                    },
+                    ...(isCompanyAdmin
+                      ? [
+                          {
+                            key: "financial-report",
+                            icon: <LineChartOutlined />,
+                            label: (
+                              <Link href="/dashboard/financial-report">
+                                {tSidebar("financial.report")}
+                              </Link>
+                            ),
+                          },
+                        ]
+                      : []),
                     {
                       key: "transfer-payment-management",
                       icon: <BankOutlined />,
@@ -312,7 +316,13 @@ export default function Sidebar({ collapsed }) {
                         {
                           key: "transfer-payment-management-pending",
                           label: (
-                            <Link href="/dashboard/payment-management">
+                            <Link
+                              href={
+                                isCompanyAdmin
+                                  ? "/dashboard/payment-management"
+                                  : "/dashboard/transfer-payments/processing"
+                              }
+                            >
                               {tSidebar("financial.paymentStatuses.pending")}
                             </Link>
                           ),

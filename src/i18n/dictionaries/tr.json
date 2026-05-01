@@ -97,6 +97,18 @@
       "adminTopups": {
         "title": "Bakiye Yükleme Onayları"
       },
+      "transferPayments": {
+        "title": "İşlemdeki Transfer Ödemeleri",
+        "columns": {
+          "receipt": "Makbuz"
+        },
+        "actions": {
+          "downloadReceipt": "Ödenmemiş makbuzu indir"
+        },
+        "messages": {
+          "receiptError": "Makbuz oluşturulamadı."
+        }
+      },
       "transactions": {
         "title": "Bakiye Hareketleri",
         "currentBalance": "Güncel Bakiye",
