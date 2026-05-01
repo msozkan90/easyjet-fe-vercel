@@ -173,7 +173,7 @@ export default function DesignAreaSelector({
             <img
               src={previewSrc}
               alt="position preview"
-              className="block w-full rounded-lg"
+              className="block w-full rounded-lg bg-gray-200"
               onLoad={measureOverlay}
             />
             <div ref={overlayRef} className="absolute inset-0">
