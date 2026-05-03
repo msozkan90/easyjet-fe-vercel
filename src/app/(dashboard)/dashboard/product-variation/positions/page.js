@@ -105,7 +105,7 @@ export default function ProductPositionsPage() {
               width={64}
               height={64}
               loading="lazy"
-              style={{ objectFit: "cover", borderRadius: 8 }}
+              style={{ objectFit: "cover", borderRadius: 8, background: "#b2b2b2" }}
               preview={{ mask: <EyeOutlined /> }}
             />
           ) : (
