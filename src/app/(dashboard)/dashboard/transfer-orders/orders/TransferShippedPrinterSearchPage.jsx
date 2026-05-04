@@ -479,23 +479,22 @@ export default function TransferShippedPrinterSearchPage() {
                 {transferLabel?.base_shipping_price != null ? (
                   <Space direction="vertical" size={0}>
                     <Typography.Text>
-                      Price:{" "}
+                      Label Price:{" "}
                       {formatCurrency(
                         transferLabel.base_shipping_price,
                         orderSummary?.currency || "USD",
                       )}
                     </Typography.Text>
-                    <Typography.Text>
-                      Total:{" "}
-                      {formatCurrency(
-                        transferLabel.shipment_total_price ??
-                          transferLabel.shipping_price,
-                        orderSummary?.currency || "USD",
-                      )}
-                      {transferLabel?.shipment_multiplier != null
-                        ? ` x ${formatAmount(transferLabel.shipment_multiplier)}`
-                        : ""}
-                    </Typography.Text>
+                    {transferLabel?.source === "shipStationCompany" && (
+                      <Typography.Text>
+                        With Multiplier:{" "}
+                        {formatCurrency(
+                          transferLabel.shipment_total_price ??
+                            transferLabel.shipping_price,
+                          orderSummary?.currency || "USD",
+                        )}
+                      </Typography.Text>
+                    )}
                   </Space>
                 ) : transferLabel?.shipping_price != null ? (
                   formatCurrency(

@@ -167,7 +167,7 @@ export default function WalletTransactionsPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
+    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin", "systemAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <Title level={3} style={{ margin: 0 }}>
           {t("title")}
