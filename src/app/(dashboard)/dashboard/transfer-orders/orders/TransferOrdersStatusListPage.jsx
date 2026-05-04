@@ -1,6 +1,13 @@
 "use client";
 
-import { Children, cloneElement, useCallback, useMemo, useRef, useState } from "react";
+import {
+  Children,
+  cloneElement,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import moment from "moment";
 import dayjs from "dayjs";
 import Link from "next/link";
@@ -26,6 +33,7 @@ import {
   FileSearchOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { useSelector } from "react-redux";
 import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { TransferOrdersAPI } from "@/utils/api";
@@ -58,7 +66,13 @@ const renderTruncatedWithPopover = (value, fallback, maxWidth = 240) => {
   return (
     <Popover
       content={
-        <div style={{ maxWidth: 480, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        <div
+          style={{
+            maxWidth: 480,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
+        >
           {value}
         </div>
       }
@@ -84,7 +98,10 @@ const extractBarcodeFilename = (url, fallbackName = "barcode.png") => {
   if (!url) return fallbackName;
   try {
     const parsed = new URL(url);
-    const lastSegment = (parsed.pathname || "").split("/").filter(Boolean).pop();
+    const lastSegment = (parsed.pathname || "")
+      .split("/")
+      .filter(Boolean)
+      .pop();
     if (!lastSegment) return fallbackName;
     const decoded = decodeURIComponent(lastSegment).trim();
     return decoded || fallbackName;
@@ -109,6 +126,18 @@ export default function TransferOrdersStatusListPage({
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
+  const roles = useSelector((state) => state.auth.user?.roles || []);
+  const showOwnerEntityColumn = useMemo(
+    () =>
+      roles.some((role) =>
+        [
+          "companyadmin",
+          "companycompletedworker",
+          "companyshipmentworker",
+        ].includes(role),
+      ),
+    [roles],
+  );
   const internalTableRef = useRef(null);
   const tableRef = tableRefExternal || internalTableRef;
   const [quickFilters, setQuickFilters] = useState(() =>
@@ -179,9 +208,13 @@ export default function TransferOrdersStatusListPage({
     [allowedStatuses, fixedFilters, listApiFn],
   );
 
-  const annotateRows = useCallback(function markRows(items = [], parent = null) {
+  const annotateRows = useCallback(function markRows(
+    items = [],
+    parent = null,
+  ) {
     return (items || []).map((item) => {
-      const hasChildren = Array.isArray(item?.children) && item.children.length > 0;
+      const hasChildren =
+        Array.isArray(item?.children) && item.children.length > 0;
       const next = {
         ...item,
         __hasChildren: hasChildren,
@@ -315,8 +348,12 @@ export default function TransferOrdersStatusListPage({
     const proxyUrl = `/api/file-proxy?url=${encodeURIComponent(url)}`;
 
     try {
-      const response = await fetch(proxyUrl, { method: "GET", cache: "no-store" });
-      if (!response.ok) throw new Error(`Proxy download failed: ${response.status}`);
+      const response = await fetch(proxyUrl, {
+        method: "GET",
+        cache: "no-store",
+      });
+      if (!response.ok)
+        throw new Error(`Proxy download failed: ${response.status}`);
       const blob = await response.blob();
       saveBlobAsFile(blob, filename);
     } catch {
@@ -362,7 +399,7 @@ export default function TransferOrdersStatusListPage({
                     alt={`${record?.order_number || "transfer-order"}-barcode`}
                     preview={{
                       mask: <EyeOutlined />,
-                      toolbarRender: (originalNode, info) => (
+                      toolbarRender: (originalNode, info) =>
                         cloneElement(originalNode, {}, [
                           ...Children.toArray(originalNode?.props?.children),
                           <div
@@ -372,22 +409,28 @@ export default function TransferOrdersStatusListPage({
                               event.preventDefault();
                               event.stopPropagation();
                               const src = info?.image?.url || value;
-                              void handleBarcodeDownload(src, record?.order_number);
+                              void handleBarcodeDownload(
+                                src,
+                                record?.order_number,
+                              );
                             }}
                             title={t("actions.download")}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(event) => {
-                              if (event.key !== "Enter" && event.key !== " ") return;
+                              if (event.key !== "Enter" && event.key !== " ")
+                                return;
                               event.preventDefault();
                               const src = info?.image?.url || value;
-                              void handleBarcodeDownload(src, record?.order_number);
+                              void handleBarcodeDownload(
+                                src,
+                                record?.order_number,
+                              );
                             }}
                           >
                             <DownloadOutlined />
                           </div>,
-                        ])
-                      ),
+                        ]),
                     }}
                     style={{
                       maxWidth: "45px",
@@ -507,6 +550,30 @@ export default function TransferOrdersStatusListPage({
         dataIndex: "bill_to_name",
         render: (value) => value || t("common.none"),
       },
+      ...(showOwnerEntityColumn
+        ? [
+            {
+              title: t("columns.ownerEntity"),
+              dataIndex: "entity_name",
+              render: (value, record) => {
+                if (record?.__isChild) return null;
+                const name = value || record?.owner_entity?.name;
+                const type = record?.entity_type || record?.owner_entity?.type;
+                if (!name && !type) return t("common.none");
+                return (
+                  <Space size={6}>
+                    {name || t("common.none")}
+                    {type ? (
+                      <Tag color={type === "partner" ? "blue" : "green"}>
+                        {type}
+                      </Tag>
+                    ) : null}
+                  </Space>
+                );
+              },
+            },
+          ]
+        : []),
       ...(showDeliveryMethodColumn
         ? [
             {
@@ -574,7 +641,8 @@ export default function TransferOrdersStatusListPage({
           type: "dateRange",
           placeholder: t("filters.orderDateRange"),
         },
-        render: (value) => (value ? moment(value).format("LLL") : t("common.none")),
+        render: (value) =>
+          value ? moment(value).format("LLL") : t("common.none"),
       },
       ...(showDetailAction
         ? [
@@ -603,7 +671,9 @@ export default function TransferOrdersStatusListPage({
                   <Space>
                     {canViewDetail ? (
                       <Tooltip title={t("actions.viewDetail")}>
-                        <Link href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}>
+                        <Link
+                          href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}
+                        >
                           <Button icon={<FileSearchOutlined />} />
                         </Link>
                       </Tooltip>
@@ -641,6 +711,7 @@ export default function TransferOrdersStatusListPage({
     handleCopyTransferOrderId,
     rowActionsRenderer,
     showTransferOrderIdCopy,
+    showOwnerEntityColumn,
     tableRef,
   ]);
 

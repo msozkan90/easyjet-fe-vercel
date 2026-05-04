@@ -43,7 +43,9 @@ export default function Sidebar({ collapsed }) {
       .map((category) => {
         if (!category) return null;
         if (typeof category === "string") return category.trim().toLowerCase();
-        return String(category?.name || "").trim().toLowerCase();
+        return String(category?.name || "")
+          .trim()
+          .toLowerCase();
       })
       .filter(Boolean),
   );
@@ -53,17 +55,20 @@ export default function Sidebar({ collapsed }) {
     userCategoryNames.has("print") ||
     userCategoryNames.has("apparel") ||
     userCategoryNames.has("engraving");
-  const showCompanyOrdersMenu = isCompanyAdmin && hasStandardProductVariationCategory;
-  const showCompanyTransferOrdersMenu = isCompanyAdmin && hasTransferOrderCategory;
+  const showCompanyOrdersMenu =
+    isCompanyAdmin && hasStandardProductVariationCategory;
+  const showCompanyTransferOrdersMenu =
+    isCompanyAdmin && hasTransferOrderCategory;
+  const showPartnerOrdersMenu =
+    isPartnerAdmin && hasStandardProductVariationCategory;
+  const showPartnerTransferOrdersMenu =
+    isPartnerAdmin && hasTransferOrderCategory;
   const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
-  const categoriesData = useSelector(
+  const categoriesData = useSelector((s) => {
+    s?.categories?.listWithSubCategories;
 
-    (s) => { s?.categories?.listWithSubCategories
-
-      return s?.categories?.listWithSubCategories
-    },
-
-  );
+    return s?.categories?.listWithSubCategories;
+  });
   const { token } = theme.useToken();
   const tSidebar = useTranslations("dashboard.sidebar");
 
@@ -97,11 +102,15 @@ export default function Sidebar({ collapsed }) {
   );
 
   const transferCategories = filteredCategories.filter((category) => {
-    const categoryName = String(category?.name || "").trim().toLowerCase();
+    const categoryName = String(category?.name || "")
+      .trim()
+      .toLowerCase();
     return categoryName === "transfer" || categoryName === "transfers";
   });
   const standardCategories = filteredCategories.filter((category) => {
-    const categoryName = String(category?.name || "").trim().toLowerCase();
+    const categoryName = String(category?.name || "")
+      .trim()
+      .toLowerCase();
     return (
       categoryName === "print" ||
       categoryName === "engraving" ||
@@ -109,28 +118,29 @@ export default function Sidebar({ collapsed }) {
     );
   });
 
+  const transferOrderSubCategoryMenuItems = transferCategories.flatMap(
+    (category) => {
+      const subCategories = Array.isArray(category?.sub_categories)
+        ? category.sub_categories
+        : [];
 
-  const transferOrderSubCategoryMenuItems = transferCategories.flatMap((category) => {
-    const subCategories = Array.isArray(category?.sub_categories)
-      ? category.sub_categories
-      : [];
-
-    return subCategories
-      .filter((subCategory) => subCategory?.id)
-      .map((subCategory) => ({
-        key: `transfer-order-list-sub-${category.id}-${subCategory.id}`,
-        icon: <TagsOutlined />,
-        label: (
-          <Link
-            href={`/dashboard/transfer-orders/orders?subCategoryId=${encodeURIComponent(
-              subCategory.id
-            )}`}
-          >
-            {subCategory.name || tSidebar("order.transferOrdersList")}
-          </Link>
-        ),
-      }));
-  });
+      return subCategories
+        .filter((subCategory) => subCategory?.id)
+        .map((subCategory) => ({
+          key: `transfer-order-list-sub-${category.id}-${subCategory.id}`,
+          icon: <TagsOutlined />,
+          label: (
+            <Link
+              href={`/dashboard/transfer-orders/orders?subCategoryId=${encodeURIComponent(
+                subCategory.id,
+              )}`}
+            >
+              {subCategory.name || tSidebar("order.transferOrdersList")}
+            </Link>
+          ),
+        }));
+    },
+  );
 
   const buildCategoryMenuItems = () =>
     standardCategories.map((category) => {
@@ -242,11 +252,19 @@ export default function Sidebar({ collapsed }) {
     children: [
       {
         key: "shipment-orders-view-order",
-        label: <Link href="/dashboard/orders/view-order">{tSidebar("orders.view")}</Link>,
+        label: (
+          <Link href="/dashboard/orders/view-order">
+            {tSidebar("orders.view")}
+          </Link>
+        ),
       },
       {
         key: "shipment-orders-printer",
-        label: <Link href="/dashboard/orders/printer">{tSidebar("orders.printer")}</Link>,
+        label: (
+          <Link href="/dashboard/orders/printer">
+            {tSidebar("orders.printer")}
+          </Link>
+        ),
       },
     ],
   });
@@ -258,11 +276,19 @@ export default function Sidebar({ collapsed }) {
     children: [
       {
         key: "shipment-transfer-orders-view-order",
-        label: <Link href="/dashboard/transfer-orders/view-order">{tSidebar("order.viewOrder")}</Link>,
+        label: (
+          <Link href="/dashboard/transfer-orders/view-order">
+            {tSidebar("order.viewOrder")}
+          </Link>
+        ),
       },
       {
         key: "shipment-transfer-orders-printer",
-        label: <Link href="/dashboard/transfer-orders/printer">{tSidebar("order.printer")}</Link>,
+        label: (
+          <Link href="/dashboard/transfer-orders/printer">
+            {tSidebar("order.printer")}
+          </Link>
+        ),
       },
     ],
   });
@@ -275,8 +301,12 @@ export default function Sidebar({ collapsed }) {
     },
     ...(isCompanyCompletedWorker ? buildCategoryMenuItems() : []),
     ...(isCompanyCompletedWorker ? buildTransferCategoryMenuItems() : []),
-    ...(isShipmentWorker && hasStandardProductVariationCategory ? [buildShipmentOrdersMenuItem()] : []),
-    ...(isShipmentWorker && hasTransferOrderCategory ? [buildShipmentTransferOrdersMenuItem()] : []),
+    ...(isShipmentWorker && hasStandardProductVariationCategory
+      ? [buildShipmentOrdersMenuItem()]
+      : []),
+    ...(isShipmentWorker && hasTransferOrderCategory
+      ? [buildShipmentTransferOrdersMenuItem()]
+      : []),
     ...(isFinancialUser
       ? [
           {
@@ -293,7 +323,7 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
-              ...(isCompanyAdmin || isCustomerAdmin
+              ...(isCompanyAdmin || isPartnerAdmin || isCustomerAdmin
                 ? [
                     ...(isCompanyAdmin
                       ? [
@@ -313,17 +343,53 @@ export default function Sidebar({ collapsed }) {
                       icon: <BankOutlined />,
                       label: tSidebar("financial.transferPaymentManagement"),
                       children: [
+                        ...(isCompanyAdmin || isCustomerAdmin
+                          ? [
+                              {
+                                key: "transfer-payment-management-pending",
+                                label: (
+                                  <Link
+                                    href={
+                                      isCompanyAdmin
+                                        ? "/dashboard/payment-management"
+                                        : "/dashboard/transfer-payments/processing"
+                                    }
+                                  >
+                                    {tSidebar(
+                                      isCompanyAdmin
+                                        ? "financial.paymentStatuses.pending"
+                                        : "financial.paymentStatuses.processing",
+                                    )}
+                                  </Link>
+                                ),
+                              },
+                            ]
+                          : []),
+                        ...(isCompanyAdmin || isPartnerAdmin
+                          ? [
+                              {
+                                key: "transfer-payment-management-processing",
+                                label: (
+                                  <Link href="/dashboard/payment-management/processing">
+                                    {tSidebar(
+                                      "financial.paymentStatuses.processing",
+                                    )}
+                                  </Link>
+                                ),
+                              },
+                            ]
+                          : []),
                         {
-                          key: "transfer-payment-management-pending",
+                          key: "transfer-payment-management-completed",
                           label: (
                             <Link
                               href={
-                                isCompanyAdmin
-                                  ? "/dashboard/payment-management"
-                                  : "/dashboard/transfer-payments/processing"
+                                isCustomerAdmin
+                                  ? "/dashboard/transfer-payments/completed"
+                                  : "/dashboard/payment-management/completed"
                               }
                             >
-                              {tSidebar("financial.paymentStatuses.pending")}
+                              {tSidebar("financial.paymentStatuses.completed")}
                             </Link>
                           ),
                         },
@@ -711,7 +777,7 @@ export default function Sidebar({ collapsed }) {
             : []),
         ]
       : []),
-    ...(isPartnerAdmin || showCompanyOrdersMenu
+    ...(showPartnerOrdersMenu || showCompanyOrdersMenu
       ? [
           {
             key: "orders-affiliated",
@@ -762,13 +828,26 @@ export default function Sidebar({ collapsed }) {
           },
         ]
       : []),
-    ...(showCompanyTransferOrdersMenu
+    ...(showCompanyTransferOrdersMenu || showPartnerTransferOrdersMenu
       ? [
           {
             key: "transfer-orders-affiliated",
             icon: <ShoppingCartOutlined />,
             label: tSidebar("order.transferOrders"),
             children: [
+              ...(showPartnerTransferOrdersMenu
+                ? [
+                    {
+                      key: "transfer-orders-list",
+                      icon: <ShoppingCartOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders">
+                          {tSidebar("order.transferOrdersList")}
+                        </Link>
+                      ),
+                    },
+                  ]
+                : []),
               {
                 key: "transfer-orders-affiliated-production",
                 icon: <ShoppingCartOutlined />,
@@ -788,7 +867,7 @@ export default function Sidebar({ collapsed }) {
             type: "divider",
             key: "company-admin-divider",
             // kalınlaştır divider
-            style: {  borderBottom: "1.4px solid #f0f0f0", margin: "18px 0" },
+            style: { borderBottom: "1.4px solid #f0f0f0", margin: "18px 0" },
           },
           {
             key: "my-company",
@@ -819,31 +898,35 @@ export default function Sidebar({ collapsed }) {
       : []),
     ...(isPartnerAdmin
       ? [
-          {
-            key: "partner-product-variation",
-            icon: <AppstoreOutlined />,
-            label: tSidebar("productVariation.title"),
-            children: [
-              {
-                key: "partner-product-variation-prices",
-                icon: <DollarCircleOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/partner-prices">
-                    {tSidebar("productVariation.partnerPrices")}
-                  </Link>
-                ),
-              },
-              {
-                key: "partner-to-customer-product-variation-prices",
-                icon: <DollarCircleOutlined />,
-                label: (
-                  <Link href="/dashboard/product-variation/partner-to-customer-prices">
-                    {tSidebar("productVariation.partnerToCustomerPrices")}
-                  </Link>
-                ),
-              },
-            ],
-          },
+          ...(hasStandardProductVariationCategory
+            ? [
+                {
+                  key: "partner-product-variation",
+                  icon: <AppstoreOutlined />,
+                  label: tSidebar("productVariation.title"),
+                  children: [
+                    {
+                      key: "partner-product-variation-prices",
+                      icon: <DollarCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/partner-prices">
+                          {tSidebar("productVariation.partnerPrices")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "partner-to-customer-product-variation-prices",
+                      icon: <DollarCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/partner-to-customer-prices">
+                          {tSidebar("productVariation.partnerToCustomerPrices")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
           {
             key: "customer",
             icon: <ApartmentOutlined />,

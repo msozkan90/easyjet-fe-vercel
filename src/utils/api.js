@@ -212,14 +212,28 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/items/cancel/list", payload),
   paymentPendingList: (payload) =>
     api.post("/transfer-orders/payments/pending/list", payload),
+  paymentProcessingList: (payload) =>
+    api.post("/transfer-orders/payments/processing/list", payload),
+  paymentCompletedList: (payload) =>
+    api.post("/transfer-orders/payments/completed/list", payload),
   customerPaymentProcessingList: (payload) =>
     api.post("/transfer-orders/payments/customer/processing/list", payload),
+  customerPaymentCompletedList: (payload) =>
+    api.post("/transfer-orders/payments/customer/completed/list", payload),
   customerPaymentReceipt: (payload, config = {}) =>
     fetchBlobFilePost("/transfer-orders/payments/customer/processing/receipt", {
       data: payload,
       config,
       fallbackFilename: "transfer-payment-receipt.pdf",
     }),
+  completedPaymentReceipt: (payload, config = {}) =>
+    fetchBlobFilePost("/transfer-orders/payments/completed/receipt", {
+      data: payload,
+      config,
+      fallbackFilename: "transfer-payment-invoice.pdf",
+    }),
+  completeCustomerPayment: (payload) =>
+    api.post("/transfer-orders/payments/customer/processing/complete", payload),
   createPaymentRequest: (payload) =>
     api.post("/transfer-orders/payments/request", payload),
   sendToProduction: (payload, config = {}) =>

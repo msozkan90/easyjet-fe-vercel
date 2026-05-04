@@ -99,14 +99,32 @@
       },
       "transferPayments": {
         "title": "İşlemdeki Transfer Ödemeleri",
+        "processingCompanyTitle": "İşlemdeki Transfer Ödemeleri",
+        "completedTitle": "Tamamlanan Transfer Ödemeleri",
+        "completedCompanyTitle": "Tamamlanan Transfer Ödemeleri",
         "columns": {
           "receipt": "Makbuz"
         },
         "actions": {
-          "downloadReceipt": "Ödenmemiş makbuzu indir"
+          "downloadReceipt": "Ödenmemiş makbuzu indir",
+          "downloadPaidInvoice": "Ödenmiş faturayı indir",
+          "completePayment": "Ödemeyi tamamla"
         },
         "messages": {
-          "receiptError": "Makbuz oluşturulamadı."
+          "receiptError": "Makbuz oluşturulamadı.",
+          "completeSuccess": "Ödeme tamamlandı.",
+          "completeError": "Ödeme tamamlanamadı."
+        },
+        "summary": {
+          "title": "Ödeme özeti",
+          "confirm": "Ödemeyi onayla",
+          "cancel": "Vazgeç",
+          "group": "Grup",
+          "transferOrder": "Transfer Siparişi",
+          "items": "Kalem",
+          "order": "Sipariş",
+          "shipment": "Kargo",
+          "total": "Toplam"
         }
       },
       "transactions": {
@@ -1550,6 +1568,7 @@
         "price": "Fiyat",
         "customer": "Müşteri",
         "customerName": "Müşteri Adı",
+        "ownerEntity": "Bağlı Entity",
         "barcode": "Barkod",
         "deliveryMethod": "Teslimat Yöntemi",
         "localPickup": "Local Pickup",
@@ -2228,7 +2247,9 @@
         "fundingAccounts": "Fonlama Hesapları",
         "transferPaymentManagement": "Transfer Ödemeleri",
         "paymentStatuses": {
-          "pending": "Bekleyenler"
+          "pending": "Bekleyenler",
+          "processing": "İşlemde",
+          "completed": "Tamamlananlar"
         }
       },
       "partner": {

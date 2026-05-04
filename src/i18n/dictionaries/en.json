@@ -99,14 +99,32 @@
       },
       "transferPayments": {
         "title": "Processing Transfer Payments",
+        "processingCompanyTitle": "Processing Transfer Payments",
+        "completedTitle": "Completed Transfer Payments",
+        "completedCompanyTitle": "Completed Transfer Payments",
         "columns": {
           "receipt": "Receipt"
         },
         "actions": {
-          "downloadReceipt": "Download unpaid receipt"
+          "downloadReceipt": "Download unpaid receipt",
+          "downloadPaidInvoice": "Download paid invoice",
+          "completePayment": "Complete payment"
         },
         "messages": {
-          "receiptError": "Receipt could not be generated."
+          "receiptError": "Receipt could not be generated.",
+          "completeSuccess": "Payment completed.",
+          "completeError": "Payment could not be completed."
+        },
+        "summary": {
+          "title": "Payment summary",
+          "confirm": "Confirm payment",
+          "cancel": "Cancel",
+          "group": "Group",
+          "transferOrder": "Transfer Order",
+          "items": "Items",
+          "order": "Order",
+          "shipment": "Shipment",
+          "total": "Total"
         }
       },
       "transactions": {
@@ -1691,6 +1709,7 @@
         "price": "Price",
         "customer": "Customer",
         "customerName": "Customer Name",
+        "ownerEntity": "Owner Entity",
         "barcode": "Barcode",
         "deliveryMethod": "Delivery Method",
         "localPickup": "Local Pickup",
@@ -2369,7 +2388,9 @@
         "fundingAccounts": "Funding Accounts",
         "transferPaymentManagement": "Transfer Payments",
         "paymentStatuses": {
-          "pending": "Pending"
+          "pending": "Pending",
+          "processing": "Processing",
+          "completed": "Completed"
         }
       },
       "partner": {
