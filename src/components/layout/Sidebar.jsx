@@ -596,15 +596,15 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
-              {
-                key: "customer-permissions",
-                icon: <SettingOutlined />,
-                label: (
-                  <Link href="/dashboard/customer/permissions">
-                    {tSidebar("customer.permissions")}
-                  </Link>
-                ),
-              },
+              // {
+              //   key: "customer-permissions",
+              //   icon: <SettingOutlined />,
+              //   label: (
+              //     <Link href="/dashboard/customer/permissions">
+              //       {tSidebar("customer.permissions")}
+              //     </Link>
+              //   ),
+              // },
             ],
           },
         ]

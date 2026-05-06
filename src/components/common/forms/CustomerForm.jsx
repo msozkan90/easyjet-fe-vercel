@@ -2,10 +2,25 @@
 "use client";
 
 import { ShipStationAPI } from "@/utils/api";
-import { Form, Input, Select, App as AntdApp, InputNumber } from "antd";
-import { useEffect, useState } from "react";
+import { Form, Input, Select, App as AntdApp, InputNumber, Alert } from "antd";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslations } from "@/i18n/use-translations";
+
+const TRANSFER_CATEGORIES = new Set(["transfer", "transfers"]);
+const PRODUCTION_CATEGORIES = new Set(["apparel", "engraving", "print"]);
+
+const normalizeCategoryName = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+const isTransferCategoryName = (value) =>
+  TRANSFER_CATEGORIES.has(normalizeCategoryName(value));
+
+const isProductionCategoryName = (value) =>
+  PRODUCTION_CATEGORIES.has(normalizeCategoryName(value));
 
 export default function CustomerForm({
   initialValues,
@@ -26,6 +41,100 @@ export default function CustomerForm({
   const tForm = useTranslations("forms.customer");
   const tStatus = useTranslations("common.status");
   const submitButtonLabel = submitText || tCommonForms("buttons.save");
+  const selectedCategories = Form.useWatch("categories", form) || [];
+  const selectedCategoryIds = useMemo(
+    () => new Set(selectedCategories),
+    [selectedCategories],
+  );
+
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
+
+  const selectedCategoryItems = useMemo(
+    () => selectedCategories.map((id) => categoryById.get(id)).filter(Boolean),
+    [categoryById, selectedCategories],
+  );
+
+  const hasTransferSelected = selectedCategoryItems.some((category) =>
+    isTransferCategoryName(category?.name),
+  );
+  const hasProductionCategorySelected = selectedCategoryItems.some((category) =>
+    isProductionCategoryName(category?.name),
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((category) => {
+        const isTransfer = isTransferCategoryName(category.name);
+        const isProductionCategory = isProductionCategoryName(category.name);
+        const isSelected = selectedCategoryIds.has(category.id);
+        const disabled =
+          !isSelected &&
+          ((hasTransferSelected && isProductionCategory) ||
+            (hasProductionCategorySelected && isTransfer));
+
+        return {
+          value: category.id,
+          label: category.name,
+          disabled,
+        };
+      }),
+    [
+      categories,
+      hasProductionCategorySelected,
+      hasTransferSelected,
+      selectedCategoryIds,
+    ],
+  );
+
+  const validateCategoryCombination = (_, value = []) => {
+    const selectedItems = value
+      .map((id) => normalizeCategoryName(categoryById.get(id)?.name))
+      .filter(Boolean);
+    const hasTransfer = selectedItems.some(isTransferCategoryName);
+    const hasProductionCategory = selectedItems.some(isProductionCategoryName);
+
+    if (hasTransfer && hasProductionCategory) {
+      return Promise.reject(new Error(tForm("validation.categoryRestriction")));
+    }
+
+    return Promise.resolve();
+  };
+
+  const handleCategoryChange = (nextValues) => {
+    const selectedItems = nextValues
+      .map((id) => ({ id, category: categoryById.get(id) }))
+      .filter((item) => item.category);
+
+    const hasTransfer = selectedItems.some((item) =>
+      isTransferCategoryName(item.category.name),
+    );
+    const hasProductionCategory = selectedItems.some((item) =>
+      isProductionCategoryName(item.category.name),
+    );
+
+    if (hasTransfer && hasProductionCategory) {
+      const lastSelectedId = nextValues[nextValues.length - 1];
+      const lastSelectedCategory = categoryById.get(lastSelectedId);
+      const lastIsTransfer = isTransferCategoryName(lastSelectedCategory?.name);
+      const allowedValues = nextValues.filter((id) => {
+        const category = categoryById.get(id);
+        if (!category) return false;
+        return lastIsTransfer
+          ? !isProductionCategoryName(category.name)
+          : !isTransferCategoryName(category.name);
+      });
+
+      form.setFieldsValue({ categories: allowedValues });
+      form.setFields([{ name: "categories", errors: [] }]);
+      return;
+    }
+
+    form.setFieldsValue({ categories: nextValues });
+    form.setFields([{ name: "categories", errors: [] }]);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -100,12 +209,26 @@ export default function CustomerForm({
               field: tForm("labels.categories"),
             }),
           },
+          { validator: validateCategoryCombination },
         ]}
       >
         <Select
           placeholder={tForm("placeholders.categories")}
           mode="multiple"
-          options={categories.map((c) => ({ value: c.id, label: c.name }))}
+          options={categoryOptions}
+          onChange={handleCategoryChange}
+          dropdownRender={(menu) => (
+            <>
+              <div className="p-2">
+                <Alert
+                  type="info"
+                  showIcon
+                  message={tForm("info.categoryRestriction")}
+                />
+              </div>
+              {menu}
+            </>
+          )}
         />
       </Form.Item>
 

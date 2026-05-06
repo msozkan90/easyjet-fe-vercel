@@ -2782,6 +2782,12 @@
         "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz.",
         "productMultiplier": "Ürün fiyatlarına eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
       },
+      "info": {
+        "categoryRestriction": "Transfer kategorisi; Apparel, Engraving veya Print kategorileriyle birlikte seçilemez."
+      },
+      "validation": {
+        "categoryRestriction": "Transfer ile Apparel, Engraving veya Print aynı müşteride birlikte seçilemez."
+      },
       "messages": {
         "storeListLoadError": "Mağaza listesi yüklenemedi."
       }

@@ -62,7 +62,7 @@ export default function PartnersPage() {
       numericArrayKeys: ["partner_categories"],
       fixedFilters: {},
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
@@ -105,47 +105,23 @@ export default function PartnersPage() {
             t("common.none")
           ),
       },
-      isShippingOwner ?
-      {
-        title: t("columns.shipmentMultiplier"),
-        dataIndex: "shipment_multipliers",
-        width: 180,
-        render: (_, record) => {
-          const multipliers = Array.isArray(record?.shipment_multipliers)
-            ? record.shipment_multipliers.filter(
-                (item) =>
-                  item?.multiplier !== undefined &&
-                  item?.multiplier !== null &&
-                  item?.multiplier !== ""
-              )
-            : [];
-
-          if (multipliers.length > 0) {
-            return (
-              <Space wrap>
-                {multipliers.map((item, index) => {
-                  const percent = multiplierToPercent(item?.multiplier);
-                  const label =
-                    typeof percent === "number"
-                      ? `%${percent}`
-                      : item?.multiplier ?? "-";
-                  return <Tag key={item?.id || index}>{label}</Tag>;
-                })}
-              </Space>
-            );
+      isShippingOwner
+        ? {
+            title: t("columns.shipmentMultiplier"),
+            dataIndex: "shipment_multiplier",
+            width: 180,
+            render: (_, record) => {
+              const fallbackMultiplier = getPrimaryShipmentMultiplier(record);
+              if (fallbackMultiplier !== undefined) {
+                const percent = multiplierToPercent(fallbackMultiplier);
+                return typeof percent === "number"
+                  ? `%${percent}`
+                  : fallbackMultiplier;
+              }
+              return t("common.none");
+            },
           }
-
-          const fallbackMultiplier = getPrimaryShipmentMultiplier(record);
-          if (fallbackMultiplier !== undefined) {
-            const percent = multiplierToPercent(fallbackMultiplier);
-            return typeof percent === "number"
-              ? `%${percent}`
-              : fallbackMultiplier;
-          }
-          return t("common.none");
-        },
-      }
-      : {},
+        : {},
       {
         title: t("columns.createdAt"),
         dataIndex: "created_at",
@@ -203,13 +179,13 @@ export default function PartnersPage() {
         ),
       },
     ],
-    [categories, t, isShippingOwner]
+    [categories, t, isShippingOwner],
   );
 
   const buildPayload = (values) => {
     const payload = { ...values };
     const normalizedMultiplier = percentToMultiplier(
-      values?.shipment_multiplier
+      values?.shipment_multiplier,
     );
     delete payload.shipment_multiplier;
 
@@ -238,7 +214,7 @@ export default function PartnersPage() {
       }
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -312,14 +288,16 @@ export default function PartnersPage() {
                   name: editingRow?.name,
                   description: editingRow?.description,
                   categories: (
-                    editingRow?.partner_categories || editingRow?.categories || []
+                    editingRow?.partner_categories ||
+                    editingRow?.categories ||
+                    []
                   ).map((category) => category.id),
                   status: editingRow?.status,
                   shipment_multiplier: multiplierToPercent(
-                    getPrimaryShipmentMultiplier(editingRow)
+                    getPrimaryShipmentMultiplier(editingRow),
                   ),
                 }
-              : { status: "active" }
+              : { status: "active", shipment_multiplier: 0 }
           }
         />
       </Modal>

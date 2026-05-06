@@ -2782,6 +2782,12 @@
         "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none).",
         "productMultiplier": "Percentage profit added on top of product prices (leave blank for none)."
       },
+      "info": {
+        "categoryRestriction": "Transfer cannot be selected together with Apparel, Engraving, or Print."
+      },
+      "validation": {
+        "categoryRestriction": "Transfer cannot be assigned together with Apparel, Engraving, or Print for the same customer."
+      },
       "messages": {
         "storeListLoadError": "Store list could not be loaded."
       }
