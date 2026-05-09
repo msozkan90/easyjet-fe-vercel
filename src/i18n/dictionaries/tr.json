@@ -42,7 +42,8 @@
       "searchPlaceholder": "{label} ara",
       "selectPlaceholder": "{label} seç",
       "totalItems": "Toplam {count} kayıt"
-    }
+    },
+    "none": "-"
   },
   "home": {
     "title": "EasyJet'e Hoş Geldiniz",
@@ -149,7 +150,8 @@
         "types": {
           "topup": "Bakiye Yükleme",
           "order": "Sipariş",
-          "shipment": "Sevkiyat"
+          "shipment": "Sevkiyat",
+          "refund": "İade"
         },
         "directions": {
           "credit": "Giriş",
@@ -1486,7 +1488,9 @@
         "orderDateRange": "Sipariş tarihi aralığı",
         "singleDate": "Tek tarih",
         "dateRange": "Tarih aralığı",
-        "clearDate": "Tarih filtresini temizle"
+        "clearDate": "Tarih filtresini temizle",
+        "searchSku": "SKU ara",
+        "searchItem": "Ürün ara"
       },
       "actions": {
         "fetch": "ShipStation verisini çek",
@@ -1640,7 +1644,9 @@
         "transferItemsPrintedError": "Transfer order itemları printed durumuna alınamadı.",
         "transferLabelRequired": "Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.",
         "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur.",
-        "subCategoryRequiredForManualOrder": "Manuel transfer order için alt kategori zorunludur."
+        "subCategoryRequiredForManualOrder": "Manuel transfer order için alt kategori zorunludur.",
+        "noItems": "Kayıt bulunamadı.",
+        "loadListError": "Liste yüklenemedi."
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -1822,7 +1828,8 @@
           "labelService": "Servis",
           "labelRate": "Ücret",
           "labelTracking": "Takip Numarası",
-          "labelCreatedAt": "Oluşturma Tarihi"
+          "labelCreatedAt": "Oluşturma Tarihi",
+          "labels": "Etiketler"
         },
         "designs": {
           "title": "Tasarımlar",
@@ -2100,6 +2107,13 @@
           "uploadFailed": "Yükleme başarısız",
           "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
         }
+      },
+      "shippingRates": {
+        "actions": {
+          "confirmSendTitle": "Bu transfer siparişi üretime gönderilsin mi?",
+          "confirmSendDescription": "Bu işlem transfer siparişini üretim aşamasına alır.",
+          "confirmSendOk": "Üretime gönder"
+        }
       }
     },
     "refundRemake": {
@@ -2294,6 +2308,7 @@
         "transferOrders": "Transfer Siparişler",
         "transferOrderPool": "Transfer Sipariş Havuzu",
         "transferOrdersList": "Transfer Siparişler Listesi",
+        "others": "Others",
         "orders": "Siparişler",
         "pending": "Bekleyen Siparişler",
         "inProduction": "Üretimdeki Siparişler",

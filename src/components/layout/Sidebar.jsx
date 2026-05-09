@@ -124,7 +124,7 @@ export default function Sidebar({ collapsed }) {
         ? category.sub_categories
         : [];
 
-      return subCategories
+      const subCategoryMenuItems = subCategories
         .filter((subCategory) => subCategory?.id)
         .map((subCategory) => ({
           key: `transfer-order-list-sub-${category.id}-${subCategory.id}`,
@@ -139,6 +139,19 @@ export default function Sidebar({ collapsed }) {
             </Link>
           ),
         }));
+
+      return [
+        ...subCategoryMenuItems,
+        {
+          key: `transfer-order-list-others-${category.id}`,
+          icon: <TagsOutlined />,
+          label: (
+            <Link href="/dashboard/transfer-orders/orders?withoutSubCategory=1">
+              {tSidebar("order.others")}
+            </Link>
+          ),
+        },
+      ];
     },
   );
 
@@ -209,39 +222,70 @@ export default function Sidebar({ collapsed }) {
         ? category.sub_categories
         : [];
 
+      const subCategoryItems = subCategories
+        .filter((subCategory) => subCategory?.id)
+        .map((subCategory) => ({
+          key: `transfer-subcategory-${category.id}-${subCategory.id}`,
+          icon: <TagsOutlined />,
+          label: subCategory.name || "Sub Category",
+          children: [
+            {
+              key: `transfer-subcategory-${category.id}-${subCategory.id}-view-order`,
+              label: (
+                <Link
+                  href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/view-order`}
+                >
+                  View Order
+                </Link>
+              ),
+            },
+            {
+              key: `transfer-subcategory-${category.id}-${subCategory.id}-printer`,
+              label: (
+                <Link
+                  href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/printer`}
+                >
+                  Printer
+                </Link>
+              ),
+            },
+          ],
+        }));
+
       return {
         key: `transfer-category-${category.id}`,
         icon: <AppstoreOutlined />,
         label: category.name || "Transfer",
-        children: subCategories
-          .filter((subCategory) => subCategory?.id)
-          .map((subCategory) => ({
-            key: `transfer-subcategory-${category.id}-${subCategory.id}`,
+        children: [
+          ...subCategoryItems,
+          {
+            key: `transfer-subcategory-${category.id}-others`,
             icon: <TagsOutlined />,
-            label: subCategory.name || "Sub Category",
+            label: tSidebar("order.others"),
             children: [
               {
-                key: `transfer-subcategory-${category.id}-${subCategory.id}-view-order`,
+                key: `transfer-subcategory-${category.id}-others-view-order`,
                 label: (
                   <Link
-                    href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/view-order`}
+                    href={`/dashboard/transfer-orders/${category.id}/others/view-order`}
                   >
                     View Order
                   </Link>
                 ),
               },
               {
-                key: `transfer-subcategory-${category.id}-${subCategory.id}-printer`,
+                key: `transfer-subcategory-${category.id}-others-printer`,
                 label: (
                   <Link
-                    href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/printer`}
+                    href={`/dashboard/transfer-orders/${category.id}/others/printer`}
                   >
                     Printer
                   </Link>
                 ),
               },
             ],
-          })),
+          },
+        ],
       };
     });
 

@@ -63,7 +63,6 @@ export default function CompaniesPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90, sorter: true },
       {
         title: t("columns.name"),
         dataIndex: "name",

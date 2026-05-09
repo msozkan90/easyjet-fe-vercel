@@ -164,7 +164,6 @@ export default function WalletTopupsListPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90 },
       {
         title: t("columns.amount"),
         dataIndex: "amount",

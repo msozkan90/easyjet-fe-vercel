@@ -118,7 +118,11 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
   );
 };
 
-export default function TransferPrinterOrderSearchPage({ categoryId, subCategoryId }) {
+export default function TransferPrinterOrderSearchPage({
+  categoryId,
+  subCategoryId,
+  withoutDesign = false,
+}) {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
@@ -141,7 +145,7 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
-      if (!categoryId || !subCategoryId) return;
+      if (!categoryId || (!subCategoryId && !withoutDesign)) return;
 
       setSearching(true);
       setPrinting(true);
@@ -149,7 +153,9 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
         const response = await TransferOrdersAPI.markWorkerItemsPrinted({
           transfer_order_id: nextTransferOrderId,
           category_id: categoryId,
-          sub_category_id: subCategoryId,
+          ...(withoutDesign
+            ? { without_design: true }
+            : { sub_category_id: subCategoryId }),
         });
         const payload = response?.data || null;
 
@@ -185,7 +191,15 @@ export default function TransferPrinterOrderSearchPage({ categoryId, subCategory
         setPrinting(false);
       }
     },
-    [categoryId, message, orderNumber, subCategoryId, tOrders, transferOrderId],
+    [
+      categoryId,
+      message,
+      orderNumber,
+      subCategoryId,
+      tOrders,
+      transferOrderId,
+      withoutDesign,
+    ],
   );
 
   const confirmPrint = useCallback(

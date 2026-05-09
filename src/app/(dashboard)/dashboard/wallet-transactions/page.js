@@ -71,7 +71,6 @@ export default function WalletTransactionsPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 120 },
       {
         title: t("columns.type"),
         dataIndex: "transaction_type",
@@ -82,6 +81,7 @@ export default function WalletTransactionsPage() {
             { value: "topup", label: t("types.topup") },
             { value: "order", label: t("types.order") },
             { value: "shipment", label: t("types.shipment") },
+            { value: "refund", label: t("types.refund") },
           ],
         },
         render: (value) => {

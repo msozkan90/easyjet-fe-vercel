@@ -2,10 +2,12 @@ import TransferPrinterOrderSearchPage from "../../../orders/TransferPrinterOrder
 
 export default function TransferSubCategoryPrinterPage({ params }) {
   const { categoryId, subCategoryId } = params || {};
+  const isOthers = String(subCategoryId || "").toLowerCase() === "others";
   return (
     <TransferPrinterOrderSearchPage
       categoryId={categoryId}
-      subCategoryId={subCategoryId}
+      subCategoryId={isOthers ? undefined : subCategoryId}
+      withoutDesign={isOthers}
     />
   );
 }

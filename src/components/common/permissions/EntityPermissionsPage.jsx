@@ -64,7 +64,6 @@ export default function EntityPermissionsPage({
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 160 },
       {
         title: t("columns.name"),
         dataIndex: "name",

@@ -42,7 +42,8 @@
       "searchPlaceholder": "Search {label}",
       "selectPlaceholder": "Select {label}",
       "totalItems": "Total {count} items"
-    }
+    },
+    "none": "-"
   },
   "home": {
     "title": "Welcome to EasyJet",
@@ -149,7 +150,8 @@
         "types": {
           "topup": "Top-Up",
           "order": "Order",
-          "shipment": "Shipment"
+          "shipment": "Shipment",
+          "refund": "Refund"
         },
         "directions": {
           "credit": "Credit",
@@ -1627,7 +1629,9 @@
         "orderDateRange": "Order date range",
         "singleDate": "Single date",
         "dateRange": "Date range",
-        "clearDate": "Clear date filter"
+        "clearDate": "Clear date filter",
+        "searchSku": "Search SKU",
+        "searchItem": "Search item"
       },
       "actions": {
         "fetch": "Fetch ShipStation",
@@ -1781,7 +1785,9 @@
         "transferItemsPrintedError": "Transfer order items could not be moved to printed status.",
         "transferLabelRequired": "Label is missing. You need to create a shipping label.",
         "subCategoryRequiredForDesignUpload": "Sub category is required for design upload.",
-        "subCategoryRequiredForManualOrder": "Sub category is required for manual transfer order."
+        "subCategoryRequiredForManualOrder": "Sub category is required for manual transfer order.",
+        "noItems": "No items found.",
+        "loadListError": "Failed to load the list."
       },
       "table": {
         "noData": "No data"
@@ -1963,7 +1969,8 @@
           "labelService": "Service",
           "labelRate": "Rate",
           "labelTracking": "Tracking Number",
-          "labelCreatedAt": "Created At"
+          "labelCreatedAt": "Created At",
+          "labels": "Labels"
         },
         "designs": {
           "title": "Designs",
@@ -2241,6 +2248,13 @@
           "uploadFailed": "Upload failed",
           "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
         }
+      },
+      "shippingRates": {
+        "actions": {
+          "confirmSendTitle": "Send this transfer order to production?",
+          "confirmSendDescription": "This will move the transfer order into production.",
+          "confirmSendOk": "Send to production"
+        }
       }
     },
     "refundRemake": {
@@ -2435,6 +2449,7 @@
         "transferOrders": "Transfer Orders",
         "transferOrderPool": "Transfer Order Pool",
         "transferOrdersList": "Transfer Orders List",
+        "others": "Others",
         "orders": "Orders",
         "pending": "Pending Orders",
         "inProduction": "In Production",

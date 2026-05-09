@@ -229,10 +229,17 @@ export default function TransferOrdersPage() {
     const trimmed = raw.trim();
     return trimmed || undefined;
   }, [searchParams]);
+  const withoutSubCategory = useMemo(
+    () => searchParams?.get("withoutSubCategory") === "1",
+    [searchParams],
+  );
 
   const fixedFilters = useMemo(
-    () => (subCategoryId ? { sub_category_id: subCategoryId } : undefined),
-    [subCategoryId],
+    () => {
+      if (withoutSubCategory) return { without_sub_category: true };
+      return subCategoryId ? { sub_category_id: subCategoryId } : undefined;
+    },
+    [subCategoryId, withoutSubCategory],
   );
   const manualShipToName = Form.useWatch("ship_to_name", manualOrderForm);
   const manualShipToCompany = Form.useWatch("ship_to_company", manualOrderForm);
@@ -264,7 +271,8 @@ export default function TransferOrdersPage() {
     try {
       const list = await fetchGenericList("transfer_product", {
         filters: {
-          status: "active"
+          status: "active",
+          sub_category_id: subCategoryId,
         },
       });
       setManualProducts(Array.isArray(list) ? list : []);
@@ -347,7 +355,12 @@ export default function TransferOrdersPage() {
           const showWaitingAction = canUpdateItem && record?.status === "newOrder";
           const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
           const canEditRecord = Boolean(record?.transfer_order_id);
-          const canUploadDesign = Boolean(isParentRow && record?.transfer_order_id && subCategoryId);
+          const canUploadDesign = Boolean(
+            isParentRow &&
+              record?.transfer_order_id &&
+              subCategoryId &&
+              !withoutSubCategory,
+          );
           const canSendToProduction = Boolean(isParentRow && record?.transfer_order_id);
           const orderNumber = record?.order_number;
           const canViewDetail = Boolean(orderNumber);
@@ -471,6 +484,7 @@ export default function TransferOrdersPage() {
       isRowActionLoading,
       router,
       subCategoryId,
+      withoutSubCategory,
       t,
     ],
   );
@@ -706,7 +720,13 @@ export default function TransferOrdersPage() {
         onChange={handleDesignUploadInputChange}
       />
       <TransferOrdersStatusListPage
-        key={subCategoryId ? `transfer-orders-sub-${subCategoryId}` : "transfer-orders-all"}
+        key={
+          withoutSubCategory
+            ? "transfer-orders-without-subcategory"
+            : subCategoryId
+              ? `transfer-orders-sub-${subCategoryId}`
+              : "transfer-orders-all"
+        }
         listApiFn={TransferOrdersAPI.pendingItemsList}
         allowedStatuses={["newOrder", "waitingForDesign"]}
         initialFilters={{ status: ["newOrder", "waitingForDesign"] }}
@@ -715,7 +735,7 @@ export default function TransferOrdersPage() {
         columnsBuilder={columnsBuilder}
         tableRefExternal={tableRef}
         toolbarRight={
-          subCategoryId ? (
+          subCategoryId && !withoutSubCategory ? (
             <Button type="primary" onClick={handleOpenManualModal}>
               {t("actions.manualOrder")}
             </Button>

@@ -147,7 +147,6 @@ export default function FundingAccountsAdminPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90, sorter: true },
       {
         title: t("columns.displayName"),
         dataIndex: "display_name",
