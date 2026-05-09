@@ -18,6 +18,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
   const { categoryId, subCategoryId } = params || {};
+  const isOthers = String(subCategoryId || "").toLowerCase() === "others";
   const tableRef = useRef(null);
 
   const listApiFn = useMemo(
@@ -25,18 +26,21 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
       const nextFilters = {
         ...(payload?.filters || {}),
         category: categoryId,
-        sub_category: subCategoryId,
+        ...(isOthers
+          ? { without_design: true }
+          : { sub_category: subCategoryId }),
       };
       return TransferOrdersAPI.workerCompletedItemsList({
         ...(payload || {}),
         filters: nextFilters,
       });
     },
-    [categoryId, subCategoryId],
+    [categoryId, isOthers, subCategoryId],
   );
 
   const handleDownloadDesigns = useCallback(
     (record) => {
+      if (isOthers) return;
       const transferOrderId = String(record?.transfer_order_id || "").trim();
       if (!transferOrderId || !categoryId || !subCategoryId) return;
 
@@ -55,11 +59,12 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
         }, delayMs);
       });
     },
-    [categoryId, message, subCategoryId, tOrders],
+    [categoryId, isOthers, message, subCategoryId, tOrders],
   );
 
   const rowActionsRenderer = useCallback(
     ({ record, isParentRow }) => {
+      if (isOthers) return null;
       if (!isParentRow) return null;
       const transferOrderId = String(record?.transfer_order_id || "").trim();
       if (!transferOrderId) return null;
@@ -73,7 +78,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
         </Tooltip>
       );
     },
-    [handleDownloadDesigns, tOrders],
+    [handleDownloadDesigns, isOthers, tOrders],
   );
 
   return (
@@ -83,6 +88,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
       requireRoles={["companyAdmin", "companyCompletedWorker"]}
       tableRefExternal={tableRef}
       rowActionsRenderer={rowActionsRenderer}
+      showTransferOrderIdCopy
     />
   );
 }

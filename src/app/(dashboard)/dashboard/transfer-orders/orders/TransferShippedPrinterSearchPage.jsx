@@ -1,17 +1,24 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import moment from "moment";
 import {
   App as AntdApp,
   Button,
   Card,
+  Col,
+  Descriptions,
   Empty,
   Image,
   Input,
+  Popconfirm,
+  Row,
+  Space,
   Spin,
   Tag,
   Typography,
 } from "antd";
+import { ExportOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
@@ -39,6 +46,21 @@ const formatAmount = (value, fallback = "-") => {
   });
 };
 
+const formatCurrency = (value, currency = "USD") => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return "-";
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency || "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  } catch {
+    return formatAmount(numericValue);
+  }
+};
+
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
     return rawOptions
@@ -57,6 +79,52 @@ const normalizeOptions = (rawOptions) => {
   return [];
 };
 
+function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1 / 1",
+          borderRadius: 8,
+          overflow: "hidden",
+          background: "#f5f5f5",
+          border: "1px solid #f0f0f0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography.Text type="secondary">{emptyText}</Typography.Text>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        aspectRatio: "1 / 1",
+        borderRadius: 8,
+        overflow: "hidden",
+        background: "#f5f5f5",
+        border: "1px solid #f0f0f0",
+      }}
+    >
+      <img
+        src={src}
+        alt={alt || preparingText}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+    </div>
+  );
+}
+
 const TransferOrderItemCard = ({ item, tOrders }) => {
   const options = normalizeOptions(item?.options);
   const statusKey = item?.status || "";
@@ -65,16 +133,22 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
     : tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      bodyStyle={{ padding: 20 }}
+    >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
           <Tag color="gold">
-            {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
+            {tOrders("columns.quantity")}:{" "}
+            {item?.quantity ?? tOrders("common.none")}
           </Tag>
-          <Tag color="green">{tOrders("columns.price")}: {formatAmount(item?.price)}</Tag>
+          <Tag color="green">
+            {tOrders("columns.price")}: {formatAmount(item?.price)}
+          </Tag>
           <Tag color={STATUS_COLORS[statusKey] || "default"}>
             {tOrders("columns.status")}: {statusLabel}
           </Tag>
@@ -82,17 +156,27 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.product")}</Typography.Text>
-            <div className="font-medium">{item?.product?.name || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.product")}
+            </Typography.Text>
+            <div className="font-medium">
+              {item?.product?.name || tOrders("common.none")}
+            </div>
           </div>
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.notes")}</Typography.Text>
-            <div className="font-medium">{item?.notes || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.notes")}
+            </Typography.Text>
+            <div className="font-medium">
+              {item?.notes || tOrders("common.none")}
+            </div>
           </div>
         </div>
 
         <div>
-          <Typography.Text type="secondary">{tOrders("columns.options")}</Typography.Text>
+          <Typography.Text type="secondary">
+            {tOrders("columns.options")}
+          </Typography.Text>
           {options.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
               {options.map((option, index) => (
@@ -100,7 +184,8 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
                   key={`${option?.name || "option"}-${index}`}
                   className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
                 >
-                  {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
+                  {option?.name || tOrders("common.none")}:{" "}
+                  {option?.value || tOrders("common.none")}
                 </span>
               ))}
             </div>
@@ -116,20 +201,41 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
 export default function TransferShippedPrinterSearchPage() {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
+  const tDetail = useTranslations("dashboard.orders.transferDetail");
   const tCommonActions = useTranslations("common.actions");
+  const autoDownloadedLabelRef = useRef("");
 
   const [orderNumber, setOrderNumber] = useState("");
+  const [transferOrderId, setTransferOrderId] = useState("");
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [items, setItems] = useState([]);
   const [orderSummary, setOrderSummary] = useState(null);
+  const [transferLabel, setTransferLabel] = useState(null);
+  const [designGroups, setDesignGroups] = useState([]);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
+  const [voidingLabelId, setVoidingLabelId] = useState(null);
+
+  const triggerLabelDownload = useCallback((labelUrl, selectedOrderNumber) => {
+    if (!labelUrl) return;
+    if (typeof document === "undefined") return;
+    const anchor = document.createElement("a");
+    anchor.href = labelUrl;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.download = `${selectedOrderNumber || "transfer-order"}-label.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  }, []);
 
   const handleSearch = useCallback(
-    async (rawOrderNumber) => {
-      const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
-      if (!nextOrderNumber) {
+    async (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
@@ -139,14 +245,23 @@ export default function TransferShippedPrinterSearchPage() {
 
       try {
         const response = await TransferOrdersAPI.shipWorkerItems({
-          order_number: nextOrderNumber,
+          transfer_order_id: nextTransferOrderId,
         });
         const payload = response?.data || {};
         const transferOrder = payload?.transfer_order || null;
         const scopedItems = Array.isArray(payload?.items) ? payload.items : [];
         const requiresLabelCreation = payload?.requires_label_creation === true;
+        const latestLabel = payload?.transfer_label || null;
 
         setItems(scopedItems);
+        setTransferLabel(latestLabel);
+        setDesignGroups(
+          Array.isArray(transferOrder?.design_groups)
+            ? transferOrder.design_groups
+            : [],
+        );
+        setOrderNumber(transferOrder?.order_number || "");
+        setTransferOrderId(nextTransferOrderId);
         setOrderSummary(
           transferOrder
             ? {
@@ -154,14 +269,27 @@ export default function TransferShippedPrinterSearchPage() {
                 order_number: transferOrder?.order_number || null,
                 bill_to_name: transferOrder?.bill_to_name || null,
                 status: transferOrder?.order_status || null,
+                currency: transferOrder?.currency || "USD",
                 barcode_url: transferOrder?.barcode_url || null,
                 order_date: transferOrder?.order_date || null,
-                fullfillment_location: transferOrder?.fullfillment_location || null,
+                fullfillment_location:
+                  transferOrder?.fullfillment_location || null,
                 local_pickup: Boolean(transferOrder?.local_pickup),
                 shipping_address: transferOrder?.shipping_address || null,
               }
             : null,
         );
+
+        if (payload?.shipped === true && latestLabel?.label_url) {
+          const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
+          if (autoDownloadedLabelRef.current !== labelIdentity) {
+            autoDownloadedLabelRef.current = labelIdentity;
+            triggerLabelDownload(
+              latestLabel.label_url,
+              transferOrder?.order_number || nextTransferOrderId,
+            );
+          }
+        }
 
         if (requiresLabelCreation && transferOrder?.id) {
           const orderTotal =
@@ -169,7 +297,11 @@ export default function TransferShippedPrinterSearchPage() {
               const unitPrice = Number(item?.price);
               const quantity = Number(item?.quantity ?? 1);
               if (!Number.isFinite(unitPrice)) return sum;
-              return sum + unitPrice * (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+              return (
+                sum +
+                unitPrice *
+                  (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+              );
             }, 0) || 0;
 
           setShippingModalRecord({
@@ -178,7 +310,7 @@ export default function TransferShippedPrinterSearchPage() {
             items: scopedItems,
           });
           setShippingModalOpen(true);
-          message.warning("Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.");
+          message.warning(tOrders("messages.transferLabelRequired"));
         } else {
           setShippingModalRecord(null);
           setShippingModalOpen(false);
@@ -186,29 +318,75 @@ export default function TransferShippedPrinterSearchPage() {
       } catch (error) {
         setItems([]);
         setOrderSummary(null);
+        setTransferLabel(null);
+        setDesignGroups([]);
         setShippingModalRecord(null);
         setShippingModalOpen(false);
-        message.error(error?.response?.data?.error?.message || tOrders("messages.loadListError"));
+        message.error(
+          error?.response?.data?.error?.message ||
+            tOrders("messages.loadListError"),
+        );
       } finally {
         setSearching(false);
       }
     },
-    [message, orderNumber, tOrders],
+    [message, orderNumber, tOrders, transferOrderId, triggerLabelDownload],
   );
 
-  const handleCreateLabelSuccess = useCallback(() => {
-    const latestOrderNumber =
-      orderSummary?.order_number || shippingModalRecord?.order_number || orderNumber;
+  const confirmShipSearch = useCallback(
+    (rawTransferOrderId) => {
+      const nextTransferOrderId = String(
+        rawTransferOrderId || transferOrderId || orderNumber,
+      ).trim();
+      if (!nextTransferOrderId) {
+        message.warning(tOrders("filters.searchOrderNumber"));
+        return;
+      }
+      void handleSearch(nextTransferOrderId);
+    },
+    [handleSearch, message, orderNumber, tOrders, transferOrderId],
+  );
+
+  const handleCreateLabelSuccess = useCallback((payload) => {
+    const latestLabel = payload?.transfer_label || null;
+    if (latestLabel) {
+      setTransferLabel(latestLabel);
+    }
     setShippingModalOpen(false);
     setShippingModalRecord(null);
-    if (latestOrderNumber) {
-      void handleSearch(latestOrderNumber);
+  }, []);
+
+  const handleVoidLabel = useCallback(async () => {
+    const transferOrderId = orderSummary?.id || shippingModalRecord?.id;
+    const labelId = transferLabel?.id || transferLabel?.label_id;
+    if (!transferOrderId || !labelId) {
+      message.error(tOrders("detail.messages.voidLabelError"));
+      return;
+    }
+
+    setVoidingLabelId(String(labelId));
+    try {
+      await TransferOrdersAPI.voidWorkerShipmentLabel({
+        transfer_order_id: transferOrderId,
+        label_id: labelId,
+      });
+      message.success(tOrders("detail.messages.voidLabelSuccess"));
+      setTransferLabel(null);
+      autoDownloadedLabelRef.current = "";
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          tOrders("detail.messages.voidLabelError"),
+      );
+    } finally {
+      setVoidingLabelId(null);
     }
   }, [
-    handleSearch,
-    orderNumber,
-    orderSummary?.order_number,
-    shippingModalRecord?.order_number,
+    message,
+    orderSummary?.id,
+    shippingModalRecord?.id,
+    tOrders,
+    transferLabel,
   ]);
 
   const statusTag = useMemo(() => {
@@ -222,7 +400,7 @@ export default function TransferShippedPrinterSearchPage() {
     <RequireRole anyOfRoles={["companyShipmentWorker"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
-          Printer
+          {tOrders("workerShipmentPrinter.title")}
         </Typography.Title>
 
         <Card className="rounded-2xl">
@@ -235,15 +413,20 @@ export default function TransferShippedPrinterSearchPage() {
             }
             placeholder={tOrders("filters.searchOrderNumber")}
             value={orderNumber}
-            onChange={(event) => setOrderNumber(event.target.value)}
-            onSearch={handleSearch}
+            onChange={(event) => {
+              const value = event.target.value;
+              setOrderNumber(value);
+              setTransferOrderId(value);
+            }}
+            onSearch={() => confirmShipSearch()}
             onPaste={(event) => {
               const pastedValue = event?.clipboardData?.getData("text") || "";
               const normalizedOrderNumber = String(pastedValue).trim();
               if (!normalizedOrderNumber) return;
               event.preventDefault();
               setOrderNumber(normalizedOrderNumber);
-              void handleSearch(normalizedOrderNumber);
+              setTransferOrderId(normalizedOrderNumber);
+              confirmShipSearch(normalizedOrderNumber);
             }}
           />
         </Card>
@@ -262,7 +445,8 @@ export default function TransferShippedPrinterSearchPage() {
                   {orderSummary?.order_number || tOrders("common.none")}
                 </Typography.Title>
                 <Typography.Text type="secondary">
-                  {tOrders("columns.customerName")}: {orderSummary?.bill_to_name || tOrders("common.none")}
+                  {tOrders("columns.customerName")}:{" "}
+                  {orderSummary?.bill_to_name || tOrders("common.none")}
                 </Typography.Text>
                 <div>{statusTag}</div>
               </div>
@@ -278,10 +462,211 @@ export default function TransferShippedPrinterSearchPage() {
           </Card>
         ) : null}
 
+        {transferLabel ? (
+          <Card
+            className="rounded-2xl border border-slate-100"
+            title={tOrders("detail.fields.labels")}
+          >
+            <Descriptions
+              column={{ xs: 1, sm: 2, md: 3 }}
+              size="small"
+              bordered
+            >
+              <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
+                {transferLabel?.source || tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
+                {transferLabel?.base_shipping_price != null ? (
+                  <Space direction="vertical" size={0}>
+                    <Typography.Text>
+                      Label Price:{" "}
+                      {formatCurrency(
+                        transferLabel.base_shipping_price,
+                        orderSummary?.currency || "USD",
+                      )}
+                    </Typography.Text>
+                    {transferLabel?.source === "shipStationCompany" && (
+                      <Typography.Text>
+                        With Multiplier:{" "}
+                        {formatCurrency(
+                          transferLabel.shipment_total_price ??
+                            transferLabel.shipping_price,
+                          orderSummary?.currency || "USD",
+                        )}
+                      </Typography.Text>
+                    )}
+                  </Space>
+                ) : transferLabel?.shipping_price != null ? (
+                  formatCurrency(
+                    transferLabel.shipping_price,
+                    orderSummary?.currency || "USD",
+                  )
+                ) : (
+                  tOrders("common.none")
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label={tOrders("detail.fields.labelCreatedAt")}
+              >
+                {transferLabel?.created_at
+                  ? moment(transferLabel.created_at).format("LLL")
+                  : tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("detail.fields.labelTracking")}>
+                {transferLabel?.tracking_number || tOrders("common.none")}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label={tOrders("detail.actions.viewLabel")}
+                span={2}
+              >
+                <Space wrap>
+                  {transferLabel?.label_url ? (
+                    <Button
+                      icon={<ExportOutlined />}
+                      onClick={() =>
+                        triggerLabelDownload(
+                          transferLabel.label_url,
+                          orderSummary?.order_number || orderNumber,
+                        )
+                      }
+                    >
+                      {tOrders("actions.download")}
+                    </Button>
+                  ) : (
+                    tOrders("common.none")
+                  )}
+                  {(transferLabel?.id || transferLabel?.label_id) &&
+                  transferLabel?.source !== "self_label" &&
+                  orderSummary?.status !== "shipped" ? (
+                    <Popconfirm
+                      title={tOrders("detail.actions.voidLabelConfirmTitle")}
+                      okText={tOrders("detail.actions.voidLabelConfirmOk")}
+                      okButtonProps={{
+                        danger: true,
+                        loading:
+                          voidingLabelId ===
+                          String(
+                            transferLabel?.id || transferLabel?.label_id || "",
+                          ),
+                      }}
+                      onConfirm={handleVoidLabel}
+                    >
+                      <Button
+                        danger
+                        loading={
+                          voidingLabelId ===
+                          String(
+                            transferLabel?.id || transferLabel?.label_id || "",
+                          )
+                        }
+                      >
+                        {tOrders("detail.actions.voidLabel")}
+                      </Button>
+                    </Popconfirm>
+                  ) : null}
+                </Space>
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
+        ) : null}
+
+        {designGroups.length ? (
+          <Card title={tDetail("sections.uploadedDesigns")}>
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              {designGroups.map((group, groupIndex) => (
+                <Card
+                  key={group?.sub_category_id || `group-${groupIndex}`}
+                  type="inner"
+                  title={group?.sub_category_name || "-"}
+                  extra={
+                    <Typography.Text strong>
+                      {formatCurrency(
+                        group?.total_price,
+                        orderSummary?.currency || "USD",
+                      )}
+                    </Typography.Text>
+                  }
+                >
+                  <Row gutter={[12, 12]}>
+                    {(Array.isArray(group?.designs) ? group.designs : []).map(
+                      (design) => (
+                        <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
+                          <Card size="small" styles={{ body: { padding: 10 } }}>
+                            <Space
+                              direction="vertical"
+                              size={8}
+                              style={{ width: "100%" }}
+                            >
+                              <LazyPreviewImage
+                                src={design?.design_url}
+                                alt={`design-${design?.id}`}
+                                preparingText={tDetail("preview.preparing")}
+                                emptyText={tDetail("preview.empty")}
+                              />
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {tDetail("designCard.size")}:{" "}
+                                {formatAmount(design?.width)}" x{" "}
+                                {formatAmount(design?.height)}"
+                              </Typography.Text>
+                              <Typography.Text strong>
+                                {tDetail("designCard.price")}:{" "}
+                                {formatCurrency(
+                                  design?.price,
+                                  orderSummary?.currency || "USD",
+                                )}
+                              </Typography.Text>
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {design?.created_at
+                                  ? moment(design.created_at).format("LLL")
+                                  : "-"}
+                              </Typography.Text>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                }}
+                              >
+                                <Button
+                                  size="small"
+                                  icon={<ExportOutlined />}
+                                  onClick={() => {
+                                    if (!design?.design_url) return;
+                                    window.open(
+                                      design.design_url,
+                                      "_blank",
+                                      "noopener,noreferrer",
+                                    );
+                                  }}
+                                >
+                                  {tDetail("actions.open")}
+                                </Button>
+                              </div>
+                            </Space>
+                          </Card>
+                        </Col>
+                      ),
+                    )}
+                  </Row>
+                </Card>
+              ))}
+            </Space>
+          </Card>
+        ) : null}
+
         {items.length ? (
           <div className="grid gap-6">
             {items.map((item) => (
-              <TransferOrderItemCard key={item?.id} item={item} tOrders={tOrders} />
+              <TransferOrderItemCard
+                key={item?.id}
+                item={item}
+                tOrders={tOrders}
+              />
             ))}
           </div>
         ) : null}

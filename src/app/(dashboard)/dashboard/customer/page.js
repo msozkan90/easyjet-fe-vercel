@@ -64,12 +64,11 @@ export default function CustomersPage() {
       numericArrayKeys: ["customer_categories"],
       fixedFilters: {},
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90, sorter: true },
       {
         title: t("columns.name"),
         dataIndex: "name",
@@ -108,33 +107,9 @@ export default function CustomersPage() {
       isShippingOwner
         ? {
             title: t("columns.shipmentMultiplier"),
-            dataIndex: "shipment_multipliers",
+            dataIndex: "shipment_multiplier",
             width: 180,
             render: (_, record) => {
-              const multipliers = Array.isArray(record?.shipment_multipliers)
-                ? record.shipment_multipliers.filter(
-                    (item) =>
-                      item?.multiplier !== undefined &&
-                      item?.multiplier !== null &&
-                      item?.multiplier !== ""
-                  )
-                : [];
-
-              if (multipliers.length > 0) {
-                return (
-                  <Space wrap>
-                    {multipliers.map((item, index) => {
-                      const percent = multiplierToPercent(item?.multiplier);
-                      const label =
-                        typeof percent === "number"
-                          ? `%${percent}`
-                          : item?.multiplier ?? "-";
-                      return <Tag key={item?.id || index}>{label}</Tag>;
-                    })}
-                  </Space>
-                );
-              }
-
               const fallback = getPrimaryShipmentMultiplier(record);
               if (fallback !== undefined) {
                 const percent = multiplierToPercent(fallback);
@@ -148,33 +123,9 @@ export default function CustomersPage() {
       isPartnerEntity
         ? {
             title: t("columns.productMultiplier"),
-            dataIndex: "product_multipliers",
+            dataIndex: "product_multiplier",
             width: 200,
             render: (_, record) => {
-              const multipliers = Array.isArray(record?.product_multipliers)
-                ? record.product_multipliers.filter(
-                    (item) =>
-                      item?.multiplier !== undefined &&
-                      item?.multiplier !== null &&
-                      item?.multiplier !== ""
-                  )
-                : [];
-
-              if (multipliers.length > 0) {
-                return (
-                  <Space wrap>
-                    {multipliers.map((item, index) => {
-                      const percent = multiplierToPercent(item?.multiplier);
-                      const label =
-                        typeof percent === "number"
-                          ? `%${percent}`
-                          : item?.multiplier ?? "-";
-                      return <Tag key={item?.id || index}>{label}</Tag>;
-                    })}
-                  </Space>
-                );
-              }
-
               const fallback = getPrimaryProductMultiplier(record);
               if (fallback !== undefined) {
                 const percent = multiplierToPercent(fallback);
@@ -242,7 +193,7 @@ export default function CustomersPage() {
         ),
       },
     ],
-    [categories, t, isPartnerEntity, isShippingOwner]
+    [categories, t, isPartnerEntity, isShippingOwner],
   );
 
   const buildPayload = (values) => {
@@ -250,7 +201,7 @@ export default function CustomersPage() {
 
     if (isPartnerEntity) {
       const normalizedProductMultiplier = percentToMultiplier(
-        values?.product_multiplier
+        values?.product_multiplier,
       );
       delete payload.product_multiplier;
       if (normalizedProductMultiplier !== undefined) {
@@ -262,14 +213,12 @@ export default function CustomersPage() {
 
     if (isShippingOwner) {
       const normalizedShipmentMultiplier = percentToMultiplier(
-        values?.shipment_multiplier
+        values?.shipment_multiplier,
       );
       delete payload.shipment_multiplier;
 
       if (normalizedShipmentMultiplier !== undefined) {
         payload.shipment_multiplier = normalizedShipmentMultiplier;
-  
- 
       } else {
         delete payload.shipment_multipliers;
       }
@@ -299,7 +248,7 @@ export default function CustomersPage() {
       }
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -374,26 +323,30 @@ export default function CustomersPage() {
                   name: editingRow?.name,
                   description: editingRow?.description,
                   categories: (editingRow?.customer_categories || []).map(
-                    (c) => c.id
+                    (c) => c.id,
                   ),
                   status: editingRow?.status,
                   store_id: editingRow?.store_id,
                   ...(isPartnerEntity
                     ? {
                         product_multiplier: multiplierToPercent(
-                          getPrimaryProductMultiplier(editingRow)
+                          getPrimaryProductMultiplier(editingRow),
                         ),
                       }
                     : {}),
                   ...(isShippingOwner
                     ? {
                         shipment_multiplier: multiplierToPercent(
-                          getPrimaryShipmentMultiplier(editingRow)
+                          getPrimaryShipmentMultiplier(editingRow),
                         ),
                       }
                     : {}),
                 }
-              : { status: "active" }
+              : {
+                  status: "active",
+                  ...(isPartnerEntity ? { product_multiplier: 0 } : {}),
+                  ...(isShippingOwner ? { shipment_multiplier: 0 } : {}),
+                }
           }
           showProductMultiplier={isPartnerEntity}
           showShipmentMultiplier={isShippingOwner}

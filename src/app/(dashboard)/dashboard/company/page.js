@@ -58,12 +58,11 @@ export default function CompaniesPage() {
       filterMap: {},
       numericArrayKeys: ["company_categories"],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90, sorter: true },
       {
         title: t("columns.name"),
         dataIndex: "name",
@@ -100,37 +99,9 @@ export default function CompaniesPage() {
       },
       {
         title: t("columns.shipmentMultiplier"),
-        dataIndex: "shipment_multipliers",
+        dataIndex: "shipment_multiplier",
         width: 180,
         render: (_, record) => {
-          const multipliers = Array.isArray(record?.shipment_multipliers)
-            ? record.shipment_multipliers.filter(
-                (item) =>
-                  item?.multiplier !== undefined &&
-                  item?.multiplier !== null &&
-                  item?.multiplier !== ""
-              )
-            : [];
-
-          if (multipliers.length > 0) {
-            return (
-              <Space wrap>
-                {multipliers.map((item, index) => {
-                  const percent = multiplierToPercent(item?.multiplier);
-                  const label =
-                    typeof percent === "number"
-                      ? `%${percent}`
-                      : item?.multiplier ?? "-";
-                  return (
-                    <Tag key={item?.id || index}>
-                      {label}
-                    </Tag>
-                  );
-                })}
-              </Space>
-            );
-          }
-
           const fallbackMultiplier = getPrimaryShipmentMultiplier(record);
           if (fallbackMultiplier !== undefined) {
             const percent = multiplierToPercent(fallbackMultiplier);
@@ -188,12 +159,14 @@ export default function CompaniesPage() {
         ),
       },
     ],
-    [categories, t]
+    [categories, t],
   );
 
   const buildPayload = (values) => {
     const payload = { ...values };
-    const normalizedMultiplier = percentToMultiplier(values?.shipment_multiplier);
+    const normalizedMultiplier = percentToMultiplier(
+      values?.shipment_multiplier,
+    );
     delete payload.shipment_multiplier;
 
     if (normalizedMultiplier === undefined) {
@@ -229,14 +202,15 @@ export default function CompaniesPage() {
             categories: (editingRow?.company_categories || []).map((c) => c.id),
             status: editingRow?.status,
             shipment_multiplier: multiplierToPercent(
-              getPrimaryShipmentMultiplier(editingRow)
+              getPrimaryShipmentMultiplier(editingRow),
             ),
             address: editingRow?.address
               ? {
                   name: editingRow.address.name,
                   phone: editingRow.address.phone,
                   company_name: editingRow.address.company_name,
-                  fullfillment_location: editingRow.address.fullfillment_location,
+                  fullfillment_location:
+                    editingRow.address.fullfillment_location,
                   address_line1: editingRow.address.address_line1,
                   city_locality: editingRow.address.city_locality,
                   state_province: editingRow.address.state_province,
@@ -245,8 +219,8 @@ export default function CompaniesPage() {
                 }
               : {},
           }
-        : { status: "active", address: {} },
-    [editingRow, open]
+        : { status: "active", shipment_multiplier: 0, address: {} },
+    [editingRow, open],
   );
 
   const onSubmit = async (values) => {
@@ -267,7 +241,7 @@ export default function CompaniesPage() {
       }
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };

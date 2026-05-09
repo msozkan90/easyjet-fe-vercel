@@ -27,24 +27,26 @@ export const multiplierToPercent = (value) => {
 
 export const getPrimaryShipmentMultiplier = (record) => {
   if (!record) return undefined;
+  const fallback = record?.shipment_multiplier;
+  if (!isEmptyValue(fallback)) {
+    return fallback;
+  }
   const list = Array.isArray(record?.shipment_multipliers)
     ? record.shipment_multipliers
     : [];
-  const validEntry = list.find(
-    (item) => !isEmptyValue(item?.multiplier)
-  );
+  const validEntry = list.find((item) => !isEmptyValue(item?.multiplier));
   if (validEntry) {
     return validEntry.multiplier;
   }
-  const fallback = record?.shipment_multiplier;
-  if (isEmptyValue(fallback)) {
-    return undefined;
-  }
-  return fallback;
+  return undefined;
 };
 
 export const getPrimaryProductMultiplier = (record) => {
   if (!record) return undefined;
+  const fallback = record?.product_multiplier;
+  if (!isEmptyValue(fallback)) {
+    return fallback;
+  }
   const list = Array.isArray(record?.product_multipliers)
     ? record.product_multipliers
     : [];
@@ -52,9 +54,5 @@ export const getPrimaryProductMultiplier = (record) => {
   if (validEntry) {
     return validEntry.multiplier;
   }
-  const fallback = record?.product_multiplier;
-  if (isEmptyValue(fallback)) {
-    return undefined;
-  }
-  return fallback;
+  return undefined;
 };

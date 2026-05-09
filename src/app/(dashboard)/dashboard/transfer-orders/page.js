@@ -563,10 +563,10 @@ export default function OrdersPage() {
   ]);
 
   const fetchButtonLabel = pulling
-    ? "Fetching Shopify..."
+    ? t("actions.fetching")
     : remainingSec > 0
-    ? `Fetch Shopify (${remainingSec}s)`
-    : "Fetch Shopify";
+    ? t("actions.fetchCountdown", { seconds: remainingSec })
+    : t("actions.fetch");
 
   const rowSelectionConfig = useMemo(
     () => ({

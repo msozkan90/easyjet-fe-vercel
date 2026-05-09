@@ -9,6 +9,7 @@ export default function TransferOrdersViewOrderPage() {
       listApiFn={TransferOrdersAPI.workerShippedItemsList}
       allowedStatuses={["printed", "shipped"]}
       requireRoles={["companyShipmentWorker"]}
+      showTransferOrderIdCopy
     />
   );
 }

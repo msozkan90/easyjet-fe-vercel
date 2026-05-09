@@ -9,7 +9,7 @@ export default function AffiliatedTransferProductionOrdersPage() {
       listApiFn={TransferOrdersAPI.affilatedProductionItemsList}
       allowedStatuses={["processing", "downloaded"]}
       initialFilters={{ status: ["processing", "downloaded"] }}
-      requireRoles={["companyAdmin", "companyShipmentWorker"]}
+      requireRoles={["companyAdmin", "companyShipmentWorker", "partnerAdmin"]}
     />
   );
 }

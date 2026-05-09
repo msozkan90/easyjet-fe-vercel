@@ -81,7 +81,6 @@ export default function WalletTopupsAdminListPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("columns.id"), dataIndex: "id", width: 90 },
       {
         title: t("columns.ownerType"),
         dataIndex: "owner_type",

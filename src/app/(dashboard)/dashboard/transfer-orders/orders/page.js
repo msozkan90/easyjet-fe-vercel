@@ -1,16 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dayjs from "dayjs";
 import {
   App as AntdApp,
   Button,
+  DatePicker,
   Descriptions,
   Form,
+  Input,
   Modal,
   Popconfirm,
   Popover,
   Radio,
+  Select,
   Space,
+  Switch,
   Upload,
 } from "antd";
 import {
@@ -24,6 +29,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
+import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import TransferOrdersStatusListPage from "./TransferOrdersStatusListPage";
@@ -39,7 +45,7 @@ const toNullableString = (value) => {
 };
 
 export default function TransferOrdersPage() {
-  const { message } = AntdApp.useApp();
+  const { message, modal } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
   const router = useRouter();
   const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
@@ -47,6 +53,8 @@ export default function TransferOrdersPage() {
   const tableRef = useRef(null);
   const designUploadInputRef = useRef(null);
   const [editForm] = Form.useForm();
+  const [manualOrderForm] = Form.useForm();
+  const [manualAddressForm] = Form.useForm();
   const [rowActionLoading, setRowActionLoading] = useState({});
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editModalLoading, setEditModalLoading] = useState(false);
@@ -59,6 +67,11 @@ export default function TransferOrdersPage() {
   const [productionRecord, setProductionRecord] = useState(null);
   const [productionOption, setProductionOption] = useState("local_pickup");
   const [productionLabelFiles, setProductionLabelFiles] = useState([]);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [manualModalSubmitting, setManualModalSubmitting] = useState(false);
+  const [manualAddressModalOpen, setManualAddressModalOpen] = useState(false);
+  const [manualProductsLoading, setManualProductsLoading] = useState(false);
+  const [manualProducts, setManualProducts] = useState([]);
   const handledSuccessUploadIdsRef = useRef(new Set());
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
@@ -167,6 +180,23 @@ export default function TransferOrdersPage() {
     }
   }, [editForm, editingDetail, editingRecord, handleEditModalClose, message, t]);
 
+  const handleEditAddressSelect = useCallback(
+    (payload) => {
+      if (!payload) return;
+      const updates = {};
+      if (payload.street1 !== undefined) updates.ship_to_street1 = payload.street1;
+      if (payload.street2 !== undefined) updates.ship_to_street2 = payload.street2;
+      if (payload.city !== undefined) updates.ship_to_city = payload.city;
+      if (payload.state !== undefined) updates.ship_to_state = payload.state;
+      if (payload.postalCode !== undefined) updates.ship_to_postal_code = payload.postalCode;
+      if (payload.country !== undefined) updates.ship_to_country = payload.country;
+      if (Object.keys(updates).length) {
+        editForm.setFieldsValue(updates);
+      }
+    },
+    [editForm],
+  );
+
   const handleStatusUpdate = useCallback(
     async (record, status) => {
       if (!record?.id || !status) return;
@@ -199,16 +229,67 @@ export default function TransferOrdersPage() {
     const trimmed = raw.trim();
     return trimmed || undefined;
   }, [searchParams]);
+  const withoutSubCategory = useMemo(
+    () => searchParams?.get("withoutSubCategory") === "1",
+    [searchParams],
+  );
 
   const fixedFilters = useMemo(
-    () => (subCategoryId ? { sub_category_id: subCategoryId } : undefined),
-    [subCategoryId],
+    () => {
+      if (withoutSubCategory) return { without_sub_category: true };
+      return subCategoryId ? { sub_category_id: subCategoryId } : undefined;
+    },
+    [subCategoryId, withoutSubCategory],
   );
+  const manualShipToName = Form.useWatch("ship_to_name", manualOrderForm);
+  const manualShipToCompany = Form.useWatch("ship_to_company", manualOrderForm);
+  const manualShipToStreet1 = Form.useWatch("ship_to_street1", manualOrderForm);
+  const manualShipToStreet2 = Form.useWatch("ship_to_street2", manualOrderForm);
+  const manualShipToCity = Form.useWatch("ship_to_city", manualOrderForm);
+  const manualShipToState = Form.useWatch("ship_to_state", manualOrderForm);
+  const manualShipToPostalCode = Form.useWatch("ship_to_postal_code", manualOrderForm);
+  const manualShipToCountry = Form.useWatch("ship_to_country", manualOrderForm);
+  const manualShipToPhone = Form.useWatch("ship_to_phone", manualOrderForm);
+
+  const manualProductOptions = useMemo(
+    () =>
+      (Array.isArray(manualProducts) ? manualProducts : [])
+        .filter((row) => row?.id)
+        .map((row) => ({
+          value: row.id,
+          label: row?.name || row.id,
+        })),
+    [manualProducts],
+  );
+
+  const loadManualProducts = useCallback(async () => {
+    if (!subCategoryId) {
+      setManualProducts([]);
+      return;
+    }
+    setManualProductsLoading(true);
+    try {
+      const list = await fetchGenericList("transfer_product", {
+        filters: {
+          status: "active",
+          sub_category_id: subCategoryId,
+        },
+      });
+      setManualProducts(Array.isArray(list) ? list : []);
+    } catch (error) {
+      setManualProducts([]);
+      message.error(
+        error?.response?.data?.error?.message || t("messages.loadVariationsError"),
+      );
+    } finally {
+      setManualProductsLoading(false);
+    }
+  }, [message, subCategoryId, t]);
 
   const handleOpenDesignUpload = useCallback(
     (record) => {
       if (!subCategoryId) {
-        message.error("Sub category is required for design upload.");
+        message.error(t("messages.subCategoryRequiredForDesignUpload"));
         return;
       }
       const transferOrderId = record?.transfer_order_id;
@@ -219,7 +300,7 @@ export default function TransferOrdersPage() {
       });
       designUploadInputRef.current?.click?.();
     },
-    [message, subCategoryId],
+    [message, subCategoryId, t],
   );
 
   const handleDesignUploadInputChange = useCallback(
@@ -274,7 +355,12 @@ export default function TransferOrdersPage() {
           const showWaitingAction = canUpdateItem && record?.status === "newOrder";
           const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
           const canEditRecord = Boolean(record?.transfer_order_id);
-          const canUploadDesign = Boolean(isParentRow && record?.transfer_order_id && subCategoryId);
+          const canUploadDesign = Boolean(
+            isParentRow &&
+              record?.transfer_order_id &&
+              subCategoryId &&
+              !withoutSubCategory,
+          );
           const canSendToProduction = Boolean(isParentRow && record?.transfer_order_id);
           const orderNumber = record?.order_number;
           const canViewDetail = Boolean(orderNumber);
@@ -398,6 +484,7 @@ export default function TransferOrdersPage() {
       isRowActionLoading,
       router,
       subCategoryId,
+      withoutSubCategory,
       t,
     ],
   );
@@ -409,6 +496,169 @@ export default function TransferOrdersPage() {
     setProductionOption("local_pickup");
     setProductionLabelFiles([]);
   }, []);
+
+  const handleOpenManualModal = useCallback(async () => {
+    if (!subCategoryId) {
+      message.error(t("messages.subCategoryRequiredForManualOrder"));
+      return;
+    }
+    setManualModalOpen(true);
+    manualOrderForm.setFieldsValue({
+      order_number: "",
+      order_date: dayjs(),
+      local_pickup: false,
+      ship_to_name: "",
+      ship_to_company: "",
+      ship_to_street1: "",
+      ship_to_street2: "",
+      ship_to_city: "",
+      ship_to_state: "",
+      ship_to_postal_code: "",
+      ship_to_country: "",
+      ship_to_phone: "",
+      notes: "",
+      items: [{ name: "", transfer_product_id: undefined }],
+    });
+    await loadManualProducts();
+  }, [loadManualProducts, manualOrderForm, message, subCategoryId, t]);
+
+  const handleOpenManualAddressModal = useCallback(() => {
+    const values = manualOrderForm.getFieldsValue([
+      "ship_to_name",
+      "ship_to_company",
+      "ship_to_street1",
+      "ship_to_street2",
+      "ship_to_city",
+      "ship_to_state",
+      "ship_to_postal_code",
+      "ship_to_country",
+      "ship_to_phone",
+    ]);
+    manualAddressForm.setFieldsValue({
+      ship_to_name: values?.ship_to_name || "",
+      ship_to_company: values?.ship_to_company || "",
+      ship_to_street1: values?.ship_to_street1 || "",
+      ship_to_street2: values?.ship_to_street2 || "",
+      ship_to_city: values?.ship_to_city || "",
+      ship_to_state: values?.ship_to_state || "",
+      ship_to_postal_code: values?.ship_to_postal_code || "",
+      ship_to_country: values?.ship_to_country || "",
+      ship_to_phone: values?.ship_to_phone || "",
+    });
+    setManualAddressModalOpen(true);
+  }, [manualAddressForm, manualOrderForm]);
+
+  const handleCloseManualAddressModal = useCallback(() => {
+    setManualAddressModalOpen(false);
+  }, []);
+
+  const handleManualAddressSelect = useCallback(
+    (payload) => {
+      if (!payload) return;
+      const updates = {};
+      if (payload.street1 !== undefined) updates.ship_to_street1 = payload.street1;
+      if (payload.street2 !== undefined) updates.ship_to_street2 = payload.street2;
+      if (payload.city !== undefined) updates.ship_to_city = payload.city;
+      if (payload.state !== undefined) updates.ship_to_state = payload.state;
+      if (payload.postalCode !== undefined) updates.ship_to_postal_code = payload.postalCode;
+      if (payload.country !== undefined) updates.ship_to_country = payload.country;
+      if (Object.keys(updates).length) {
+        manualAddressForm.setFieldsValue(updates);
+      }
+    },
+    [manualAddressForm],
+  );
+
+  const handleSaveManualAddress = useCallback(async () => {
+    let values;
+    try {
+      values = await manualAddressForm.validateFields();
+    } catch {
+      return;
+    }
+    manualOrderForm.setFieldsValue({
+      ship_to_name: values?.ship_to_name || "",
+      ship_to_company: values?.ship_to_company || "",
+      ship_to_street1: values?.ship_to_street1 || "",
+      ship_to_street2: values?.ship_to_street2 || "",
+      ship_to_city: values?.ship_to_city || "",
+      ship_to_state: values?.ship_to_state || "",
+      ship_to_postal_code: values?.ship_to_postal_code || "",
+      ship_to_country: values?.ship_to_country || "",
+      ship_to_phone: values?.ship_to_phone || "",
+    });
+    setManualAddressModalOpen(false);
+  }, [manualAddressForm, manualOrderForm]);
+
+  const handleCloseManualModal = useCallback(() => {
+    setManualModalOpen(false);
+    setManualModalSubmitting(false);
+    setManualAddressModalOpen(false);
+    manualOrderForm.resetFields();
+    manualAddressForm.resetFields();
+  }, [manualAddressForm, manualOrderForm]);
+
+  const handleCreateManualOrder = useCallback(async () => {
+    if (!subCategoryId) {
+      message.error(t("messages.subCategoryRequiredForManualOrder"));
+      return;
+    }
+    let values;
+    try {
+      values = await manualOrderForm.validateFields();
+    } catch {
+      return;
+    }
+
+    const toNullableField = (value) => {
+      if (value === undefined || value === null) return null;
+      const text = String(value).trim();
+      return text.length ? text : null;
+    };
+
+    const normalizedItems = (Array.isArray(values?.items) ? values.items : [])
+      .map((item) => ({
+        name: toNullableField(item?.name),
+        transfer_product_id: toNullableField(item?.transfer_product_id),
+      }))
+      .filter((item) => item.name && item.transfer_product_id);
+
+    if (!normalizedItems.length) {
+      message.error(t("manualOrderModal.validation.itemsRequired"));
+      return;
+    }
+
+    const payload = {
+      order_number: String(values.order_number || "").trim(),
+      order_date: values.order_date?.toISOString?.() || new Date().toISOString(),
+      ship_to_name: toNullableField(values.ship_to_name),
+      ship_to_company: toNullableField(values.ship_to_company),
+      local_pickup: Boolean(values.local_pickup),
+      ship_to_street1: toNullableField(values.ship_to_street1),
+      ship_to_street2: toNullableField(values.ship_to_street2),
+      ship_to_city: toNullableField(values.ship_to_city),
+      ship_to_state: toNullableField(values.ship_to_state),
+      ship_to_postal_code: toNullableField(values.ship_to_postal_code),
+      ship_to_country: toNullableField(values.ship_to_country),
+      ship_to_phone: toNullableField(values.ship_to_phone),
+      notes: toNullableField(values.notes),
+      items: normalizedItems,
+    };
+
+    setManualModalSubmitting(true);
+    try {
+      await TransferOrdersAPI.createManual(payload);
+      message.success(t("manualOrderModal.messages.success"));
+      handleCloseManualModal();
+      tableRef.current?.reload?.();
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message || t("manualOrderModal.messages.error"),
+      );
+    } finally {
+      setManualModalSubmitting(false);
+    }
+  }, [handleCloseManualModal, manualOrderForm, message, subCategoryId, t]);
 
   const handleSendToProduction = useCallback(async () => {
     const transferOrderId = productionRecord?.transfer_order_id;
@@ -449,6 +699,16 @@ export default function TransferOrdersPage() {
     t,
   ]);
 
+  const handleConfirmSendToProduction = useCallback(() => {
+    modal.confirm({
+      title: t("shippingRates.actions.confirmSendTitle"),
+      content: t("shippingRates.actions.confirmSendDescription"),
+      okText: t("shippingRates.actions.confirmSendOk"),
+      cancelText: "Cancel",
+      onOk: handleSendToProduction,
+    });
+  }, [handleSendToProduction, modal, t]);
+
   return (
     <>
       <input
@@ -460,7 +720,13 @@ export default function TransferOrdersPage() {
         onChange={handleDesignUploadInputChange}
       />
       <TransferOrdersStatusListPage
-        key={subCategoryId ? `transfer-orders-sub-${subCategoryId}` : "transfer-orders-all"}
+        key={
+          withoutSubCategory
+            ? "transfer-orders-without-subcategory"
+            : subCategoryId
+              ? `transfer-orders-sub-${subCategoryId}`
+              : "transfer-orders-all"
+        }
         listApiFn={TransferOrdersAPI.pendingItemsList}
         allowedStatuses={["newOrder", "waitingForDesign"]}
         initialFilters={{ status: ["newOrder", "waitingForDesign"] }}
@@ -468,6 +734,13 @@ export default function TransferOrdersPage() {
         showOptionsInsteadOfSku
         columnsBuilder={columnsBuilder}
         tableRefExternal={tableRef}
+        toolbarRight={
+          subCategoryId && !withoutSubCategory ? (
+            <Button type="primary" onClick={handleOpenManualModal}>
+              {t("actions.manualOrder")}
+            </Button>
+          ) : null
+        }
       />
       <AddressEditorModal
         open={editModalOpen}
@@ -477,7 +750,7 @@ export default function TransferOrdersPage() {
         onSave={handleAddressSave}
         editForm={editForm}
         editingOrder={editingOrder}
-        onAddressSelect={() => {}}
+        onAddressSelect={handleEditAddressSelect}
         orderDateLabel={
           editingOrder?.order_date
             ? new Date(editingOrder.order_date).toLocaleString()
@@ -485,11 +758,30 @@ export default function TransferOrdersPage() {
         }
         zIndex={1500}
       />
+      <AddressEditorModal
+        open={manualAddressModalOpen}
+        loading={false}
+        saving={false}
+        onCancel={handleCloseManualAddressModal}
+        onSave={handleSaveManualAddress}
+        editForm={manualAddressForm}
+        editingOrder={{
+          order_number: manualOrderForm.getFieldValue("order_number") || "-",
+          order_date: manualOrderForm.getFieldValue("order_date")
+            ? dayjs(manualOrderForm.getFieldValue("order_date")).format("YYYY-MM-DD HH:mm:ss")
+            : "-",
+          bill_to_name: "-",
+        }}
+        onAddressSelect={handleManualAddressSelect}
+        showBillToName={false}
+        showRecipientFields
+        zIndex={1600}
+      />
       <Modal
         open={productionModalOpen}
         onCancel={handleProductionModalClose}
         title={t("productionModal.title")}
-        onOk={handleSendToProduction}
+        onOk={handleConfirmSendToProduction}
         okText={t("productionModal.actions.send")}
         confirmLoading={productionSubmitting}
         destroyOnHidden
@@ -566,6 +858,152 @@ export default function TransferOrdersPage() {
             </Upload>
           </div>
         ) : null}
+      </Modal>
+      <Modal
+        open={manualModalOpen}
+        onCancel={handleCloseManualModal}
+        onOk={handleCreateManualOrder}
+        okText={t("manualOrderModal.actions.create")}
+        title={t("manualOrderModal.title")}
+        confirmLoading={manualModalSubmitting}
+        destroyOnHidden
+        width={900}
+      >
+        <Form form={manualOrderForm} layout="vertical">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Form.Item
+              name="order_number"
+              label={t("manualOrderModal.fields.orderNumber")}
+              rules={[{ required: true, message: t("manualOrderModal.validation.orderNumberRequired") }]}
+            >
+              <Input placeholder={t("manualOrderModal.placeholders.orderNumber")} />
+            </Form.Item>
+            <Form.Item
+              name="order_date"
+              label={t("manualOrderModal.fields.orderDate")}
+              rules={[{ required: true, message: t("manualOrderModal.validation.orderDateRequired") }]}
+            >
+              <DatePicker
+                showTime
+                style={{ width: "100%" }}
+                format="YYYY-MM-DD HH:mm:ss"
+              />
+            </Form.Item>
+            <Form.Item
+              name="local_pickup"
+              label={t("manualOrderModal.fields.localPickup")}
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+          </div>
+          <div className="mb-3 rounded border border-slate-200 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="font-medium">{t("manualOrderModal.fields.address")}</div>
+              <Button onClick={handleOpenManualAddressModal}>
+                {t("actions.editAddress")}
+              </Button>
+            </div>
+            <div className="text-sm text-slate-600">
+              {manualShipToName || "-"}{" "}
+              {manualShipToCompany
+                ? `(${manualShipToCompany})`
+                : ""}
+            </div>
+            <div className="text-sm text-slate-600">
+              {[
+                manualShipToStreet1,
+                manualShipToStreet2,
+                manualShipToCity,
+                manualShipToState,
+                manualShipToPostalCode,
+                manualShipToCountry,
+              ]
+                .filter(Boolean)
+                .join(", ") || "-"}
+            </div>
+            <div className="text-sm text-slate-600">
+              {manualShipToPhone || "-"}
+            </div>
+          </div>
+          <Form.Item name="ship_to_name" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_company" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_street1" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_street2" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_city" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_state" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_postal_code" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_country" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="ship_to_phone" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="notes" label={t("manualOrderModal.fields.notes")}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+
+          <Form.List name="items">
+            {(fields, { add, remove }) => (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-medium">{t("manualOrderModal.fields.items")}</div>
+                  <Button onClick={() => add({ name: "", transfer_product_id: undefined })}>
+                    {t("manualOrderModal.actions.addItem")}
+                  </Button>
+                </div>
+                {fields.map((field) => (
+                  <div key={field.key} className="grid grid-cols-1 gap-3 rounded border border-slate-200 p-3 md:grid-cols-[1fr_1fr_auto]">
+                    <Form.Item
+                      {...field}
+                      name={[field.name, "name"]}
+                      label={t("manualOrderModal.fields.itemName")}
+                      rules={[{ required: true, message: t("manualOrderModal.validation.itemNameRequired") }]}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      name={[field.name, "transfer_product_id"]}
+                      label={t("manualOrderModal.fields.transferProduct")}
+                      rules={[{ required: true, message: t("manualOrderModal.validation.transferProductRequired") }]}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Select
+                        showSearch
+                        allowClear
+                        loading={manualProductsLoading}
+                        options={manualProductOptions}
+                        placeholder={t("manualOrderModal.placeholders.transferProduct")}
+                        optionFilterProp="label"
+                      />
+                    </Form.Item>
+                    <div className="flex items-end">
+                      <Button danger onClick={() => remove(field.name)}>
+                        {t("manualOrderModal.actions.removeItem")}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Form.List>
+        </Form>
       </Modal>
     </>
   );
