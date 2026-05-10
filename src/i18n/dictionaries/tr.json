@@ -10,7 +10,16 @@
       "logout": "Çıkış Yap",
       "unknownUser": "Kullanıcı",
       "orderSearchPlaceholder": "Sipariş numarası ara",
-      "orderSearchAria": "Sipariş numarasına göre ara"
+      "orderSearchAria": "Sipariş numarasına göre ara",
+      "orderSearchNotFound": "Sipariş bulunamadı.",
+      "orderSearchError": "Sipariş araması başarısız oldu.",
+      "orderSearchMultipleTitle": "Sipariş tipini seçin",
+      "openOrder": "Aç",
+      "customer": "Müşteri",
+      "orderTypes": {
+        "order": "Sipariş",
+        "transferOrder": "Transfer Sipariş"
+      }
     },
     "actions": {
       "search": "Ara",
@@ -1960,10 +1969,13 @@
         }
       },
       "workerPrinter": {
-        "title": "Printer"
+        "title": "Tarayıcı"
       },
       "workerShipmentPrinter": {
-        "title": "Printer"
+        "title": "Tarayıcı"
+      },
+      "scanner": {
+        "title": "Tarayıcı"
       },
       "transferDetail": {
         "header": {
@@ -2243,12 +2255,18 @@
     },
     "sidebar": {
       "dashboard": "Kontrol Paneli",
+      "common": {
+        "category": "Kategori",
+        "subCategory": "Alt Kategori",
+        "transfer": "Transfer"
+      },
       "orders": {
         "title": "Siparişler",
         "view": "Siparişleri Görüntüle",
         "waitingForDesign": "Tasarım Bekleyenler",
         "cancel": "İptal Siparişler",
-        "printer": "Printer"
+        "printer": "Printer",
+        "scanner": "Tarayıcı"
       },
       "financial": {
         "title": "Finans",
@@ -2308,7 +2326,9 @@
         "transferOrders": "Transfer Siparişler",
         "transferOrderPool": "Transfer Sipariş Havuzu",
         "transferOrdersList": "Transfer Siparişler Listesi",
-        "others": "Others",
+        "transferPrintedOrder": "Yazdırılmış Transfer Sipariş",
+        "transferShippedOrder": "Kargolanmış Transfer Sipariş",
+        "others": "Diğerleri",
         "orders": "Siparişler",
         "pending": "Bekleyen Siparişler",
         "inProduction": "Üretimdeki Siparişler",

@@ -166,7 +166,7 @@ export default function Sidebar({ collapsed }) {
           key: `category-${category.id}-view-order`,
           label: (
             <Link href={`/dashboard/orders/${category.id}/view-order`}>
-              View Order
+              {tSidebar("order.viewOrder")}
             </Link>
           ),
         },
@@ -174,7 +174,7 @@ export default function Sidebar({ collapsed }) {
           key: `category-${category.id}-printer`,
           label: (
             <Link href={`/dashboard/orders/${category.id}/printer`}>
-              Printer
+              {tSidebar("orders.scanner")}
             </Link>
           ),
         },
@@ -183,7 +183,7 @@ export default function Sidebar({ collapsed }) {
       const subCategoryItems = subCategories.map((subCategory) => ({
         key: `subcategory-${category.id}-${subCategory.id}`,
         icon: <TagsOutlined />,
-        label: subCategory.name || "Sub Category",
+        label: subCategory.name || tSidebar("common.subCategory"),
         children: [
           {
             key: `subcategory-${category.id}-${subCategory.id}-view-order`,
@@ -191,7 +191,7 @@ export default function Sidebar({ collapsed }) {
               <Link
                 href={`/dashboard/orders/${category.id}/${subCategory.id}/view-order`}
               >
-                View Order
+                {tSidebar("order.viewOrder")}
               </Link>
             ),
           },
@@ -201,7 +201,7 @@ export default function Sidebar({ collapsed }) {
               <Link
                 href={`/dashboard/orders/${category.id}/${subCategory.id}/printer`}
               >
-                Printer
+                {tSidebar("orders.scanner")}
               </Link>
             ),
           },
@@ -211,7 +211,7 @@ export default function Sidebar({ collapsed }) {
       return {
         key: `category-${category.id}`,
         icon: <AppstoreOutlined />,
-        label: category.name || "Category",
+        label: category.name || tSidebar("common.category"),
         children: [...categoryItems, ...subCategoryItems],
       };
     });
@@ -227,7 +227,7 @@ export default function Sidebar({ collapsed }) {
         .map((subCategory) => ({
           key: `transfer-subcategory-${category.id}-${subCategory.id}`,
           icon: <TagsOutlined />,
-          label: subCategory.name || "Sub Category",
+          label: subCategory.name || tSidebar("common.subCategory"),
           children: [
             {
               key: `transfer-subcategory-${category.id}-${subCategory.id}-view-order`,
@@ -235,7 +235,7 @@ export default function Sidebar({ collapsed }) {
                 <Link
                   href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/view-order`}
                 >
-                  View Order
+                  {tSidebar("order.viewOrder")}
                 </Link>
               ),
             },
@@ -245,7 +245,7 @@ export default function Sidebar({ collapsed }) {
                 <Link
                   href={`/dashboard/transfer-orders/${category.id}/${subCategory.id}/printer`}
                 >
-                  Printer
+                  {tSidebar("orders.scanner")}
                 </Link>
               ),
             },
@@ -255,7 +255,7 @@ export default function Sidebar({ collapsed }) {
       return {
         key: `transfer-category-${category.id}`,
         icon: <AppstoreOutlined />,
-        label: category.name || "Transfer",
+        label: category.name || tSidebar("common.transfer"),
         children: [
           ...subCategoryItems,
           {
@@ -269,7 +269,7 @@ export default function Sidebar({ collapsed }) {
                   <Link
                     href={`/dashboard/transfer-orders/${category.id}/others/view-order`}
                   >
-                    View Order
+                    {tSidebar("order.viewOrder")}
                   </Link>
                 ),
               },
@@ -279,7 +279,7 @@ export default function Sidebar({ collapsed }) {
                   <Link
                     href={`/dashboard/transfer-orders/${category.id}/others/printer`}
                   >
-                    Printer
+                    {tSidebar("orders.scanner")}
                   </Link>
                 ),
               },
@@ -306,7 +306,7 @@ export default function Sidebar({ collapsed }) {
         key: "shipment-orders-printer",
         label: (
           <Link href="/dashboard/orders/printer">
-            {tSidebar("orders.printer")}
+            {tSidebar("orders.scanner")}
           </Link>
         ),
       },
@@ -330,7 +330,7 @@ export default function Sidebar({ collapsed }) {
         key: "shipment-transfer-orders-printer",
         label: (
           <Link href="/dashboard/transfer-orders/printer">
-            {tSidebar("order.printer")}
+            {tSidebar("orders.scanner")}
           </Link>
         ),
       },
@@ -815,6 +815,24 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    {
+                      key: "transfer-order-printed",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders/printed">
+                          {tSidebar("order.transferPrintedOrder")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "transfer-order-shipped",
+                      icon: <ApartmentOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders/shipped">
+                          {tSidebar("order.transferShippedOrder")}
+                        </Link>
+                      ),
+                    },
                   ],
                 },
               ]
@@ -901,6 +919,28 @@ export default function Sidebar({ collapsed }) {
                   </Link>
                 ),
               },
+              ...(isCompanyAdmin
+                ? [
+                    {
+                      key: "transfer-orders-affiliated-printed",
+                      icon: <ShoppingCartOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders/printed">
+                          {tSidebar("order.transferPrintedOrder")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "transfer-orders-affiliated-shipped",
+                      icon: <ShoppingCartOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/orders/shipped">
+                          {tSidebar("order.transferShippedOrder")}
+                        </Link>
+                      ),
+                    },
+                  ]
+                : []),
             ],
           },
         ]
