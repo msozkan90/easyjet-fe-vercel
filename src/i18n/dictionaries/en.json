@@ -10,7 +10,16 @@
       "logout": "Sign Out",
       "unknownUser": "User",
       "orderSearchPlaceholder": "Search order number",
-      "orderSearchAria": "Search by order number"
+      "orderSearchAria": "Search by order number",
+      "orderSearchNotFound": "Order not found.",
+      "orderSearchError": "Order search failed.",
+      "orderSearchMultipleTitle": "Select order type",
+      "openOrder": "Open",
+      "customer": "Customer",
+      "orderTypes": {
+        "order": "Order",
+        "transferOrder": "Transfer Order"
+      }
     },
     "actions": {
       "search": "Search",
@@ -2101,10 +2110,13 @@
         }
       },
       "workerPrinter": {
-        "title": "Printer"
+        "title": "Scanner"
       },
       "workerShipmentPrinter": {
-        "title": "Printer"
+        "title": "Scanner"
+      },
+      "scanner": {
+        "title": "Scanner"
       },
       "transferDetail": {
         "header": {
@@ -2384,12 +2396,18 @@
     },
     "sidebar": {
       "dashboard": "Dashboard",
+      "common": {
+        "category": "Category",
+        "subCategory": "Sub Category",
+        "transfer": "Transfer"
+      },
       "orders": {
         "title": "Orders",
         "view": "View Orders",
         "waitingForDesign": "Waiting for Design",
         "cancel": "Cancel Orders",
-        "printer": "Printer"
+        "printer": "Printer",
+        "scanner": "Scanner"
       },
       "financial": {
         "title": "Financial",
@@ -2449,6 +2467,8 @@
         "transferOrders": "Transfer Orders",
         "transferOrderPool": "Transfer Order Pool",
         "transferOrdersList": "Transfer Orders List",
+        "transferPrintedOrder": "Printed Order",
+        "transferShippedOrder": "Shipped Order",
         "others": "Others",
         "orders": "Orders",
         "pending": "Pending Orders",

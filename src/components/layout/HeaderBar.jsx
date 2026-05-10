@@ -1,6 +1,17 @@
 "use client";
 
-import { Layout, Button, Typography, Dropdown, theme, Space, Input } from "antd";
+import {
+  App as AntdApp,
+  Layout,
+  Button,
+  Dropdown,
+  theme,
+  Space,
+  Input,
+  Modal,
+  List,
+  Tag,
+} from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -11,7 +22,7 @@ import {
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "@/redux/features/uiSlice";
-import { AuthAPI, WalletAPI } from "@/utils/api";
+import { AuthAPI, OrderSearchAPI, WalletAPI } from "@/utils/api";
 import { logoutLocal } from "@/redux/features/authSlice";
 import { setBalance } from "@/redux/features/balanceSlice";
 import { resetCategories } from "@/redux/features/categoriesSlice";
@@ -24,6 +35,7 @@ import { useTranslations } from "@/i18n/use-translations";
 const { Header } = Layout;
 
 export default function HeaderBar({ pathname }) {
+  const { message } = AntdApp.useApp();
   const tNavbar = useTranslations("common.navbar");
   const dispatch = useDispatch();
   const router = useRouter();
@@ -32,6 +44,9 @@ export default function HeaderBar({ pathname }) {
   const balance = useSelector((s) => s.balance.value);
   const { token } = theme.useToken();
   const [orderSearch, setOrderSearch] = useState("");
+  const [orderSearchLoading, setOrderSearchLoading] = useState(false);
+  const [orderSearchMatches, setOrderSearchMatches] = useState([]);
+  const [orderSearchModalOpen, setOrderSearchModalOpen] = useState(false);
 
   const formattedBalance = useMemo(() => {
     const numericBalance = Number(balance);
@@ -108,10 +123,51 @@ export default function HeaderBar({ pathname }) {
     };
   }, [dispatch, user?.id]);
 
-  const handleOrderSearch = (value) => {
-    const trimmedValue = value.trim();
+  const getOrderSearchRoute = (match) => {
+    const orderNumber = encodeURIComponent(match?.order_number || "");
+    if (!orderNumber) return null;
+    if (match?.type === "transfer_order") {
+      return `/dashboard/transfer-orders/orders/${orderNumber}`;
+    }
+    if (match?.type === "order") {
+      return `/dashboard/order/detail/${orderNumber}`;
+    }
+    return null;
+  };
+
+  const handleOrderSearchMatchSelect = (match) => {
+    const route = getOrderSearchRoute(match);
+    if (!route) return;
+    setOrderSearchModalOpen(false);
+    setOrderSearchMatches([]);
+    setOrderSearch("");
+    router.push(route);
+  };
+
+  const handleOrderSearch = async (value) => {
+    const trimmedValue = String(value || "").trim();
     if (!trimmedValue) return;
-    router.push(`/dashboard/order/detail/${encodeURIComponent(trimmedValue)}`);
+    setOrderSearchLoading(true);
+    try {
+      const response = await OrderSearchAPI.resolve(trimmedValue);
+      const matches = Array.isArray(response?.data) ? response.data : [];
+      if (!matches.length) {
+        message.warning(tNavbar("orderSearchNotFound"));
+        return;
+      }
+      if (matches.length === 1) {
+        handleOrderSearchMatchSelect(matches[0]);
+        return;
+      }
+      setOrderSearchMatches(matches);
+      setOrderSearchModalOpen(true);
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message || tNavbar("orderSearchError"),
+      );
+    } finally {
+      setOrderSearchLoading(false);
+    }
   };
 
   return (
@@ -142,10 +198,61 @@ export default function HeaderBar({ pathname }) {
           onChange={(event) => setOrderSearch(event.target.value)}
           onSearch={handleOrderSearch}
           allowClear
+          loading={orderSearchLoading}
           placeholder={tNavbar("orderSearchPlaceholder")}
           aria-label={tNavbar("orderSearchAria")}
           className="mt-2.5"
         />
+        <Modal
+          title={tNavbar("orderSearchMultipleTitle")}
+          open={orderSearchModalOpen}
+          footer={null}
+          onCancel={() => setOrderSearchModalOpen(false)}
+          destroyOnHidden
+        >
+          <List
+            dataSource={orderSearchMatches}
+            locale={{ emptyText: tNavbar("orderSearchNotFound") }}
+            renderItem={(item) => {
+              const typeLabel =
+                item?.type === "transfer_order"
+                  ? tNavbar("orderTypes.transferOrder")
+                  : tNavbar("orderTypes.order");
+              return (
+                <List.Item
+                  actions={[
+                    <Button
+                      key="open"
+                      type="primary"
+                      onClick={() => handleOrderSearchMatchSelect(item)}
+                    >
+                      {tNavbar("openOrder")}
+                    </Button>,
+                  ]}
+                >
+                  <List.Item.Meta
+                    title={
+                      <Space>
+                        <span>{item?.order_number || "-"}</span>
+                        <Tag color={item?.type === "transfer_order" ? "blue" : "green"}>
+                          {typeLabel}
+                        </Tag>
+                      </Space>
+                    }
+                    description={
+                      <Space wrap>
+                        <span>
+                          {tNavbar("customer")}: {item?.customer_name || "-"}
+                        </span>
+                        {item?.status ? <Tag>{item.status}</Tag> : null}
+                      </Space>
+                    }
+                  />
+                </List.Item>
+              );
+            }}
+          />
+        </Modal>
         <LanguageSwitcher size="small" />
         <Link
           href="/dashboard/wallet-transactions"

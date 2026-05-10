@@ -90,6 +90,10 @@ export const WalletAPI = {
   getBalance: () => api.get("/wallet"),
 };
 
+export const OrderSearchAPI = {
+  resolve: (query) => api.get("/order-search/resolve", { query }),
+};
+
 export const TransactionsAPI = {
   list: (payload) => api.post("/transactions/list", payload),
 };
@@ -180,6 +184,14 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/items/pending/list", payload),
   productionItemsList: (payload) =>
     api.post("/transfer-orders/items/production/list", payload),
+  printedItemsList: (payload) =>
+    api.post("/transfer-orders/items/printed/list", payload),
+  shippedTransferItemsList: (payload) =>
+    api.post("/transfer-orders/items/shipped/list", payload),
+  customerPrintedItemsList: (payload) =>
+    api.post("/transfer-orders/items/customer/printed/list", payload),
+  customerShippedItemsList: (payload) =>
+    api.post("/transfer-orders/items/customer/shipped/list", payload),
   affilatedProductionItemsList: (payload) =>
     api.post("/transfer-orders/items/affilated/production/list", payload),
   workerCompletedItemsList: (payload) =>
