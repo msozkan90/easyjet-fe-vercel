@@ -1,6 +1,6 @@
 "use client";
 
-import { Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 
 export default function ProductMapperForm({
@@ -63,7 +63,12 @@ export default function ProductMapperForm({
           },
         ]}
       >
-        <Input placeholder={tForm("placeholders.mapper")} />
+        <Select
+          mode="tags"
+          tokenSeparators={[","]}
+          placeholder={tForm("placeholders.mapper")}
+          open={false}
+        />
       </Form.Item>
 
       <Form.Item

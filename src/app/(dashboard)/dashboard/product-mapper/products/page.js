@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import moment from "moment";
 import {
   App as AntdApp,
@@ -21,6 +20,27 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+
+const normalizeMapperNames = (value) =>
+  Array.isArray(value)
+    ? value.filter(Boolean)
+    : value
+    ? [value]
+    : [];
+
+const formatMapperTitle = (value) => normalizeMapperNames(value).join(", ");
+
+const renderMapperNames = (value) => {
+  const names = normalizeMapperNames(value);
+  if (!names.length) return null;
+  return (
+    <Space size={[4, 4]} wrap>
+      {names.map((name) => (
+        <Tag key={name}>{name}</Tag>
+      ))}
+    </Space>
+  );
+};
 
 export default function ProductMapperProductsPage() {
   const { message } = AntdApp.useApp();
@@ -88,11 +108,11 @@ export default function ProductMapperProductsPage() {
       {
         title: t("columns.mapper"),
         dataIndex: "product_mapper",
-        sorter: true,
         filter: {
           type: "text",
           placeholder: t("filters.searchMapper"),
         },
+        render: renderMapperNames,
       },
       {
         title: t("columns.status"),
@@ -222,7 +242,7 @@ export default function ProductMapperProductsPage() {
         title={
           editingRow
             ? t("modal.editTitle", {
-                name: editingRow?.product_mapper || "",
+                name: formatMapperTitle(editingRow?.product_mapper),
               })
             : t("modal.createTitle")
         }
@@ -245,7 +265,7 @@ export default function ProductMapperProductsPage() {
             editingRow
               ? {
                   product_id: editingRow?.product_id ?? editingRow?.product?.id,
-                  product_mapper: editingRow?.product_mapper,
+                  product_mapper: normalizeMapperNames(editingRow?.product_mapper),
                   status: editingRow?.status,
                 }
               : undefined
