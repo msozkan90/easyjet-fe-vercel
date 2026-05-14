@@ -162,6 +162,12 @@ export default function CustomerForm({
     };
   }, [hasOwnKey, message, tForm]);
 
+  useEffect(() => {
+    if (hasTransferSelected && form.getFieldValue("store_id")) {
+      form.setFieldsValue({ store_id: undefined });
+    }
+  }, [form, hasTransferSelected]);
+
   return (
     <Form
       form={form}
@@ -232,7 +238,7 @@ export default function CustomerForm({
         />
       </Form.Item>
 
-      {hasOwnKey && !has_api_key && (
+      {hasOwnKey && !has_api_key && !hasTransferSelected && (
         <Form.Item
           name="store_id"
           label={tForm("labels.store")}

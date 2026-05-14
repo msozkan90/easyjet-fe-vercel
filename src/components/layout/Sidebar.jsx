@@ -63,6 +63,8 @@ export default function Sidebar({ collapsed }) {
     isPartnerAdmin && hasStandardProductVariationCategory;
   const showPartnerTransferOrdersMenu =
     isPartnerAdmin && hasTransferOrderCategory;
+  const showCustomerProductMapperMenu =
+    isCustomerAdmin && !hasTransferOrderCategory;
   const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector((s) => {
     s?.categories?.listWithSubCategories;
@@ -655,40 +657,44 @@ export default function Sidebar({ collapsed }) {
       : []),
     ...(isCustomerAdmin
       ? [
-          {
-            key: "product-mapper",
-            icon: <AppstoreOutlined />,
-            label: tSidebar("productMapper.title"),
-            children: [
-              {
-                key: "product-mapper-products",
-                icon: <AppstoreOutlined />,
-                label: (
-                  <Link href="/dashboard/product-mapper/products">
-                    {tSidebar("productMapper.products")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-mapper-sizes",
-                icon: <GatewayOutlined />,
-                label: (
-                  <Link href="/dashboard/product-mapper/sizes">
-                    {tSidebar("productMapper.sizes")}
-                  </Link>
-                ),
-              },
-              {
-                key: "product-mapper-colors",
-                icon: <BgColorsOutlined />,
-                label: (
-                  <Link href="/dashboard/product-mapper/colors">
-                    {tSidebar("productMapper.colors")}
-                  </Link>
-                ),
-              },
-            ],
-          },
+          ...(showCustomerProductMapperMenu
+            ? [
+                {
+                  key: "product-mapper",
+                  icon: <AppstoreOutlined />,
+                  label: tSidebar("productMapper.title"),
+                  children: [
+                    {
+                      key: "product-mapper-products",
+                      icon: <AppstoreOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-mapper/products">
+                          {tSidebar("productMapper.products")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-mapper-sizes",
+                      icon: <GatewayOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-mapper/sizes">
+                          {tSidebar("productMapper.sizes")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-mapper-colors",
+                      icon: <BgColorsOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-mapper/colors">
+                          {tSidebar("productMapper.colors")}
+                        </Link>
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : []),
           ...(hasStandardProductVariationCategory
             ? [
                 {

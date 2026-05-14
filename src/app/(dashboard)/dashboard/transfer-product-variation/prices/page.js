@@ -15,11 +15,26 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import TransferProductPriceForm from "@/components/common/forms/TransferProductPriceForm";
-import { TransferProductPricesAPI } from "@/utils/api";
+import {
+  CategoriesAPI,
+  CustomersAPI,
+  PartnersAPI,
+  TransferProductPricesAPI,
+} from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+
+const TRANSFER_CATEGORIES = new Set(["transfer", "transfers"]);
+
+const isTransferCategoryName = (value) =>
+  TRANSFER_CATEGORIES.has(
+    String(value || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase(),
+  );
 
 export default function TransferProductPricesPage() {
   const { message } = AntdApp.useApp();
@@ -49,11 +64,59 @@ export default function TransferProductPricesPage() {
       }
     };
 
+    const loadTransferCategoryIds = async () => {
+      const categoriesResp = await CategoriesAPI.list();
+      const categoriesPayload = categoriesResp?.data ?? categoriesResp;
+      const categories =
+        categoriesPayload?.items ??
+        categoriesPayload?.data?.data ??
+        categoriesPayload?.data ??
+        categoriesPayload ??
+        [];
+      const transferCategoryIds = Array.isArray(categories)
+        ? categories
+            .filter((category) => isTransferCategoryName(category?.name))
+            .map((category) => category.id)
+            .filter(Boolean)
+        : [];
+      return transferCategoryIds;
+    };
+
     const loadCustomers = async () => {
       try {
-        const list = await fetchGenericList("customer");
+        const transferCategoryIds = await loadTransferCategoryIds();
+        if (!transferCategoryIds.length) {
+          if (alive) {
+            setCustomers([]);
+          }
+          return;
+        }
+
+        const allCustomers = [];
+        let page = 1;
+        let total = 0;
+
+        do {
+          const customersResp = await CustomersAPI.list({
+            pagination: {
+              page,
+              pageSize: 100,
+              orderBy: [{ field: "name", direction: "asc" }],
+            },
+            filters: {
+              status: "active",
+              customer_categories: transferCategoryIds,
+            },
+          });
+          const normalized = normalizeListAndMeta(customersResp);
+          if (!normalized.list.length) break;
+          allCustomers.push(...normalized.list);
+          total = normalized.total;
+          page += 1;
+        } while (allCustomers.length < total);
+
         if (alive) {
-          setCustomers(Array.isArray(list) ? list : []);
+          setCustomers(allCustomers);
         }
       } catch {
         if (alive) {
@@ -64,9 +127,39 @@ export default function TransferProductPricesPage() {
 
     const loadPartners = async () => {
       try {
-        const list = await fetchGenericList("partner");
+        const transferCategoryIds = await loadTransferCategoryIds();
+        if (!transferCategoryIds.length) {
+          if (alive) {
+            setPartners([]);
+          }
+          return;
+        }
+
+        const allPartners = [];
+        let page = 1;
+        let total = 0;
+
+        do {
+          const partnersResp = await PartnersAPI.list({
+            pagination: {
+              page,
+              pageSize: 100,
+              orderBy: [{ field: "name", direction: "asc" }],
+            },
+            filters: {
+              status: "active",
+              partner_categories: transferCategoryIds,
+            },
+          });
+          const normalized = normalizeListAndMeta(partnersResp);
+          if (!normalized.list.length) break;
+          allPartners.push(...normalized.list);
+          total = normalized.total;
+          page += 1;
+        } while (allPartners.length < total);
+
         if (alive) {
-          setPartners(Array.isArray(list) ? list : []);
+          setPartners(allPartners);
         }
       } catch {
         if (alive) {
