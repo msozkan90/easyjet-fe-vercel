@@ -563,7 +563,12 @@ export default function OrdersPage() {
     try {
       setPulling(true);
       setCooldownEnd(Date.now() + 60_000);
-      await ShipStationAPI.manualOrderGet({});
+      const to = new Date();
+      const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
+      await ShipStationAPI.manualOrderGet({
+        fromISO: from.toISOString(),
+        toISO: to.toISOString(),
+      });
       message.success(t("messages.fetchSuccess"));
       tableRef.current?.setPage?.(1);
       tableRef.current?.reload?.();

@@ -210,6 +210,10 @@ export default function SettingsPage() {
     return (source?.name || "").toLowerCase() === "shopify_api";
   }, []);
 
+  const isRexvenSource = useCallback((source) => {
+    return (source?.name || "").toLowerCase() === "rexven_api";
+  }, []);
+
   const resetShipstationState = useCallback(() => {
     setCredentialsBySource({});
     setEditingSources({});
@@ -451,6 +455,7 @@ export default function SettingsPage() {
 
         const isShipstation = isShipstationSource(source);
         const isShopify = isShopifySource(source);
+        const isRexven = isRexvenSource(source);
         const resolvedStoreId = values.store_id ?? credential?.store_id ?? "";
 
         if (isShipstation && hasOwnApiKeyCustomerAdmin && !resolvedStoreId) {
@@ -503,6 +508,13 @@ export default function SettingsPage() {
           delete payload.access_key;
         }
 
+        if (isRexven) {
+          const rexvenSecret = `${values["x-api-secret"] ?? ""}`.trim();
+          if (rexvenSecret) {
+            payload["x-api-secret"] = rexvenSecret;
+          }
+        }
+
         if (!credential) {
           await ShipStationAPI.create(payload);
           message.success(tProfile("messages.shipstationCreated"));
@@ -530,6 +542,7 @@ export default function SettingsPage() {
       getSourceById,
       hasOwnApiKeyCustomerAdmin,
       isShopifySource,
+      isRexvenSource,
       isShipstationSource,
       loadShipStation,
       message,
@@ -547,22 +560,42 @@ export default function SettingsPage() {
       try {
         const values = shipForm.getFieldsValue();
         const credential = credentialsBySource[sourceId] || null;
+        const source = getSourceById(sourceId);
+        const fields = source?.config?.form?.fields || [];
+        const isRexven = isRexvenSource(source);
         const masked = credential?.api_key_mask || "";
         const currentKey = values.api_key;
         const currentSecret = values.api_secret;
         const keyProvided = !!currentKey && currentKey !== masked;
         const secretProvided = !!currentSecret;
+        const rexvenSecret = `${values["x-api-secret"] ?? ""}`.trim();
 
-        if (!keyProvided || !secretProvided) {
+        if (isRexven) {
+          if (!rexvenSecret) {
+            message.warning(tProfile("messages.verificationMissing"));
+            return;
+          }
+        } else if (!keyProvided || !secretProvided) {
           message.warning(tProfile("messages.verificationMissing"));
           return;
         }
 
-        const response = await ShipStationAPI.keyCheck({
-          api_source_id: sourceId,
-          api_key: currentKey,
-          api_secret: currentSecret,
+        const payload = { api_source_id: sourceId };
+        if (isRexven) {
+          payload["x-api-secret"] = rexvenSecret;
+        } else {
+          payload.api_key = currentKey;
+          payload.api_secret = currentSecret;
+        }
+
+        fields.forEach((field) => {
+          if (!field?.key || payload[field.key] !== undefined) return;
+          if (values[field.key]) {
+            payload[field.key] = values[field.key];
+          }
         });
+
+        const response = await ShipStationAPI.keyCheck(payload);
         setStoreLists((prev) => ({
           ...prev,
           [sourceId]: response.data || [],
@@ -580,6 +613,8 @@ export default function SettingsPage() {
     },
     [
       credentialsBySource,
+      getSourceById,
+      isRexvenSource,
       message,
       setLoadingFlag,
       shipForm,
@@ -610,6 +645,7 @@ export default function SettingsPage() {
     (field) => field.key === "api_secret"
   );
   const isShipstationActive = isShipstationSource(activeSource);
+  const isRexvenActive = isRexvenSource(activeSource);
   const shouldShowStoreId = isShipstationActive && hasOwnApiKeyCustomerAdmin;
   const credential = credentialsBySource[activeSourceId] || null;
   const isEditing =
@@ -617,7 +653,9 @@ export default function SettingsPage() {
   const storeList = storeLists[activeSourceId] || [];
   const activeSourceLabel = formatSourceLabel(activeSource);
   const canVerifyCredentials =
-    shouldShowStoreId && hasApiKeyField && hasApiSecretField;
+    (shouldShowStoreId && hasApiKeyField && hasApiSecretField) ||
+    (isRexvenActive &&
+      activeSourceFields.some((field) => field.key === "x-api-secret"));
 
   return (
     <div className="grid gap-4">

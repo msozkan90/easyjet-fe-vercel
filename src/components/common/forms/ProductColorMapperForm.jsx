@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 
@@ -154,7 +154,12 @@ export default function ProductColorMapperForm({
           },
         ]}
       >
-        <Input placeholder={tForm("placeholders.mapper")} />
+        <Select
+          mode="tags"
+          tokenSeparators={[","]}
+          placeholder={tForm("placeholders.mapper")}
+          open={false}
+        />
       </Form.Item>
 
       <Form.Item

@@ -51,6 +51,14 @@ const formatAmount = (value, fallback) => {
   });
 };
 
+const isReorderedOrder = (record) => {
+  if (record?.is_reordered || record?.order?.is_reordered) return true;
+  const rawOrder = record?.order?.raw_order || record?.raw_order;
+  return Boolean(
+    rawOrder && typeof rawOrder === "object" && rawOrder.reordered === true,
+  );
+};
+
 export default function OrdersStatusListPage({
   listApiFn,
   allowedStatuses = [],
@@ -91,7 +99,7 @@ export default function OrdersStatusListPage({
       waitingForDesign: t("status.values.waitingForDesign"),
       cancel: t("status.values.cancel"),
     }),
-    [t]
+    [t],
   );
 
   const statusOptions = useMemo(() => {
@@ -148,7 +156,7 @@ export default function OrdersStatusListPage({
         if (!active) return;
         message.error(
           error?.response?.data?.error?.message ||
-            t("messages.loadVariationsError")
+            t("messages.loadVariationsError"),
         );
       }
     };
@@ -156,7 +164,13 @@ export default function OrdersStatusListPage({
     return () => {
       active = false;
     };
-  }, [defaultProductListFetcher, message, normalizeProductList, productListFetcher, t]);
+  }, [
+    defaultProductListFetcher,
+    message,
+    normalizeProductList,
+    productListFetcher,
+    t,
+  ]);
 
   const productOptions = useMemo(() => {
     const map = new Map();
@@ -210,10 +224,10 @@ export default function OrdersStatusListPage({
               const arr = Array.isArray(next.status)
                 ? next.status
                 : next.status
-                ? [next.status]
-                : [];
+                  ? [next.status]
+                  : [];
               const filtered = arr.filter((status) =>
-                allowedStatuses.includes(status)
+                allowedStatuses.includes(status),
               );
               next.status = filtered.length ? filtered : undefined;
             }
@@ -232,14 +246,14 @@ export default function OrdersStatusListPage({
             return next;
           },
         },
-        normalizeListAndMeta
+        normalizeListAndMeta,
       ),
-    [affilated, allowedStatuses, listApiFn]
+    [affilated, allowedStatuses, listApiFn],
   );
 
   const annotateRows = useCallback(function markRows(
     items = [],
-    parent = null
+    parent = null,
   ) {
     return (items || []).map((item) => {
       const hasChildren =
@@ -254,8 +268,7 @@ export default function OrdersStatusListPage({
       }
       return next;
     });
-  },
-  []);
+  }, []);
 
   const request = useCallback(
     async (params) => {
@@ -265,12 +278,12 @@ export default function OrdersStatusListPage({
         list: annotateRows(result?.list || []),
       };
     },
-    [annotateRows, baseRequest]
+    [annotateRows, baseRequest],
   );
 
   const formatDateTime = useCallback(
     (value) => (value ? moment(value).format("LLL") : t("common.none")),
-    [t]
+    [t],
   );
 
   const applyFilterPatch = useCallback(
@@ -278,13 +291,16 @@ export default function OrdersStatusListPage({
       tableRef.current?.setFilters?.(patch);
       tableRef.current?.setPage?.(1);
     },
-    [tableRef]
+    [tableRef],
   );
 
-  const handleOrderNumberChange = useCallback((event) => {
-    const value = event?.target?.value ?? "";
-    setQuickFilters((prev) => ({ ...prev, order_number: value }));
-  }, [skuFilterKey]);
+  const handleOrderNumberChange = useCallback(
+    (event) => {
+      const value = event?.target?.value ?? "";
+      setQuickFilters((prev) => ({ ...prev, order_number: value }));
+    },
+    [skuFilterKey],
+  );
 
   const handleSkuChange = useCallback((event) => {
     const value = event?.target?.value ?? "";
@@ -299,7 +315,7 @@ export default function OrdersStatusListPage({
         : arr;
       setQuickFilters((prev) => ({ ...prev, status: filtered }));
     },
-    [allowedStatuses]
+    [allowedStatuses],
   );
 
   const handleOrderDateChange = useCallback((range) => {
@@ -406,7 +422,7 @@ export default function OrdersStatusListPage({
               </span>
             );
           } else {
-            return null
+            return null;
           }
         },
       },
@@ -479,11 +495,18 @@ export default function OrdersStatusListPage({
                 width: 220,
               }
             : undefined,
-        render: (value) => {
+        render: (value, record) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
           const color = STATUS_COLORS[value] || "default";
-          return <Tag color={color}>{label}</Tag>;
+          return (
+            <Space direction="vertical" size={2}>
+              {isReorderedOrder(record) ? (
+                <Tag color="purple">Re Ordered</Tag>
+              ) : null}
+              <Tag color={color}>{label}</Tag>
+            </Space>
+          );
         },
       },
       {
@@ -648,7 +671,7 @@ export default function OrdersStatusListPage({
       },
       rowClassName: getRowClassName,
     }),
-    [getRowClassName, t]
+    [getRowClassName, t],
   );
 
   return (

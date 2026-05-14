@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
   Button,
+  Dropdown,
   Modal,
   Popconfirm,
   Popover,
@@ -16,21 +16,51 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import ProductMapperForm from "@/components/common/forms/ProductMapperForm";
+import ImportResultModal from "@/components/common/Modal/ImportResultModal";
 import { ProductMappersAPI } from "@/utils/api";
+import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+
+const normalizeMapperNames = (value) =>
+  Array.isArray(value)
+    ? value.filter(Boolean)
+    : value
+    ? [value]
+    : [];
+
+const formatMapperTitle = (value) => normalizeMapperNames(value).join(", ");
+
+const renderMapperNames = (value) => {
+  const names = normalizeMapperNames(value);
+  if (!names.length) return null;
+  return (
+    <Space size={[4, 4]} wrap>
+      {names.map((name) => (
+        <Tag key={name}>{name}</Tag>
+      ))}
+    </Space>
+  );
+};
 
 export default function ProductMapperProductsPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.productMapper");
   const tStatus = useTranslations("common.status");
   const tableRef = useRef(null);
+  const importInputRef = useRef(null);
 
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [products, setProducts] = useState([]);
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [existingLoading, setExistingLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const [importResultOpen, setImportResultOpen] = useState(false);
+  const [listFilters, setListFilters] = useState({});
 
   useEffect(() => {
     let alive = true;
@@ -88,11 +118,11 @@ export default function ProductMapperProductsPage() {
       {
         title: t("columns.mapper"),
         dataIndex: "product_mapper",
-        sorter: true,
         filter: {
           type: "text",
           placeholder: t("filters.searchMapper"),
         },
+        render: renderMapperNames,
       },
       {
         title: t("columns.status"),
@@ -188,8 +218,128 @@ export default function ProductMapperProductsPage() {
     }
   };
 
+  const handleExistingDownload = async (format) => {
+    setExistingLoading(true);
+    try {
+      const { blob, filename } = await ProductMappersAPI.downloadExists({
+        format,
+        filters: listFilters,
+      });
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.templateDownloadSuccess"));
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.templateDownloadError")
+      );
+    } finally {
+      setExistingLoading(false);
+    }
+  };
+
+  const handleTemplateDownload = async (format) => {
+    setTemplateLoading(true);
+    try {
+      const { blob, filename } = await ProductMappersAPI.downloadTemplate({
+        format,
+      });
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.templateDownloadSuccess"));
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.templateDownloadError")
+      );
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
+  const handleFiltersChange = useCallback((filters) => {
+    setListFilters(filters || {});
+  }, []);
+
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleImportFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    if (!["csv", "xlsx"].includes(extension)) {
+      message.error(t("messages.importInvalidFile"));
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const response = await ProductMappersAPI.import(file);
+      const payload = response?.data ?? response;
+      const resultData = payload?.data ?? payload;
+      setImportResult(resultData);
+      setImportResultOpen(true);
+
+      const failedCount = resultData?.failed ?? 0;
+      if (failedCount > 0) {
+        message.warning(
+          t("messages.importCompletedWithErrors", { failed: failedCount })
+        );
+      } else {
+        message.success(t("messages.importSuccess"));
+      }
+      tableRef.current?.reload();
+    } catch (error) {
+      const payload = error?.response?.data;
+      const resultData = payload?.data ?? payload;
+      if (resultData && typeof resultData === "object") {
+        setImportResult(resultData);
+        setImportResultOpen(true);
+        message.warning(t("messages.importCompletedWithErrorsFallback"));
+      } else {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.importFailed")
+        );
+      }
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const importModalLabels = useMemo(
+    () => ({
+      row: t("import.errorRow"),
+      field: t("import.errorField"),
+      value: t("import.errorValue"),
+      message: t("import.errorMessage"),
+      noErrors: t("import.noErrors"),
+    }),
+    [t]
+  );
+
+  const buildImportSummary = useCallback(
+    (resultData) => {
+      if (!resultData) return "";
+      const total = resultData?.total ?? 0;
+      const created = resultData?.created ?? 0;
+      const updated = resultData?.updated ?? 0;
+      const failed = resultData?.failed ?? 0;
+      return t("import.summary", { total, created, updated, failed });
+    },
+    [t]
+  );
+
   return (
     <RequireRole anyOfRoles={["customerAdmin"]}>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+        style={{ display: "none" }}
+        onChange={handleImportFileChange}
+      />
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -200,17 +350,49 @@ export default function ProductMapperProductsPage() {
           product_mapper: "",
           status: undefined,
         }}
+        onFiltersChange={handleFiltersChange}
         toolbarRight={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingRow(null);
-              setOpen(true);
-            }}
-          >
-            {t("actions.new")}
-          </Button>
+          <Space>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "csv", label: "CSV" },
+                  { key: "xlsx", label: "XLSX" },
+                ],
+                onClick: ({ key }) => handleExistingDownload(key),
+              }}
+            >
+              <Button loading={existingLoading}>
+                {t("actions.existsDownload")}
+              </Button>
+            </Dropdown>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "csv", label: "CSV" },
+                  { key: "xlsx", label: "XLSX" },
+                ],
+                onClick: ({ key }) => handleTemplateDownload(key),
+              }}
+            >
+              <Button loading={templateLoading}>
+                {t("actions.templateDownload")}
+              </Button>
+            </Dropdown>
+            <Button onClick={handleImportClick} loading={importing}>
+              {t("actions.bulkImport")}
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setEditingRow(null);
+                setOpen(true);
+              }}
+            >
+              {t("actions.new")}
+            </Button>
+          </Space>
         }
         tableProps={{
           locale: { emptyText: t("table.noData") },
@@ -222,7 +404,7 @@ export default function ProductMapperProductsPage() {
         title={
           editingRow
             ? t("modal.editTitle", {
-                name: editingRow?.product_mapper || "",
+                name: formatMapperTitle(editingRow?.product_mapper),
               })
             : t("modal.createTitle")
         }
@@ -245,13 +427,21 @@ export default function ProductMapperProductsPage() {
             editingRow
               ? {
                   product_id: editingRow?.product_id ?? editingRow?.product?.id,
-                  product_mapper: editingRow?.product_mapper,
+                  product_mapper: normalizeMapperNames(editingRow?.product_mapper),
                   status: editingRow?.status,
                 }
               : undefined
           }
         />
       </Modal>
+      <ImportResultModal
+        open={importResultOpen}
+        result={importResult}
+        onClose={() => setImportResultOpen(false)}
+        title={t("import.resultTitle")}
+        summaryBuilder={buildImportSummary}
+        labels={importModalLabels}
+      />
     </RequireRole>
   );
 }

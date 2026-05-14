@@ -38,6 +38,14 @@ const formatAmount = (value, fallback = "-") => {
 const formatDateTime = (value, fallback = "-") =>
   value ? dayjs(value).format("LLL") : fallback;
 
+const isReorderedOrder = (order) => {
+  if (order?.is_reordered) return true;
+  const rawOrder = order?.raw_order;
+  return Boolean(
+    rawOrder && typeof rawOrder === "object" && rawOrder.reordered === true,
+  );
+};
+
 const LABEL_STATUS_COLORS = {
   purchased: "green",
   created: "blue",
@@ -558,6 +566,7 @@ export default function OrderDetailPage() {
 
   const statusLabel = orderDetail?.order_status || orderDetail?.status;
   const statusColor = STATUS_COLORS[statusLabel] || "default";
+  const isReordered = isReorderedOrder(orderDetail);
 
   const billingRows = useMemo(
     () => [
@@ -691,12 +700,22 @@ export default function OrderDetailPage() {
                       #{orderDetail?.order_number || tOrders("common.none")}
                     </Typography.Title>
                     {statusLabel ? (
-                      <Tag
-                        color={statusColor}
-                        className="rounded-full px-4 py-1 text-sm"
-                      >
-                        {statusLabel}
-                      </Tag>
+                      <div className="flex flex-col items-start gap-1">
+                        {isReordered ? (
+                          <Tag
+                            color="purple"
+                            className="rounded-full px-4 py-1 text-sm"
+                          >
+                            Re Ordered
+                          </Tag>
+                        ) : null}
+                        <Tag
+                          color={statusColor}
+                          className="rounded-full px-4 py-1 text-sm"
+                        >
+                          {statusLabel}
+                        </Tag>
+                      </div>
                     ) : null}
                   </div>
                 </div>

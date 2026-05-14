@@ -1086,6 +1086,9 @@
       },
       "actions": {
         "new": "New Product Mapper",
+        "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
+        "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
         "confirmDeleteTitle": "Delete product mapper?",
@@ -1098,7 +1101,23 @@
         "updateSuccess": "Product mapper updated.",
         "deleteSuccess": "Product mapper deleted.",
         "deleteError": "Delete failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importSuccess": "Import completed.",
+        "importFailed": "Import failed.",
+        "importCompletedWithErrors": "Import completed with {failed} failed rows.",
+        "importCompletedWithErrorsFallback": "Import completed with errors.",
         "operationFailed": "Operation failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total: {total}, Created: {created}, Updated: {updated}, Failed: {failed}",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message",
+        "noErrors": "No errors found"
       },
       "table": {
         "noData": "No data"
@@ -1133,6 +1152,9 @@
       },
       "actions": {
         "new": "New Size Mapper",
+        "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
+        "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
         "confirmDeleteTitle": "Delete size mapper?",
@@ -1146,7 +1168,23 @@
         "updateSuccess": "Size mapper updated.",
         "deleteSuccess": "Size mapper deleted.",
         "deleteError": "Delete failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importSuccess": "Import completed.",
+        "importFailed": "Import failed.",
+        "importCompletedWithErrors": "Import completed with {failed} failed rows.",
+        "importCompletedWithErrorsFallback": "Import completed with errors.",
         "operationFailed": "Operation failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total: {total}, Created: {created}, Updated: {updated}, Failed: {failed}",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message",
+        "noErrors": "No errors found"
       },
       "table": {
         "noData": "No data"
@@ -1181,6 +1219,9 @@
       },
       "actions": {
         "new": "New Color Mapper",
+        "templateDownload": "Download Template",
+        "existsDownload": "Download Existing",
+        "bulkImport": "Bulk Import",
         "edit": "Edit",
         "delete": "Delete",
         "confirmDeleteTitle": "Delete color mapper?",
@@ -1194,7 +1235,23 @@
         "updateSuccess": "Color mapper updated.",
         "deleteSuccess": "Color mapper deleted.",
         "deleteError": "Delete failed.",
+        "templateDownloadSuccess": "Template downloaded.",
+        "templateDownloadError": "Template download failed.",
+        "importInvalidFile": "Please select a .csv or .xlsx file.",
+        "importSuccess": "Import completed.",
+        "importFailed": "Import failed.",
+        "importCompletedWithErrors": "Import completed with {failed} failed rows.",
+        "importCompletedWithErrorsFallback": "Import completed with errors.",
         "operationFailed": "Operation failed."
+      },
+      "import": {
+        "resultTitle": "Import Result",
+        "summary": "Total: {total}, Created: {created}, Updated: {updated}, Failed: {failed}",
+        "errorRow": "Row",
+        "errorField": "Field",
+        "errorValue": "Value",
+        "errorMessage": "Message",
+        "noErrors": "No errors found"
       },
       "table": {
         "noData": "No data"
