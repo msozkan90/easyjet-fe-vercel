@@ -2605,6 +2605,9 @@
       },
       "actions": {
         "new": "Yeni Ürün Eşleşmesi",
+        "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
+        "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
         "confirmDeleteTitle": "Ürün eşleşmesi silinsin mi?",
@@ -2617,7 +2620,23 @@
         "updateSuccess": "Ürün eşleşmesi güncellendi.",
         "deleteSuccess": "Ürün eşleşmesi silindi.",
         "deleteError": "Silme işlemi başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importSuccess": "İçe aktarma tamamlandı.",
+        "importFailed": "İçe aktarma başarısız.",
+        "importCompletedWithErrors": "İçe aktarma {failed} hatalı satır ile tamamlandı.",
+        "importCompletedWithErrorsFallback": "İçe aktarma hatalarla tamamlandı.",
         "operationFailed": "İşlem başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam: {total}, Oluşturulan: {created}, Güncellenen: {updated}, Hatalı: {failed}",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj",
+        "noErrors": "Hata bulunamadı"
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -2652,6 +2671,9 @@
       },
       "actions": {
         "new": "Yeni Beden Eşleşmesi",
+        "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
+        "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
         "confirmDeleteTitle": "Beden eşleşmesi silinsin mi?",
@@ -2665,7 +2687,23 @@
         "updateSuccess": "Beden eşleşmesi güncellendi.",
         "deleteSuccess": "Beden eşleşmesi silindi.",
         "deleteError": "Silme işlemi başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importSuccess": "İçe aktarma tamamlandı.",
+        "importFailed": "İçe aktarma başarısız.",
+        "importCompletedWithErrors": "İçe aktarma {failed} hatalı satır ile tamamlandı.",
+        "importCompletedWithErrorsFallback": "İçe aktarma hatalarla tamamlandı.",
         "operationFailed": "İşlem başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam: {total}, Oluşturulan: {created}, Güncellenen: {updated}, Hatalı: {failed}",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj",
+        "noErrors": "Hata bulunamadı"
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -2700,6 +2738,9 @@
       },
       "actions": {
         "new": "Yeni Renk Eşleşmesi",
+        "templateDownload": "Şablon İndir",
+        "existsDownload": "Verileri İndir",
+        "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
         "delete": "Sil",
         "confirmDeleteTitle": "Renk eşleşmesi silinsin mi?",
@@ -2713,7 +2754,23 @@
         "updateSuccess": "Renk eşleşmesi güncellendi.",
         "deleteSuccess": "Renk eşleşmesi silindi.",
         "deleteError": "Silme işlemi başarısız.",
+        "templateDownloadSuccess": "Şablon indirildi.",
+        "templateDownloadError": "Şablon indirilemedi.",
+        "importInvalidFile": "Lütfen .csv veya .xlsx dosyası seçin.",
+        "importSuccess": "İçe aktarma tamamlandı.",
+        "importFailed": "İçe aktarma başarısız.",
+        "importCompletedWithErrors": "İçe aktarma {failed} hatalı satır ile tamamlandı.",
+        "importCompletedWithErrorsFallback": "İçe aktarma hatalarla tamamlandı.",
         "operationFailed": "İşlem başarısız."
+      },
+      "import": {
+        "resultTitle": "İçe Aktarma Sonucu",
+        "summary": "Toplam: {total}, Oluşturulan: {created}, Güncellenen: {updated}, Hatalı: {failed}",
+        "errorRow": "Satır",
+        "errorField": "Alan",
+        "errorValue": "Değer",
+        "errorMessage": "Mesaj",
+        "noErrors": "Hata bulunamadı"
       },
       "table": {
         "noData": "Kayıt bulunamadı"

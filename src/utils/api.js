@@ -533,6 +533,35 @@ export const ProductMappersAPI = {
   create: (data) => api.post("/product-mappers", data),
   update: (id, data) => api.put(`/product-mappers/${id}`, data),
   remove: (id) => api.del(`/product-mappers/${id}`),
+  downloadExists: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-mappers/export", {
+      data: payload,
+      config,
+      fallbackFilename: `product-mappers-existing.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-mappers/export-template", {
+      data: payload,
+      config,
+      fallbackFilename: `product-mappers-template.${format}`,
+    });
+  },
+  import: (fileOrFormData, options = {}) => {
+    const payload = ensureFormDataPayload(fileOrFormData, {
+      fieldName: options.fieldName,
+      additionalFields: options.additionalFields,
+    });
+    return api.postMultipart(
+      `/product-mappers/import`,
+      payload,
+      options.config || options.multipartConfig,
+    );
+  },
 };
 
 export const ProductVariationAPI = {
@@ -544,6 +573,35 @@ export const ProductSizeMappersAPI = {
   create: (data) => api.post("/size-mappers", data),
   update: (id, data) => api.put(`/size-mappers/${id}`, data),
   remove: (id) => api.del(`/size-mappers/${id}`),
+  downloadExists: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/size-mappers/export", {
+      data: payload,
+      config,
+      fallbackFilename: `size-mappers-existing.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/size-mappers/export-template", {
+      data: payload,
+      config,
+      fallbackFilename: `size-mappers-template.${format}`,
+    });
+  },
+  import: (fileOrFormData, options = {}) => {
+    const payload = ensureFormDataPayload(fileOrFormData, {
+      fieldName: options.fieldName,
+      additionalFields: options.additionalFields,
+    });
+    return api.postMultipart(
+      `/size-mappers/import`,
+      payload,
+      options.config || options.multipartConfig,
+    );
+  },
 };
 
 export const ProductColorMappersAPI = {
@@ -551,6 +609,35 @@ export const ProductColorMappersAPI = {
   create: (data) => api.post("/color-mappers", data),
   update: (id, data) => api.put(`/color-mappers/${id}`, data),
   remove: (id) => api.del(`/color-mappers/${id}`),
+  downloadExists: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/color-mappers/export", {
+      data: payload,
+      config,
+      fallbackFilename: `color-mappers-existing.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/color-mappers/export-template", {
+      data: payload,
+      config,
+      fallbackFilename: `color-mappers-template.${format}`,
+    });
+  },
+  import: (fileOrFormData, options = {}) => {
+    const payload = ensureFormDataPayload(fileOrFormData, {
+      fieldName: options.fieldName,
+      additionalFields: options.additionalFields,
+    });
+    return api.postMultipart(
+      `/color-mappers/import`,
+      payload,
+      options.config || options.multipartConfig,
+    );
+  },
 };
 
 export const CategoriesAPI = {
