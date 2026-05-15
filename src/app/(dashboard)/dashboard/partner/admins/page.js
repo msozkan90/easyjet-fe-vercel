@@ -5,13 +5,14 @@ import { Space, Button, Modal, App as AntdApp, Tag, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { CategoriesAPI, PartnerAdminsAPI, PartnersAPI } from "@/utils/api";
+import { CategoriesAPI, PartnerAdminsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import PartnerAdminForm from "@/components/common/forms/PartnerAdminForm";
 import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
+import { fetchGenericList } from "@/utils/fetchGenericList";
 
 export default function PartnerAdminsPage() {
   const { message } = AntdApp.useApp();
@@ -29,9 +30,8 @@ export default function PartnerAdminsPage() {
 
     const loadPartners = async () => {
       try {
-        const resp = await PartnersAPI.list({ page: 1, pageSize: 200 });
+        const list = await fetchGenericList("partner");
         if (!alive) return;
-        const { list } = normalizeListAndMeta(resp);
         setPartners(Array.isArray(list) ? list : []);
       } catch {
         if (alive) {
