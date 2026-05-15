@@ -5,13 +5,14 @@ import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { CategoriesAPI, CustomerAdminsAPI, CustomersAPI } from "@/utils/api";
+import { CategoriesAPI, CustomerAdminsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import CustomerAdminForm from "@/components/common/forms/CustomerAdminForm";
 import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
+import { fetchGenericList } from "@/utils/fetchGenericList";
 
 export default function CustomerAdminsPage() {
   const { message } = AntdApp.useApp();
@@ -29,9 +30,8 @@ export default function CustomerAdminsPage() {
 
     const loadCustomers = async () => {
       try {
-        const resp = await CustomersAPI.list({ page: 1, pageSize: 200 });
+        const list = await fetchGenericList("customer");
         if (!alive) return;
-        const { list } = normalizeListAndMeta(resp);
         setCustomers(Array.isArray(list) ? list : []);
       } catch {
         if (alive) {
