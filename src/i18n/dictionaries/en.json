@@ -262,7 +262,6 @@
       "columns": {
         "id": "ID",
         "displayName": "Display Name",
-        "accountIdentifier": "Account Identifier",
         "type": "Type",
         "status": "Status",
         "createdAt": "Created At",
@@ -270,21 +269,38 @@
       },
       "filters": {
         "displayName": "Search display name",
-        "accountIdentifier": "Search identifier",
         "type": "Search type",
         "status": "Select status"
       },
       "fields": {
         "displayName": "Display Name",
-        "accountIdentifier": "Account Identifier",
         "type": "Type",
-        "status": "Status"
+        "status": "Status",
+        "details": {
+          "first_name": "First Name",
+          "last_name": "Last Name",
+          "company_name": "Company Name",
+          "company_address": "Company Address",
+          "phone_number": "Phone Number",
+          "email_address": "Email Address",
+          "account_number": "Account Number",
+          "routing_number": "Routing Number"
+        }
       },
       "placeholders": {
         "displayName": "Display name",
-        "accountIdentifier": "Identifier",
         "type": "Type",
-        "status": "Select status"
+        "status": "Select status",
+        "details": {
+          "first_name": "Enter first name",
+          "last_name": "Enter last name",
+          "company_name": "Enter company name",
+          "company_address": "Enter company address",
+          "phone_number": "Enter phone number",
+          "email_address": "Enter email address",
+          "account_number": "Enter account number",
+          "routing_number": "Enter routing number"
+        }
       },
       "validation": {
         "required": "This field is required."
@@ -307,6 +323,7 @@
       "modal": {
         "createTitle": "Create Funding Account",
         "editTitle": "Edit: {name}",
+        "detailsTitle": "Account Details",
         "submitCreate": "Create",
         "submitUpdate": "Update"
       },

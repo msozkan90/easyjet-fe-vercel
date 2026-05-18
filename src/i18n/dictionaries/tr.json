@@ -262,7 +262,6 @@
       "columns": {
         "id": "ID",
         "displayName": "Görünen İsim",
-        "accountIdentifier": "Hesap Bilgisi",
         "type": "Tip",
         "status": "Durum",
         "createdAt": "Oluşturma Tarihi",
@@ -270,21 +269,38 @@
       },
       "filters": {
         "displayName": "Görünen isim ara",
-        "accountIdentifier": "Hesap bilgisi ara",
         "type": "Tip ara",
         "status": "Durum seçin"
       },
       "fields": {
         "displayName": "Görünen İsim",
-        "accountIdentifier": "Hesap Bilgisi",
         "type": "Tip",
-        "status": "Durum"
+        "status": "Durum",
+        "details": {
+          "first_name": "İsim",
+          "last_name": "Soyisim",
+          "company_name": "Şirket İsmi",
+          "company_address": "Şirket Adresi",
+          "phone_number": "Telefon Numarası",
+          "email_address": "Email Adresi",
+          "account_number": "Account Number",
+          "routing_number": "Routing Number"
+        }
       },
       "placeholders": {
         "displayName": "Görünen isim",
-        "accountIdentifier": "Hesap bilgisi",
         "type": "Tip",
-        "status": "Durum seçin"
+        "status": "Durum seçin",
+        "details": {
+          "first_name": "İsim girin",
+          "last_name": "Soyisim girin",
+          "company_name": "Şirket ismi girin",
+          "company_address": "Şirket adresi girin",
+          "phone_number": "Telefon numarası girin",
+          "email_address": "Email adresi girin",
+          "account_number": "Account number girin",
+          "routing_number": "Routing number girin"
+        }
       },
       "validation": {
         "required": "Bu alan zorunludur."
@@ -307,6 +323,7 @@
       "modal": {
         "createTitle": "Fonlama Hesabı Oluştur",
         "editTitle": "Düzenle: {name}",
+        "detailsTitle": "Hesap Detayları",
         "submitCreate": "Oluştur",
         "submitUpdate": "Güncelle"
       },

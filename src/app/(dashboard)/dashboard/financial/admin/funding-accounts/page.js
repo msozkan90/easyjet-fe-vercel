@@ -18,6 +18,10 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import { FundingAccountsAPI } from "@/utils/api";
+import {
+  getFundingAccountDetailFields,
+  pickFundingAccountDetails,
+} from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 
 const statusColor = {
@@ -67,6 +71,7 @@ export default function FundingAccountsAdminPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
+  const selectedType = Form.useWatch("type", form);
 
   const typeOptions = useMemo(
     () => [
@@ -88,12 +93,6 @@ export default function FundingAccountsAdminPage() {
       );
     }
 
-    if (filters?.account_identifier) {
-      list = list.filter((item) =>
-        matchesText(item?.account_identifier, filters.account_identifier)
-      );
-    }
-
     if (filters?.type) {
       list = list.filter((item) => item?.type === filters.type);
     }
@@ -112,12 +111,16 @@ export default function FundingAccountsAdminPage() {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const payload = {
+        ...values,
+        details: pickFundingAccountDetails(values.type, values.details),
+      };
       setSubmitting(true);
       if (editingRow) {
-        await FundingAccountsAPI.update(editingRow.id, values);
+        await FundingAccountsAPI.update(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
       } else {
-        await FundingAccountsAPI.create(values);
+        await FundingAccountsAPI.create(payload);
         message.success(t("messages.createSuccess"));
       }
       setOpen(false);
@@ -152,12 +155,6 @@ export default function FundingAccountsAdminPage() {
         dataIndex: "display_name",
         sorter: true,
         filter: { type: "text", placeholder: t("filters.displayName") },
-      },
-      {
-        title: t("columns.accountIdentifier"),
-        dataIndex: "account_identifier",
-        sorter: true,
-        filter: { type: "text", placeholder: t("filters.accountIdentifier") },
       },
       {
         title: t("columns.type"),
@@ -204,8 +201,8 @@ export default function FundingAccountsAdminPage() {
                 setEditingRow(record);
                 form.setFieldsValue({
                   display_name: record?.display_name,
-                  account_identifier: record?.account_identifier,
                   type: record?.type,
+                  details: pickFundingAccountDetails(record?.type, record?.details),
                   status: record?.status || "active",
                 });
                 setOpen(true);
@@ -244,7 +241,6 @@ export default function FundingAccountsAdminPage() {
           initialPageSize={10}
           initialFilters={{
             display_name: "",
-            account_identifier: "",
             type: "",
             status: undefined,
           }}
@@ -255,7 +251,7 @@ export default function FundingAccountsAdminPage() {
               onClick={() => {
                 setEditingRow(null);
                 form.resetFields();
-                form.setFieldsValue({ status: "active" });
+                form.setFieldsValue({ status: "active", details: {} });
                 setOpen(true);
               }}
             >
@@ -292,13 +288,6 @@ export default function FundingAccountsAdminPage() {
             <Input placeholder={t("placeholders.displayName")} />
           </Form.Item>
           <Form.Item
-            label={t("fields.accountIdentifier")}
-            name="account_identifier"
-            rules={[{ required: true, message: t("validation.required") }]}
-          >
-            <Input placeholder={t("placeholders.accountIdentifier")} />
-          </Form.Item>
-          <Form.Item
             label={t("fields.type")}
             name="type"
             rules={[{ required: true, message: t("validation.required") }]}
@@ -306,8 +295,30 @@ export default function FundingAccountsAdminPage() {
             <Select
               placeholder={t("placeholders.type")}
               options={typeOptions}
+              onChange={(type) => {
+                form.setFieldsValue({
+                  details: pickFundingAccountDetails(type, form.getFieldValue("details")),
+                });
+              }}
             />
           </Form.Item>
+          {getFundingAccountDetailFields(selectedType).length ? (
+            <>
+              <Title level={5} style={{ marginTop: 0 }}>
+                {t("modal.detailsTitle")}
+              </Title>
+              {getFundingAccountDetailFields(selectedType).map((field) => (
+                <Form.Item
+                  key={field}
+                  label={t(`fields.details.${field}`)}
+                  name={["details", field]}
+                  rules={[{ required: true, message: t("validation.required") }]}
+                >
+                  <Input placeholder={t(`placeholders.details.${field}`)} />
+                </Form.Item>
+              ))}
+            </>
+          ) : null}
           <Form.Item
             label={t("fields.status")}
             name="status"

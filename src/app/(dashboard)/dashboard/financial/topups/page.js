@@ -27,6 +27,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { refreshWalletBalance } from "@/utils/walletBalance";
+import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 
 const { Title } = Typography;
@@ -98,7 +99,7 @@ export default function WalletTopupsListPage() {
     () =>
       fundingAccounts.map((account) => ({
         value: account.id,
-        label: account.display_name || account.account_identifier,
+        label: account.display_name || account.id,
       })),
     [fundingAccounts]
   );
@@ -112,6 +113,11 @@ export default function WalletTopupsListPage() {
     if (!selectedFundingId) return null;
     return fundingAccounts.find((account) => account.id === selectedFundingId);
   }, [fundingAccounts, selectedFundingId]);
+
+  const selectedFundingAccountDetails = useMemo(
+    () => getFundingAccountDetailFields(selectedFundingAccount?.type),
+    [selectedFundingAccount?.type]
+  );
 
   const handleCreate = async () => {
     try {
@@ -184,7 +190,6 @@ export default function WalletTopupsListPage() {
         dataIndex: "funding_account_id",
         render: (_, record) =>
           record?.funding_account?.display_name ||
-          record?.funding_account?.account_identifier ||
           record?.funding_account_id ||
           "-",
         filter: {
@@ -304,12 +309,17 @@ export default function WalletTopupsListPage() {
                 <Descriptions.Item label={tFunding("columns.displayName")}>
                   {selectedFundingAccount.display_name || "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label={tFunding("columns.accountIdentifier")}>
-                  {selectedFundingAccount.account_identifier || "-"}
-                </Descriptions.Item>
                 <Descriptions.Item label={tFunding("columns.type")}>
                   {selectedFundingAccount.type || "-"}
                 </Descriptions.Item>
+                {selectedFundingAccountDetails.map((field) => (
+                  <Descriptions.Item
+                    key={field}
+                    label={tFunding(`fields.details.${field}`)}
+                  >
+                    {selectedFundingAccount.details?.[field] || "-"}
+                  </Descriptions.Item>
+                ))}
               </Descriptions>
             ) : null}
             <Form.Item

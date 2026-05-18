@@ -74,7 +74,7 @@ export default function WalletTopupsAdminListPage() {
     () =>
       fundingAccounts.map((account) => ({
         value: account.id,
-        label: account.display_name || account.account_identifier,
+        label: account.display_name || account.id,
       })),
     [fundingAccounts]
   );
@@ -120,7 +120,6 @@ export default function WalletTopupsAdminListPage() {
         dataIndex: "funding_account_id",
         render: (_, record) =>
           record?.funding_account?.display_name ||
-          record?.funding_account?.account_identifier ||
           record?.funding_account_id ||
           "-",
         filter: {

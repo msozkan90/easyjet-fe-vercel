@@ -147,7 +147,6 @@ export default function WalletTopupDetailPage() {
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.fundingAccount")}>
               {record?.funding_account?.display_name ||
-                record?.funding_account?.account_identifier ||
                 record?.funding_account_id ||
                 "-"}
             </Descriptions.Item>
