@@ -171,6 +171,23 @@ export const OrdersAPI = {
   voidLabel: (data) => api.post("/orders/labels/void", data),
 };
 
+export const OrdersPdfAPI = {
+  list: (payload) => api.post("/orders-pdf/list", payload),
+  get: (id) => api.get(`/orders-pdf/${encodeURIComponent(id)}`),
+  create: (payload) => api.post("/orders-pdf", payload),
+  update: (id, payload) => api.put(`/orders-pdf/${encodeURIComponent(id)}`, payload),
+  remove: (id) => api.del(`/orders-pdf/${encodeURIComponent(id)}`),
+  designsList: (id, payload) =>
+    api.post(`/orders-pdf/${encodeURIComponent(id)}/designs/list`, payload),
+  uploadDesigns: (payload, config = {}) =>
+    api.postMultipart("/orders-pdf/designs", payload, config),
+  uploadDesignProgress: (uploadId) =>
+    api.get(`/orders-pdf/designs/progress/${encodeURIComponent(uploadId)}`),
+  updateDesign: (id, payload) =>
+    api.put(`/orders-pdf/designs/${encodeURIComponent(id)}`, payload),
+  deleteDesign: (id) => api.del(`/orders-pdf/designs/${encodeURIComponent(id)}`),
+};
+
 export const TransferOrdersAPI = {
   create: (data) => api.post("/transfer-orders", data),
   createManual: (data) => api.post("/transfer-orders/manual", data),

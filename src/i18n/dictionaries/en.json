@@ -32,7 +32,8 @@
       "save": "Save",
       "cancel": "Cancel",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "detail": "Detail"
     },
     "status": {
       "active": "Active",
@@ -261,7 +262,6 @@
       "columns": {
         "id": "ID",
         "displayName": "Display Name",
-        "accountIdentifier": "Account Identifier",
         "type": "Type",
         "status": "Status",
         "createdAt": "Created At",
@@ -269,21 +269,38 @@
       },
       "filters": {
         "displayName": "Search display name",
-        "accountIdentifier": "Search identifier",
         "type": "Search type",
         "status": "Select status"
       },
       "fields": {
         "displayName": "Display Name",
-        "accountIdentifier": "Account Identifier",
         "type": "Type",
-        "status": "Status"
+        "status": "Status",
+        "details": {
+          "first_name": "First Name",
+          "last_name": "Last Name",
+          "company_name": "Company Name",
+          "company_address": "Company Address",
+          "phone_number": "Phone Number",
+          "email_address": "Email Address",
+          "account_number": "Account Number",
+          "routing_number": "Routing Number"
+        }
       },
       "placeholders": {
         "displayName": "Display name",
-        "accountIdentifier": "Identifier",
         "type": "Type",
-        "status": "Select status"
+        "status": "Select status",
+        "details": {
+          "first_name": "Enter first name",
+          "last_name": "Enter last name",
+          "company_name": "Enter company name",
+          "company_address": "Enter company address",
+          "phone_number": "Enter phone number",
+          "email_address": "Enter email address",
+          "account_number": "Enter account number",
+          "routing_number": "Enter routing number"
+        }
       },
       "validation": {
         "required": "This field is required."
@@ -306,6 +323,7 @@
       "modal": {
         "createTitle": "Create Funding Account",
         "editTitle": "Edit: {name}",
+        "detailsTitle": "Account Details",
         "submitCreate": "Create",
         "submitUpdate": "Update"
       },
@@ -2117,7 +2135,10 @@
           "taxAmount": "Tax amount",
           "amountPaid": "Total amount",
           "orderNumber": "Order number",
+          "productName": "Product",
           "quantity": "Quantity",
+          "size": "Size",
+          "color": "Color",
           "unitPrice": "Unit Price"
         },
         "address": {
@@ -2316,6 +2337,88 @@
         "messages": {
           "uploadFailed": "Upload failed",
           "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
+        }
+      },
+      "ordersPdf": {
+        "title": "Downloaded PDFs",
+        "subtitle": "PDFs downloaded from completed company orders and their related designs.",
+        "detailTitle": "PDF Detail",
+        "scope": {
+          "categoryOnly": "Category only",
+          "subCategory": "Sub category"
+        },
+        "summary": {
+          "total": "Total {count} records"
+        },
+        "fields": {
+          "pdfName": "PDF Name",
+          "category": "Category",
+          "subCategory": "Sub Category",
+          "designs": "Designs",
+          "status": "Status",
+          "createdAt": "Created At",
+          "actions": "Actions",
+          "designName": "Design Name"
+        },
+        "actions": {
+          "addDesign": "Add Design",
+          "downloadPdf": "Download PDF"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "empty": {
+          "pdfs": "No downloaded PDFs found.",
+          "designs": "No designs added yet.",
+          "unnamedPdf": "Untitled PDF",
+          "unnamedDesign": "Untitled design"
+        },
+        "tooltips": {
+          "detail": "View PDF designs",
+          "addDesign": "Upload one or more design files"
+        },
+        "confirm": {
+          "deleteTitle": "Delete this PDF record?",
+          "deleteDescription": "The PDF and its designs will be removed.",
+          "designDeleteTitle": "Delete this design?",
+          "designDeleteDescription": "The uploaded design file will be removed."
+        },
+        "messages": {
+          "loadFailed": "PDF records could not be loaded.",
+          "designLoadFailed": "Designs could not be loaded.",
+          "deleted": "PDF record deleted.",
+          "deleteFailed": "PDF record could not be deleted.",
+          "designDeleted": "Design deleted.",
+          "designDeleteFailed": "Design could not be deleted.",
+          "uploadQueued": "{count} design upload queued."
+        },
+        "uploadQueue": {
+          "title": "PDF Design Uploads",
+          "subtitle": "Uploads continue while you navigate inside the app.",
+          "status": {
+            "queued": "Queued",
+            "uploading": "Uploading",
+            "preparing": "Preparing",
+            "saving": "Saving",
+            "success": "Completed",
+            "failed": "Failed",
+            "canceled": "Canceled"
+          },
+          "badges": {
+            "uploading": "Uploading: {count}",
+            "queued": "Queued: {count}"
+          },
+          "actions": {
+            "clearFinished": "Clear Finished",
+            "retry": "Retry",
+            "cancel": "Cancel",
+            "remove": "Remove"
+          },
+          "messages": {
+            "uploadFailed": "Upload failed",
+            "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
+          }
         }
       },
       "shippingRates": {
@@ -2534,6 +2637,7 @@
         "shipped": "Shipped Orders",
         "refundRemake": "Refund / Remake",
         "viewOrder": "View Order",
+        "ordersPdf": "PDFs",
         "printer": "Printer"
       },
       "company": {

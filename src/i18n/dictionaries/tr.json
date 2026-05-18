@@ -32,7 +32,8 @@
       "save": "Kaydet",
       "cancel": "İptal",
       "edit": "Düzenle",
-      "delete": "Sil"
+      "delete": "Sil",
+      "detail": "Detay"
     },
     "status": {
       "active": "Aktif",
@@ -261,7 +262,6 @@
       "columns": {
         "id": "ID",
         "displayName": "Görünen İsim",
-        "accountIdentifier": "Hesap Bilgisi",
         "type": "Tip",
         "status": "Durum",
         "createdAt": "Oluşturma Tarihi",
@@ -269,21 +269,38 @@
       },
       "filters": {
         "displayName": "Görünen isim ara",
-        "accountIdentifier": "Hesap bilgisi ara",
         "type": "Tip ara",
         "status": "Durum seçin"
       },
       "fields": {
         "displayName": "Görünen İsim",
-        "accountIdentifier": "Hesap Bilgisi",
         "type": "Tip",
-        "status": "Durum"
+        "status": "Durum",
+        "details": {
+          "first_name": "İsim",
+          "last_name": "Soyisim",
+          "company_name": "Şirket İsmi",
+          "company_address": "Şirket Adresi",
+          "phone_number": "Telefon Numarası",
+          "email_address": "Email Adresi",
+          "account_number": "Account Number",
+          "routing_number": "Routing Number"
+        }
       },
       "placeholders": {
         "displayName": "Görünen isim",
-        "accountIdentifier": "Hesap bilgisi",
         "type": "Tip",
-        "status": "Durum seçin"
+        "status": "Durum seçin",
+        "details": {
+          "first_name": "İsim girin",
+          "last_name": "Soyisim girin",
+          "company_name": "Şirket ismi girin",
+          "company_address": "Şirket adresi girin",
+          "phone_number": "Telefon numarası girin",
+          "email_address": "Email adresi girin",
+          "account_number": "Account number girin",
+          "routing_number": "Routing number girin"
+        }
       },
       "validation": {
         "required": "Bu alan zorunludur."
@@ -306,6 +323,7 @@
       "modal": {
         "createTitle": "Fonlama Hesabı Oluştur",
         "editTitle": "Düzenle: {name}",
+        "detailsTitle": "Hesap Detayları",
         "submitCreate": "Oluştur",
         "submitUpdate": "Güncelle"
       },
@@ -1919,7 +1937,10 @@
           "taxAmount": "Vergi tutarı",
           "amountPaid": "Toplam tutar",
           "orderNumber": "Sipariş numarası",
+          "productName": "Ürün",
           "quantity": "Miktar",
+          "size": "Beden",
+          "color": "Renk",
           "unitPrice": "Birim Fiyat"
         },
         "address": {
@@ -2118,6 +2139,88 @@
         "messages": {
           "uploadFailed": "Yükleme başarısız",
           "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
+        }
+      },
+      "ordersPdf": {
+        "title": "İndirilen PDFler",
+        "subtitle": "Tamamlanan firma siparişlerinden indirilen PDFler ve bağlı tasarımlar.",
+        "detailTitle": "PDF Detayı",
+        "scope": {
+          "categoryOnly": "Sadece kategori",
+          "subCategory": "Alt kategori"
+        },
+        "summary": {
+          "total": "Toplam {count} kayıt"
+        },
+        "fields": {
+          "pdfName": "PDF Adı",
+          "category": "Kategori",
+          "subCategory": "Alt Kategori",
+          "designs": "Tasarımlar",
+          "status": "Durum",
+          "createdAt": "Oluşturulma",
+          "actions": "İşlemler",
+          "designName": "Tasarım Adı"
+        },
+        "actions": {
+          "addDesign": "Tasarım Ekle",
+          "downloadPdf": "PDF İndir"
+        },
+        "status": {
+          "active": "Aktif",
+          "inactive": "Pasif"
+        },
+        "empty": {
+          "pdfs": "İndirilen PDF bulunamadı.",
+          "designs": "Henüz tasarım eklenmedi.",
+          "unnamedPdf": "İsimsiz PDF",
+          "unnamedDesign": "İsimsiz tasarım"
+        },
+        "tooltips": {
+          "detail": "PDF tasarımlarını görüntüle",
+          "addDesign": "Bir veya daha fazla tasarım dosyası yükle"
+        },
+        "confirm": {
+          "deleteTitle": "Bu PDF kaydı silinsin mi?",
+          "deleteDescription": "PDF ve bağlı tasarımlar kaldırılacak.",
+          "designDeleteTitle": "Bu tasarım silinsin mi?",
+          "designDeleteDescription": "Yüklenen tasarım dosyası kaldırılacak."
+        },
+        "messages": {
+          "loadFailed": "PDF kayıtları yüklenemedi.",
+          "designLoadFailed": "Tasarımlar yüklenemedi.",
+          "deleted": "PDF kaydı silindi.",
+          "deleteFailed": "PDF kaydı silinemedi.",
+          "designDeleted": "Tasarım silindi.",
+          "designDeleteFailed": "Tasarım silinemedi.",
+          "uploadQueued": "{count} tasarım yüklemesi sıraya alındı."
+        },
+        "uploadQueue": {
+          "title": "PDF Tasarım Yüklemeleri",
+          "subtitle": "Uygulama içinde gezinirken yüklemeler devam eder.",
+          "status": {
+            "queued": "Sırada",
+            "uploading": "Yükleniyor",
+            "preparing": "Hazırlanıyor",
+            "saving": "Kaydediliyor",
+            "success": "Tamamlandı",
+            "failed": "Başarısız",
+            "canceled": "İptal Edildi"
+          },
+          "badges": {
+            "uploading": "Yükleniyor: {count}",
+            "queued": "Sırada: {count}"
+          },
+          "actions": {
+            "clearFinished": "Tamamlananları Temizle",
+            "retry": "Tekrar Dene",
+            "cancel": "İptal",
+            "remove": "Kaldır"
+          },
+          "messages": {
+            "uploadFailed": "Yükleme başarısız",
+            "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
+          }
         }
       },
       "shippingRates": {
@@ -2336,6 +2439,7 @@
         "shipped": "Kargolanmış Siparişler",
         "refundRemake": "İade / Yeniden Üretim",
         "viewOrder": "Siparişleri Görüntüle",
+        "ordersPdf": "PDFler",
         "printer": "Printer"
       },
       "company": {
