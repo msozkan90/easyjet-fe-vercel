@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
 import { setUser } from "@/redux/features/authSlice";
 import { TransferDesignUploadQueueProvider } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
+import { OrdersPdfDesignUploadQueueProvider } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import {
   resetCategories,
   setCategoriesError,
@@ -64,8 +65,10 @@ export function Providers({ children }) {
         }}
       >
         <TransferDesignUploadQueueProvider>
-          <AuthBootstrap />
-          {children}
+          <OrdersPdfDesignUploadQueueProvider>
+            <AuthBootstrap />
+            {children}
+          </OrdersPdfDesignUploadQueueProvider>
         </TransferDesignUploadQueueProvider>
       </ConfigProvider>
     </Provider>

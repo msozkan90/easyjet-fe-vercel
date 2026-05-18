@@ -173,6 +173,14 @@ export default function Sidebar({ collapsed }) {
           ),
         },
         {
+          key: `category-${category.id}-pdfs`,
+          label: (
+            <Link href={`/dashboard/orders/${category.id}/pdfs`}>
+              {tSidebar("order.ordersPdf")}
+            </Link>
+          ),
+        },
+        {
           key: `category-${category.id}-printer`,
           label: (
             <Link href={`/dashboard/orders/${category.id}/printer`}>
@@ -194,6 +202,16 @@ export default function Sidebar({ collapsed }) {
                 href={`/dashboard/orders/${category.id}/${subCategory.id}/view-order`}
               >
                 {tSidebar("order.viewOrder")}
+              </Link>
+            ),
+          },
+          {
+            key: `subcategory-${category.id}-${subCategory.id}-pdfs`,
+            label: (
+              <Link
+                href={`/dashboard/orders/${category.id}/${subCategory.id}/pdfs`}
+              >
+                {tSidebar("order.ordersPdf")}
               </Link>
             ),
           },
