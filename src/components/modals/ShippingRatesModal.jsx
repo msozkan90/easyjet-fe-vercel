@@ -156,6 +156,23 @@ const extractBalanceValue = (response) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const getVariationName = (item, key) => {
+  const directValue = item?.[key];
+  if (typeof directValue === "string" && directValue.trim()) {
+    return directValue;
+  }
+  if (directValue?.name) {
+    return directValue.name;
+  }
+
+  const snakeKey = `${key}_name`;
+  const productKey = `product_${key}`;
+  return item?.[snakeKey] || item?.[productKey]?.name || null;
+};
+
+const getProductName = (item) =>
+  item?.product?.name || item?.product_name || item?.productName || null;
+
 const SERVICE_TABS = {
   EASYJET: "easyjet",
   COMPANY: "company",
@@ -642,6 +659,9 @@ const ShippingRatesModal = ({
             <div className="mt-4 space-y-3 max-h-[285px] overflow-y-auto pr-1">
               {orderItems.map((item, index) => {
                 const key = item?.id ?? `${item?.sku || "item"}-${index}`;
+                const productName = getProductName(item);
+                const sizeName = getVariationName(item, "size");
+                const colorName = getVariationName(item, "color");
                 const imageUrl =
                   item?.image_url ||
                   item?.image ||
@@ -682,12 +702,22 @@ const ShippingRatesModal = ({
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                       <div className="font-semibold text-gray-900">
-                       {tShipping("items.quantity")} : {item?.quantity || tCommon("none")}
+                        {tShipping("items.quantity")} :{" "}
+                        {item?.quantity || tCommon("none")}
                       </div>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                       <div className="font-semibold text-gray-900">
-                       {tShipping("items.unitPrice")} : $ {item?.unit_price || tCommon("none")}
+                        {tShipping("items.size")} :{" "}
+                        {sizeName || tCommon("none")}
+                      </div>
+                      <div className="font-semibold text-gray-900">
+                        {tShipping("items.color")} :{" "}
+                        {colorName || tCommon("none")}
+                      </div>
+                      <div className="font-semibold text-gray-900">
+                        {tShipping("items.productName")}:{" "}
+                        {productName || tCommon("none")}
                       </div>
                     </div>
                     <div className="text-base font-semibold text-gray-900">

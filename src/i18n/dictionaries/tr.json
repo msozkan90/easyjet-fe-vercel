@@ -1919,7 +1919,10 @@
           "taxAmount": "Vergi tutarı",
           "amountPaid": "Toplam tutar",
           "orderNumber": "Sipariş numarası",
+          "productName": "Ürün",
           "quantity": "Miktar",
+          "size": "Beden",
+          "color": "Renk",
           "unitPrice": "Birim Fiyat"
         },
         "address": {

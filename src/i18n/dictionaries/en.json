@@ -2117,7 +2117,10 @@
           "taxAmount": "Tax amount",
           "amountPaid": "Total amount",
           "orderNumber": "Order number",
+          "productName": "Product",
           "quantity": "Quantity",
+          "size": "Size",
+          "color": "Color",
           "unitPrice": "Unit Price"
         },
         "address": {

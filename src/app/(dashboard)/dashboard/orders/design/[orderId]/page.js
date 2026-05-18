@@ -48,7 +48,7 @@ const ACCEPTED_FILE_TYPES = [
   "application/pdf",
 ];
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.pdf";
-const MAX_FILE_SIZE_MB = 25;
+const MAX_FILE_SIZE_MB = 2000;
 
 const extractPositionList = (response) => {
   if (!response) return [];
