@@ -280,6 +280,24 @@ export default function ProductColorsPage() {
     }
   };
 
+  const handleExportTemplateDownload = async (format) => {
+    setTemplateLoading(true);
+    try {
+      const { blob, filename } = await ProductColorsAPI.downloadTemplate({
+        format,
+      });
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.templateDownloadSuccess"));
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.templateDownloadError"),
+      );
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
   const handleFiltersChange = useCallback((filters) => {
     setListFilters(filters || {});
   }, []);
@@ -389,6 +407,19 @@ export default function ProductColorsPage() {
             >
               <Button loading={templateLoading}>
                 {t("actions.existsDownload")}
+              </Button>
+            </Dropdown>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "csv", label: "CSV" },
+                  { key: "xlsx", label: "XLSX" },
+                ],
+                onClick: ({ key }) => handleExportTemplateDownload(key),
+              }}
+            >
+              <Button loading={templateLoading}>
+                {t("actions.templateDownload")}
               </Button>
             </Dropdown>
             <Button onClick={handleImportClick} loading={importing}>

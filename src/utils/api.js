@@ -396,6 +396,15 @@ export const ProductSizesAPI = {
       fallbackFilename: `product-sizes-template.${format}`,
     });
   },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-sizes/export-template", {
+      data: payload,
+      config,
+      fallbackFilename: `product-sizes-template.${format}`,
+    });
+  },
   import: (fileOrFormData, options = {}) => {
     const payload = ensureFormDataPayload(fileOrFormData, {
       fieldName: options.fieldName,
@@ -418,6 +427,15 @@ export const ProductColorsAPI = {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-colors/export", {
+      data: payload,
+      config,
+      fallbackFilename: `product-colors-template.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-colors/export-template", {
       data: payload,
       config,
       fallbackFilename: `product-colors-template.${format}`,
@@ -453,6 +471,15 @@ export const ProductAdditionalPricesAPI = {
     const payload = buildExportPayload(params);
     const format = payload?.format || "csv";
     return fetchBlobFilePost("/product-additional-prices/export", {
+      data: payload,
+      config,
+      fallbackFilename: `product-additional-prices-template.${format}`,
+    });
+  },
+  downloadTemplate: (params = {}, config = {}) => {
+    const payload = buildExportPayload(params);
+    const format = payload?.format || "csv";
+    return fetchBlobFilePost("/product-additional-prices/export-template", {
       data: payload,
       config,
       fallbackFilename: `product-additional-prices-template.${format}`,
