@@ -1810,10 +1810,11 @@
           "shippingAddress": "Teslimat Adresi",
           "totals": "Toplamlar",
           "package": "Paket",
-          "notes": "Notlar",
-          "labels": "Etiketler",
-          "items": "Sipariş Ürünleri"
-        },
+        "notes": "Notlar",
+        "labels": "Etiketler",
+        "items": "Sipariş Ürünleri",
+        "scrap": "Fire / Üretim Kayıpları"
+      },
         "fields": {
           "billToName": "Fatura Adı",
           "billToCompany": "Fatura Şirketi",
@@ -1883,6 +1884,47 @@
           "voidLabel": "Etiketi İptal Et",
           "voidLabelConfirmTitle": "Bu etiketi iptal etmek istiyor musunuz?",
           "voidLabelConfirmOk": "Evet, iptal et"
+        },
+        "scrap": {
+          "title": "Fire Kaydı Oluştur",
+          "entryTitle": "Fire Kaydı #{index}",
+          "quantityBadge": "{quantity} adet ekstra kullanıldı",
+          "fields": {
+            "item": "Sipariş Ürünü",
+            "variant": "Varyant",
+            "quantity": "Ekstra Adet",
+            "reason": "Sebep",
+            "note": "Not",
+            "causedBy": "Sebep Olan",
+            "recordedBy": "Kaydı Giren",
+            "source": "Kaynak",
+            "createdAt": "Kayıt Tarihi"
+          },
+          "placeholders": {
+            "item": "Sipariş ürünü seçin",
+            "reason": "Sebep seçin",
+            "note": "Opsiyonel not"
+          },
+          "sourceOptions": {
+            "scanner": "Tarayıcı",
+            "orderDetail": "Sipariş detayı"
+          },
+          "validation": {
+            "item": "Lütfen bir sipariş ürünü seçin",
+            "quantity": "Lütfen adet girin",
+            "reason": "Lütfen sebep seçin"
+          },
+          "actions": {
+            "add": "Fire Ekle",
+            "confirm": "Fireyi Kaydet",
+            "addEntry": "Yeni Kayıt Ekle"
+          },
+          "messages": {
+            "empty": "Fire kaydı bulunamadı.",
+            "recordSuccess": "Fire kaydı oluşturuldu.",
+            "orderIdMissing": "Sipariş bilgisi bulunamadı.",
+            "invalidItem": "Seçilen ürün geçerli bir varyanta sahip değil."
+          }
         }
       },
       "addressEditor": {
@@ -1996,7 +2038,51 @@
         "title": "Tarayıcı"
       },
       "scanner": {
-        "title": "Tarayıcı"
+        "title": "Tarayıcı",
+        "actions": {
+          "complete": "Tamamla",
+          "scrap": "Fire Var"
+        },
+        "messages": {
+          "loadBeforeScrap": "Fire kaydı girmeden önce siparişi yükleyin.",
+          "invalidScrapItem": "Seçilen ürün geçerli bir varyanta sahip değil.",
+          "completeSuccess": "Sipariş ürünleri başarıyla tamamlandı.",
+          "completeWithScrapSuccess": "Sipariş ürünleri tamamlandı ve fire kaydı oluşturuldu.",
+          "designPreparing": "Tasarım dosyaları indirilmeye hazırlanıyor.",
+          "designDownloadSuccess": "Tasarım dosyaları indirildi.",
+          "designDownloadError": "Tasarım dosyaları indirilemedi."
+        },
+        "scrap": {
+          "title": "Fire Kaydı Oluştur",
+          "entryTitle": "Fire Kaydı #{index}",
+          "confirm": "Fire ile Tamamla",
+          "fields": {
+            "item": "Etkilenen Ürün",
+            "quantity": "Ekstra Adet",
+            "reason": "Sebep",
+            "note": "Not"
+          },
+          "placeholders": {
+            "item": "Ürün seçin",
+            "reason": "Sebep seçin",
+            "note": "Opsiyonel not"
+          },
+          "validation": {
+            "item": "Lütfen ürün seçin",
+            "quantity": "Lütfen adet girin",
+            "reason": "Lütfen sebep seçin"
+          },
+          "actions": {
+            "addEntry": "Yeni Kayıt Ekle"
+          },
+          "reasonOptions": {
+            "wrongPrint": "Yanlış baskı",
+            "wrongEngraving": "Yanlış engraving",
+            "apparelIssue": "Apparel sorunu",
+            "damagedProduct": "Hasarlı ürün",
+            "other": "Diğer"
+          }
+        }
       },
       "transferDetail": {
         "header": {

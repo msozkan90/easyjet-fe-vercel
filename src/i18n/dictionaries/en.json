@@ -2008,10 +2008,11 @@
           "shippingAddress": "Shipping Address",
           "totals": "Totals",
           "package": "Package",
-          "notes": "Notes",
-          "labels": "Labels",
-          "items": "Order Items"
-        },
+        "notes": "Notes",
+        "labels": "Labels",
+        "items": "Order Items",
+        "scrap": "Fire / Production Losses"
+      },
         "fields": {
           "billToName": "Bill To Name",
           "billToCompany": "Bill To Company",
@@ -2081,6 +2082,47 @@
           "voidLabel": "Void label",
           "voidLabelConfirmTitle": "Void this label?",
           "voidLabelConfirmOk": "Yes, void"
+        },
+        "scrap": {
+          "title": "Record Scrap",
+          "entryTitle": "Scrap Entry #{index}",
+          "quantityBadge": "{quantity} extra used",
+          "fields": {
+            "item": "Order Item",
+            "variant": "Variant",
+            "quantity": "Extra Quantity",
+            "reason": "Cause",
+            "note": "Note",
+            "causedBy": "Caused By",
+            "recordedBy": "Recorded By",
+            "source": "Source",
+            "createdAt": "Recorded At"
+          },
+          "placeholders": {
+            "item": "Select order item",
+            "reason": "Select cause",
+            "note": "Optional note"
+          },
+          "sourceOptions": {
+            "scanner": "Scanner",
+            "orderDetail": "Order detail"
+          },
+          "validation": {
+            "item": "Please select an order item",
+            "quantity": "Please enter a quantity",
+            "reason": "Please select a cause"
+          },
+          "actions": {
+            "add": "Add Scrap",
+            "confirm": "Save Scrap",
+            "addEntry": "Add Another Entry"
+          },
+          "messages": {
+            "empty": "No scrap records found.",
+            "recordSuccess": "Scrap record saved.",
+            "orderIdMissing": "Order information is missing.",
+            "invalidItem": "Selected item does not have a valid variant."
+          }
         }
       },
       "addressEditor": {
@@ -2194,7 +2236,51 @@
         "title": "Scanner"
       },
       "scanner": {
-        "title": "Scanner"
+        "title": "Scanner",
+        "actions": {
+          "complete": "Complete",
+          "scrap": "Report Scrap"
+        },
+        "messages": {
+          "loadBeforeScrap": "Load an order before recording scrap.",
+          "invalidScrapItem": "Selected item does not have a valid variant.",
+          "completeSuccess": "Order items completed successfully.",
+          "completeWithScrapSuccess": "Order items completed and scrap recorded.",
+          "designPreparing": "Design files are being prepared for download.",
+          "designDownloadSuccess": "Design files downloaded.",
+          "designDownloadError": "Design files could not be downloaded."
+        },
+        "scrap": {
+          "title": "Record Fire / Scrap",
+          "entryTitle": "Scrap Entry #{index}",
+          "confirm": "Complete With Scrap",
+          "fields": {
+            "item": "Affected Item",
+            "quantity": "Extra Quantity",
+            "reason": "Cause",
+            "note": "Note"
+          },
+          "placeholders": {
+            "item": "Select item",
+            "reason": "Select cause",
+            "note": "Optional note"
+          },
+          "validation": {
+            "item": "Please select an item",
+            "quantity": "Please enter a quantity",
+            "reason": "Please select a cause"
+          },
+          "actions": {
+            "addEntry": "Add Another Entry"
+          },
+          "reasonOptions": {
+            "wrongPrint": "Wrong print",
+            "wrongEngraving": "Wrong engraving",
+            "apparelIssue": "Apparel issue",
+            "damagedProduct": "Damaged product",
+            "other": "Other"
+          }
+        }
       },
       "transferDetail": {
         "header": {

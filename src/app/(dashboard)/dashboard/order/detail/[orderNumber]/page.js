@@ -1,15 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import dayjs from "dayjs";
+import moment from "moment";
 import {
   Alert,
   App as AntdApp,
   Button,
   Card,
   Empty,
+  Form,
   Image,
+  Input,
+  InputNumber,
+  Modal,
   Popconfirm,
+  Select,
   Spin,
   Tag,
   Typography,
@@ -20,6 +25,8 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import { STATUS_COLORS } from "@/app/(dashboard)/dashboard/orders/statusConstants";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
+import { useSelector } from "react-redux";
+import { hasAnyRole } from "@/utils/rbac";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -36,7 +43,7 @@ const formatAmount = (value, fallback = "-") => {
 };
 
 const formatDateTime = (value, fallback = "-") =>
-  value ? dayjs(value).format("LLL") : fallback;
+  value ? moment(value).format("LLL") : fallback;
 
 const isReorderedOrder = (order) => {
   if (order?.is_reordered) return true;
@@ -54,6 +61,30 @@ const LABEL_STATUS_COLORS = {
   cancelled: "volcano",
   error: "red",
   failed: "red",
+};
+
+const SCRAP_REASON_OPTIONS = [
+  { value: "wrong_print", labelKey: "wrongPrint" },
+  { value: "damaged_product", labelKey: "damagedProduct" },
+  { value: "other", labelKey: "other" },
+];
+
+const formatUserName = (user, fallback) => {
+  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
+  return fullName || user?.email || fallback;
+};
+
+const SCRAP_REASON_DETAIL_KEY_MAP = {
+  wrong_print: "wrongPrint",
+  wrong_engraving: "wrongEngraving",
+  apparel_issue: "apparelIssue",
+  damaged_product: "damagedProduct",
+  other: "other",
+};
+
+const SCRAP_SOURCE_KEY_MAP = {
+  scanner: "scanner",
+  order_detail: "orderDetail",
 };
 
 const extractPositionList = (response) => {
@@ -211,6 +242,74 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
           ) : null}
         </div>
       ) : null}
+    </Card>
+  );
+};
+
+const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
+  const reasonKey =
+    SCRAP_REASON_DETAIL_KEY_MAP[movement?.reason_detail] || movement?.reason_detail;
+  const sourceKey =
+    SCRAP_SOURCE_KEY_MAP[movement?.source_screen] || movement?.source_screen;
+  const variantLabel = [
+    movement?.product?.name,
+    movement?.size?.name,
+    movement?.color?.name,
+  ]
+    .filter(Boolean)
+    .join(" / ");
+
+  return (
+    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 16 }}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {tDesign("scrap.fields.variant")}
+          </Typography.Text>
+          <Typography.Title level={5} style={{ margin: 0 }}>
+            {variantLabel || tOrders("common.none")}
+          </Typography.Title>
+        </div>
+        <Tag color="volcano" className="rounded-full px-4 py-1 text-sm">
+          {tDesign("scrap.quantityBadge", { quantity: movement?.quantity ?? 0 })}
+        </Tag>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <InfoField
+          label={tDesign("scrap.fields.reason")}
+          value={
+            tOrders(`scanner.scrap.reasonOptions.${reasonKey}`) ||
+            movement?.reason_detail ||
+            tOrders("common.none")
+          }
+        />
+        <InfoField
+          label={tDesign("scrap.fields.causedBy")}
+          value={formatUserName(movement?.caused_by, tOrders("common.none"))}
+        />
+        <InfoField
+          label={tDesign("scrap.fields.recordedBy")}
+          value={formatUserName(movement?.recorded_by, tOrders("common.none"))}
+        />
+        <InfoField
+          label={tDesign("scrap.fields.source")}
+          value={
+            tDesign(`scrap.sourceOptions.${sourceKey}`) ||
+            movement?.source_screen ||
+            tOrders("common.none")
+          }
+        />
+        <InfoField
+          label={tDesign("scrap.fields.createdAt")}
+          value={formatDateTime(movement?.created_at, tOrders("common.none"))}
+        />
+      </div>
+      <div className="mt-4">
+        <Typography.Text type="secondary">{tDesign("scrap.fields.note")}</Typography.Text>
+        <div className="mt-1 text-sm text-slate-700">
+          {movement?.note || tOrders("common.none")}
+        </div>
+      </div>
     </Card>
   );
 };
@@ -437,16 +536,22 @@ const OrderItemCard = ({
 
 export default function OrderDetailPage() {
   const { message } = AntdApp.useApp();
+  const [scrapForm] = Form.useForm();
   const tOrders = useTranslations("dashboard.orders");
   const tDesign = useTranslations("dashboard.orders.detail");
+  const tCommonActions = useTranslations("common.actions");
+  const user = useSelector((state) => state.auth.user);
   const params = useParams();
   const orderNumber = params?.orderNumber;
+  const canRecordScrap = hasAnyRole(user, ["companyadmin"]);
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [positionsByProductId, setPositionsByProductId] = useState({});
   const [positionsLoading, setPositionsLoading] = useState(false);
   const [voidingLabelId, setVoidingLabelId] = useState(null);
+  const [scrapModalOpen, setScrapModalOpen] = useState(false);
+  const [recordingScrap, setRecordingScrap] = useState(false);
 
   const items = useMemo(
     () => (Array.isArray(orderDetail?.items) ? orderDetail.items : []),
@@ -454,6 +559,13 @@ export default function OrderDetailPage() {
   );
   const labels = useMemo(
     () => (Array.isArray(orderDetail?.labels) ? orderDetail.labels : []),
+    [orderDetail],
+  );
+  const scrapMovements = useMemo(
+    () =>
+      Array.isArray(orderDetail?.product_stock_movements)
+        ? orderDetail.product_stock_movements
+        : [],
     [orderDetail],
   );
 
@@ -501,6 +613,88 @@ export default function OrderDetailPage() {
     },
     [loadOrderDetail, message, orderDetail, tDesign],
   );
+
+  const itemOptions = useMemo(
+    () =>
+      items.map((item) => ({
+        value: String(item?.id),
+        label: [
+          item?.product?.name,
+          item?.size?.name,
+          item?.color?.name,
+          item?.sku ? `SKU: ${item.sku}` : null,
+        ]
+          .filter(Boolean)
+          .join(" / "),
+        item,
+      })),
+    [items],
+  );
+
+  const reasonOptions = useMemo(
+    () =>
+      SCRAP_REASON_OPTIONS.map((option) => ({
+        value: option.value,
+        label: tOrders(`scanner.scrap.reasonOptions.${option.labelKey}`),
+      })),
+    [tOrders],
+  );
+
+  const openScrapModal = useCallback(() => {
+    scrapForm.setFieldsValue({
+      entries: [{ quantity: 1, reason_detail: "wrong_print" }],
+    });
+    setScrapModalOpen(true);
+  }, [scrapForm]);
+
+  const handleRecordScrap = useCallback(async () => {
+    const orderId =
+      orderDetail?.id || orderDetail?.order_id || orderDetail?.orderId;
+    if (!orderId) {
+      message.error(tDesign("scrap.messages.orderIdMissing"));
+      return;
+    }
+
+    try {
+      setRecordingScrap(true);
+      const values = await scrapForm.validateFields();
+      const entries = (values?.entries || []).map((entry) => {
+        const selected = itemOptions.find((option) => option.value === entry.order_item_id)?.item;
+        if (!selected?.product_id || !selected?.size_id || !selected?.color_id) {
+          throw new Error(tDesign("scrap.messages.invalidItem"));
+        }
+        return {
+          order_item_id: entry.order_item_id,
+          product_id: selected.product_id,
+          size_id: selected.size_id,
+          color_id: selected.color_id,
+          quantity: entry.quantity,
+          reason: "manual_adjustment",
+          reason_detail: entry.reason_detail,
+          note: entry.note || undefined,
+        };
+      });
+
+      await OrdersAPI.recordScrap({
+        order_id: orderId,
+        entries,
+      });
+      message.success(tDesign("scrap.messages.recordSuccess"));
+      setScrapModalOpen(false);
+      scrapForm.resetFields();
+      await loadOrderDetail();
+    } catch (error) {
+      const errorMessage =
+        error?.errorFields?.length > 0
+          ? null
+          : error?.message || error?.response?.data?.error?.message;
+      if (errorMessage) {
+        message.error(errorMessage);
+      }
+    } finally {
+      setRecordingScrap(false);
+    }
+  }, [itemOptions, loadOrderDetail, message, orderDetail, scrapForm, tDesign]);
 
   useEffect(() => {
     loadOrderDetail();
@@ -895,6 +1089,30 @@ export default function OrderDetailPage() {
                   <Empty description={tDesign("messages.noLabels")} />
                 )}
               </div>
+              <div className="mt-6 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <SectionHeader title={tDesign("sections.scrap")} />
+                  {canRecordScrap ? (
+                    <Button type="primary" onClick={openScrapModal}>
+                      {tDesign("scrap.actions.add")}
+                    </Button>
+                  ) : null}
+                </div>
+                {scrapMovements.length ? (
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    {scrapMovements.map((movement) => (
+                      <ScrapMovementCard
+                        key={movement?.id}
+                        movement={movement}
+                        tDesign={tDesign}
+                        tOrders={tOrders}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Empty description={tDesign("scrap.messages.empty")} />
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -936,6 +1154,89 @@ export default function OrderDetailPage() {
             )}
           </div>
         )}
+        <Modal
+          open={scrapModalOpen}
+          title={tDesign("scrap.title")}
+          onCancel={() => {
+            setScrapModalOpen(false);
+            scrapForm.resetFields();
+          }}
+          onOk={handleRecordScrap}
+          okText={tDesign("scrap.actions.confirm")}
+          cancelText={tCommonActions("cancel")}
+          confirmLoading={recordingScrap}
+          width={760}
+        >
+          <Form form={scrapForm} layout="vertical">
+            <Form.List name="entries">
+              {(fields, { add, remove }) => (
+                <div className="space-y-4">
+                  {fields.map((field, index) => (
+                    <Card
+                      key={field.key}
+                      size="small"
+                      className="rounded-2xl border border-slate-100"
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <Typography.Text strong>
+                          {tDesign("scrap.entryTitle", { index: index + 1 })}
+                        </Typography.Text>
+                        {fields.length > 1 ? (
+                          <Button danger type="text" onClick={() => remove(field.name)}>
+                            {tCommonActions("remove")}
+                          </Button>
+                        ) : null}
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <Form.Item
+                          name={[field.name, "order_item_id"]}
+                          label={tDesign("scrap.fields.item")}
+                          rules={[{ required: true, message: tDesign("scrap.validation.item") }]}
+                        >
+                          <Select
+                            showSearch
+                            optionFilterProp="label"
+                            options={itemOptions}
+                            placeholder={tDesign("scrap.placeholders.item")}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, "quantity"]}
+                          label={tDesign("scrap.fields.quantity")}
+                          rules={[{ required: true, message: tDesign("scrap.validation.quantity") }]}
+                        >
+                          <InputNumber min={1} precision={0} className="w-full" />
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, "reason_detail"]}
+                          label={tDesign("scrap.fields.reason")}
+                          rules={[{ required: true, message: tDesign("scrap.validation.reason") }]}
+                        >
+                          <Select
+                            options={reasonOptions}
+                            placeholder={tDesign("scrap.placeholders.reason")}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, "note"]}
+                          label={tDesign("scrap.fields.note")}
+                        >
+                          <Input.TextArea
+                            autoSize={{ minRows: 2, maxRows: 4 }}
+                            placeholder={tDesign("scrap.placeholders.note")}
+                          />
+                        </Form.Item>
+                      </div>
+                    </Card>
+                  ))}
+                  <Button type="dashed" block onClick={() => add({ quantity: 1 })}>
+                    {tDesign("scrap.actions.addEntry")}
+                  </Button>
+                </div>
+              )}
+            </Form.List>
+          </Form>
+        </Modal>
       </div>
     </RequireRole>
   );
