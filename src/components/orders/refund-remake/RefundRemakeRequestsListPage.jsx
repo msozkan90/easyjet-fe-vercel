@@ -39,6 +39,9 @@ export default function RefundRemakeRequestsListPage({
   fixedFilters = {},
   basePath = "/dashboard/orders/refund-remake",
   hideStatusFilter = false,
+  listApi = RefundRemakeRequestsAPI,
+  orderFilterKey = "order_id",
+  orderResponseKey = "order",
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
@@ -58,8 +61,9 @@ export default function RefundRemakeRequestsListPage({
           pageSize,
           sort,
           filters: mergedFilters,
+          orderFilterKey,
         });
-        const response = await RefundRemakeRequestsAPI.list(payload);
+        const response = await listApi.list(payload);
         return normalizeRefundRemakeListResponse(response);
       } catch (error) {
         message.error(
@@ -68,7 +72,7 @@ export default function RefundRemakeRequestsListPage({
         return { list: [], total: 0 };
       }
     },
-    [fixedFilters, message, t]
+    [fixedFilters, listApi, message, orderFilterKey, t]
   );
 
   const requestTypeOptions = useMemo(
@@ -91,28 +95,33 @@ export default function RefundRemakeRequestsListPage({
   const handleSearch = useCallback(() => {
     const nextFilters = cleanFilters({ ...quickFilters, ...fixedFilters });
     tableRef.current?.setFilters?.({
-      order_id: nextFilters.order_id || "",
+      [orderFilterKey]: nextFilters[orderFilterKey] || nextFilters.order_id || "",
       request_type: nextFilters.request_type,
       status: nextFilters.status,
     });
     tableRef.current?.setPage?.(1);
-  }, [fixedFilters, quickFilters]);
+  }, [fixedFilters, orderFilterKey, quickFilters]);
 
   const handleReset = useCallback(() => {
     const next = { ...createDefaultFilters(), ...fixedFilters };
     setQuickFilters(next);
     tableRef.current?.setFilters?.({
-      order_id: next.order_id || "",
+      [orderFilterKey]: next[orderFilterKey] || next.order_id || "",
       request_type: next.request_type,
       status: next.status,
     });
     tableRef.current?.setPage?.(1);
-  }, [fixedFilters]);
+  }, [fixedFilters, orderFilterKey]);
 
   const handleFiltersSync = useCallback((filters = {}) => {
     setQuickFilters((prev) => {
       const next = {
-        order_id: filters?.order_id ?? fixedFilters?.order_id ?? "",
+        order_id:
+          filters?.[orderFilterKey] ??
+          filters?.order_id ??
+          fixedFilters?.[orderFilterKey] ??
+          fixedFilters?.order_id ??
+          "",
         request_type: filters?.request_type ?? fixedFilters?.request_type,
         status: filters?.status ?? fixedFilters?.status,
       };
@@ -125,7 +134,7 @@ export default function RefundRemakeRequestsListPage({
       }
       return next;
     });
-  }, [fixedFilters]);
+  }, [fixedFilters, orderFilterKey]);
 
   const columns = useMemo(
     () => [
@@ -149,7 +158,13 @@ export default function RefundRemakeRequestsListPage({
       {
         title: t("columns.order"),
         dataIndex: "order_id",
-        render: (_, record) => record?.order?.order_number || record?.order_id || "-",
+        render: (_, record) =>
+          record?.[orderResponseKey]?.order_number ||
+          record?.transfer_order?.order_number ||
+          record?.order?.order_number ||
+          record?.[orderFilterKey] ||
+          record?.order_id ||
+          "-",
       },
       {
         title: t("columns.createdAt"),
@@ -179,7 +194,7 @@ export default function RefundRemakeRequestsListPage({
         },
       },
     ],
-    [basePath, t]
+    [basePath, orderFilterKey, orderResponseKey, t]
   );
 
   return (
