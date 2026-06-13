@@ -857,6 +857,19 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    ...(isCustomerAdmin
+                      ? [
+                          {
+                            key: "transfer-order-refund-remake",
+                            icon: <ApartmentOutlined />,
+                            label: (
+                              <Link href="/dashboard/transfer-orders/orders/refund-remake">
+                                {tSidebar("order.refundRemake")}
+                              </Link>
+                            ),
+                          },
+                        ]
+                      : []),
                   ],
                 },
               ]
@@ -960,6 +973,15 @@ export default function Sidebar({ collapsed }) {
                       label: (
                         <Link href="/dashboard/transfer-orders/orders/shipped">
                           {tSidebar("order.transferShippedOrder")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "transfer-orders-affiliated-refund-remake",
+                      icon: <ShoppingCartOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/affiliated/refund-remake">
+                          {tSidebar("order.refundRemake")}
                         </Link>
                       ),
                     },

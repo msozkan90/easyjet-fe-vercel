@@ -22,6 +22,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import moment from "moment";
 import { useParams } from "next/navigation";
+import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { useTranslations } from "@/i18n/use-translations";
 import { RefundRemakeRequestsAPI } from "@/utils/api";
@@ -41,11 +42,16 @@ export default function RefundRemakeRequestDetailPage({
   requireRoles = ["customerAdmin"],
   allowStatusActions = false,
   backHref = "/dashboard/orders/refund-remake",
+  detailApi = RefundRemakeRequestsAPI,
+  orderResponseKey = "order",
+  orderIdField = "order_id",
+  companyActionRoles = ["companyadmin", "companycompletedworker", "companyshipmentworker"],
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
   const params = useParams();
   const requestId = params?.id;
+  const userRoles = useSelector((state) => state.auth.user?.roles || []);
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(true);
@@ -57,7 +63,7 @@ export default function RefundRemakeRequestDetailPage({
     if (!requestId) return;
     setLoading(true);
     try {
-      const response = await RefundRemakeRequestsAPI.details(requestId);
+      const response = await detailApi.details(requestId);
       setDetail(extractRefundRemakeEntityFromResponse(response));
     } catch (error) {
       message.error(
@@ -66,7 +72,7 @@ export default function RefundRemakeRequestDetailPage({
     } finally {
       setLoading(false);
     }
-  }, [message, requestId, t]);
+  }, [detailApi, message, requestId, t]);
 
   useEffect(() => {
     loadDetail();
@@ -83,7 +89,7 @@ export default function RefundRemakeRequestDetailPage({
       if (!requestId) return;
       setStatusUpdating(true);
       try {
-        await RefundRemakeRequestsAPI.updateStatus(requestId, payload);
+        await detailApi.updateStatus(requestId, payload);
         message.success(t("messages.statusUpdateSuccess"));
         await loadDetail();
       } catch (error) {
@@ -95,7 +101,7 @@ export default function RefundRemakeRequestDetailPage({
         setStatusUpdating(false);
       }
     },
-    [loadDetail, message, requestId, t],
+    [detailApi, loadDetail, message, requestId, t],
   );
 
   const handleCancelSubmit = useCallback(async () => {
@@ -112,8 +118,18 @@ export default function RefundRemakeRequestDetailPage({
     setCancelModalOpen(false);
   }, [form, updateStatus]);
 
+  const canManageStatus = useMemo(() => {
+    if (!allowStatusActions) return false;
+    return Array.isArray(userRoles)
+      ? userRoles.some((role) =>
+          companyActionRoles.includes(String(role || "").toLowerCase())
+        )
+      : false;
+  }, [allowStatusActions, companyActionRoles, userRoles]);
+
   const isPending = detail?.status === "pending";
   const isCanceled = detail?.status === "canceled";
+  const linkedOrder = detail?.[orderResponseKey] || detail?.order || detail?.transfer_order || null;
 
   const itemColumns = useMemo(
     () => [
@@ -197,7 +213,7 @@ export default function RefundRemakeRequestDetailPage({
               {t("actions.backToList")}
             </Button>
           </Link>
-          {allowStatusActions ? (
+          {canManageStatus ? (
             <>
               <Popconfirm
                 title={t("actions.completeConfirm")}
@@ -233,7 +249,7 @@ export default function RefundRemakeRequestDetailPage({
             <Space direction="vertical" style={{ width: "100%" }} size="large">
               <Descriptions column={2} bordered size="small">
                 <Descriptions.Item label={t("detail.fields.order")}>
-                  {detail?.order?.order_number || detail?.order_id || "-"}
+                  {linkedOrder?.order_number || detail?.[orderIdField] || detail?.order_id || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.requestType")}>
                   {detail?.request_type === "remake"

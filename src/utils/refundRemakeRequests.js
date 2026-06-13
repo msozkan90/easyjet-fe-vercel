@@ -40,6 +40,7 @@ export const buildRefundRemakeListPayload = ({
   pageSize = 10,
   sort,
   filters,
+  orderFilterKey = "order_id",
 } = {}) => {
   const orderBy = Array.isArray(sort)
     ? sort
@@ -59,7 +60,7 @@ export const buildRefundRemakeListPayload = ({
 
   return {
     filters: cleanObject({
-      order_id: filters?.order_id,
+      [orderFilterKey]: filters?.[orderFilterKey] ?? filters?.order_id,
       request_type: filters?.request_type,
       status: filters?.status,
     }),

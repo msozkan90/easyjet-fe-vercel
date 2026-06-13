@@ -49,6 +49,7 @@ export default function RefundRemakeCreateModal({
   responsibleEntityOptions = [],
   onCancel,
   onSubmit,
+  orderFieldName = "order_id",
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
@@ -257,7 +258,7 @@ export default function RefundRemakeCreateModal({
     }
 
     const payload = {
-      order_id: orderId,
+      [orderFieldName]: orderId,
       order_items,
       responsible_entity_id: values.responsible_entity_id,
       request_type: String(values.request_type || "refund").toLowerCase(),
