@@ -86,6 +86,10 @@ export const AuthAPI = {
   logout: () => api.post("/auth/logout"),
 };
 
+export const DashboardAPI = {
+  overview: (payload = {}) => api.post("/dashboard/overview", payload),
+};
+
 export const WalletAPI = {
   getBalance: () => api.get("/wallet"),
 };
