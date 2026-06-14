@@ -82,6 +82,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
         formData.append("transfer_order_id", currentTask.orderId);
         formData.append("sub_category_id", currentTask.subCategoryId);
         formData.append("upload_id", currentTask.id);
+        formData.append("quantity", String(currentTask.quantity || 1));
         formData.append("design_files", currentTask.file);
 
         const pollProgress = async () => {
@@ -214,16 +215,26 @@ export function TransferDesignUploadQueueProvider({ children }) {
   }, [runTask, tasks]);
 
   const enqueueUploads = useCallback(({ orderId, orderNumber, subCategoryId, files }) => {
-    const nextFiles = Array.from(files || []).filter((file) => file instanceof File);
+    const nextFiles = Array.from(files || [])
+      .map((entry) =>
+        entry instanceof File
+          ? { file: entry, quantity: 1 }
+          : {
+              file: entry?.file instanceof File ? entry.file : null,
+              quantity: Number.parseInt(entry?.quantity || 1, 10) || 1,
+            },
+      )
+      .filter((entry) => entry.file instanceof File);
     if (!nextFiles.length) return [];
 
     const now = Date.now();
-    const newTasks = nextFiles.map((file) => ({
+    const newTasks = nextFiles.map(({ file, quantity }) => ({
       id: createTaskId(),
       orderId: String(orderId),
       orderNumber: orderNumber || "-",
       subCategoryId: String(subCategoryId),
       file,
+      quantity,
       fileName: file.name || "untitled",
       fileSize: file.size || 0,
       status: "queued",
@@ -400,9 +411,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
                         </Typography.Text>
                         <Tag color={meta.color}>{meta.label}</Tag>
                       </Space>
-                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {tQueue("fields.order")}: {task.orderNumber} • {formatBytes(task.fileSize)}
-                        </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {tQueue("fields.order")}: {task.orderNumber} • {tQueue("fields.quantity")}: {task.quantity || 1} • {formatBytes(task.fileSize)}
+                      </Typography.Text>
                       <Progress
                         percent={task.status === "queued" ? 0 : task.progress}
                         size="small"

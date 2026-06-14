@@ -1870,6 +1870,7 @@
         "transferLabelRequired": "Label is missing. You need to create a shipping label.",
         "subCategoryRequiredForDesignUpload": "Sub category is required for design upload.",
         "subCategoryRequiredForManualOrder": "Sub category is required for manual transfer order.",
+        "uploadQueued": "{count} design upload queued.",
         "noItems": "No items found.",
         "loadListError": "Failed to load the list."
       },
@@ -1950,6 +1951,24 @@
         "messages": {
           "success": "Manual transfer order created.",
           "error": "Manual transfer order could not be created."
+        }
+      },
+      "designUploadModal": {
+        "title": "Upload Designs",
+        "fields": {
+          "orderNumber": "Order Number",
+          "design": "Design",
+          "quantity": "Quantity"
+        },
+        "actions": {
+          "queue": "Queue Uploads",
+          "cancel": "Cancel",
+          "add": "Add Design",
+          "remove": "Remove",
+          "selectFile": "Select File"
+        },
+        "validation": {
+          "fileRequired": "Please select a file for each design row."
         }
       },
       "design": {
@@ -2305,6 +2324,7 @@
           "designerNotes": "Add designer notes..."
         },
         "designCard": {
+          "quantity": "Quantity",
           "size": "Size",
           "price": "Price"
         },
@@ -2412,7 +2432,8 @@
           "queued": "Queued: {count}"
         },
         "fields": {
-          "order": "Order"
+          "order": "Order",
+          "quantity": "Quantity"
         },
         "actions": {
           "clearFinished": "Clear Finished",
