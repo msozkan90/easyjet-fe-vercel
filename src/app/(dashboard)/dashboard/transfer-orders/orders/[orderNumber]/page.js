@@ -588,6 +588,13 @@ export default function TransferOrderDetailPage() {
                                   type="secondary"
                                   style={{ fontSize: 12 }}
                                 >
+                                  {tDetail("designCard.quantity")}:{" "}
+                                  {design?.quantity ?? 1}
+                                </Typography.Text>
+                                <Typography.Text
+                                  type="secondary"
+                                  style={{ fontSize: 12 }}
+                                >
                                   {tDetail("designCard.size")}:{" "}
                                   {formatAmount(design?.width)}" x{" "}
                                   {formatAmount(design?.height)}"

@@ -9,6 +9,7 @@ import {
   Descriptions,
   Form,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Popover,
@@ -44,6 +45,15 @@ const toNullableString = (value) => {
   return value;
 };
 
+const createDesignUploadEntry = () => ({
+  id:
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  fileList: [],
+  quantity: 1,
+});
+
 export default function TransferOrdersPage() {
   const { message, modal } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
@@ -51,7 +61,6 @@ export default function TransferOrdersPage() {
   const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
   const searchParams = useSearchParams();
   const tableRef = useRef(null);
-  const designUploadInputRef = useRef(null);
   const [editForm] = Form.useForm();
   const [manualOrderForm] = Form.useForm();
   const [manualAddressForm] = Form.useForm();
@@ -62,6 +71,10 @@ export default function TransferOrdersPage() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [editingDetail, setEditingDetail] = useState(null);
   const [designUploadTarget, setDesignUploadTarget] = useState(null);
+  const [designUploadModalOpen, setDesignUploadModalOpen] = useState(false);
+  const [designUploadEntries, setDesignUploadEntries] = useState([
+    createDesignUploadEntry(),
+  ]);
   const [productionModalOpen, setProductionModalOpen] = useState(false);
   const [productionSubmitting, setProductionSubmitting] = useState(false);
   const [productionRecord, setProductionRecord] = useState(null);
@@ -298,27 +311,86 @@ export default function TransferOrdersPage() {
         orderId: transferOrderId,
         orderNumber: record?.order_number || "-",
       });
-      designUploadInputRef.current?.click?.();
+      setDesignUploadEntries([createDesignUploadEntry()]);
+      setDesignUploadModalOpen(true);
     },
     [message, subCategoryId, t],
   );
 
-  const handleDesignUploadInputChange = useCallback(
-    (event) => {
-      const files = event?.target?.files ? Array.from(event.target.files) : [];
-      const target = designUploadTarget;
-      event.target.value = "";
-      if (!target || !subCategoryId || !files.length) return;
-      enqueueUploads({
-        orderId: target.orderId,
-        orderNumber: target.orderNumber,
-        subCategoryId,
-        files,
-      });
-      setDesignUploadTarget(null);
-    },
-    [designUploadTarget, enqueueUploads, subCategoryId],
-  );
+  const handleCloseDesignUploadModal = useCallback(() => {
+    setDesignUploadModalOpen(false);
+    setDesignUploadTarget(null);
+    setDesignUploadEntries([createDesignUploadEntry()]);
+  }, []);
+
+  const handleAddDesignUploadEntry = useCallback(() => {
+    setDesignUploadEntries((prev) => [...prev, createDesignUploadEntry()]);
+  }, []);
+
+  const handleRemoveDesignUploadEntry = useCallback((entryId) => {
+    setDesignUploadEntries((prev) =>
+      prev.length <= 1
+        ? [createDesignUploadEntry()]
+        : prev.filter((entry) => entry.id !== entryId),
+    );
+  }, []);
+
+  const handleDesignUploadFileChange = useCallback((entryId, fileList) => {
+    setDesignUploadEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === entryId ? { ...entry, fileList: fileList.slice(-1) } : entry,
+      ),
+    );
+  }, []);
+
+  const handleDesignUploadQuantityChange = useCallback((entryId, quantity) => {
+    setDesignUploadEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              quantity: Math.max(1, Number.parseInt(quantity || 1, 10) || 1),
+            }
+          : entry,
+      ),
+    );
+  }, []);
+
+  const handleSubmitDesignUploads = useCallback(() => {
+    if (!designUploadTarget || !subCategoryId) {
+      message.error(t("messages.subCategoryRequiredForDesignUpload"));
+      return;
+    }
+
+    const uploadEntries = designUploadEntries
+      .map((entry) => ({
+        file: entry?.fileList?.[0]?.originFileObj || null,
+        quantity: Math.max(1, Number.parseInt(entry?.quantity || 1, 10) || 1),
+      }))
+      .filter((entry) => entry.file instanceof File);
+
+    if (!uploadEntries.length || uploadEntries.length !== designUploadEntries.length) {
+      message.error(t("designUploadModal.validation.fileRequired"));
+      return;
+    }
+
+    enqueueUploads({
+      orderId: designUploadTarget.orderId,
+      orderNumber: designUploadTarget.orderNumber,
+      subCategoryId,
+      files: uploadEntries,
+    });
+    message.success(t("messages.uploadQueued", { count: uploadEntries.length }));
+    handleCloseDesignUploadModal();
+  }, [
+    designUploadEntries,
+    designUploadTarget,
+    enqueueUploads,
+    handleCloseDesignUploadModal,
+    message,
+    subCategoryId,
+    t,
+  ]);
 
   useEffect(() => {
     if (!subCategoryId) return;
@@ -711,14 +783,6 @@ export default function TransferOrdersPage() {
 
   return (
     <>
-      <input
-        ref={designUploadInputRef}
-        type="file"
-        multiple
-        accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif"
-        style={{ display: "none" }}
-        onChange={handleDesignUploadInputChange}
-      />
       <TransferOrdersStatusListPage
         key={
           withoutSubCategory
@@ -777,6 +841,102 @@ export default function TransferOrdersPage() {
         showRecipientFields
         zIndex={1600}
       />
+      <Modal
+        open={designUploadModalOpen}
+        title={t("designUploadModal.title")}
+        onCancel={handleCloseDesignUploadModal}
+        onOk={handleSubmitDesignUploads}
+        okText={t("designUploadModal.actions.queue")}
+        cancelText={t("designUploadModal.actions.cancel")}
+        destroyOnHidden
+      >
+        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <Descriptions
+            size="small"
+            bordered
+            column={1}
+            items={[
+              {
+                key: "orderNumber",
+                label: t("designUploadModal.fields.orderNumber"),
+                children: designUploadTarget?.orderNumber || "-",
+              },
+            ]}
+          />
+          <Space direction="vertical" size={12} style={{ width: "100%" }}>
+            {designUploadEntries.map((entry, index) => (
+              <div
+                key={entry.id}
+                style={{
+                  border: "1px solid #f0f0f0",
+                  borderRadius: 8,
+                  padding: 12,
+                }}
+              >
+                <Space
+                  direction="vertical"
+                  size={12}
+                  style={{ width: "100%" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                    }}
+                  >
+                    <strong>
+                      {t("designUploadModal.fields.design")} #{index + 1}
+                    </strong>
+                    <Button
+                      danger
+                      size="small"
+                      onClick={() => handleRemoveDesignUploadEntry(entry.id)}
+                    >
+                      {t("designUploadModal.actions.remove")}
+                    </Button>
+                  </div>
+                  <Upload
+                    accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif"
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    fileList={entry.fileList}
+                    onChange={({ fileList }) =>
+                      handleDesignUploadFileChange(entry.id, fileList)
+                    }
+                  >
+                    <Button icon={<UploadOutlined />}>
+                      {t("designUploadModal.actions.selectFile")}
+                    </Button>
+                  </Upload>
+                  <div>
+                    <div style={{ marginBottom: 8 }}>
+                      {t("designUploadModal.fields.quantity")}
+                    </div>
+                    <InputNumber
+                      min={1}
+                      precision={0}
+                      value={entry.quantity}
+                      onChange={(value) =>
+                        handleDesignUploadQuantityChange(entry.id, value)
+                      }
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                </Space>
+              </div>
+            ))}
+          </Space>
+          <Button
+            type="dashed"
+            icon={<PlusOutlined />}
+            onClick={handleAddDesignUploadEntry}
+            block
+          >
+            {t("designUploadModal.actions.add")}
+          </Button>
+        </Space>
+      </Modal>
       <Modal
         open={productionModalOpen}
         onCancel={handleProductionModalClose}

@@ -1672,6 +1672,7 @@
         "transferLabelRequired": "Label bulunmuyor. Kargo etiketi oluşturmanız gerekiyor.",
         "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur.",
         "subCategoryRequiredForManualOrder": "Manuel transfer order için alt kategori zorunludur.",
+        "uploadQueued": "{count} tasarım yüklemesi sıraya alındı.",
         "noItems": "Kayıt bulunamadı.",
         "loadListError": "Liste yüklenemedi."
       },
@@ -1752,6 +1753,24 @@
         "messages": {
           "success": "Manuel transfer order oluşturuldu.",
           "error": "Manuel transfer order oluşturulamadı."
+        }
+      },
+      "designUploadModal": {
+        "title": "Tasarım Yükle",
+        "fields": {
+          "orderNumber": "Sipariş Numarası",
+          "design": "Tasarım",
+          "quantity": "Adet"
+        },
+        "actions": {
+          "queue": "Yüklemeye Al",
+          "cancel": "İptal",
+          "add": "Tasarım Ekle",
+          "remove": "Kaldır",
+          "selectFile": "Dosya Seç"
+        },
+        "validation": {
+          "fileRequired": "Her tasarım satırı için bir dosya seçin."
         }
       },
       "design": {
@@ -2107,6 +2126,7 @@
           "designerNotes": "Tasarımcı notu ekleyin..."
         },
         "designCard": {
+          "quantity": "Adet",
           "size": "Boyut",
           "price": "Fiyat"
         },
@@ -2214,7 +2234,8 @@
           "queued": "Sırada: {count}"
         },
         "fields": {
-          "order": "Sipariş"
+          "order": "Sipariş",
+          "quantity": "Adet"
         },
         "actions": {
           "clearFinished": "Tamamlananları Temizle",
