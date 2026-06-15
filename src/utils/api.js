@@ -86,6 +86,10 @@ export const AuthAPI = {
   logout: () => api.post("/auth/logout"),
 };
 
+export const DashboardAPI = {
+  overview: (payload = {}) => api.post("/dashboard/overview", payload),
+};
+
 export const WalletAPI = {
   getBalance: () => api.get("/wallet"),
 };
@@ -294,6 +298,16 @@ export const TransferRefundRemakeRequestsAPI = {
   create: (payload) => api.post("/transfer-orders/refund-remake", payload),
   updateStatus: (id, payload) =>
     api.post(`/transfer-orders/refund-remake/${id}/status`, payload),
+};
+
+export const AuditLogsAPI = {
+  orderTimeline: (orderNumber, params = {}) =>
+    api.get(`/audit-logs/orders/${encodeURIComponent(orderNumber)}`, params),
+  transferOrderTimeline: (orderNumber, params = {}) =>
+    api.get(
+      `/audit-logs/transfer-orders/${encodeURIComponent(orderNumber)}`,
+      params,
+    ),
 };
 
 export const NestShipperAPI = {
@@ -512,6 +526,7 @@ export const ProductStockAPI = {
   create: (data) => api.post("/product-stocks", data),
   update: (id, data) => api.put(`/product-stocks/${id}`, data),
   addStock: (id, data) => api.post(`/product-stocks/${id}/add-stock`, data),
+  decreaseStock: (id, data) => api.post(`/product-stocks/${id}/decrease-stock`, data),
   remove: (id) => api.del(`/product-stocks/${id}`),
   downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);

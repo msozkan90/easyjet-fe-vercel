@@ -19,8 +19,10 @@ import {
   Statistic,
   Table,
   Tag,
+  Tabs,
   Typography,
 } from "antd";
+import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { TransferOrdersAPI } from "@/utils/api";
 import {
@@ -308,6 +310,7 @@ export default function TransferOrderDetailPage() {
     "companyCompletedWorker",
     "companyShipmentWorker",
   ]);
+  const canViewAuditTimeline = hasAnyRole(user, ["companyAdmin"]);
   const canVoidTransferLabel =
     isCompanyUser &&
     Boolean(transferLabelId) &&
@@ -330,25 +333,13 @@ export default function TransferOrderDetailPage() {
     return <Empty description={tDetail("messages.notFound")} />;
   }
 
-  return (
-    <RequireRole
-      anyOfRoles={[
-        "companyAdmin",
-        "companyCompletedWorker",
-        "companyShipmentWorker",
-        "partnerAdmin",
-        "customerAdmin",
-      ]}
-      anyOfCategories={["Transfers"]}
-    >
-      <Row gutter={[16, 16]}>
-        <Col span={24}>
-          <Card>
-            <Typography.Title level={4} style={{ marginTop: 0 }}>
-              {tDetail("header.orderNumber", {
-                orderNumber: detail?.order_number || "-",
-              })}
-            </Typography.Title>
+  const detailTabs = [
+    {
+      key: "overview",
+      label: tDetail("tabs.overview"),
+      children: (
+        <div className="space-y-6">
+          <Card title={tDetail("tabs.overview")}>
             <Descriptions
               column={{ xs: 1, sm: 2, md: 3 }}
               bordered
@@ -390,101 +381,7 @@ export default function TransferOrderDetailPage() {
               </Descriptions.Item>
             </Descriptions>
           </Card>
-        </Col>
 
-        {transferLabel ? (
-          <Col span={24}>
-            <Card title={tOrders("detail.fields.labels")}>
-              <Descriptions
-                column={{ xs: 1, sm: 2, md: 3 }}
-                bordered
-                size="small"
-              >
-                <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
-                  {transferLabel?.source || tOrders("common.none")}
-                </Descriptions.Item>
-                <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
-                  {transferLabel?.base_shipping_price != null ? (
-                    <Space direction="vertical" size={0}>
-                      <Typography.Text>
-                        Label Price:{" "}
-                        {formatCurrency(
-                          transferLabel.base_shipping_price,
-                          detail?.currency,
-                        )}
-                      </Typography.Text>
-                      { transferLabel?.source === "shipStationCompany" && <Typography.Text>
-                        With Multiplier:{" "}
-                        {formatCurrency(
-                          transferLabel.shipment_total_price ??
-                            transferLabel.shipping_price,
-                          detail?.currency,
-                        )}
-                      </Typography.Text> }
-                    </Space>
-                  ) : transferLabel?.shipping_price != null ? (
-                    formatCurrency(
-                      transferLabel.shipping_price,
-                      detail?.currency,
-                    )
-                  ) : (
-                    tOrders("common.none")
-                  )}
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={tOrders("detail.fields.labelCreatedAt")}
-                >
-                  {transferLabel?.created_at
-                    ? moment(transferLabel.created_at).format("LLL")
-                    : tOrders("common.none")}
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={tOrders("detail.actions.viewLabel")}
-                  span={3}
-                >
-                  <Space wrap>
-                    {transferLabel?.label_url ? (
-                      <Button
-                        icon={<ExportOutlined />}
-                        onClick={() => {
-                          window.open(
-                            transferLabel.label_url,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }}
-                      >
-                        {tOrders("actions.download")}
-                      </Button>
-                    ) : (
-                      tOrders("common.none")
-                    )}
-                    {canVoidTransferLabel ? (
-                      <Popconfirm
-                        title={tOrders("detail.actions.voidLabelConfirmTitle")}
-                        okText={tOrders("detail.actions.voidLabelConfirmOk")}
-                        okButtonProps={{
-                          danger: true,
-                          loading: voidingLabelId === String(transferLabelId),
-                        }}
-                        onConfirm={handleVoidLabel}
-                      >
-                        <Button
-                          danger
-                          loading={voidingLabelId === String(transferLabelId)}
-                        >
-                          {tOrders("detail.actions.voidLabel")}
-                        </Button>
-                      </Popconfirm>
-                    ) : null}
-                  </Space>
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </Col>
-        ) : null}
-
-        <Col span={24}>
           <Card title={tOrders("columns.designerNotes")}>
             <Space direction="vertical" style={{ width: "100%" }} size={12}>
               <Input.TextArea
@@ -507,37 +404,14 @@ export default function TransferOrderDetailPage() {
               </div>
             </Space>
           </Card>
-        </Col>
-
-        <Col span={24}>
-          <Card title={tDetail("sections.priceSummary")}>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.itemPrices")}
-                  value={formatCurrency(itemTotalPrice, detail?.currency)}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.designPrices")}
-                  value={formatCurrency(designTotalPrice, detail?.currency)}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.combined")}
-                  value={formatCurrency(
-                    itemTotalPrice + designTotalPrice,
-                    detail?.currency,
-                  )}
-                />
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-
-        <Col span={24}>
+        </div>
+      ),
+    },
+    {
+      key: "items",
+      label: tDetail("tabs.itemsAndDesigns"),
+      children: (
+        <div className="space-y-6">
           <Card title={tDetail("sections.items")}>
             <Table
               rowKey="id"
@@ -546,9 +420,7 @@ export default function TransferOrderDetailPage() {
               pagination={false}
             />
           </Card>
-        </Col>
 
-        <Col span={24}>
           <Card title={tDetail("sections.uploadedDesigns")}>
             {!designGroups.length ? (
               <Empty description={tDetail("messages.noUploadedDesigns")} />
@@ -596,8 +468,8 @@ export default function TransferOrderDetailPage() {
                                   style={{ fontSize: 12 }}
                                 >
                                   {tDetail("designCard.size")}:{" "}
-                                  {formatAmount(design?.width)}" x{" "}
-                                  {formatAmount(design?.height)}"
+                                  {formatAmount(design?.width)}&quot; x{" "}
+                                  {formatAmount(design?.height)}&quot;
                                 </Typography.Text>
                                 <Typography.Text strong>
                                   {tDetail("designCard.price")}:{" "}
@@ -678,8 +550,223 @@ export default function TransferOrderDetailPage() {
               </Space>
             )}
           </Card>
-        </Col>
-      </Row>
+        </div>
+      ),
+    },
+    {
+      key: "operations",
+      label: tDetail("tabs.labelsAndPricing"),
+      children: (
+        <div className="space-y-6">
+          {transferLabel ? (
+            <Card title={tOrders("detail.fields.labels")}>
+              <Descriptions
+                column={{ xs: 1, sm: 2, md: 3 }}
+                bordered
+                size="small"
+              >
+                <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
+                  {transferLabel?.source || tOrders("common.none")}
+                </Descriptions.Item>
+                <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
+                  {transferLabel?.base_shipping_price != null ? (
+                    <Space direction="vertical" size={0}>
+                      <Typography.Text>
+                        Label Price:{" "}
+                        {formatCurrency(
+                          transferLabel.base_shipping_price,
+                          detail?.currency,
+                        )}
+                      </Typography.Text>
+                      {transferLabel?.source === "shipStationCompany" ? (
+                        <Typography.Text>
+                          With Multiplier:{" "}
+                          {formatCurrency(
+                            transferLabel.shipment_total_price ??
+                              transferLabel.shipping_price,
+                            detail?.currency,
+                          )}
+                        </Typography.Text>
+                      ) : null}
+                    </Space>
+                  ) : transferLabel?.shipping_price != null ? (
+                    formatCurrency(
+                      transferLabel.shipping_price,
+                      detail?.currency,
+                    )
+                  ) : (
+                    tOrders("common.none")
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={tOrders("detail.fields.labelCreatedAt")}
+                >
+                  {transferLabel?.created_at
+                    ? moment(transferLabel.created_at).format("LLL")
+                    : tOrders("common.none")}
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={tOrders("detail.actions.viewLabel")}
+                  span={3}
+                >
+                  <Space wrap>
+                    {transferLabel?.label_url ? (
+                      <Button
+                        icon={<ExportOutlined />}
+                        onClick={() => {
+                          window.open(
+                            transferLabel.label_url,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        }}
+                      >
+                        {tOrders("actions.download")}
+                      </Button>
+                    ) : (
+                      tOrders("common.none")
+                    )}
+                    {canVoidTransferLabel ? (
+                      <Popconfirm
+                        title={tOrders("detail.actions.voidLabelConfirmTitle")}
+                        okText={tOrders("detail.actions.voidLabelConfirmOk")}
+                        okButtonProps={{
+                          danger: true,
+                          loading: voidingLabelId === String(transferLabelId),
+                        }}
+                        onConfirm={handleVoidLabel}
+                      >
+                        <Button
+                          danger
+                          loading={voidingLabelId === String(transferLabelId)}
+                        >
+                          {tOrders("detail.actions.voidLabel")}
+                        </Button>
+                      </Popconfirm>
+                    ) : null}
+                  </Space>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          ) : null}
+
+          <Card title={tDetail("sections.priceSummary")}>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={8}>
+                <Statistic
+                  title={tDetail("priceSummary.itemPrices")}
+                  value={formatCurrency(itemTotalPrice, detail?.currency)}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Statistic
+                  title={tDetail("priceSummary.designPrices")}
+                  value={formatCurrency(designTotalPrice, detail?.currency)}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Statistic
+                  title={tDetail("priceSummary.combined")}
+                  value={formatCurrency(
+                    itemTotalPrice + designTotalPrice,
+                    detail?.currency,
+                  )}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </div>
+      ),
+    },
+    ...(canViewAuditTimeline
+      ? [
+          {
+            key: "activity",
+            label: tDetail("tabs.activity"),
+            children: (
+              <EntityAuditTimeline
+                entityType="transfer_order"
+                entityKey={detail?.order_number || orderNumber}
+                visible={canViewAuditTimeline}
+              />
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <RequireRole
+      anyOfRoles={[
+        "companyAdmin",
+        "companyCompletedWorker",
+        "companyShipmentWorker",
+        "partnerAdmin",
+        "customerAdmin",
+      ]}
+      anyOfCategories={["Transfers"]}
+    >
+      <div className="min-h-full bg-slate-50/70 p-4 md:p-6">
+        <div className="space-y-6">
+          <Card className="rounded-2xl border border-slate-100 shadow-sm">
+            <Typography.Title level={4} style={{ marginTop: 0 }}>
+              {tDetail("header.orderNumber", {
+                orderNumber: detail?.order_number || "-",
+              })}
+            </Typography.Title>
+            <Descriptions
+              column={{ xs: 1, sm: 2, md: 3 }}
+              bordered
+              size="small"
+            >
+              <Descriptions.Item label={tDetail("fields.orderName")}>
+                {detail?.order_name || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.status")}>
+                <Tag color={STATUS_COLORS[detail?.order_status] || "default"}>
+                  {detail?.order_status
+                    ? tOrders(`status.values.${detail?.order_status}`) ||
+                      detail?.order_status
+                    : tOrders("common.none")}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.customerName")}>
+                {detail?.bill_to_name || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.orderDate")}>
+                {detail?.order_date
+                  ? moment(detail.order_date).format("LLL")
+                  : "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label={tDetail("fields.currency")}>
+                {detail?.currency || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label={tDetail("fields.orderTotal")}>
+                {formatAmount(detail?.order_total)}
+              </Descriptions.Item>
+              <Descriptions.Item label={tOrders("columns.notes")}>
+                {detail?.notes || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label={tOrders("columns.designerNotes")}
+                span={2}
+              >
+                {detail?.designer_notes || "-"}
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
+          <Card
+            className="rounded-2xl border border-slate-100 shadow-sm"
+            bodyStyle={{ padding: 20 }}
+          >
+            <Tabs
+              defaultActiveKey="overview"
+              items={detailTabs}
+              className="[&_.ant-tabs-nav]:mb-6 [&_.ant-tabs-tab]:rounded-full [&_.ant-tabs-tab]:px-4 [&_.ant-tabs-tab]:py-2"
+            />
+          </Card>
+        </div>
+      </div>
     </RequireRole>
   );
 }
