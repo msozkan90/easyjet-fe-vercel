@@ -1773,6 +1773,145 @@
       "common": {
         "none": "-"
       },
+      "audit": {
+        "sectionTitle": "İşlem Geçmişi",
+        "sectionSubtitle": "Bu siparişte hangi işlemi kimin, ne zaman ve hangi istemci bağlamından yaptığını görün.",
+        "filters": {
+          "allStatuses": "Tüm durumlar",
+          "allActions": "Tüm aksiyonlar"
+        },
+        "status": {
+          "success": "Başarılı",
+          "failed": "Başarısız"
+        },
+        "actions": {
+          "create": "Oluşturma",
+          "update": "Güncelleme",
+          "replace": "Değiştirme",
+          "delete": "Silme",
+          "viewDetail": "Detay",
+          "loadMore": "Daha fazla yükle"
+        },
+        "labels": {
+          "actor": "İşlemi yapan",
+          "customer": "Müşteri",
+          "partner": "Partner",
+          "company": "Şirket",
+          "ip": "IP",
+          "userAgent": "User agent",
+          "route": "Rota"
+        },
+        "columns": {
+          "date": "Tarih",
+          "subject": "Konu",
+          "activity": "Aktivite",
+          "actor": "İşlemi yapan",
+          "status": "Durum",
+          "actions": "İşlemler"
+        },
+        "values": {
+          "unknownUser": "Bilinmeyen kullanıcı"
+        },
+        "messages": {
+          "loadError": "Audit geçmişi yüklenemedi.",
+          "empty": "Bu kayıt için henüz bir işlem geçmişi bulunmuyor.",
+          "copySuccess": "Panoya kopyalandı.",
+          "copyError": "İçerik kopyalanamadı."
+        },
+        "detailModal": {
+          "title": "Audit Log Detayı",
+          "actions": {
+            "copy": "Kopyala"
+          },
+          "sections": {
+            "metadata": "Metadata",
+            "payload": "Request Payload",
+            "response": "Response Payload"
+          },
+          "fields": {
+            "title": "Başlık",
+            "summary": "Özet",
+            "date": "Tarih",
+            "subject": "Konu",
+            "status": "Durum",
+            "action": "Aksiyon",
+            "actor": "İşlemi yapan",
+            "actorEmail": "Kullanıcı E-postası",
+            "company": "Şirket",
+            "customer": "Müşteri",
+            "partner": "Partner",
+            "route": "Rota",
+            "requestType": "İstek Tipi",
+            "targetTable": "Hedef Tablo",
+            "ip": "IP Adresi",
+            "userAgent": "User Agent",
+            "httpStatus": "HTTP Durumu",
+            "duration": "Süre",
+            "error": "Hata"
+          },
+          "messages": {
+            "noPayload": "Kaydedilmiş request payload bulunmuyor.",
+            "noResponse": "Kaydedilmiş response payload bulunmuyor."
+          }
+        },
+        "subjects": {
+          "order": "Sipariş",
+          "order_item": "Sipariş Kalemi",
+          "order_item_design": "Sipariş Kalemi Tasarımı",
+          "label": "Etiket",
+          "label_void": "Etiket İptali",
+          "transfer_order": "Transfer Siparişi",
+          "transfer_order_item": "Transfer Sipariş Kalemi",
+          "transfer_order_design": "Transfer Tasarımı",
+          "transfer_label": "Transfer Etiketi",
+          "transfer_label_void": "Transfer Etiket İptali",
+          "refund_request": "İade / Yeniden Üretim Talebi",
+          "generic": "Kayıt"
+        },
+        "events": {
+          "generic_activity": "İşlem kaydı oluşturuldu",
+          "order_create": "Sipariş oluşturuldu",
+          "order_update": "Sipariş güncellendi",
+          "order_delete": "Sipariş silindi",
+          "order_production": "Sipariş üretime gönderildi",
+          "order_items_update": "Sipariş kalemleri güncellendi",
+          "order_items_complete": "Sipariş kalemleri tamamlandı",
+          "order_items_ship": "Sipariş kalemleri gönderildi",
+          "order_items_cancel": "Sipariş kalemi iptal edildi",
+          "order_scrap_record": "Fire kaydı oluşturuldu",
+          "order_design_update": "Sipariş tasarımları yüklendi veya güncellendi",
+          "order_design_delete": "Sipariş kalemi tasarımı silindi",
+          "label_void": "Kargo etiketi iptal edildi",
+          "transfer_order_create": "Transfer siparişi oluşturuldu",
+          "transfer_order_update": "Transfer siparişi güncellendi",
+          "transfer_order_delete": "Transfer siparişi silindi",
+          "transfer_order_production": "Transfer siparişi üretime gönderildi",
+          "transfer_order_design_create": "Transfer tasarımları yüklendi",
+          "transfer_order_design_delete": "Transfer tasarımı silindi",
+          "transfer_order_items_update": "Transfer sipariş kalemi güncellendi",
+          "transfer_order_items_delete": "Transfer sipariş kalemi silindi",
+          "transfer_order_items_ship": "Transfer gönderi işlemi yapıldı",
+          "transfer_order_items_print": "Transfer kalemleri printed durumuna alındı",
+          "transfer_label_create": "Transfer etiketi oluşturuldu",
+          "transfer_label_void": "Transfer etiketi iptal edildi",
+          "transfer_order_payment_request": "Transfer ödeme talebi oluşturuldu",
+          "transfer_order_refund_remake_create": "Transfer iade / yeniden üretim talebi oluşturuldu",
+          "transfer_order_refund_remake_update": "Transfer iade / yeniden üretim talebi güncellendi"
+        },
+        "metadata": {
+          "order_number": "Sipariş #",
+          "status_code": "HTTP durumu",
+          "duration_ms": "Süre (ms)",
+          "batch_size": "Toplu işlem adedi",
+          "design_file_count": "Tasarım dosyası",
+          "item_count": "Kalem",
+          "entry_count": "Kayıt",
+          "quantity": "Adet",
+          "source": "Kaynak",
+          "order_status": "Durum",
+          "result_count": "Sonuç sayısı"
+        }
+      },
       "productionModal": {
         "title": "Üretime Gönder",
         "summary": {
@@ -1909,6 +2048,12 @@
       },
       "detail": {
         "title": "Sipariş Detayı",
+        "tabs": {
+          "overview": "Genel Bakış",
+          "itemsAndDesigns": "Ürünler ve Tasarımlar",
+          "labelsAndProduction": "Etiketler ve Üretim",
+          "activity": "Aktivite"
+        },
         "sections": {
           "orderInfo": "Sipariş Bilgileri",
           "customer": "Müşteri",
@@ -2204,6 +2349,12 @@
           "priceSummary": "Fiyat Özeti",
           "items": "Kalemler",
           "uploadedDesigns": "Yüklenen Tasarımlar"
+        },
+        "tabs": {
+          "overview": "Genel Bakış",
+          "itemsAndDesigns": "Kalemler ve Tasarımlar",
+          "labelsAndPricing": "Etiket ve Fiyatlama",
+          "activity": "Aktivite"
         },
         "priceSummary": {
           "itemPrices": "Ürün Fiyatları",

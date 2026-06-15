@@ -17,8 +17,10 @@ import {
   Select,
   Spin,
   Tag,
+  Tabs,
   Typography,
 } from "antd";
+import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
@@ -544,6 +546,7 @@ export default function OrderDetailPage() {
   const params = useParams();
   const orderNumber = params?.orderNumber;
   const canRecordScrap = hasAnyRole(user, ["companyadmin"]);
+  const canViewAuditTimeline = hasAnyRole(user, ["companyadmin"]);
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -854,6 +857,244 @@ export default function OrderDetailPage() {
     tOrders("common.none"),
   );
 
+  const detailTabs = [
+    {
+      key: "overview",
+      label: tDesign("tabs.overview"),
+      children: (
+        <div className="space-y-6">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card
+              className="rounded-2xl border border-slate-100 shadow-sm"
+              bodyStyle={{ padding: 16 }}
+            >
+              <SectionHeader title={tDesign("sections.customer")} />
+              <div className="mt-4 grid gap-3">
+                <InfoField
+                  label={tDesign("fields.customerName")}
+                  value={orderDetail?.customer?.name || tOrders("common.none")}
+                />
+                <InfoField
+                  label={tDesign("fields.customerEmail")}
+                  value={orderDetail?.customer_email || tOrders("common.none")}
+                />
+                <InfoField
+                  label={tDesign("fields.customerUsername")}
+                  value={
+                    orderDetail?.customer_username || tOrders("common.none")
+                  }
+                />
+              </div>
+            </Card>
+            <Card
+              className="rounded-2xl border border-slate-100 shadow-sm"
+              bodyStyle={{ padding: 16 }}
+            >
+              <SectionHeader title={tDesign("sections.shipping")} />
+              <div className="mt-4 grid gap-3">
+                <InfoField
+                  label={tDesign("fields.requestedService")}
+                  value={
+                    orderDetail?.requested_service || tOrders("common.none")
+                  }
+                />
+                <InfoField
+                  label={tDesign("fields.carrierCode")}
+                  value={orderDetail?.carrier_code || tOrders("common.none")}
+                />
+                <InfoField
+                  label={tDesign("fields.serviceCode")}
+                  value={orderDetail?.service_code || tOrders("common.none")}
+                />
+              </div>
+            </Card>
+            <Card
+              className="rounded-2xl border border-slate-100 shadow-sm"
+              bodyStyle={{ padding: 16 }}
+            >
+              <SectionHeader title={tDesign("sections.package")} />
+              <div className="mt-4 grid gap-3">
+                <InfoField
+                  label={tDesign("fields.weight")}
+                  value={
+                    orderDetail?.weight?.value
+                      ? `${orderDetail.weight.value} ${
+                          orderDetail.weight.units || ""
+                        }`.trim()
+                      : tOrders("common.none")
+                  }
+                />
+                <InfoField
+                  label={tDesign("fields.dimensions")}
+                  value={
+                    orderDetail?.dimensions
+                      ? `${orderDetail.dimensions.length} x ${
+                          orderDetail.dimensions.width
+                        } x ${orderDetail.dimensions.height} ${
+                          orderDetail.dimensions.units || ""
+                        }`
+                      : tOrders("common.none")
+                  }
+                />
+                <InfoField
+                  label={tDesign("fields.orderDate")}
+                  value={orderDate}
+                />
+                <InfoField
+                  label={tDesign("fields.paymentDate")}
+                  value={paymentDate}
+                />
+                <InfoField
+                  label={tDesign("fields.shipDate")}
+                  value={shipDate}
+                />
+                <InfoField
+                  label={tDesign("fields.orderTotal")}
+                  value={orderTotal}
+                />
+              </div>
+            </Card>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <AddressBlock title={tDesign("sections.billing")} rows={billingRows} />
+            <AddressBlock
+              title={tDesign("sections.shippingAddress")}
+              rows={shippingRows}
+            />
+          </div>
+          <Card
+            className="rounded-2xl border border-slate-100 shadow-sm"
+            bodyStyle={{ padding: 16 }}
+          >
+            <SectionHeader title={tDesign("sections.notes")} />
+            <div className="mt-4 grid gap-3">
+              <InfoField
+                label={tDesign("fields.customerNotes")}
+                value={orderDetail?.customer_notes || tOrders("common.none")}
+              />
+              <InfoField
+                label={tDesign("fields.internalNotes")}
+                value={orderDetail?.internal_notes || tOrders("common.none")}
+              />
+            </div>
+          </Card>
+        </div>
+      ),
+    },
+    {
+      key: "items",
+      label: tDesign("tabs.itemsAndDesigns"),
+      children: (
+        <div className="space-y-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <SectionHeader title={tDesign("sections.items")} />
+            {positionsLoading ? (
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {tDesign("messages.positionsLoading")}
+              </Typography.Text>
+            ) : null}
+          </div>
+          {items.length ? (
+            <div className="grid gap-6">
+              {items.map((item) => {
+                const productId = String(
+                  item?.product_id || item?.product?.id || "",
+                );
+                const positions = positionsByProductId[productId] || [];
+                const positionMap = new Map(
+                  positions.map((position) => [String(position?.id), position]),
+                );
+                return (
+                  <OrderItemCard
+                    key={item?.id}
+                    item={item}
+                    positionMap={positionMap}
+                    tOrders={tOrders}
+                    tDesign={tDesign}
+                    fallbackText={fallbackText}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <Empty description={tDesign("messages.noItems")} />
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "operations",
+      label: tDesign("tabs.labelsAndProduction"),
+      children: (
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <SectionHeader title={tDesign("sections.labels")} />
+            {labels.length ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {labels.map((label) => (
+                  <LabelCard
+                    key={label?.id || label?.label_url}
+                    label={label}
+                    tDesign={tDesign}
+                    tOrders={tOrders}
+                    onVoid={handleVoidLabel}
+                    voiding={
+                      voidingLabelId &&
+                      String(
+                        label?.label_id || label?.id || label?.labelId || "",
+                      ) === voidingLabelId
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <Empty description={tDesign("messages.noLabels")} />
+            )}
+          </div>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <SectionHeader title={tDesign("sections.scrap")} />
+              {canRecordScrap ? (
+                <Button type="primary" onClick={openScrapModal}>
+                  {tDesign("scrap.actions.add")}
+                </Button>
+              ) : null}
+            </div>
+            {scrapMovements.length ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {scrapMovements.map((movement) => (
+                  <ScrapMovementCard
+                    key={movement?.id}
+                    movement={movement}
+                    tDesign={tDesign}
+                    tOrders={tOrders}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Empty description={tDesign("scrap.messages.empty")} />
+            )}
+          </div>
+        </div>
+      ),
+    },
+    ...(canViewAuditTimeline
+      ? [
+          {
+            key: "activity",
+            label: tDesign("tabs.activity"),
+            children: (
+              <EntityAuditTimeline
+                entityType="order"
+                entityKey={orderDetail?.order_number || orderNumber}
+                visible={canViewAuditTimeline}
+              />
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <RequireRole
       anyOfRoles={[
@@ -946,212 +1187,14 @@ export default function OrderDetailPage() {
                   />
                 </div>
               </div>
-              <div className="mt-6 grid gap-4 lg:grid-cols-3">
-                <Card
-                  className="rounded-2xl border border-slate-100 shadow-sm"
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <SectionHeader title={tDesign("sections.customer")} />
-                  <div className="mt-4 grid gap-3">
-                    <InfoField
-                      label={tDesign("fields.customerName")}
-                      value={
-                        orderDetail?.customer?.name || tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.customerEmail")}
-                      value={
-                        orderDetail?.customer_email || tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.customerUsername")}
-                      value={
-                        orderDetail?.customer_username || tOrders("common.none")
-                      }
-                    />
-                  </div>
-                </Card>
-                <Card
-                  className="rounded-2xl border border-slate-100 shadow-sm"
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <SectionHeader title={tDesign("sections.shipping")} />
-                  <div className="mt-4 grid gap-3">
-                    <InfoField
-                      label={tDesign("fields.requestedService")}
-                      value={
-                        orderDetail?.requested_service || tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.carrierCode")}
-                      value={
-                        orderDetail?.carrier_code || tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.serviceCode")}
-                      value={
-                        orderDetail?.service_code || tOrders("common.none")
-                      }
-                    />
-                  </div>
-                </Card>
-                <Card
-                  className="rounded-2xl border border-slate-100 shadow-sm"
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <SectionHeader title={tDesign("sections.package")} />
-                  <div className="mt-4 grid gap-3">
-                    <InfoField
-                      label={tDesign("fields.weight")}
-                      value={
-                        orderDetail?.weight?.value
-                          ? `${orderDetail.weight.value} ${
-                              orderDetail.weight.units || ""
-                            }`.trim()
-                          : tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.dimensions")}
-                      value={
-                        orderDetail?.dimensions
-                          ? `${orderDetail.dimensions.length} x ${
-                              orderDetail.dimensions.width
-                            } x ${orderDetail.dimensions.height} ${
-                              orderDetail.dimensions.units || ""
-                            }`
-                          : tOrders("common.none")
-                      }
-                    />
-                  </div>
-                </Card>
-              </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <AddressBlock
-                  title={tDesign("sections.billing")}
-                  rows={billingRows}
-                />
-                <AddressBlock
-                  title={tDesign("sections.shippingAddress")}
-                  rows={shippingRows}
+              <div className="mt-6">
+                <Tabs
+                  defaultActiveKey="overview"
+                  items={detailTabs}
+                  size="large"
                 />
               </div>
-              <div className="mt-6 grid gap-4">
-                <Card
-                  className="rounded-2xl border border-slate-100 shadow-sm"
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <SectionHeader title={tDesign("sections.notes")} />
-                  <div className="mt-4 grid gap-3">
-                    <InfoField
-                      label={tDesign("fields.customerNotes")}
-                      value={
-                        orderDetail?.customer_notes || tOrders("common.none")
-                      }
-                    />
-                    <InfoField
-                      label={tDesign("fields.internalNotes")}
-                      value={
-                        orderDetail?.internal_notes || tOrders("common.none")
-                      }
-                    />
-                  </div>
-                </Card>
-              </div>
-              <div className="mt-6 space-y-4">
-                <SectionHeader title={tDesign("sections.labels")} />
-                {labels.length ? (
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {labels.map((label) => (
-                      <LabelCard
-                        key={label?.id || label?.label_url}
-                        label={label}
-                        tDesign={tDesign}
-                        tOrders={tOrders}
-                        onVoid={handleVoidLabel}
-                        voiding={
-                          voidingLabelId &&
-                          String(
-                            label?.label_id ||
-                              label?.id ||
-                              label?.labelId ||
-                              "",
-                          ) === voidingLabelId
-                        }
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Empty description={tDesign("messages.noLabels")} />
-                )}
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <SectionHeader title={tDesign("sections.scrap")} />
-                  {canRecordScrap ? (
-                    <Button type="primary" onClick={openScrapModal}>
-                      {tDesign("scrap.actions.add")}
-                    </Button>
-                  ) : null}
-                </div>
-                {scrapMovements.length ? (
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {scrapMovements.map((movement) => (
-                      <ScrapMovementCard
-                        key={movement?.id}
-                        movement={movement}
-                        tDesign={tDesign}
-                        tOrders={tOrders}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Empty description={tDesign("scrap.messages.empty")} />
-                )}
-              </div>
             </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader title={tDesign("sections.items")} />
-              {positionsLoading ? (
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  {tDesign("messages.positionsLoading")}
-                </Typography.Text>
-              ) : null}
-            </div>
-
-            {items.length ? (
-              <div className="grid gap-6">
-                {items.map((item) => {
-                  const productId = String(
-                    item?.product_id || item?.product?.id || "",
-                  );
-                  const positions = positionsByProductId[productId] || [];
-                  const positionMap = new Map(
-                    positions.map((position) => [
-                      String(position?.id),
-                      position,
-                    ]),
-                  );
-                  return (
-                    <OrderItemCard
-                      key={item?.id}
-                      item={item}
-                      positionMap={positionMap}
-                      tOrders={tOrders}
-                      tDesign={tDesign}
-                      fallbackText={fallbackText}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <Empty description={tDesign("messages.noItems")} />
-            )}
           </div>
         )}
         <Modal

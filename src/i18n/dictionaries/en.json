@@ -1971,6 +1971,145 @@
       "common": {
         "none": "-"
       },
+      "audit": {
+        "sectionTitle": "Activity Timeline",
+        "sectionSubtitle": "See who changed this order, when, and from which client context.",
+        "filters": {
+          "allStatuses": "All statuses",
+          "allActions": "All actions"
+        },
+        "status": {
+          "success": "Success",
+          "failed": "Failed"
+        },
+        "actions": {
+          "create": "Create",
+          "update": "Update",
+          "replace": "Replace",
+          "delete": "Delete",
+          "viewDetail": "Detail",
+          "loadMore": "Load more"
+        },
+        "labels": {
+          "actor": "Actor",
+          "customer": "Customer",
+          "partner": "Partner",
+          "company": "Company",
+          "ip": "IP",
+          "userAgent": "User agent",
+          "route": "Route"
+        },
+        "columns": {
+          "date": "Date",
+          "subject": "Subject",
+          "activity": "Activity",
+          "actor": "Actor",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "values": {
+          "unknownUser": "Unknown user"
+        },
+        "messages": {
+          "loadError": "Failed to load audit timeline.",
+          "empty": "No activity found for this record yet.",
+          "copySuccess": "Copied to clipboard.",
+          "copyError": "Failed to copy content."
+        },
+        "detailModal": {
+          "title": "Audit Log Detail",
+          "actions": {
+            "copy": "Copy"
+          },
+          "sections": {
+            "metadata": "Metadata",
+            "payload": "Request Payload",
+            "response": "Response Payload"
+          },
+          "fields": {
+            "title": "Title",
+            "summary": "Summary",
+            "date": "Date",
+            "subject": "Subject",
+            "status": "Status",
+            "action": "Action",
+            "actor": "Actor",
+            "actorEmail": "Actor Email",
+            "company": "Company",
+            "customer": "Customer",
+            "partner": "Partner",
+            "route": "Route",
+            "requestType": "Request Type",
+            "targetTable": "Target Table",
+            "ip": "IP Address",
+            "userAgent": "User Agent",
+            "httpStatus": "HTTP Status",
+            "duration": "Duration",
+            "error": "Error"
+          },
+          "messages": {
+            "noPayload": "No request payload recorded.",
+            "noResponse": "No response payload recorded."
+          }
+        },
+        "subjects": {
+          "order": "Order",
+          "order_item": "Order Item",
+          "order_item_design": "Order Item Design",
+          "label": "Label",
+          "label_void": "Label Void",
+          "transfer_order": "Transfer Order",
+          "transfer_order_item": "Transfer Order Item",
+          "transfer_order_design": "Transfer Order Design",
+          "transfer_label": "Transfer Label",
+          "transfer_label_void": "Transfer Label Void",
+          "refund_request": "Refund / Remake Request",
+          "generic": "Record"
+        },
+        "events": {
+          "generic_activity": "Activity recorded",
+          "order_create": "Created order",
+          "order_update": "Updated order",
+          "order_delete": "Deleted order",
+          "order_production": "Sent order to production",
+          "order_items_update": "Updated order items",
+          "order_items_complete": "Marked order items as completed",
+          "order_items_ship": "Marked order items as shipped",
+          "order_items_cancel": "Cancelled order item",
+          "order_scrap_record": "Recorded production scrap",
+          "order_design_update": "Uploaded or updated order designs",
+          "order_design_delete": "Deleted order item design",
+          "label_void": "Voided shipping label",
+          "transfer_order_create": "Created transfer order",
+          "transfer_order_update": "Updated transfer order",
+          "transfer_order_delete": "Deleted transfer order",
+          "transfer_order_production": "Sent transfer order to production",
+          "transfer_order_design_create": "Uploaded transfer designs",
+          "transfer_order_design_delete": "Deleted transfer design",
+          "transfer_order_items_update": "Updated transfer order item",
+          "transfer_order_items_delete": "Deleted transfer order item",
+          "transfer_order_items_ship": "Processed transfer shipment",
+          "transfer_order_items_print": "Marked transfer items as printed",
+          "transfer_label_create": "Created transfer label",
+          "transfer_label_void": "Voided transfer label",
+          "transfer_order_payment_request": "Created transfer payment request",
+          "transfer_order_refund_remake_create": "Created transfer refund/remake request",
+          "transfer_order_refund_remake_update": "Updated transfer refund/remake request"
+        },
+        "metadata": {
+          "order_number": "Order #",
+          "status_code": "HTTP status",
+          "duration_ms": "Duration (ms)",
+          "batch_size": "Batch size",
+          "design_file_count": "Design files",
+          "item_count": "Items",
+          "entry_count": "Entries",
+          "quantity": "Quantity",
+          "source": "Source",
+          "order_status": "Status",
+          "result_count": "Results"
+        }
+      },
       "productionModal": {
         "title": "Send To Production",
         "summary": {
@@ -2107,6 +2246,12 @@
       },
       "detail": {
         "title": "Order Detail",
+        "tabs": {
+          "overview": "Overview",
+          "itemsAndDesigns": "Items & Designs",
+          "labelsAndProduction": "Labels & Production",
+          "activity": "Activity"
+        },
         "sections": {
           "orderInfo": "Order Information",
           "customer": "Customer",
@@ -2402,6 +2547,12 @@
           "priceSummary": "Price Summary",
           "items": "Items",
           "uploadedDesigns": "Uploaded Designs"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "itemsAndDesigns": "Items & Designs",
+          "labelsAndPricing": "Labels & Pricing",
+          "activity": "Activity"
         },
         "priceSummary": {
           "itemPrices": "Item Prices",

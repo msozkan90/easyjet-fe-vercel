@@ -300,6 +300,16 @@ export const TransferRefundRemakeRequestsAPI = {
     api.post(`/transfer-orders/refund-remake/${id}/status`, payload),
 };
 
+export const AuditLogsAPI = {
+  orderTimeline: (orderNumber, params = {}) =>
+    api.get(`/audit-logs/orders/${encodeURIComponent(orderNumber)}`, params),
+  transferOrderTimeline: (orderNumber, params = {}) =>
+    api.get(
+      `/audit-logs/transfer-orders/${encodeURIComponent(orderNumber)}`,
+      params,
+    ),
+};
+
 export const NestShipperAPI = {
   quoteRates: (payload) => api.post("/nestshipper/rates/quote", payload),
 };
