@@ -1629,6 +1629,7 @@
         "existsDownload": "Download Existing",
         "bulkImport": "Bulk Import",
         "edit": "Edit",
+        "manualDecrease": "Manual Stock Decrease",
         "activate": "Activate",
         "deactivate": "Deactivate",
         "confirmActivateTitle": "Activate stock?",
@@ -1642,6 +1643,9 @@
         "loadColorsError": "Colors could not be loaded.",
         "createSuccess": "Stock created.",
         "updateSuccess": "Stock updated.",
+        "decreaseSuccess": "Stock decreased.",
+        "decreaseError": "Stock decrease failed.",
+        "decreaseInvalidQuantity": "Enter a valid quantity. Maximum: {max}.",
         "activateSuccess": "Stock activated.",
         "deactivateSuccess": "Stock deactivated.",
         "statusUpdateError": "Status update failed.",
@@ -1671,6 +1675,13 @@
         "editTitle": "Edit: {name}",
         "submitCreate": "Create",
         "submitUpdate": "Update"
+      },
+      "decreaseModal": {
+        "title": "Decrease Stock: {name}",
+        "description": "Enter how many units to remove from stock. You can remove up to {max} units. Unit price will stay unchanged.",
+        "quantityLabel": "Decrease Quantity",
+        "quantityPlaceholder": "Enter quantity to decrease",
+        "submit": "Decrease"
       },
       "common": {
         "none": "-"

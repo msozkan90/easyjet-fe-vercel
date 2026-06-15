@@ -1431,6 +1431,7 @@
         "existsDownload": "Verileri İndir",
         "bulkImport": "Toplu İçe Aktar",
         "edit": "Düzenle",
+        "manualDecrease": "Manuel Stok Düş",
         "activate": "Aktif Yap",
         "deactivate": "Pasif Yap",
         "confirmActivateTitle": "Stok aktif yapılsın mı?",
@@ -1444,6 +1445,9 @@
         "loadColorsError": "Renkler yüklenemedi.",
         "createSuccess": "Stok oluşturuldu.",
         "updateSuccess": "Stok güncellendi.",
+        "decreaseSuccess": "Stok düşüldü.",
+        "decreaseError": "Stok düşme işlemi başarısız.",
+        "decreaseInvalidQuantity": "Geçerli bir adet girin. Maksimum: {max}.",
         "activateSuccess": "Stok aktif yapıldı.",
         "deactivateSuccess": "Stok pasif yapıldı.",
         "statusUpdateError": "Durum güncelleme işlemi başarısız.",
@@ -1473,6 +1477,13 @@
         "editTitle": "Düzenle: {name}",
         "submitCreate": "Oluştur",
         "submitUpdate": "Güncelle"
+      },
+      "decreaseModal": {
+        "title": "Stok Düş: {name}",
+        "description": "Stoktan düşülecek adet miktarını girin. En fazla {max} adet düşebilirsiniz. Birim fiyat değişmez.",
+        "quantityLabel": "Düşülecek Adet",
+        "quantityPlaceholder": "Düşülecek adedi girin",
+        "submit": "Düş"
       },
       "common": {
         "none": "-"

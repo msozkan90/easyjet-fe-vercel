@@ -6,6 +6,7 @@ import {
   App as AntdApp,
   Button,
   Dropdown,
+  InputNumber,
   Modal,
   Popconfirm,
   Popover,
@@ -15,6 +16,7 @@ import {
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
+  MinusOutlined,
   EditOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
@@ -46,6 +48,10 @@ export default function ProductStockPage() {
   const [importResult, setImportResult] = useState(null);
   const [importResultOpen, setImportResultOpen] = useState(false);
   const [listFilters, setListFilters] = useState({});
+  const [decreaseModalOpen, setDecreaseModalOpen] = useState(false);
+  const [decreaseTarget, setDecreaseTarget] = useState(null);
+  const [decreaseQuantity, setDecreaseQuantity] = useState(1);
+  const [decreasing, setDecreasing] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -105,6 +111,25 @@ export default function ProductStockPage() {
     },
     normalizeListAndMeta
   );
+
+  const onToggleStatus = useCallback(async (record) => {
+    const currentStatus = record?.status === "active" ? "active" : "inactive";
+    const nextStatus = currentStatus === "active" ? "inactive" : "active";
+
+    try {
+      await ProductStockAPI.update(record.id, { status: nextStatus });
+      message.success(
+        nextStatus === "active"
+          ? t("messages.activateSuccess")
+          : t("messages.deactivateSuccess")
+      );
+      tableRef.current?.reload();
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message || t("messages.statusUpdateError")
+      );
+    }
+  }, [message, t]);
 
   const columns = useMemo(
     () => [
@@ -216,6 +241,17 @@ export default function ProductStockPage() {
                 }}
               ></Button>
             </Popover>
+            <Popover content={t("actions.manualDecrease")}>
+              <Button
+                icon={<MinusOutlined />}
+                disabled={!Number(record?.quantity)}
+                onClick={() => {
+                  setDecreaseTarget(record);
+                  setDecreaseQuantity(1);
+                  setDecreaseModalOpen(true);
+                }}
+              ></Button>
+            </Popover>
             <Popover
               content={
                 record?.status === "active"
@@ -258,7 +294,7 @@ export default function ProductStockPage() {
         ),
       },
     ],
-    [colors, products, sizes, t, tStatus]
+    [colors, onToggleStatus, products, sizes, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -287,25 +323,6 @@ export default function ProductStockPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed")
-      );
-    }
-  };
-
-  const onToggleStatus = async (record) => {
-    const currentStatus = record?.status === "active" ? "active" : "inactive";
-    const nextStatus = currentStatus === "active" ? "inactive" : "active";
-
-    try {
-      await ProductStockAPI.update(record.id, { status: nextStatus });
-      message.success(
-        nextStatus === "active"
-          ? t("messages.activateSuccess")
-          : t("messages.deactivateSuccess")
-      );
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.statusUpdateError")
       );
     }
   };
@@ -352,6 +369,36 @@ export default function ProductStockPage() {
   const handleFiltersChange = useCallback((filters) => {
     setListFilters(filters || {});
   }, []);
+
+  const handleDecreaseStock = async () => {
+    if (!decreaseTarget?.id) return;
+    const maxQuantity = Number(decreaseTarget?.quantity || 0);
+    if (
+      !Number.isInteger(decreaseQuantity) ||
+      decreaseQuantity <= 0 ||
+      decreaseQuantity > maxQuantity
+    ) {
+      message.error(t("messages.decreaseInvalidQuantity", { max: maxQuantity }));
+      return;
+    }
+    try {
+      setDecreasing(true);
+      await ProductStockAPI.decreaseStock(decreaseTarget.id, {
+        quantity: decreaseQuantity,
+      });
+      message.success(t("messages.decreaseSuccess"));
+      setDecreaseModalOpen(false);
+      setDecreaseTarget(null);
+      setDecreaseQuantity(1);
+      tableRef.current?.reload();
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message || t("messages.decreaseError")
+      );
+    } finally {
+      setDecreasing(false);
+    }
+  };
 
   const handleImportClick = () => {
     importInputRef.current?.click();
@@ -529,6 +576,46 @@ export default function ProductStockPage() {
               : undefined
           }
         />
+      </Modal>
+      <Modal
+        title={t("decreaseModal.title", {
+          name: decreaseTarget?.product?.name || "",
+        })}
+        open={decreaseModalOpen}
+        onCancel={() => {
+          if (decreasing) return;
+          setDecreaseModalOpen(false);
+          setDecreaseTarget(null);
+          setDecreaseQuantity(1);
+        }}
+        onOk={handleDecreaseStock}
+        okText={t("decreaseModal.submit")}
+        okButtonProps={{ danger: true, loading: decreasing }}
+        destroyOnHidden
+      >
+        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {t("decreaseModal.description", {
+              max: Number(decreaseTarget?.quantity || 0),
+            })}
+          </div>
+          <div>
+            <div style={{ marginBottom: 8, fontWeight: 500 }}>
+              {t("decreaseModal.quantityLabel")}
+            </div>
+            <InputNumber
+              min={1}
+              max={Number(decreaseTarget?.quantity || 0)}
+              precision={0}
+              value={decreaseQuantity}
+              onChange={(value) =>
+                setDecreaseQuantity(Number.parseInt(value || 1, 10) || 1)
+              }
+              style={{ width: "100%" }}
+              placeholder={t("decreaseModal.quantityPlaceholder")}
+            />
+          </div>
+        </Space>
       </Modal>
       <ImportResultModal
         open={importResultOpen}
