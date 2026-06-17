@@ -483,6 +483,70 @@
         "emptyDetail": "Bu gün için ürün detayı bulunamadı."
       }
     },
+    "transferOrderReport": {
+      "title": "Transfer Sipariş Raporu",
+      "subtitle": "Company kapsamındaki transfer siparişlerinin günlük ciro, inch ve ürün dağılım raporu.",
+      "heroBadge": "Transfer Financial Insight",
+      "rangeLabel": "{from} - {to} aralığı gösteriliyor",
+      "summary": {
+        "totalOrders": "Toplam Sipariş",
+        "totalItems": "Toplam Ürün Adedi",
+        "totalLengthInches": "Toplam Length (inch)",
+        "totalRevenue": "Toplam Ciro",
+        "totalDays": "Filtrelenen Gün"
+      },
+      "filters": {
+        "title": "Filtreler",
+        "entities": "Partner / Customer",
+        "orderStatus": "Sipariş Durumu",
+        "orderDate": "Sipariş Tarihi",
+        "entitiesPlaceholder": "Partner ve customer seçin",
+        "selectAllEntities": "Tümünü Seç",
+        "orderStatusPlaceholder": "Durum seçin",
+        "searchInColumn": "{column} ara",
+        "search": "Ara",
+        "reset": "Temizle",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Günlük Transfer Sipariş Özeti",
+        "date": "Tarih",
+        "orderCount": "Sipariş Sayısı",
+        "itemQuantity": "Ürün Adedi",
+        "lengthInches": "Length (inch)",
+        "revenue": "Toplam Tutar",
+        "actions": "İşlemler"
+      },
+      "detailTable": {
+        "product": "Ürün",
+        "itemQuantity": "Toplam Adet",
+        "lengthInches": "Length (inch)",
+        "revenue": "Toplam Tutar"
+      },
+      "drawer": {
+        "title": "{date} Detayı",
+        "fallbackTitle": "Gün Detayı",
+        "totalOrders": "Sipariş Sayısı",
+        "totalItems": "Ürün Adedi",
+        "totalLengthInches": "Toplam Length (inch)",
+        "totalRevenue": "Toplam Ciro"
+      },
+      "messages": {
+        "loadFiltersError": "Rapor filtreleri yüklenemedi.",
+        "loadReportError": "Transfer sipariş raporu yüklenemedi.",
+        "loadDetailError": "Gün detayı yüklenemedi.",
+        "empty": "Gösterilecek günlük transfer raporu bulunamadı.",
+        "emptyDetail": "Bu gün için transfer ürün detayı bulunamadı."
+      }
+    },
     "customer": {
       "columns": {
         "id": "Kimlik",

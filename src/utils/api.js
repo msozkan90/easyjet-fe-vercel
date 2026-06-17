@@ -198,6 +198,9 @@ export const OrdersPdfAPI = {
 export const TransferOrdersAPI = {
   create: (data) => api.post("/transfer-orders", data),
   createManual: (data) => api.post("/transfer-orders/manual", data),
+  report: (payload) => api.post("/transfer-orders/report", payload),
+  reportDayDetail: (payload) =>
+    api.post("/transfer-orders/report/day-detail", payload),
   list: (payload) => api.post("/transfer-orders/list", payload),
   detail: (orderNumber) =>
     api.get(`/transfer-orders/${encodeURIComponent(orderNumber)}`),
