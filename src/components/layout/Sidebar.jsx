@@ -389,14 +389,49 @@ export default function Sidebar({ collapsed }) {
               },
               ...(isCompanyAdmin || isPartnerAdmin || isCustomerAdmin
                 ? [
+                    {
+                      key: "financial-report",
+                      icon: <BankOutlined />,
+                      label: tSidebar("financial.report"),
+                      children: [
+                        ...(isCompanyAdmin
+                             ? [
+                              {
+                                key: "order-report",
+                                label: (
+                                  <Link href="/dashboard/order-report">
+                                    {tSidebar(
+                                      "financial.orderReport",
+                                    )}
+                                  </Link>
+                                ),
+                              },
+                            ]
+                          : []),
+                        ...(isCompanyAdmin
+                          ? [
+                              {
+                                key: "transfer-order-report",
+                                label: (
+                                  <Link href="/dashboard/transfer-order-report">
+                                    {tSidebar(
+                                      "financial.transferOrderReport",
+                                    )}
+                                  </Link>
+                                ),
+                              },
+                            ]
+                          : [])
+                      ],
+                    },
                     ...(isCompanyAdmin
                       ? [
                           {
-                            key: "financial-report",
+                            key: "wallet-transactions",
                             icon: <LineChartOutlined />,
                             label: (
-                              <Link href="/dashboard/financial-report">
-                                {tSidebar("financial.report")}
+                              <Link href="/dashboard/wallet-transactions">
+                                {tSidebar("financial.walletTransactions")}
                               </Link>
                             ),
                           },

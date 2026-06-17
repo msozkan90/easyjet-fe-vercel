@@ -419,6 +419,70 @@
         "noData": "Veri bulunamadı"
       }
     },
+    "orderReport": {
+      "title": "Sipariş Raporu",
+      "subtitle": "Company kapsamındaki siparişlerin günlük ciro ve ürün dağılım raporu.",
+      "heroBadge": "Financial Insight",
+      "rangeLabel": "{from} - {to} aralığı gösteriliyor",
+      "summary": {
+        "totalOrders": "Toplam Sipariş",
+        "totalItems": "Toplam Ürün Adedi",
+        "totalRevenue": "Toplam Ciro",
+        "totalDays": "Filtrelenen Gün"
+      },
+      "filters": {
+        "title": "Filtreler",
+        "entities": "Partner / Customer",
+        "category": "Kategori",
+        "orderStatus": "Sipariş Durumu",
+        "orderDate": "Sipariş Tarihi",
+        "entitiesPlaceholder": "Partner ve customer seçin",
+        "selectAllEntities": "Tümünü Seç",
+        "categoryPlaceholder": "Kategori seçin",
+        "orderStatusPlaceholder": "Durum seçin",
+        "searchInColumn": "{column} ara",
+        "search": "Ara",
+        "reset": "Temizle",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Günlük Sipariş Özeti",
+        "date": "Tarih",
+        "orderCount": "Sipariş Sayısı",
+        "itemQuantity": "Ürün Adedi",
+        "revenue": "Toplam Tutar",
+        "actions": "İşlemler"
+      },
+      "detailTable": {
+        "product": "Ürün",
+        "size": "Size",
+        "color": "Color",
+        "itemQuantity": "Toplam Adet",
+        "revenue": "Toplam Tutar"
+      },
+      "drawer": {
+        "title": "{date} Detayı",
+        "fallbackTitle": "Gün Detayı",
+        "totalOrders": "Sipariş Sayısı",
+        "totalItems": "Ürün Adedi",
+        "totalRevenue": "Toplam Ciro"
+      },
+      "messages": {
+        "loadFiltersError": "Rapor filtreleri yüklenemedi.",
+        "loadReportError": "Sipariş raporu yüklenemedi.",
+        "loadDetailError": "Gün detayı yüklenemedi.",
+        "empty": "Gösterilecek günlük rapor bulunamadı.",
+        "emptyDetail": "Bu gün için ürün detayı bulunamadı."
+      }
+    },
     "customer": {
       "columns": {
         "id": "Kimlik",
@@ -2738,6 +2802,9 @@
         "adminTopups": "Bakiye Yükleme Onayları",
         "fundingAccounts": "Fonlama Hesapları",
         "transferPaymentManagement": "Transfer Ödemeleri",
+        "walletTransactions": "Bakiye Hareketleri",
+        "orderReport": "Sipariş Raporu",
+        "transferOrderReport": "Transfer Sipariş Raporu",
         "paymentStatuses": {
           "pending": "Bekleyenler",
           "processing": "İşlemde",

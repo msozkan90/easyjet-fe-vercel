@@ -161,6 +161,8 @@ export const OrdersAPI = {
   //order Details
   details: (id) => api.get(`/orders/items/${id}`),
   orderDetail: (orderNumber) => api.get(`/orders/${orderNumber}`),
+  report: (payload) => api.post("/orders/report", payload),
+  reportDayDetail: (payload) => api.post("/orders/report/day-detail", payload),
   saveDesign: (formData) => api.putMultipart("/orders/items", formData),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),

@@ -419,6 +419,70 @@
         "noData": "No data"
       }
     },
+    "orderReport": {
+      "title": "Order Report",
+      "subtitle": "Daily revenue and product mix report for orders within the company scope.",
+      "heroBadge": "Financial Insight",
+      "rangeLabel": "Showing range {from} - {to}",
+      "summary": {
+        "totalOrders": "Total Orders",
+        "totalItems": "Total Item Quantity",
+        "totalRevenue": "Total Revenue",
+        "totalDays": "Filtered Days"
+      },
+      "filters": {
+        "title": "Filters",
+        "entities": "Partner / Customer",
+        "category": "Category",
+        "orderStatus": "Order Status",
+        "orderDate": "Order Date",
+        "entitiesPlaceholder": "Select partners and customers",
+        "selectAllEntities": "Select All",
+        "categoryPlaceholder": "Select category",
+        "orderStatusPlaceholder": "Select status",
+        "searchInColumn": "Search {column}",
+        "search": "Search",
+        "reset": "Clear",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Daily Order Summary",
+        "date": "Date",
+        "orderCount": "Order Count",
+        "itemQuantity": "Item Quantity",
+        "revenue": "Total Amount",
+        "actions": "Actions"
+      },
+      "detailTable": {
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "itemQuantity": "Total Quantity",
+        "revenue": "Total Amount"
+      },
+      "drawer": {
+        "title": "{date} Detail",
+        "fallbackTitle": "Day Detail",
+        "totalOrders": "Order Count",
+        "totalItems": "Item Quantity",
+        "totalRevenue": "Total Revenue"
+      },
+      "messages": {
+        "loadFiltersError": "Failed to load report filters.",
+        "loadReportError": "Failed to load order report.",
+        "loadDetailError": "Failed to load day detail.",
+        "empty": "No daily report data found.",
+        "emptyDetail": "No product detail found for this day."
+      }
+    },
     "customer": {
       "columns": {
         "id": "ID",
@@ -2936,6 +3000,9 @@
         "adminTopups": "Top-Up Approvals",
         "fundingAccounts": "Funding Accounts",
         "transferPaymentManagement": "Transfer Payments",
+        "walletTransactions": "Wallet Transactions",
+        "orderReport": "Order Report",
+        "transferOrderReport": "Transfer Order Report",
         "paymentStatuses": {
           "pending": "Pending",
           "processing": "Processing",
