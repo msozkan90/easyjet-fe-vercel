@@ -296,13 +296,18 @@ const OrderItemCard = ({ item, positionMap, tOrders, tDetail, fallbackText }) =>
   );
 };
 
-export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
+export default function PrinterOrderSearchPage({
+  categoryId,
+  subCategoryId,
+  mode = "scanner",
+}) {
   const { message } = AntdApp.useApp();
   const [scrapForm] = Form.useForm();
   const tOrders = useTranslations("dashboard.orders");
   const tDetail = useTranslations("dashboard.orders.detail");
   const tCommonActions = useTranslations("common.actions");
   const fallbackText = tDetail("designs.designAreaPlaceholder");
+  const isReportScrapeMode = mode === "reportScrape";
 
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
@@ -424,6 +429,11 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
         setOrderSummary(
           firstGroup
             ? {
+                id:
+                  firstGroup?.order?.id ||
+                  firstGroup?.order_id ||
+                  nextItems.find((item) => item?.order_id)?.order_id ||
+                  null,
                 order_number:
                   firstGroup?.order?.order_number || firstGroup?.order_number || nextOrderNumber,
                 customer_name:
@@ -444,8 +454,10 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
   );
 
   const finalizeCompletion = useCallback(
-    async (scrapPayload) => {
-      const nextOrderNumber = String(orderSummary?.order_number || orderNumber).trim();
+    async ({ rawOrderNumber, scrapPayload } = {}) => {
+      const nextOrderNumber = String(
+        rawOrderNumber || orderSummary?.order_number || orderNumber
+      ).trim();
       if (!nextOrderNumber) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
@@ -466,8 +478,11 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
 
         setOrderSummary(
           responseOrder
-            ? { order_number: responseOrder?.order_number || nextOrderNumber }
-            : { order_number: nextOrderNumber }
+            ? {
+                id: responseOrder?.id || orderSummary?.id || null,
+                order_number: responseOrder?.order_number || nextOrderNumber,
+              }
+            : { id: orderSummary?.id || null, order_number: nextOrderNumber }
         );
         setItems(Array.isArray(responseOrder?.items) ? responseOrder.items : []);
 
@@ -506,10 +521,29 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
 
   const handleComplete = useCallback(async () => {
     await finalizeCompletion({
-      has_scrap: false,
-      entries: [],
+      scrapPayload: {
+        has_scrap: false,
+        entries: [],
+      },
     });
   }, [finalizeCompletion]);
+
+  const handleSearchSubmit = useCallback(
+    async (rawOrderNumber) => {
+      if (isReportScrapeMode) {
+        await loadPreview(rawOrderNumber);
+        return;
+      }
+      await finalizeCompletion({
+        rawOrderNumber,
+        scrapPayload: {
+          has_scrap: false,
+          entries: [],
+        },
+      });
+    },
+    [finalizeCompletion, isReportScrapeMode, loadPreview]
+  );
 
   const handlePaste = useCallback(
     (event) => {
@@ -518,9 +552,19 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
       if (!normalizedOrderNumber) return;
       event.preventDefault();
       setOrderNumber(normalizedOrderNumber);
-      loadPreview(normalizedOrderNumber);
+      if (isReportScrapeMode) {
+        loadPreview(normalizedOrderNumber);
+        return;
+      }
+      finalizeCompletion({
+        rawOrderNumber: normalizedOrderNumber,
+        scrapPayload: {
+          has_scrap: false,
+          entries: [],
+        },
+      });
     },
-    [loadPreview]
+    [finalizeCompletion, isReportScrapeMode, loadPreview]
   );
 
   const openScrapModal = useCallback(() => {
@@ -540,6 +584,12 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
   }, [items.length, message, scrapForm, tOrders]);
 
   const handleSubmitScrap = useCallback(async () => {
+    const orderId = orderSummary?.id || items.find((item) => item?.order_id)?.order_id;
+    if (!orderId) {
+      message.error(tOrders("reportScrape.messages.orderIdMissing"));
+      return;
+    }
+
     try {
       setSubmittingScrap(true);
       const values = await scrapForm.validateFields();
@@ -554,18 +604,20 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
           size_id: selected.size_id,
           color_id: selected.color_id,
           quantity: entry.quantity,
-          reason: "production_scrap",
+          reason: "manual_adjustment",
           reason_detail: entry.reason_detail,
           note: entry.note || undefined,
         };
       });
 
-      await finalizeCompletion({
-        has_scrap: true,
+      await OrdersAPI.recordScrap({
+        order_id: orderId,
         entries,
       });
       setScrapModalOpen(false);
       scrapForm.resetFields();
+      message.success(tOrders("reportScrape.messages.recordSuccess"));
+      await loadPreview(orderSummary?.order_number || orderNumber);
     } catch (error) {
       const errorMessage =
         error?.errorFields?.length > 0
@@ -577,13 +629,13 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
     } finally {
       setSubmittingScrap(false);
     }
-  }, [finalizeCompletion, itemOptions, message, scrapForm, tOrders]);
+  }, [items, itemOptions, loadPreview, message, orderNumber, orderSummary, scrapForm, tOrders]);
 
   return (
     <RequireRole anyOfRoles={["companyCompletedWorker", "companyadmin"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("scanner.title")}
+          {isReportScrapeMode ? tOrders("reportScrape.title") : tOrders("scanner.title")}
         </Typography.Title>
 
         <Card className="rounded-2xl">
@@ -591,14 +643,14 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
             <Input.Search
               allowClear
               enterButton={
-                <Button type="primary" loading={searching}>
+                <Button type="primary" loading={isReportScrapeMode ? searching : completing}>
                   {tCommonActions("search")}
                 </Button>
               }
               placeholder={tOrders("filters.searchOrderNumber")}
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
-              onSearch={loadPreview}
+              onSearch={handleSearchSubmit}
               onPaste={handlePaste}
             />
 
@@ -612,23 +664,17 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
                     #{orderSummary.order_number}
                   </div>
                 </div>
-                <Space wrap>
-                  <Button
-                    type="primary"
-                    loading={completing}
-                    onClick={handleComplete}
-                    disabled={!items.length}
-                  >
-                    {tOrders("scanner.actions.complete")}
-                  </Button>
-                  <Button
-                    danger
-                    onClick={openScrapModal}
-                    disabled={!items.length || completing}
-                  >
-                    {tOrders("scanner.actions.scrap")}
-                  </Button>
-                </Space>
+                {isReportScrapeMode ? (
+                  <Space wrap>
+                    <Button
+                      type="primary"
+                      onClick={openScrapModal}
+                      disabled={!items.length}
+                    >
+                      {tOrders("reportScrape.actions.open")}
+                    </Button>
+                  </Space>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -681,92 +727,104 @@ export default function PrinterOrderSearchPage({ categoryId, subCategoryId }) {
           <Empty description={tDetail("messages.noItems")} />
         ) : null}
 
-        <Modal
-          open={scrapModalOpen}
-          title={tOrders("scanner.scrap.title")}
-          onCancel={() => {
-            setScrapModalOpen(false);
-            scrapForm.resetFields();
-          }}
-          onOk={handleSubmitScrap}
-          okText={tOrders("scanner.scrap.confirm")}
-          cancelText={tCommonActions("cancel")}
-          confirmLoading={submittingScrap}
-          width={760}
-        >
-          <Form form={scrapForm} layout="vertical">
-            <Form.List name="entries">
-              {(fields, { add, remove }) => (
-                <div className="space-y-4">
-                  {fields.map((field, index) => (
-                    <Card
-                      key={field.key}
-                      size="small"
-                      className="rounded-2xl border border-slate-100"
-                    >
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <Typography.Text strong>
-                          {tOrders("scanner.scrap.entryTitle", { index: index + 1 })}
-                        </Typography.Text>
-                        {fields.length > 1 ? (
-                          <Button danger type="text" onClick={() => remove(field.name)}>
-                            {tCommonActions("remove")}
-                          </Button>
-                        ) : null}
-                      </div>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <Form.Item
-                          name={[field.name, "order_item_id"]}
-                          label={tOrders("scanner.scrap.fields.item")}
-                          rules={[{ required: true, message: tOrders("scanner.scrap.validation.item") }]}
-                        >
-                          <Select
-                            showSearch
-                            optionFilterProp="label"
-                            options={itemOptions}
-                            placeholder={tOrders("scanner.scrap.placeholders.item")}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          name={[field.name, "quantity"]}
-                          label={tOrders("scanner.scrap.fields.quantity")}
-                          rules={[
-                            { required: true, message: tOrders("scanner.scrap.validation.quantity") },
-                          ]}
-                        >
-                          <InputNumber min={1} precision={0} className="w-full" />
-                        </Form.Item>
-                        <Form.Item
-                          name={[field.name, "reason_detail"]}
-                          label={tOrders("scanner.scrap.fields.reason")}
-                          rules={[{ required: true, message: tOrders("scanner.scrap.validation.reason") }]}
-                        >
-                          <Select
-                            options={reasonOptions}
-                            placeholder={tOrders("scanner.scrap.placeholders.reason")}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          name={[field.name, "note"]}
-                          label={tOrders("scanner.scrap.fields.note")}
-                        >
-                          <Input.TextArea
-                            autoSize={{ minRows: 2, maxRows: 4 }}
-                            placeholder={tOrders("scanner.scrap.placeholders.note")}
-                          />
-                        </Form.Item>
-                      </div>
-                    </Card>
-                  ))}
+        {isReportScrapeMode ? (
+          <Modal
+            open={scrapModalOpen}
+            title={tOrders("reportScrape.modal.title")}
+            onCancel={() => {
+              setScrapModalOpen(false);
+              scrapForm.resetFields();
+            }}
+            onOk={handleSubmitScrap}
+            okText={tOrders("reportScrape.actions.confirm")}
+            cancelText={tCommonActions("cancel")}
+            confirmLoading={submittingScrap}
+            width={760}
+          >
+            <Form form={scrapForm} layout="vertical">
+              <Form.List name="entries">
+                {(fields, { add, remove }) => (
+                  <div className="space-y-4">
+                    {fields.map((field, index) => (
+                      <Card
+                        key={field.key}
+                        size="small"
+                        className="rounded-2xl border border-slate-100"
+                      >
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <Typography.Text strong>
+                            {tOrders("scanner.scrap.entryTitle", { index: index + 1 })}
+                          </Typography.Text>
+                          {fields.length > 1 ? (
+                            <Button danger type="text" onClick={() => remove(field.name)}>
+                              {tCommonActions("remove")}
+                            </Button>
+                          ) : null}
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Form.Item
+                            name={[field.name, "order_item_id"]}
+                            label={tOrders("scanner.scrap.fields.item")}
+                            rules={[
+                              { required: true, message: tOrders("scanner.scrap.validation.item") },
+                            ]}
+                          >
+                            <Select
+                              showSearch
+                              optionFilterProp="label"
+                              options={itemOptions}
+                              placeholder={tOrders("scanner.scrap.placeholders.item")}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            name={[field.name, "quantity"]}
+                            label={tOrders("scanner.scrap.fields.quantity")}
+                            rules={[
+                              {
+                                required: true,
+                                message: tOrders("scanner.scrap.validation.quantity"),
+                              },
+                            ]}
+                          >
+                            <InputNumber min={1} precision={0} className="w-full" />
+                          </Form.Item>
+                          <Form.Item
+                            name={[field.name, "reason_detail"]}
+                            label={tOrders("scanner.scrap.fields.reason")}
+                            rules={[
+                              {
+                                required: true,
+                                message: tOrders("scanner.scrap.validation.reason"),
+                              },
+                            ]}
+                          >
+                            <Select
+                              options={reasonOptions}
+                              placeholder={tOrders("scanner.scrap.placeholders.reason")}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            name={[field.name, "note"]}
+                            label={tOrders("scanner.scrap.fields.note")}
+                          >
+                            <Input.TextArea
+                              autoSize={{ minRows: 2, maxRows: 4 }}
+                              placeholder={tOrders("scanner.scrap.placeholders.note")}
+                            />
+                          </Form.Item>
+                        </div>
+                      </Card>
+                    ))}
 
-                  <Button type="dashed" block onClick={() => add({ quantity: 1 })}>
-                    {tOrders("scanner.scrap.actions.addEntry")}
-                  </Button>
-                </div>
-              )}
-            </Form.List>
-          </Form>
-        </Modal>
+                    <Button type="dashed" block onClick={() => add({ quantity: 1 })}>
+                      {tOrders("scanner.scrap.actions.addEntry")}
+                    </Button>
+                  </div>
+                )}
+              </Form.List>
+            </Form>
+          </Modal>
+        ) : null}
       </div>
     </RequireRole>
   );

@@ -20,6 +20,7 @@ import {
   PictureOutlined,
   DollarCircleOutlined,
   TagsOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 
 import Link from "next/link";
@@ -188,6 +189,14 @@ export default function Sidebar({ collapsed }) {
             </Link>
           ),
         },
+        {
+          key: `category-${category.id}-report-scrape`,
+          label: (
+            <Link href={`/dashboard/orders/${category.id}/report-scrape`}>
+              {tSidebar("orders.reportScrape")}
+            </Link>
+          ),
+        },
       ];
 
       const subCategoryItems = subCategories.map((subCategory) => ({
@@ -222,6 +231,16 @@ export default function Sidebar({ collapsed }) {
                 href={`/dashboard/orders/${category.id}/${subCategory.id}/printer`}
               >
                 {tSidebar("orders.scanner")}
+              </Link>
+            ),
+          },
+          {
+            key: `subcategory-${category.id}-${subCategory.id}-report-scrape`,
+            label: (
+              <Link
+                href={`/dashboard/orders/${category.id}/${subCategory.id}/report-scrape`}
+              >
+                {tSidebar("orders.reportScrape")}
               </Link>
             ),
           },
@@ -1054,6 +1073,15 @@ export default function Sidebar({ collapsed }) {
                 label: (
                   <Link href="/dashboard/company/permissions">
                     {tSidebar("myCompany.settings")}
+                  </Link>
+                ),
+              },
+              {
+                key: "my-company-user-metrics",
+                icon: <BarChartOutlined />,
+                label: (
+                  <Link href="/dashboard/company/user-metrics">
+                    {tSidebar("myCompany.userMetrics")}
                   </Link>
                 ),
               },

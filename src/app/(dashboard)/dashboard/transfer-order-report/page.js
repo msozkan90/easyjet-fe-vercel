@@ -32,7 +32,12 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
-import { CustomersAPI, PartnersAPI, TransferOrdersAPI } from "@/utils/api";
+import {
+  CategoriesAPI,
+  CustomersAPI,
+  PartnersAPI,
+  TransferOrdersAPI,
+} from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 
@@ -56,11 +61,20 @@ const createDefaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
 
 const createDefaultFilters = () => ({
   entity_ids: [],
+  category_id: undefined,
+  sub_category_id: undefined,
   order_status: [],
   date_range: createDefaultRange(),
 });
 
 const extractPayload = (response) => response?.data ?? response ?? {};
+const normalizeCategoryList = (response) => {
+  const payload = extractPayload(response);
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+};
 
 const formatMoney = (value) =>
   `${Number(value || 0).toLocaleString(undefined, {
@@ -77,6 +91,12 @@ const formatLength = (value) =>
   })} in`;
 
 const getTextValue = (value) => String(value || "").toLowerCase();
+const isTransferCategory = (category) => {
+  const name = String(category?.name || "")
+    .trim()
+    .toLowerCase();
+  return name === "transfer" || name === "transfers";
+};
 
 const buildReportPayload = (filters, entityOptionsMap) => {
   const [from, to] = filters?.date_range || [];
@@ -94,6 +114,8 @@ const buildReportPayload = (filters, entityOptionsMap) => {
   return {
     customer_ids: customer_ids.length ? customer_ids : undefined,
     partner_ids: partner_ids.length ? partner_ids : undefined,
+    category_id: filters?.category_id || undefined,
+    sub_category_id: filters?.sub_category_id || undefined,
     order_status:
       Array.isArray(filters?.order_status) && filters.order_status.length
         ? filters.order_status
@@ -163,6 +185,7 @@ export default function TransferOrderReportPage() {
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [partners, setPartners] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailData, setDetailData] = useState(null);
@@ -171,13 +194,19 @@ export default function TransferOrderReportPage() {
   const loadFilterOptions = useCallback(async () => {
     setFilterOptionsLoading(true);
     try {
-      const [partnersResp, customersResp] = await Promise.all([
+      const [partnersResp, customersResp, categoriesResp] = await Promise.all([
         PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        CategoriesAPI.listWithSubCategories(),
       ]);
 
       setPartners(normalizeListAndMeta(partnersResp).list);
       setCustomers(normalizeListAndMeta(customersResp).list);
+      setCategories(
+        normalizeCategoryList(categoriesResp).filter((category) =>
+          isTransferCategory(category),
+        ),
+      );
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.loadFiltersError"),
@@ -252,6 +281,33 @@ export default function TransferOrderReportPage() {
     [tOrders],
   );
 
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((category) => ({
+        value: category.id,
+        label: category.name || category.id,
+      })),
+    [categories],
+  );
+
+  const selectedCategory = useMemo(
+    () =>
+      categories.find(
+        (category) => String(category?.id || "") === String(filters.category_id || ""),
+      ) || null,
+    [categories, filters.category_id],
+  );
+
+  const subCategoryOptions = useMemo(() => {
+    const rows = Array.isArray(selectedCategory?.sub_categories)
+      ? selectedCategory.sub_categories
+      : [];
+    return rows.map((subCategory) => ({
+        value: subCategory.id,
+        label: subCategory.name || subCategory.id,
+      }));
+  }, [selectedCategory]);
+
   const entitySelectOptions = useMemo(
     () => [
       {
@@ -282,7 +338,16 @@ export default function TransferOrderReportPage() {
   );
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
+    setFilters((prev) => {
+      if (key === "category_id") {
+        return {
+          ...prev,
+          category_id: value || undefined,
+          sub_category_id: undefined,
+        };
+      }
+      return { ...prev, [key]: value || undefined };
+    });
   }, []);
 
   const handleEntityChange = useCallback(
@@ -629,6 +694,35 @@ export default function TransferOrderReportPage() {
                 filterOption={(input, option) =>
                   getTextValue(option?.searchText).includes(getTextValue(input))
                 }
+              />
+            </Col>
+            <Col xs={24} md={12} lg={5}>
+              <Text strong>{t("filters.category")}</Text>
+              <Select
+                allowClear
+                showSearch
+                value={filters.category_id}
+                onChange={(value) => handleFilterChange("category_id", value)}
+                options={categoryOptions}
+                loading={filterOptionsLoading}
+                placeholder={t("filters.categoryPlaceholder")}
+                style={{ width: "100%", marginTop: 8 }}
+                optionFilterProp="label"
+              />
+            </Col>
+            <Col xs={24} md={12} lg={5}>
+              <Text strong>{t("filters.subCategory")}</Text>
+              <Select
+                allowClear
+                showSearch
+                value={filters.sub_category_id}
+                onChange={(value) => handleFilterChange("sub_category_id", value)}
+                options={subCategoryOptions}
+                loading={filterOptionsLoading}
+                placeholder={t("filters.subCategoryPlaceholder")}
+                style={{ width: "100%", marginTop: 8 }}
+                optionFilterProp="label"
+                disabled={!filters.category_id}
               />
             </Col>
             <Col xs={24} md={12} lg={10}>

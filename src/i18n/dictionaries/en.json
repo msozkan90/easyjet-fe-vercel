@@ -498,10 +498,14 @@
       "filters": {
         "title": "Filters",
         "entities": "Partner / Customer",
+        "category": "Category",
+        "subCategory": "Sub Category",
         "orderStatus": "Order Status",
         "orderDate": "Order Date",
         "entitiesPlaceholder": "Select partners and customers",
         "selectAllEntities": "Select All",
+        "categoryPlaceholder": "Select category",
+        "subCategoryPlaceholder": "Select sub-category",
         "orderStatusPlaceholder": "Select status",
         "searchInColumn": "Search {column}",
         "search": "Search",
@@ -817,6 +821,58 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "userMetrics": {
+      "title": "User Metrics",
+      "subtitle": "Review completed, shipped, and failed audit logs by user and date range.",
+      "stats": {
+        "completed": "Completed Logs",
+        "shipped": "Shipped Logs",
+        "failed": "Failed Logs"
+      },
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "completed": "Completed",
+        "shipped": "Shipped",
+        "failed": "Failed",
+        "actions": "Actions"
+      },
+      "actions": {
+        "detail": "Detail"
+      },
+      "metricLabels": {
+        "completed": "Completed",
+        "shipped": "Shipped",
+        "failed": "Failed"
+      },
+      "messages": {
+        "loadError": "User metrics could not be loaded.",
+        "loadDetailError": "User metric logs could not be loaded.",
+        "empty": "No user metrics found for the selected range."
+      },
+      "detail": {
+        "title": "{user} Metrics",
+        "filters": {
+          "all": "All Metrics"
+        },
+        "status": {
+          "success": "Success",
+          "failed": "Failed"
+        },
+        "columns": {
+          "date": "Date",
+          "metric": "Metric",
+          "title": "Activity",
+          "status": "Status",
+          "route": "Route",
+          "error": "Error"
+        },
+        "messages": {
+          "empty": "No logs found for this user."
+        }
       }
     },
     "customerAdmins": {
@@ -2629,8 +2685,7 @@
       "scanner": {
         "title": "Scanner",
         "actions": {
-          "complete": "Complete",
-          "scrap": "Report Scrap"
+          "complete": "Complete"
         },
         "messages": {
           "loadBeforeScrap": "Load an order before recording scrap.",
@@ -2671,6 +2726,20 @@
             "damagedProduct": "Damaged product",
             "other": "Other"
           }
+        }
+      },
+      "reportScrape": {
+        "title": "Report Scrape",
+        "actions": {
+          "open": "Report Scrape",
+          "confirm": "Save Scrap"
+        },
+        "modal": {
+          "title": "Record Scrap"
+        },
+        "messages": {
+          "orderIdMissing": "Order ID could not be resolved for scrap recording.",
+          "recordSuccess": "Scrap recorded successfully."
         }
       },
       "transferDetail": {
@@ -3052,7 +3121,8 @@
         "waitingForDesign": "Waiting for Design",
         "cancel": "Cancel Orders",
         "printer": "Printer",
-        "scanner": "Scanner"
+        "scanner": "Scanner",
+        "reportScrape": "Report Scrape"
       },
       "financial": {
         "title": "Financial",
@@ -3137,7 +3207,8 @@
       "myCompany": {
         "title": "My Company",
         "users": "Company Users",
-        "settings": "Company Settings"
+        "settings": "Company Settings",
+        "userMetrics": "User Metrics"
       },
       "settings": "Settings"
     },

@@ -498,10 +498,14 @@
       "filters": {
         "title": "Filtreler",
         "entities": "Partner / Customer",
+        "category": "Kategori",
+        "subCategory": "Sub Category",
         "orderStatus": "Sipariş Durumu",
         "orderDate": "Sipariş Tarihi",
         "entitiesPlaceholder": "Partner ve customer seçin",
         "selectAllEntities": "Tümünü Seç",
+        "categoryPlaceholder": "Kategori seçin",
+        "subCategoryPlaceholder": "Sub category seçin",
         "orderStatusPlaceholder": "Durum seçin",
         "searchInColumn": "{column} ara",
         "search": "Ara",
@@ -817,6 +821,58 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "userMetrics": {
+      "title": "Kullanıcı Metrikleri",
+      "subtitle": "Kullanıcı bazında completed, shipped ve hatalı audit log sayılarını tarih aralığına göre inceleyin.",
+      "stats": {
+        "completed": "Tamamlanan Logları",
+        "shipped": "Kargolanan Logları",
+        "failed": "Hatalı Loglar"
+      },
+      "columns": {
+        "user": "Kullanıcı",
+        "role": "Rol",
+        "status": "Durum",
+        "completed": "Tamamlanan",
+        "shipped": "Kargolanan",
+        "failed": "Hatalı",
+        "actions": "İşlemler"
+      },
+      "actions": {
+        "detail": "Detay"
+      },
+      "metricLabels": {
+        "completed": "Tamamlanan",
+        "shipped": "Kargolanan",
+        "failed": "Hatalı"
+      },
+      "messages": {
+        "loadError": "Kullanıcı metrikleri yüklenemedi.",
+        "loadDetailError": "Kullanıcı log detayları yüklenemedi.",
+        "empty": "Seçilen tarih aralığında kullanıcı metriği bulunamadı."
+      },
+      "detail": {
+        "title": "{user} Metrikleri",
+        "filters": {
+          "all": "Tüm Metrikler"
+        },
+        "status": {
+          "success": "Başarılı",
+          "failed": "Hatalı"
+        },
+        "columns": {
+          "date": "Tarih",
+          "metric": "Metrik",
+          "title": "Aktivite",
+          "status": "Durum",
+          "route": "Route",
+          "error": "Hata"
+        },
+        "messages": {
+          "empty": "Bu kullanıcı için log bulunamadı."
+        }
       }
     },
     "customerAdmins": {
@@ -2431,8 +2487,7 @@
       "scanner": {
         "title": "Tarayıcı",
         "actions": {
-          "complete": "Tamamla",
-          "scrap": "Fire Var"
+          "complete": "Tamamla"
         },
         "messages": {
           "loadBeforeScrap": "Fire kaydı girmeden önce siparişi yükleyin.",
@@ -2473,6 +2528,20 @@
             "damagedProduct": "Hasarlı ürün",
             "other": "Diğer"
           }
+        }
+      },
+      "reportScrape": {
+        "title": "Report Scrape",
+        "actions": {
+          "open": "Report Scrape",
+          "confirm": "Fire Kaydet"
+        },
+        "modal": {
+          "title": "Fire Kaydı Oluştur"
+        },
+        "messages": {
+          "orderIdMissing": "Fire kaydı için sipariş kimliği çözümlenemedi.",
+          "recordSuccess": "Fire kaydı başarıyla oluşturuldu."
         }
       },
       "transferDetail": {
@@ -2854,7 +2923,8 @@
         "waitingForDesign": "Tasarım Bekleyenler",
         "cancel": "İptal Siparişler",
         "printer": "Printer",
-        "scanner": "Tarayıcı"
+        "scanner": "Tarayıcı",
+        "reportScrape": "Report Scrape"
       },
       "financial": {
         "title": "Finans",
@@ -2939,7 +3009,8 @@
       "myCompany": {
         "title": "Şirketim",
         "users": "Şirket Kullanıcıları",
-        "settings": "Şirket Ayarları"
+        "settings": "Şirket Ayarları",
+        "userMetrics": "Kullanıcı Metrikleri"
       },
       "settings": "Ayarlar"
     },

@@ -313,6 +313,9 @@ export const AuditLogsAPI = {
       `/audit-logs/transfer-orders/${encodeURIComponent(orderNumber)}`,
       params,
     ),
+  userMetricsSummary: (params = {}) => api.get("/audit-logs/user-metrics", params),
+  userMetricLogs: (userId, params = {}) =>
+    api.get(`/audit-logs/user-metrics/${encodeURIComponent(userId)}`, params),
 };
 
 export const NestShipperAPI = {
