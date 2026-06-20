@@ -1,7 +1,6 @@
 "use client";
 
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
-import dayjs from "dayjs";
 import moment from "moment";
 import {
   Alert,
@@ -25,7 +24,7 @@ import { RoleEnum } from "@/utils/consts";
 
 const { RangePicker } = DatePicker;
 
-const DEFAULT_RANGE = [dayjs().subtract(29, "day"), dayjs()];
+const DEFAULT_RANGE = null;
 
 const STATUS_COLORS = {
   active: "green",
@@ -37,7 +36,9 @@ const STATUS_COLORS = {
 const METRIC_TAG_COLORS = {
   completed: "green",
   shipped: "blue",
-  failed: "red",
+  scrap: "orange",
+  remake: "purple",
+  refund: "red",
 };
 
 const buildRangeParams = (range) => {
@@ -66,7 +67,7 @@ export default function CompanyUserMetricsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [detailMetric, setDetailMetric] = useState("all");
+  const [detailMetric, setDetailMetric] = useState("completed");
   const [detailPage, setDetailPage] = useState(1);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
@@ -77,9 +78,12 @@ export default function CompanyUserMetricsPage() {
     pageSize: 10,
   });
   const [detailSummary, setDetailSummary] = useState({
+    total_count: 0,
     completed_count: 0,
     shipped_count: 0,
-    failed_count: 0,
+    scrap_count: 0,
+    remake_count: 0,
+    refund_count: 0,
   });
 
   const roleLabels = useMemo(
@@ -130,9 +134,12 @@ export default function CompanyUserMetricsPage() {
         });
         setDetailSummary(
           payload?.summary || {
+            total_count: 0,
             completed_count: 0,
             shipped_count: 0,
-            failed_count: 0,
+            scrap_count: 0,
+            remake_count: 0,
+            refund_count: 0,
           },
         );
       });
@@ -158,12 +165,15 @@ export default function CompanyUserMetricsPage() {
     () =>
       rows.reduce(
         (acc, row) => {
+          acc.total += Number(row?.total_count || 0);
           acc.completed += Number(row?.completed_count || 0);
           acc.shipped += Number(row?.shipped_count || 0);
-          acc.failed += Number(row?.failed_count || 0);
+          acc.scrap += Number(row?.scrap_count || 0);
+          acc.remake += Number(row?.remake_count || 0);
+          acc.refund += Number(row?.refund_count || 0);
           return acc;
         },
-        { completed: 0, shipped: 0, failed: 0 },
+        { total: 0, completed: 0, shipped: 0, scrap: 0, remake: 0, refund: 0 },
       ),
     [rows],
   );
@@ -198,6 +208,11 @@ export default function CompanyUserMetricsPage() {
         ),
       },
       {
+        title: t("columns.total"),
+        dataIndex: "total_count",
+        key: "total_count",
+      },
+      {
         title: t("columns.completed"),
         dataIndex: "completed_count",
         key: "completed_count",
@@ -208,9 +223,19 @@ export default function CompanyUserMetricsPage() {
         key: "shipped_count",
       },
       {
-        title: t("columns.failed"),
-        dataIndex: "failed_count",
-        key: "failed_count",
+        title: t("columns.scrap"),
+        dataIndex: "scrap_count",
+        key: "scrap_count",
+      },
+      {
+        title: t("columns.remake"),
+        dataIndex: "remake_count",
+        key: "remake_count",
+      },
+      {
+        title: t("columns.refund"),
+        dataIndex: "refund_count",
+        key: "refund_count",
       },
       {
         title: t("columns.actions"),
@@ -220,7 +245,7 @@ export default function CompanyUserMetricsPage() {
             icon={<EyeOutlined />}
             onClick={() => {
               setSelectedUser(record);
-              setDetailMetric("all");
+              setDetailMetric("completed");
               setDetailPage(1);
             }}
           >
@@ -256,11 +281,14 @@ export default function CompanyUserMetricsPage() {
         title: t("detail.columns.title"),
         dataIndex: "title",
         key: "title",
-        render: (_, record) => (
-          <div className="flex flex-col">
-            <Typography.Text strong>{record?.title || "-"}</Typography.Text>
-            <Typography.Text type="secondary">{record?.summary || "-"}</Typography.Text>
-          </div>
+        render: (_, record) => <Typography.Text strong>{record?.title || "-"}</Typography.Text>,
+      },
+      {
+        title: t("detail.columns.description"),
+        dataIndex: "description",
+        key: "description",
+        render: (value) => (
+          <Typography.Text type="secondary">{value || "-"}</Typography.Text>
         ),
       },
       {
@@ -272,6 +300,15 @@ export default function CompanyUserMetricsPage() {
           <Tag color={value === "failed" ? "red" : "green"}>
             {t(`detail.status.${value || "success"}`)}
           </Tag>
+        ),
+      },
+      {
+        title: t("detail.columns.requestType"),
+        dataIndex: "request_type",
+        key: "request_type",
+        width: 130,
+        render: (value) => (
+          <Tag>{value ? tActions(value) : "-"}</Tag>
         ),
       },
       {
@@ -287,7 +324,7 @@ export default function CompanyUserMetricsPage() {
         render: (value) => value || "-",
       },
     ],
-    [t],
+    [t, tActions],
   );
 
   return (
@@ -313,7 +350,10 @@ export default function CompanyUserMetricsPage() {
           </div>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+          <Card className="rounded-2xl">
+            <Statistic title={t("stats.total")} value={totals.total} />
+          </Card>
           <Card className="rounded-2xl">
             <Statistic title={t("stats.completed")} value={totals.completed} />
           </Card>
@@ -321,7 +361,13 @@ export default function CompanyUserMetricsPage() {
             <Statistic title={t("stats.shipped")} value={totals.shipped} />
           </Card>
           <Card className="rounded-2xl">
-            <Statistic title={t("stats.failed")} value={totals.failed} />
+            <Statistic title={t("stats.scrap")} value={totals.scrap} />
+          </Card>
+          <Card className="rounded-2xl">
+            <Statistic title={t("stats.remake")} value={totals.remake} />
+          </Card>
+          <Card className="rounded-2xl">
+            <Statistic title={t("stats.refund")} value={totals.refund} />
           </Card>
         </div>
 
@@ -348,7 +394,7 @@ export default function CompanyUserMetricsPage() {
           title={t("detail.title", { user: selectedUser?.full_name || "-" })}
           onCancel={() => {
             setSelectedUser(null);
-            setDetailMetric("all");
+            setDetailMetric("completed");
             setDetailPage(1);
             setDetailRows([]);
             setDetailError("");
@@ -358,7 +404,13 @@ export default function CompanyUserMetricsPage() {
         >
           {selectedUser ? (
             <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+                <Card size="small" className="rounded-2xl">
+                  <Statistic
+                    title={t("stats.total")}
+                    value={detailSummary.total_count}
+                  />
+                </Card>
                 <Card size="small" className="rounded-2xl">
                   <Statistic
                     title={t("stats.completed")}
@@ -373,8 +425,20 @@ export default function CompanyUserMetricsPage() {
                 </Card>
                 <Card size="small" className="rounded-2xl">
                   <Statistic
-                    title={t("stats.failed")}
-                    value={detailSummary.failed_count}
+                    title={t("stats.scrap")}
+                    value={detailSummary.scrap_count}
+                  />
+                </Card>
+                <Card size="small" className="rounded-2xl">
+                  <Statistic
+                    title={t("stats.remake")}
+                    value={detailSummary.remake_count}
+                  />
+                </Card>
+                <Card size="small" className="rounded-2xl">
+                  <Statistic
+                    title={t("stats.refund")}
+                    value={detailSummary.refund_count}
                   />
                 </Card>
               </div>
@@ -392,10 +456,11 @@ export default function CompanyUserMetricsPage() {
                       setDetailPage(1);
                     }}
                     options={[
-                      { value: "all", label: t("detail.filters.all") },
                       { value: "completed", label: t("metricLabels.completed") },
                       { value: "shipped", label: t("metricLabels.shipped") },
-                      { value: "failed", label: t("metricLabels.failed") },
+                      { value: "scrap", label: t("metricLabels.scrap") },
+                      { value: "remake", label: t("metricLabels.remake") },
+                      { value: "refund", label: t("metricLabels.refund") },
                     ]}
                     style={{ minWidth: 180 }}
                   />

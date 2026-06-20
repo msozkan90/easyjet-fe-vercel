@@ -498,14 +498,12 @@
       "filters": {
         "title": "Filtreler",
         "entities": "Partner / Customer",
-        "category": "Kategori",
-        "subCategory": "Sub Category",
+        "product": "Ürün",
         "orderStatus": "Sipariş Durumu",
         "orderDate": "Sipariş Tarihi",
         "entitiesPlaceholder": "Partner ve customer seçin",
         "selectAllEntities": "Tümünü Seç",
-        "categoryPlaceholder": "Kategori seçin",
-        "subCategoryPlaceholder": "Sub category seçin",
+        "productPlaceholder": "Ürün seçin",
         "orderStatusPlaceholder": "Durum seçin",
         "searchInColumn": "{column} ara",
         "search": "Ara",
@@ -825,19 +823,25 @@
     },
     "userMetrics": {
       "title": "Kullanıcı Metrikleri",
-      "subtitle": "Kullanıcı bazında completed, shipped ve hatalı audit log sayılarını tarih aralığına göre inceleyin.",
+      "subtitle": "Kullanıcı bazında başarılı audit loglarını tarih aralığına göre inceleyin.",
       "stats": {
+        "total": "Toplam Log",
         "completed": "Tamamlanan Logları",
         "shipped": "Kargolanan Logları",
-        "failed": "Hatalı Loglar"
+        "scrap": "Scrap Logları",
+        "remake": "Remake Logları",
+        "refund": "Refund Logları"
       },
       "columns": {
         "user": "Kullanıcı",
         "role": "Rol",
         "status": "Durum",
+        "total": "Toplam",
         "completed": "Tamamlanan",
         "shipped": "Kargolanan",
-        "failed": "Hatalı",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund",
         "actions": "İşlemler"
       },
       "actions": {
@@ -846,7 +850,9 @@
       "metricLabels": {
         "completed": "Tamamlanan",
         "shipped": "Kargolanan",
-        "failed": "Hatalı"
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund"
       },
       "messages": {
         "loadError": "Kullanıcı metrikleri yüklenemedi.",
@@ -855,9 +861,6 @@
       },
       "detail": {
         "title": "{user} Metrikleri",
-        "filters": {
-          "all": "Tüm Metrikler"
-        },
         "status": {
           "success": "Başarılı",
           "failed": "Hatalı"
@@ -866,7 +869,9 @@
           "date": "Tarih",
           "metric": "Metrik",
           "title": "Aktivite",
+          "description": "Açıklama",
           "status": "Durum",
+          "requestType": "Aksiyon",
           "route": "Route",
           "error": "Hata"
         },
@@ -2025,7 +2030,7 @@
           },
           "fields": {
             "title": "Başlık",
-            "summary": "Özet",
+            "summary": "Açıklama",
             "date": "Tarih",
             "subject": "Konu",
             "status": "Durum",

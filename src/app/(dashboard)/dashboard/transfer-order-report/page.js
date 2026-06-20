@@ -36,6 +36,7 @@ import {
   CategoriesAPI,
   CustomersAPI,
   PartnersAPI,
+  TransferProductsAPI,
   TransferOrdersAPI,
 } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
@@ -61,8 +62,7 @@ const createDefaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
 
 const createDefaultFilters = () => ({
   entity_ids: [],
-  category_id: undefined,
-  sub_category_id: undefined,
+  transfer_product_id: undefined,
   order_status: [],
   date_range: createDefaultRange(),
 });
@@ -114,8 +114,7 @@ const buildReportPayload = (filters, entityOptionsMap) => {
   return {
     customer_ids: customer_ids.length ? customer_ids : undefined,
     partner_ids: partner_ids.length ? partner_ids : undefined,
-    category_id: filters?.category_id || undefined,
-    sub_category_id: filters?.sub_category_id || undefined,
+    transfer_product_id: filters?.transfer_product_id || undefined,
     order_status:
       Array.isArray(filters?.order_status) && filters.order_status.length
         ? filters.order_status
@@ -186,6 +185,7 @@ export default function TransferOrderReportPage() {
   const [partners, setPartners] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [transferProducts, setTransferProducts] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailData, setDetailData] = useState(null);
@@ -194,10 +194,14 @@ export default function TransferOrderReportPage() {
   const loadFilterOptions = useCallback(async () => {
     setFilterOptionsLoading(true);
     try {
-      const [partnersResp, customersResp, categoriesResp] = await Promise.all([
+      const [partnersResp, customersResp, categoriesResp, transferProductsResp] = await Promise.all([
         PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CategoriesAPI.listWithSubCategories(),
+        TransferProductsAPI.list({
+          pagination: { page: 1, pageSize: 500 },
+          filters: { status: "active" },
+        }),
       ]);
 
       setPartners(normalizeListAndMeta(partnersResp).list);
@@ -207,6 +211,7 @@ export default function TransferOrderReportPage() {
           isTransferCategory(category),
         ),
       );
+      setTransferProducts(normalizeListAndMeta(transferProductsResp).list);
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.loadFiltersError"),
@@ -281,32 +286,26 @@ export default function TransferOrderReportPage() {
     [tOrders],
   );
 
-  const categoryOptions = useMemo(
-    () =>
-      categories.map((category) => ({
-        value: category.id,
-        label: category.name || category.id,
-      })),
+  const transferCategoryIds = useMemo(
+    () => new Set(categories.map((category) => String(category?.id || "")).filter(Boolean)),
     [categories],
   );
 
-  const selectedCategory = useMemo(
+  const productOptions = useMemo(
     () =>
-      categories.find(
-        (category) => String(category?.id || "") === String(filters.category_id || ""),
-      ) || null,
-    [categories, filters.category_id],
+      transferProducts
+        .filter((product) => transferCategoryIds.has(String(product?.category_id || "")))
+        .map((product) => ({
+          value: product.id,
+          label: product.name || product.id,
+        }))
+        .sort((left, right) =>
+          String(left.label || "").localeCompare(String(right.label || ""), undefined, {
+            sensitivity: "base",
+          }),
+        ),
+    [transferCategoryIds, transferProducts],
   );
-
-  const subCategoryOptions = useMemo(() => {
-    const rows = Array.isArray(selectedCategory?.sub_categories)
-      ? selectedCategory.sub_categories
-      : [];
-    return rows.map((subCategory) => ({
-        value: subCategory.id,
-        label: subCategory.name || subCategory.id,
-      }));
-  }, [selectedCategory]);
 
   const entitySelectOptions = useMemo(
     () => [
@@ -339,13 +338,6 @@ export default function TransferOrderReportPage() {
 
   const handleFilterChange = useCallback((key, value) => {
     setFilters((prev) => {
-      if (key === "category_id") {
-        return {
-          ...prev,
-          category_id: value || undefined,
-          sub_category_id: undefined,
-        };
-      }
       return { ...prev, [key]: value || undefined };
     });
   }, []);
@@ -697,32 +689,19 @@ export default function TransferOrderReportPage() {
               />
             </Col>
             <Col xs={24} md={12} lg={5}>
-              <Text strong>{t("filters.category")}</Text>
+              <Text strong>{t("filters.product")}</Text>
               <Select
                 allowClear
                 showSearch
-                value={filters.category_id}
-                onChange={(value) => handleFilterChange("category_id", value)}
-                options={categoryOptions}
+                value={filters.transfer_product_id}
+                onChange={(value) =>
+                  handleFilterChange("transfer_product_id", value)
+                }
+                options={productOptions}
                 loading={filterOptionsLoading}
-                placeholder={t("filters.categoryPlaceholder")}
+                placeholder={t("filters.productPlaceholder")}
                 style={{ width: "100%", marginTop: 8 }}
                 optionFilterProp="label"
-              />
-            </Col>
-            <Col xs={24} md={12} lg={5}>
-              <Text strong>{t("filters.subCategory")}</Text>
-              <Select
-                allowClear
-                showSearch
-                value={filters.sub_category_id}
-                onChange={(value) => handleFilterChange("sub_category_id", value)}
-                options={subCategoryOptions}
-                loading={filterOptionsLoading}
-                placeholder={t("filters.subCategoryPlaceholder")}
-                style={{ width: "100%", marginTop: 8 }}
-                optionFilterProp="label"
-                disabled={!filters.category_id}
               />
             </Col>
             <Col xs={24} md={12} lg={10}>

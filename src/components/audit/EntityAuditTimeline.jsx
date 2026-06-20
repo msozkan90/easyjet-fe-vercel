@@ -171,18 +171,14 @@ export default function EntityAuditTimeline({
         title: t("columns.activity"),
         dataIndex: "title",
         key: "title",
-        render: (_, record) => (
-          <div className="flex flex-col gap-1">
-            <Typography.Text strong>
-              {record?.title || record?.summary || "-"}
-            </Typography.Text>
-            <Typography.Text type="secondary">
-              {translateOrFallback(
-                `events.${record?.event_key}`,
-                record?.summary || "-",
-              )}
-            </Typography.Text>
-          </div>
+        render: (_, record) => <Typography.Text strong>{record?.title || "-"}</Typography.Text>,
+      },
+      {
+        title: t("detailModal.fields.summary"),
+        dataIndex: "description",
+        key: "description",
+        render: (value) => (
+          <Typography.Text>{value || "-"}</Typography.Text>
         ),
       },
       {
@@ -321,10 +317,7 @@ export default function EntityAuditTimeline({
                 {selectedEntry?.title || "-"}
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.summary")}>
-                {translateOrFallback(
-                  `events.${selectedEntry?.event_key}`,
-                  selectedEntry?.summary || "-",
-                )}
+                {selectedEntry?.description || "-"}
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.date")}>
                 {selectedEntry?.occurred_at

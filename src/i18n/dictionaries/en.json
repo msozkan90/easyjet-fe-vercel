@@ -498,14 +498,12 @@
       "filters": {
         "title": "Filters",
         "entities": "Partner / Customer",
-        "category": "Category",
-        "subCategory": "Sub Category",
+        "product": "Product",
         "orderStatus": "Order Status",
         "orderDate": "Order Date",
         "entitiesPlaceholder": "Select partners and customers",
         "selectAllEntities": "Select All",
-        "categoryPlaceholder": "Select category",
-        "subCategoryPlaceholder": "Select sub-category",
+        "productPlaceholder": "Select product",
         "orderStatusPlaceholder": "Select status",
         "searchInColumn": "Search {column}",
         "search": "Search",
@@ -827,17 +825,23 @@
       "title": "User Metrics",
       "subtitle": "Review completed, shipped, and failed audit logs by user and date range.",
       "stats": {
+        "total": "Total Logs",
         "completed": "Completed Logs",
         "shipped": "Shipped Logs",
-        "failed": "Failed Logs"
+        "scrap": "Scrap Logs",
+        "remake": "Remake Logs",
+        "refund": "Refund Logs"
       },
       "columns": {
         "user": "User",
         "role": "Role",
         "status": "Status",
+        "total": "Total",
         "completed": "Completed",
         "shipped": "Shipped",
-        "failed": "Failed",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund",
         "actions": "Actions"
       },
       "actions": {
@@ -846,7 +850,9 @@
       "metricLabels": {
         "completed": "Completed",
         "shipped": "Shipped",
-        "failed": "Failed"
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund"
       },
       "messages": {
         "loadError": "User metrics could not be loaded.",
@@ -855,9 +861,6 @@
       },
       "detail": {
         "title": "{user} Metrics",
-        "filters": {
-          "all": "All Metrics"
-        },
         "status": {
           "success": "Success",
           "failed": "Failed"
@@ -866,7 +869,9 @@
           "date": "Date",
           "metric": "Metric",
           "title": "Activity",
+          "description": "Description",
           "status": "Status",
+          "requestType": "Action",
           "route": "Route",
           "error": "Error"
         },
@@ -2223,7 +2228,7 @@
           },
           "fields": {
             "title": "Title",
-            "summary": "Summary",
+            "summary": "Description",
             "date": "Date",
             "subject": "Subject",
             "status": "Status",

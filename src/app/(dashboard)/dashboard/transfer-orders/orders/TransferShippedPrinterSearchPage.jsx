@@ -6,13 +6,11 @@ import {
   App as AntdApp,
   Button,
   Card,
-  Col,
   Descriptions,
   Empty,
   Image,
   Input,
   Popconfirm,
-  Row,
   Space,
   Spin,
   Tag,
@@ -125,12 +123,15 @@ function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
   );
 }
 
-const TransferOrderItemCard = ({ item, tOrders }) => {
+const TransferOrderItemCard = ({ item, tOrders, tDetail, currency }) => {
   const options = normalizeOptions(item?.options);
   const statusKey = item?.status || "";
   const statusLabel = statusKey
     ? tOrders(`status.values.${statusKey}`) || statusKey
     : tOrders("common.none");
+  const productName =
+    item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
+  const designs = Array.isArray(item?.designs) ? item.designs : [];
 
   return (
     <Card
@@ -159,9 +160,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
             <Typography.Text type="secondary">
               {tOrders("columns.product")}
             </Typography.Text>
-            <div className="font-medium">
-              {item?.product?.name || tOrders("common.none")}
-            </div>
+            <div className="font-medium">{productName}</div>
           </div>
           <div>
             <Typography.Text type="secondary">
@@ -193,6 +192,44 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
             <div className="mt-2 text-sm">{tOrders("values.noOptions")}</div>
           )}
         </div>
+
+        <div>
+          <Typography.Text type="secondary">
+            {tDetail("sections.uploadedDesigns")}
+          </Typography.Text>
+          {designs.length ? (
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {designs.map((design) => (
+                <Card
+                  key={String(design?.id || design?.design_url)}
+                  size="small"
+                  styles={{ body: { padding: 10 } }}
+                >
+                  <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                    <LazyPreviewImage
+                      src={design?.design_url}
+                      alt={`design-${design?.id}`}
+                      preparingText={tDetail("preview.preparing")}
+                      emptyText={tDetail("preview.empty")}
+                    />
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {tDetail("designCard.size")}: {formatAmount(design?.width)}" x{" "}
+                      {formatAmount(design?.height)}"
+                    </Typography.Text>
+                    <Typography.Text strong>
+                      {tDetail("designCard.price")}: {formatCurrency(design?.price, currency || "USD")}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {design?.created_at ? moment(design.created_at).format("LLL") : "-"}
+                    </Typography.Text>
+                  </Space>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-2 text-sm">{tDetail("messages.noUploadedDesigns")}</div>
+          )}
+        </div>
       </div>
     </Card>
   );
@@ -212,7 +249,6 @@ export default function TransferShippedPrinterSearchPage() {
   const [items, setItems] = useState([]);
   const [orderSummary, setOrderSummary] = useState(null);
   const [transferLabel, setTransferLabel] = useState(null);
-  const [designGroups, setDesignGroups] = useState([]);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
   const [voidingLabelId, setVoidingLabelId] = useState(null);
@@ -255,11 +291,6 @@ export default function TransferShippedPrinterSearchPage() {
 
         setItems(scopedItems);
         setTransferLabel(latestLabel);
-        setDesignGroups(
-          Array.isArray(transferOrder?.design_groups)
-            ? transferOrder.design_groups
-            : [],
-        );
         setOrderNumber(transferOrder?.order_number || "");
         setTransferOrderId(nextTransferOrderId);
         setOrderSummary(
@@ -294,14 +325,9 @@ export default function TransferShippedPrinterSearchPage() {
         if (requiresLabelCreation && transferOrder?.id) {
           const orderTotal =
             scopedItems.reduce((sum, item) => {
-              const unitPrice = Number(item?.price);
-              const quantity = Number(item?.quantity ?? 1);
-              if (!Number.isFinite(unitPrice)) return sum;
-              return (
-                sum +
-                unitPrice *
-                  (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
-              );
+              const itemPrice = Number(item?.price);
+              if (!Number.isFinite(itemPrice)) return sum;
+              return sum + itemPrice;
             }, 0) || 0;
 
           setShippingModalRecord({
@@ -319,7 +345,6 @@ export default function TransferShippedPrinterSearchPage() {
         setItems([]);
         setOrderSummary(null);
         setTransferLabel(null);
-        setDesignGroups([]);
         setShippingModalRecord(null);
         setShippingModalOpen(false);
         message.error(
@@ -570,95 +595,6 @@ export default function TransferShippedPrinterSearchPage() {
           </Card>
         ) : null}
 
-        {designGroups.length ? (
-          <Card title={tDetail("sections.uploadedDesigns")}>
-            <Space direction="vertical" size={16} style={{ width: "100%" }}>
-              {designGroups.map((group, groupIndex) => (
-                <Card
-                  key={group?.sub_category_id || `group-${groupIndex}`}
-                  type="inner"
-                  title={group?.sub_category_name || "-"}
-                  extra={
-                    <Typography.Text strong>
-                      {formatCurrency(
-                        group?.total_price,
-                        orderSummary?.currency || "USD",
-                      )}
-                    </Typography.Text>
-                  }
-                >
-                  <Row gutter={[12, 12]}>
-                    {(Array.isArray(group?.designs) ? group.designs : []).map(
-                      (design) => (
-                        <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
-                          <Card size="small" styles={{ body: { padding: 10 } }}>
-                            <Space
-                              direction="vertical"
-                              size={8}
-                              style={{ width: "100%" }}
-                            >
-                              <LazyPreviewImage
-                                src={design?.design_url}
-                                alt={`design-${design?.id}`}
-                                preparingText={tDetail("preview.preparing")}
-                                emptyText={tDetail("preview.empty")}
-                              />
-                              <Typography.Text
-                                type="secondary"
-                                style={{ fontSize: 12 }}
-                              >
-                                {tDetail("designCard.size")}:{" "}
-                                {formatAmount(design?.width)}" x{" "}
-                                {formatAmount(design?.height)}"
-                              </Typography.Text>
-                              <Typography.Text strong>
-                                {tDetail("designCard.price")}:{" "}
-                                {formatCurrency(
-                                  design?.price,
-                                  orderSummary?.currency || "USD",
-                                )}
-                              </Typography.Text>
-                              <Typography.Text
-                                type="secondary"
-                                style={{ fontSize: 12 }}
-                              >
-                                {design?.created_at
-                                  ? moment(design.created_at).format("LLL")
-                                  : "-"}
-                              </Typography.Text>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "flex-end",
-                                }}
-                              >
-                                <Button
-                                  size="small"
-                                  icon={<ExportOutlined />}
-                                  onClick={() => {
-                                    if (!design?.design_url) return;
-                                    window.open(
-                                      design.design_url,
-                                      "_blank",
-                                      "noopener,noreferrer",
-                                    );
-                                  }}
-                                >
-                                  {tDetail("actions.open")}
-                                </Button>
-                              </div>
-                            </Space>
-                          </Card>
-                        </Col>
-                      ),
-                    )}
-                  </Row>
-                </Card>
-              ))}
-            </Space>
-          </Card>
-        ) : null}
-
         {items.length ? (
           <div className="grid gap-6">
             {items.map((item) => (
@@ -666,6 +602,8 @@ export default function TransferShippedPrinterSearchPage() {
                 key={item?.id}
                 item={item}
                 tOrders={tOrders}
+                tDetail={tDetail}
+                currency={orderSummary?.currency || "USD"}
               />
             ))}
           </div>
