@@ -847,6 +847,11 @@
       "actions": {
         "detail": "Detail"
       },
+      "filters": {
+        "searchUser": "Search user or email",
+        "selectRole": "Select role",
+        "selectStatus": "Select status"
+      },
       "metricLabels": {
         "completed": "Completed",
         "shipped": "Shipped",
@@ -877,6 +882,12 @@
         },
         "messages": {
           "empty": "No logs found for this user."
+        },
+        "filters": {
+          "searchTitle": "Search activity title",
+          "searchDescription": "Search description",
+          "selectRequestType": "Select action",
+          "searchRoute": "Search route"
         }
       }
     },
@@ -2994,6 +3005,7 @@
         "requestType": "Request Type",
         "status": "Status",
         "order": "Order # / Order ID",
+        "responsibleEntity": "Responsible Entity",
         "createdAt": "Created At",
         "updatedAt": "Updated At",
         "actions": "Actions"
@@ -3029,6 +3041,8 @@
         "detailLoadError": "Request detail could not be loaded.",
         "createSuccess": "Refund/remake request created.",
         "createError": "Refund/remake request could not be created.",
+        "pendingRequestExists": "A pending refund/remake request already exists for this order.",
+        "pendingRequestCheckError": "Pending refund/remake request could not be checked.",
         "statusUpdateSuccess": "Request status updated.",
         "statusUpdateError": "Request status could not be updated.",
         "noData": "No request found.",

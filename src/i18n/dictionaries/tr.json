@@ -847,6 +847,11 @@
       "actions": {
         "detail": "Detay"
       },
+      "filters": {
+        "searchUser": "Kullanıcı veya e-posta ara",
+        "selectRole": "Rol seç",
+        "selectStatus": "Durum seç"
+      },
       "metricLabels": {
         "completed": "Tamamlanan",
         "shipped": "Kargolanan",
@@ -877,6 +882,12 @@
         },
         "messages": {
           "empty": "Bu kullanıcı için log bulunamadı."
+        },
+        "filters": {
+          "searchTitle": "Aktivite başlığı ara",
+          "searchDescription": "Açıklama ara",
+          "selectRequestType": "Aksiyon seç",
+          "searchRoute": "Route ara"
         }
       }
     },
@@ -2796,6 +2807,7 @@
         "requestType": "Talep Tipi",
         "status": "Durum",
         "order": "Sipariş # / Sipariş ID",
+        "responsibleEntity": "Sorumlu Varlık",
         "createdAt": "Oluşturulma",
         "updatedAt": "Güncellenme",
         "actions": "İşlemler"
@@ -2831,6 +2843,8 @@
         "detailLoadError": "Talep detayı yüklenemedi.",
         "createSuccess": "İade/yeniden üretim talebi oluşturuldu.",
         "createError": "İade/yeniden üretim talebi oluşturulamadı.",
+        "pendingRequestExists": "Bu sipariş için zaten bekleyen bir iade/yeniden üretim talebi var.",
+        "pendingRequestCheckError": "Bekleyen iade/yeniden üretim talebi kontrol edilemedi.",
         "statusUpdateSuccess": "Talep durumu güncellendi.",
         "statusUpdateError": "Talep durumu güncellenemedi.",
         "noData": "Talep bulunamadı.",

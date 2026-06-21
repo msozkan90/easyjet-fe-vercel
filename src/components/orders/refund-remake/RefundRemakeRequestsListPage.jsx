@@ -42,6 +42,7 @@ export default function RefundRemakeRequestsListPage({
   listApi = RefundRemakeRequestsAPI,
   orderFilterKey = "order_id",
   orderResponseKey = "order",
+  showResponsibleEntityColumn = false,
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
@@ -136,8 +137,8 @@ export default function RefundRemakeRequestsListPage({
     });
   }, [fixedFilters, orderFilterKey]);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseColumns = [
       {
         title: t("columns.requestType"),
         dataIndex: "request_type",
@@ -193,9 +194,18 @@ export default function RefundRemakeRequestsListPage({
           );
         },
       },
-    ],
-    [basePath, orderFilterKey, orderResponseKey, t]
-  );
+    ];
+
+    if (showResponsibleEntityColumn) {
+      baseColumns.splice(3, 0, {
+        title: t("columns.responsibleEntity"),
+        dataIndex: "responsible_entity_name",
+        render: (value) => value || "-",
+      });
+    }
+
+    return baseColumns;
+  }, [basePath, orderFilterKey, orderResponseKey, showResponsibleEntityColumn, t]);
 
   return (
     <RequireRole anyOfRoles={requireRoles}>

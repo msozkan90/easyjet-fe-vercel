@@ -7,6 +7,7 @@ export default function CustomerRefundRemakeRequestsPage() {
     <RefundRemakeRequestsListPage
       requireRoles={["customerAdmin"]}
       basePath="/dashboard/orders/refund-remake"
+      showResponsibleEntityColumn
     />
   );
 }
