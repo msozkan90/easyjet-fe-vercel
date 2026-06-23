@@ -8,7 +8,10 @@ import RefundRemakeCreateModal from "@/components/orders/refund-remake/RefundRem
 import { OrdersAPI, RefundRemakeRequestsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { useSelector } from "react-redux";
-import { collectRequestableOrderItemsFromRow } from "@/utils/refundRemakeRequests";
+import {
+  buildRefundRemakeListPayload,
+  collectRequestableOrderItemsFromRow,
+} from "@/utils/refundRemakeRequests";
 
 export default function ShippedOrdersPage() {
   const { message } = AntdApp.useApp();
@@ -50,10 +53,40 @@ export default function ShippedOrdersPage() {
     [selectedRow]
   );
 
-  const handleOpenCreateModal = useCallback((record) => {
-    setSelectedRow(record);
-    setModalOpen(true);
+  const hasPendingRequest = useCallback(async (orderId) => {
+    if (!orderId) return false;
+    const response = await RefundRemakeRequestsAPI.list(
+      buildRefundRemakeListPayload({
+        page: 1,
+        pageSize: 1,
+        filters: {
+          order_id: orderId,
+          status: "pending",
+        },
+      })
+    );
+    const items = response?.data?.items || response?.data?.data?.items || response?.items || [];
+    return Array.isArray(items) && items.length > 0;
   }, []);
+
+  const handleOpenCreateModal = useCallback(
+    async (record) => {
+      const orderId = record?.order?.id || record?.order_id;
+      try {
+        if (await hasPendingRequest(orderId)) {
+          message.warning(t("messages.pendingRequestExists"));
+          return;
+        }
+        setSelectedRow(record);
+        setModalOpen(true);
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.pendingRequestCheckError")
+        );
+      }
+    },
+    [hasPendingRequest, message, t]
+  );
 
   const handleCloseCreateModal = useCallback(() => {
     setModalOpen(false);
@@ -64,6 +97,10 @@ export default function ShippedOrdersPage() {
     async (payload) => {
       setCreating(true);
       try {
+        if (await hasPendingRequest(payload?.order_id)) {
+          message.warning(t("messages.pendingRequestExists"));
+          return;
+        }
         await RefundRemakeRequestsAPI.create(payload);
         message.success(t("messages.createSuccess"));
         handleCloseCreateModal();
@@ -75,7 +112,7 @@ export default function ShippedOrdersPage() {
         setCreating(false);
       }
     },
-    [handleCloseCreateModal, message, t]
+    [handleCloseCreateModal, hasPendingRequest, message, t]
   );
 
   const columnsBuilder = useCallback(

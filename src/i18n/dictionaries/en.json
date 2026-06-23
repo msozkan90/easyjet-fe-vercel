@@ -419,6 +419,136 @@
         "noData": "No data"
       }
     },
+    "orderReport": {
+      "title": "Order Report",
+      "subtitle": "Daily revenue and product mix report for orders within the company scope.",
+      "heroBadge": "Financial Insight",
+      "rangeLabel": "Showing range {from} - {to}",
+      "summary": {
+        "totalOrders": "Total Orders",
+        "totalItems": "Total Item Quantity",
+        "totalRevenue": "Total Revenue",
+        "totalDays": "Filtered Days"
+      },
+      "filters": {
+        "title": "Filters",
+        "entities": "Partner / Customer",
+        "category": "Category",
+        "orderStatus": "Order Status",
+        "orderDate": "Order Date",
+        "entitiesPlaceholder": "Select partners and customers",
+        "selectAllEntities": "Select All",
+        "categoryPlaceholder": "Select category",
+        "orderStatusPlaceholder": "Select status",
+        "searchInColumn": "Search {column}",
+        "search": "Search",
+        "reset": "Clear",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Daily Order Summary",
+        "date": "Date",
+        "orderCount": "Order Count",
+        "itemQuantity": "Item Quantity",
+        "revenue": "Total Amount",
+        "actions": "Actions"
+      },
+      "detailTable": {
+        "product": "Product",
+        "size": "Size",
+        "color": "Color",
+        "itemQuantity": "Total Quantity",
+        "revenue": "Total Amount"
+      },
+      "drawer": {
+        "title": "{date} Detail",
+        "fallbackTitle": "Day Detail",
+        "totalOrders": "Order Count",
+        "totalItems": "Item Quantity",
+        "totalRevenue": "Total Revenue"
+      },
+      "messages": {
+        "loadFiltersError": "Failed to load report filters.",
+        "loadReportError": "Failed to load order report.",
+        "loadDetailError": "Failed to load day detail.",
+        "empty": "No daily report data found.",
+        "emptyDetail": "No product detail found for this day."
+      }
+    },
+    "transferOrderReport": {
+      "title": "Transfer Order Report",
+      "subtitle": "Daily revenue, inch and product mix report for transfer orders within the company scope.",
+      "heroBadge": "Transfer Financial Insight",
+      "rangeLabel": "Showing range {from} - {to}",
+      "summary": {
+        "totalOrders": "Total Orders",
+        "totalItems": "Total Item Quantity",
+        "totalLengthInches": "Total Length (inch)",
+        "totalRevenue": "Total Revenue",
+        "totalDays": "Filtered Days"
+      },
+      "filters": {
+        "title": "Filters",
+        "entities": "Partner / Customer",
+        "product": "Product",
+        "orderStatus": "Order Status",
+        "orderDate": "Order Date",
+        "entitiesPlaceholder": "Select partners and customers",
+        "selectAllEntities": "Select All",
+        "productPlaceholder": "Select product",
+        "orderStatusPlaceholder": "Select status",
+        "searchInColumn": "Search {column}",
+        "search": "Search",
+        "reset": "Clear",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Daily Transfer Order Summary",
+        "date": "Date",
+        "orderCount": "Order Count",
+        "itemQuantity": "Item Quantity",
+        "lengthInches": "Length (inch)",
+        "revenue": "Total Amount",
+        "actions": "Actions"
+      },
+      "detailTable": {
+        "product": "Product",
+        "itemQuantity": "Total Quantity",
+        "lengthInches": "Length (inch)",
+        "revenue": "Total Amount"
+      },
+      "drawer": {
+        "title": "{date} Detail",
+        "fallbackTitle": "Day Detail",
+        "totalOrders": "Order Count",
+        "totalItems": "Item Quantity",
+        "totalLengthInches": "Total Length (inch)",
+        "totalRevenue": "Total Revenue"
+      },
+      "messages": {
+        "loadFiltersError": "Failed to load report filters.",
+        "loadReportError": "Failed to load transfer order report.",
+        "loadDetailError": "Failed to load day detail.",
+        "empty": "No daily transfer report data found.",
+        "emptyDetail": "No transfer product detail found for this day."
+      }
+    },
     "customer": {
       "columns": {
         "id": "ID",
@@ -689,6 +819,76 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "userMetrics": {
+      "title": "User Metrics",
+      "subtitle": "Review completed, shipped, and failed audit logs by user and date range.",
+      "stats": {
+        "total": "Total Logs",
+        "completed": "Completed Logs",
+        "shipped": "Shipped Logs",
+        "scrap": "Scrap Logs",
+        "remake": "Remake Logs",
+        "refund": "Refund Logs"
+      },
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "total": "Total",
+        "completed": "Completed",
+        "shipped": "Shipped",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund",
+        "actions": "Actions"
+      },
+      "actions": {
+        "detail": "Detail"
+      },
+      "filters": {
+        "searchUser": "Search user or email",
+        "selectRole": "Select role",
+        "selectStatus": "Select status"
+      },
+      "metricLabels": {
+        "completed": "Completed",
+        "shipped": "Shipped",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund"
+      },
+      "messages": {
+        "loadError": "User metrics could not be loaded.",
+        "loadDetailError": "User metric logs could not be loaded.",
+        "empty": "No user metrics found for the selected range."
+      },
+      "detail": {
+        "title": "{user} Metrics",
+        "status": {
+          "success": "Success",
+          "failed": "Failed"
+        },
+        "columns": {
+          "date": "Date",
+          "metric": "Metric",
+          "title": "Activity",
+          "description": "Description",
+          "status": "Status",
+          "requestType": "Action",
+          "route": "Route",
+          "error": "Error"
+        },
+        "messages": {
+          "empty": "No logs found for this user."
+        },
+        "filters": {
+          "searchTitle": "Search activity title",
+          "searchDescription": "Search description",
+          "selectRequestType": "Select action",
+          "searchRoute": "Search route"
+        }
       }
     },
     "customerAdmins": {
@@ -2039,7 +2239,7 @@
           },
           "fields": {
             "title": "Title",
-            "summary": "Summary",
+            "summary": "Description",
             "date": "Date",
             "subject": "Subject",
             "status": "Status",
@@ -2501,8 +2701,7 @@
       "scanner": {
         "title": "Scanner",
         "actions": {
-          "complete": "Complete",
-          "scrap": "Report Scrap"
+          "complete": "Complete"
         },
         "messages": {
           "loadBeforeScrap": "Load an order before recording scrap.",
@@ -2543,6 +2742,20 @@
             "damagedProduct": "Damaged product",
             "other": "Other"
           }
+        }
+      },
+      "reportScrape": {
+        "title": "Report Scrape",
+        "actions": {
+          "open": "Report Scrape",
+          "confirm": "Save Scrap"
+        },
+        "modal": {
+          "title": "Record Scrap"
+        },
+        "messages": {
+          "orderIdMissing": "Order ID could not be resolved for scrap recording.",
+          "recordSuccess": "Scrap recorded successfully."
         }
       },
       "transferDetail": {
@@ -2792,6 +3005,7 @@
         "requestType": "Request Type",
         "status": "Status",
         "order": "Order # / Order ID",
+        "responsibleEntity": "Responsible Entity",
         "createdAt": "Created At",
         "updatedAt": "Updated At",
         "actions": "Actions"
@@ -2827,6 +3041,8 @@
         "detailLoadError": "Request detail could not be loaded.",
         "createSuccess": "Refund/remake request created.",
         "createError": "Refund/remake request could not be created.",
+        "pendingRequestExists": "A pending refund/remake request already exists for this order.",
+        "pendingRequestCheckError": "Pending refund/remake request could not be checked.",
         "statusUpdateSuccess": "Request status updated.",
         "statusUpdateError": "Request status could not be updated.",
         "noData": "No request found.",
@@ -2924,7 +3140,8 @@
         "waitingForDesign": "Waiting for Design",
         "cancel": "Cancel Orders",
         "printer": "Printer",
-        "scanner": "Scanner"
+        "scanner": "Scanner",
+        "reportScrape": "Report Scrape"
       },
       "financial": {
         "title": "Financial",
@@ -2936,6 +3153,9 @@
         "adminTopups": "Top-Up Approvals",
         "fundingAccounts": "Funding Accounts",
         "transferPaymentManagement": "Transfer Payments",
+        "walletTransactions": "Wallet Transactions",
+        "orderReport": "Order Report",
+        "transferOrderReport": "Transfer Order Report",
         "paymentStatuses": {
           "pending": "Pending",
           "processing": "Processing",
@@ -3006,7 +3226,8 @@
       "myCompany": {
         "title": "My Company",
         "users": "Company Users",
-        "settings": "Company Settings"
+        "settings": "Company Settings",
+        "userMetrics": "User Metrics"
       },
       "settings": "Settings"
     },

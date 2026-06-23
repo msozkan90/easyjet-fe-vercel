@@ -11,6 +11,7 @@ export default function TransferRefundRemakeRequestsPage() {
       listApi={TransferRefundRemakeRequestsAPI}
       orderFilterKey="transfer_order_id"
       orderResponseKey="transfer_order"
+      showResponsibleEntityColumn
     />
   );
 }

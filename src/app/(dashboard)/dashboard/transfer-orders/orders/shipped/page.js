@@ -8,7 +8,10 @@ import TransferOrdersStatusListPage from "../TransferOrdersStatusListPage";
 import RefundRemakeCreateModal from "@/components/orders/refund-remake/RefundRemakeCreateModal";
 import { TransferOrdersAPI, TransferRefundRemakeRequestsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-import { collectRequestableOrderItemsFromRow } from "@/utils/refundRemakeRequests";
+import {
+  buildRefundRemakeListPayload,
+  collectRequestableOrderItemsFromRow,
+} from "@/utils/refundRemakeRequests";
 
 export default function TransferShippedOrdersPage() {
   const { message } = AntdApp.useApp();
@@ -46,10 +49,41 @@ export default function TransferShippedOrdersPage() {
     [selectedRow]
   );
 
-  const handleOpenCreateModal = useCallback((record) => {
-    setSelectedRow(record);
-    setModalOpen(true);
+  const hasPendingRequest = useCallback(async (transferOrderId) => {
+    if (!transferOrderId) return false;
+    const response = await TransferRefundRemakeRequestsAPI.list(
+      buildRefundRemakeListPayload({
+        page: 1,
+        pageSize: 1,
+        filters: {
+          transfer_order_id: transferOrderId,
+          status: "pending",
+        },
+        orderFilterKey: "transfer_order_id",
+      })
+    );
+    const items = response?.data?.items || response?.data?.data?.items || response?.items || [];
+    return Array.isArray(items) && items.length > 0;
   }, []);
+
+  const handleOpenCreateModal = useCallback(
+    async (record) => {
+      const transferOrderId = record?.transfer_order_id || record?.id;
+      try {
+        if (await hasPendingRequest(transferOrderId)) {
+          message.warning(t("messages.pendingRequestExists"));
+          return;
+        }
+        setSelectedRow(record);
+        setModalOpen(true);
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.pendingRequestCheckError")
+        );
+      }
+    },
+    [hasPendingRequest, message, t]
+  );
 
   const handleCloseCreateModal = useCallback(() => {
     setModalOpen(false);
@@ -60,6 +94,10 @@ export default function TransferShippedOrdersPage() {
     async (payload) => {
       setCreating(true);
       try {
+        if (await hasPendingRequest(payload?.transfer_order_id)) {
+          message.warning(t("messages.pendingRequestExists"));
+          return;
+        }
         await TransferRefundRemakeRequestsAPI.create(payload);
         message.success(t("messages.createSuccess"));
         handleCloseCreateModal();
@@ -72,7 +110,7 @@ export default function TransferShippedOrdersPage() {
         setCreating(false);
       }
     },
-    [handleCloseCreateModal, message, t]
+    [handleCloseCreateModal, hasPendingRequest, message, t]
   );
 
   const rowActionsRenderer = useCallback(

@@ -68,6 +68,8 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
   const statusLabel = statusKey
     ? tOrders(`status.values.${statusKey}`) || statusKey
     : tOrders("common.none");
+  const productName =
+    item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
 
   return (
     <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
@@ -88,7 +90,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Typography.Text type="secondary">{tOrders("columns.product")}</Typography.Text>
-            <div className="font-medium">{item?.product?.name || tOrders("common.none")}</div>
+            <div className="font-medium">{productName}</div>
           </div>
           <div>
             <Typography.Text type="secondary">{tOrders("columns.notes")}</Typography.Text>
@@ -320,19 +322,32 @@ export default function TransferPrinterOrderSearchPage({
                             {groupDesigns.length ? (
                               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {groupDesigns.map((design) => (
-                                  <Image
+                                  <Card
                                     key={String(design?.id || design?.design_url)}
-                                    src={design?.design_url}
-                                    alt="transfer-design"
-                                    style={{
-                                      width: "100%",
-                                      maxHeight: 220,
-                                      objectFit: "cover",
-                                      borderRadius: 8,
-                                      border: "1px solid #f1f5f9",
-                                    }}
-                                    preview
-                                  />
+                                    size="small"
+                                    bodyStyle={{ padding: 10 }}
+                                  >
+                                    <div className="space-y-2">
+                                      <Image
+                                        src={design?.design_url}
+                                        alt="transfer-design"
+                                        style={{
+                                          width: "100%",
+                                          maxHeight: 220,
+                                          objectFit: "cover",
+                                          borderRadius: 8,
+                                          border: "1px solid #f1f5f9",
+                                        }}
+                                        preview
+                                      />
+                                      <Typography.Text type="secondary" className="block text-xs">
+                                        Size: {formatAmount(design?.width)}" x {formatAmount(design?.height)}"
+                                      </Typography.Text>
+                                      <Typography.Text strong className="block">
+                                        Price: {formatAmount(design?.price)}
+                                      </Typography.Text>
+                                    </div>
+                                  </Card>
                                 ))}
                               </div>
                             ) : (

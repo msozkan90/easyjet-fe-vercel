@@ -419,6 +419,136 @@
         "noData": "Veri bulunamadı"
       }
     },
+    "orderReport": {
+      "title": "Sipariş Raporu",
+      "subtitle": "Company kapsamındaki siparişlerin günlük ciro ve ürün dağılım raporu.",
+      "heroBadge": "Financial Insight",
+      "rangeLabel": "{from} - {to} aralığı gösteriliyor",
+      "summary": {
+        "totalOrders": "Toplam Sipariş",
+        "totalItems": "Toplam Ürün Adedi",
+        "totalRevenue": "Toplam Ciro",
+        "totalDays": "Filtrelenen Gün"
+      },
+      "filters": {
+        "title": "Filtreler",
+        "entities": "Partner / Customer",
+        "category": "Kategori",
+        "orderStatus": "Sipariş Durumu",
+        "orderDate": "Sipariş Tarihi",
+        "entitiesPlaceholder": "Partner ve customer seçin",
+        "selectAllEntities": "Tümünü Seç",
+        "categoryPlaceholder": "Kategori seçin",
+        "orderStatusPlaceholder": "Durum seçin",
+        "searchInColumn": "{column} ara",
+        "search": "Ara",
+        "reset": "Temizle",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Günlük Sipariş Özeti",
+        "date": "Tarih",
+        "orderCount": "Sipariş Sayısı",
+        "itemQuantity": "Ürün Adedi",
+        "revenue": "Toplam Tutar",
+        "actions": "İşlemler"
+      },
+      "detailTable": {
+        "product": "Ürün",
+        "size": "Size",
+        "color": "Color",
+        "itemQuantity": "Toplam Adet",
+        "revenue": "Toplam Tutar"
+      },
+      "drawer": {
+        "title": "{date} Detayı",
+        "fallbackTitle": "Gün Detayı",
+        "totalOrders": "Sipariş Sayısı",
+        "totalItems": "Ürün Adedi",
+        "totalRevenue": "Toplam Ciro"
+      },
+      "messages": {
+        "loadFiltersError": "Rapor filtreleri yüklenemedi.",
+        "loadReportError": "Sipariş raporu yüklenemedi.",
+        "loadDetailError": "Gün detayı yüklenemedi.",
+        "empty": "Gösterilecek günlük rapor bulunamadı.",
+        "emptyDetail": "Bu gün için ürün detayı bulunamadı."
+      }
+    },
+    "transferOrderReport": {
+      "title": "Transfer Sipariş Raporu",
+      "subtitle": "Company kapsamındaki transfer siparişlerinin günlük ciro, inch ve ürün dağılım raporu.",
+      "heroBadge": "Transfer Financial Insight",
+      "rangeLabel": "{from} - {to} aralığı gösteriliyor",
+      "summary": {
+        "totalOrders": "Toplam Sipariş",
+        "totalItems": "Toplam Ürün Adedi",
+        "totalLengthInches": "Toplam Length (inch)",
+        "totalRevenue": "Toplam Ciro",
+        "totalDays": "Filtrelenen Gün"
+      },
+      "filters": {
+        "title": "Filtreler",
+        "entities": "Partner / Customer",
+        "product": "Ürün",
+        "orderStatus": "Sipariş Durumu",
+        "orderDate": "Sipariş Tarihi",
+        "entitiesPlaceholder": "Partner ve customer seçin",
+        "selectAllEntities": "Tümünü Seç",
+        "productPlaceholder": "Ürün seçin",
+        "orderStatusPlaceholder": "Durum seçin",
+        "searchInColumn": "{column} ara",
+        "search": "Ara",
+        "reset": "Temizle",
+        "entityTypes": {
+          "customer": "Customer",
+          "partner": "Partner"
+        },
+        "presets": {
+          "today": "Today",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "table": {
+        "title": "Günlük Transfer Sipariş Özeti",
+        "date": "Tarih",
+        "orderCount": "Sipariş Sayısı",
+        "itemQuantity": "Ürün Adedi",
+        "lengthInches": "Length (inch)",
+        "revenue": "Toplam Tutar",
+        "actions": "İşlemler"
+      },
+      "detailTable": {
+        "product": "Ürün",
+        "itemQuantity": "Toplam Adet",
+        "lengthInches": "Length (inch)",
+        "revenue": "Toplam Tutar"
+      },
+      "drawer": {
+        "title": "{date} Detayı",
+        "fallbackTitle": "Gün Detayı",
+        "totalOrders": "Sipariş Sayısı",
+        "totalItems": "Ürün Adedi",
+        "totalLengthInches": "Toplam Length (inch)",
+        "totalRevenue": "Toplam Ciro"
+      },
+      "messages": {
+        "loadFiltersError": "Rapor filtreleri yüklenemedi.",
+        "loadReportError": "Transfer sipariş raporu yüklenemedi.",
+        "loadDetailError": "Gün detayı yüklenemedi.",
+        "empty": "Gösterilecek günlük transfer raporu bulunamadı.",
+        "emptyDetail": "Bu gün için transfer ürün detayı bulunamadı."
+      }
+    },
     "customer": {
       "columns": {
         "id": "Kimlik",
@@ -689,6 +819,76 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "userMetrics": {
+      "title": "Kullanıcı Metrikleri",
+      "subtitle": "Kullanıcı bazında başarılı audit loglarını tarih aralığına göre inceleyin.",
+      "stats": {
+        "total": "Toplam Log",
+        "completed": "Tamamlanan Logları",
+        "shipped": "Kargolanan Logları",
+        "scrap": "Scrap Logları",
+        "remake": "Remake Logları",
+        "refund": "Refund Logları"
+      },
+      "columns": {
+        "user": "Kullanıcı",
+        "role": "Rol",
+        "status": "Durum",
+        "total": "Toplam",
+        "completed": "Tamamlanan",
+        "shipped": "Kargolanan",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund",
+        "actions": "İşlemler"
+      },
+      "actions": {
+        "detail": "Detay"
+      },
+      "filters": {
+        "searchUser": "Kullanıcı veya e-posta ara",
+        "selectRole": "Rol seç",
+        "selectStatus": "Durum seç"
+      },
+      "metricLabels": {
+        "completed": "Tamamlanan",
+        "shipped": "Kargolanan",
+        "scrap": "Scrap",
+        "remake": "Remake",
+        "refund": "Refund"
+      },
+      "messages": {
+        "loadError": "Kullanıcı metrikleri yüklenemedi.",
+        "loadDetailError": "Kullanıcı log detayları yüklenemedi.",
+        "empty": "Seçilen tarih aralığında kullanıcı metriği bulunamadı."
+      },
+      "detail": {
+        "title": "{user} Metrikleri",
+        "status": {
+          "success": "Başarılı",
+          "failed": "Hatalı"
+        },
+        "columns": {
+          "date": "Tarih",
+          "metric": "Metrik",
+          "title": "Aktivite",
+          "description": "Açıklama",
+          "status": "Durum",
+          "requestType": "Aksiyon",
+          "route": "Route",
+          "error": "Hata"
+        },
+        "messages": {
+          "empty": "Bu kullanıcı için log bulunamadı."
+        },
+        "filters": {
+          "searchTitle": "Aktivite başlığı ara",
+          "searchDescription": "Açıklama ara",
+          "selectRequestType": "Aksiyon seç",
+          "searchRoute": "Route ara"
+        }
       }
     },
     "customerAdmins": {
@@ -1841,7 +2041,7 @@
           },
           "fields": {
             "title": "Başlık",
-            "summary": "Özet",
+            "summary": "Açıklama",
             "date": "Tarih",
             "subject": "Konu",
             "status": "Durum",
@@ -2303,8 +2503,7 @@
       "scanner": {
         "title": "Tarayıcı",
         "actions": {
-          "complete": "Tamamla",
-          "scrap": "Fire Var"
+          "complete": "Tamamla"
         },
         "messages": {
           "loadBeforeScrap": "Fire kaydı girmeden önce siparişi yükleyin.",
@@ -2345,6 +2544,20 @@
             "damagedProduct": "Hasarlı ürün",
             "other": "Diğer"
           }
+        }
+      },
+      "reportScrape": {
+        "title": "Report Scrape",
+        "actions": {
+          "open": "Report Scrape",
+          "confirm": "Fire Kaydet"
+        },
+        "modal": {
+          "title": "Fire Kaydı Oluştur"
+        },
+        "messages": {
+          "orderIdMissing": "Fire kaydı için sipariş kimliği çözümlenemedi.",
+          "recordSuccess": "Fire kaydı başarıyla oluşturuldu."
         }
       },
       "transferDetail": {
@@ -2594,6 +2807,7 @@
         "requestType": "Talep Tipi",
         "status": "Durum",
         "order": "Sipariş # / Sipariş ID",
+        "responsibleEntity": "Sorumlu Varlık",
         "createdAt": "Oluşturulma",
         "updatedAt": "Güncellenme",
         "actions": "İşlemler"
@@ -2629,6 +2843,8 @@
         "detailLoadError": "Talep detayı yüklenemedi.",
         "createSuccess": "İade/yeniden üretim talebi oluşturuldu.",
         "createError": "İade/yeniden üretim talebi oluşturulamadı.",
+        "pendingRequestExists": "Bu sipariş için zaten bekleyen bir iade/yeniden üretim talebi var.",
+        "pendingRequestCheckError": "Bekleyen iade/yeniden üretim talebi kontrol edilemedi.",
         "statusUpdateSuccess": "Talep durumu güncellendi.",
         "statusUpdateError": "Talep durumu güncellenemedi.",
         "noData": "Talep bulunamadı.",
@@ -2726,7 +2942,8 @@
         "waitingForDesign": "Tasarım Bekleyenler",
         "cancel": "İptal Siparişler",
         "printer": "Printer",
-        "scanner": "Tarayıcı"
+        "scanner": "Tarayıcı",
+        "reportScrape": "Report Scrape"
       },
       "financial": {
         "title": "Finans",
@@ -2738,6 +2955,9 @@
         "adminTopups": "Bakiye Yükleme Onayları",
         "fundingAccounts": "Fonlama Hesapları",
         "transferPaymentManagement": "Transfer Ödemeleri",
+        "walletTransactions": "Bakiye Hareketleri",
+        "orderReport": "Sipariş Raporu",
+        "transferOrderReport": "Transfer Sipariş Raporu",
         "paymentStatuses": {
           "pending": "Bekleyenler",
           "processing": "İşlemde",
@@ -2808,7 +3028,8 @@
       "myCompany": {
         "title": "Şirketim",
         "users": "Şirket Kullanıcıları",
-        "settings": "Şirket Ayarları"
+        "settings": "Şirket Ayarları",
+        "userMetrics": "Kullanıcı Metrikleri"
       },
       "settings": "Ayarlar"
     },

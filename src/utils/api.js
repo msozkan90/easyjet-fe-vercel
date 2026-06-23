@@ -161,6 +161,8 @@ export const OrdersAPI = {
   //order Details
   details: (id) => api.get(`/orders/items/${id}`),
   orderDetail: (orderNumber) => api.get(`/orders/${orderNumber}`),
+  report: (payload) => api.post("/orders/report", payload),
+  reportDayDetail: (payload) => api.post("/orders/report/day-detail", payload),
   saveDesign: (formData) => api.putMultipart("/orders/items", formData),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
@@ -196,6 +198,9 @@ export const OrdersPdfAPI = {
 export const TransferOrdersAPI = {
   create: (data) => api.post("/transfer-orders", data),
   createManual: (data) => api.post("/transfer-orders/manual", data),
+  report: (payload) => api.post("/transfer-orders/report", payload),
+  reportDayDetail: (payload) =>
+    api.post("/transfer-orders/report/day-detail", payload),
   list: (payload) => api.post("/transfer-orders/list", payload),
   detail: (orderNumber) =>
     api.get(`/transfer-orders/${encodeURIComponent(orderNumber)}`),
@@ -308,6 +313,9 @@ export const AuditLogsAPI = {
       `/audit-logs/transfer-orders/${encodeURIComponent(orderNumber)}`,
       params,
     ),
+  userMetricsSummary: (params = {}) => api.get("/audit-logs/user-metrics", params),
+  userMetricLogs: (userId, params = {}) =>
+    api.get(`/audit-logs/user-metrics/${encodeURIComponent(userId)}`, params),
 };
 
 export const NestShipperAPI = {
