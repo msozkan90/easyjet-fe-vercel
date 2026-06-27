@@ -408,6 +408,7 @@ export const TransferProductsAPI = {
 
 export const TransferProductPricesAPI = {
   list: (query) => api.post("/transfer-product-prices/list", query),
+  assigned: (query) => api.post("/transfer-product-prices/assigned", query),
   create: (data) => api.post("/transfer-product-prices", data),
   update: (id, data) => api.put(`/transfer-product-prices/${id}`, data),
   remove: (id) => api.del(`/transfer-product-prices/${id}`),

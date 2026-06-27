@@ -210,11 +210,24 @@ export default function TransferShippingRatesModal({
     if (hasSystemApi)
       items.push({ key: SERVICE_TABS.EASYJET, label: tModal("tabs.easyjet") });
     if (hasCompanySSApi)
-      items.push({ key: SERVICE_TABS.COMPANY, label: tModal("tabs.company") });
+      items.push({
+        key: SERVICE_TABS.COMPANY,
+        label: companyInfo?.entity_name || tModal("tabs.company"),
+      });
     if (hasPartnerSSApi)
-      items.push({ key: SERVICE_TABS.PARTNER, label: tModal("tabs.partner") });
+      items.push({
+        key: SERVICE_TABS.PARTNER,
+        label: partnerInfo?.entity_name || tModal("tabs.partner"),
+      });
     return items;
-  }, [hasCompanySSApi, hasPartnerSSApi, hasSystemApi, tModal]);
+  }, [
+    companyInfo?.name,
+    hasCompanySSApi,
+    hasPartnerSSApi,
+    hasSystemApi,
+    partnerInfo?.name,
+    tModal,
+  ]);
 
   const items = useMemo(
     () => (Array.isArray(transferOrder?.items) ? transferOrder.items : []),
@@ -269,6 +282,7 @@ export default function TransferShippingRatesModal({
   );
 
   const shippingAmount = Number(selectedRate?.amount || 0);
+  const deliveryMethod = transferOrder?.delivery_method || null;
 
   const validateInputs = useCallback(() => {
     if (!transferOrder?.id) {
@@ -566,6 +580,11 @@ export default function TransferShippingRatesModal({
               <div>
                 <Tag className="rounded-full" color="green">
                   {tModal("items.itemCount")}: {items.length}
+                </Tag>
+              </div>
+              <div>
+                <Tag className="rounded-full" color="cyan">
+                  {tOrders("columns.deliveryMethod")}: {deliveryMethod || "-"}
                 </Tag>
               </div>
             </div>

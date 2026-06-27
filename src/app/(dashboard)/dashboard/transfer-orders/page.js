@@ -13,8 +13,7 @@ import {
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { OrdersAPI, TransferOrdersAPI } from "@/utils/api";
-import { fetchGenericList } from "@/utils/fetchGenericList";
+import { OrdersAPI, TransferOrdersAPI, TransferProductPricesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
@@ -75,11 +74,18 @@ export default function OrdersPage() {
     const loadTransferProducts = async () => {
       setProductsLoading(true);
       try {
-        const list = await fetchGenericList("transfer_product", {
+        const response = await TransferProductPricesAPI.assigned({
           filters: { status: "active" },
+          pagination: { page: 1, pageSize: 1000 },
         });
+        const { list } = normalizeListAndMeta(response);
         if (active) {
-          setTransferProducts(Array.isArray(list) ? list : []);
+          const nextProducts = Array.isArray(list)
+            ? list
+                .map((item) => item?.transfer_product)
+                .filter((product) => product?.id)
+            : [];
+          setTransferProducts(nextProducts);
         }
       } catch (error) {
         if (active) {

@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
+  Alert,
   App as AntdApp,
   Button,
   Card,
@@ -303,6 +304,7 @@ export default function TransferShippedPrinterSearchPage() {
                 currency: transferOrder?.currency || "USD",
                 barcode_url: transferOrder?.barcode_url || null,
                 order_date: transferOrder?.order_date || null,
+                delivery_method: transferOrder?.delivery_method || null,
                 fullfillment_location:
                   transferOrder?.fullfillment_location || null,
                 local_pickup: Boolean(transferOrder?.local_pickup),
@@ -484,6 +486,14 @@ export default function TransferShippedPrinterSearchPage() {
                 />
               ) : null}
             </div>
+            {orderSummary?.delivery_method ? (
+              <Alert
+                className="mt-3"
+                type="info"
+                showIcon
+                message={`${tOrders("columns.deliveryMethod")}: ${orderSummary.delivery_method}`}
+              />
+            ) : null}
           </Card>
         ) : null}
 
