@@ -104,13 +104,16 @@ export default function SettingsPage() {
   const isPartnerAdmin = normalizedRoles.includes("partneradmin");
   const isCustomerAdmin = normalizedRoles.includes("customeradmin");
   const isCompanyAdmin = normalizedRoles.includes("companyadmin");
+  const customerHasOwnKey = Boolean(user?.entity?.has_own_key);
+  const customerHasCompanyAssignedStore =
+    isCustomerAdmin &&
+    Boolean(user?.entity?.store_id) &&
+    !customerHasOwnKey;
 
-  const hasOwnApiKeyCustomerAdmin = useMemo(() => {
+  const canManageCustomerApiCredentials = useMemo(() => {
     if (!user || !isCustomerAdmin) return false;
-    const customer = user.entity;
-    if (customer.store_id) return false;
-    return true;
-  }, [user, isCustomerAdmin]);
+    return !customerHasCompanyAssignedStore || customerHasOwnKey;
+  }, [customerHasCompanyAssignedStore, customerHasOwnKey, isCustomerAdmin, user]);
 
   const canSeeShipStation =
     isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
@@ -123,17 +126,17 @@ export default function SettingsPage() {
   const userForRuleContext = useMemo(() => {
     if (!user) return null;
     const entity = user.entity || {};
-    const derivedHasOwnKey =
-      entity.has_own_key ??
-      (!entity.store_id && `${entity.entity_type || userEntityType}`.toLowerCase() === "customer");
     return {
       ...user,
       entity: {
         ...entity,
-        has_own_key: derivedHasOwnKey,
+        has_own_key: Boolean(entity.has_own_key),
+        store_assigned_by_company:
+          entity.store_assigned_by_company ??
+          (Boolean(entity.store_id) && !Boolean(entity.has_own_key)),
       },
     };
-  }, [user, userEntityType]);
+  }, [user]);
 
   const ruleContext = useMemo(
     () => ({
@@ -458,7 +461,7 @@ export default function SettingsPage() {
         const isRexven = isRexvenSource(source);
         const resolvedStoreId = values.store_id ?? credential?.store_id ?? "";
 
-        if (isShipstation && hasOwnApiKeyCustomerAdmin && !resolvedStoreId) {
+        if (isShipstation && canManageCustomerApiCredentials && isCustomerAdmin && !resolvedStoreId) {
           message.error(tProfile("messages.storeIdRequired"));
           return;
         }
@@ -478,7 +481,7 @@ export default function SettingsPage() {
           payload.api_source_id = sourceId;
         }
 
-        if (isShipstation && hasOwnApiKeyCustomerAdmin) {
+        if (isShipstation && canManageCustomerApiCredentials && isCustomerAdmin) {
           payload.store_id = resolvedStoreId;
         }
 
@@ -540,7 +543,8 @@ export default function SettingsPage() {
     [
       credentialsBySource,
       getSourceById,
-      hasOwnApiKeyCustomerAdmin,
+      canManageCustomerApiCredentials,
+      isCustomerAdmin,
       isShopifySource,
       isRexvenSource,
       isShipstationSource,
@@ -622,6 +626,37 @@ export default function SettingsPage() {
     ]
   );
 
+  const handleRemoveShipstation = useCallback(
+    async (sourceId) => {
+      if (!sourceId) return;
+      const credential = credentialsBySource[sourceId] || null;
+      if (!credential?.id) return;
+
+      setLoadingFlag("ship_save", true);
+      try {
+        await ShipStationAPI.remove(credential.id);
+        message.success("Credential removed.");
+        await loadShipStation();
+        await refreshUser();
+      } catch (error) {
+        const fallbackMessage =
+          error?.response?.data?.error?.message ||
+          tProfile("messages.shipstationGenericError");
+        message.error(fallbackMessage);
+      } finally {
+        setLoadingFlag("ship_save", false);
+      }
+    },
+    [
+      credentialsBySource,
+      loadShipStation,
+      message,
+      refreshUser,
+      setLoadingFlag,
+      tProfile,
+    ]
+  );
+
   const heroTitle = translateOrFallback(
     tSettings,
     "header.title",
@@ -646,7 +681,8 @@ export default function SettingsPage() {
   );
   const isShipstationActive = isShipstationSource(activeSource);
   const isRexvenActive = isRexvenSource(activeSource);
-  const shouldShowStoreId = isShipstationActive && hasOwnApiKeyCustomerAdmin;
+  const shouldShowStoreId =
+    isShipstationActive && isCustomerAdmin && canManageCustomerApiCredentials;
   const credential = credentialsBySource[activeSourceId] || null;
   const isEditing =
     editingSources[activeSourceId] ?? (credential ? false : true);
@@ -709,6 +745,8 @@ export default function SettingsPage() {
                   shouldShowStoreId={shouldShowStoreId}
                   canVerify={canVerifyCredentials}
                   isShipstation={isShipstationActive}
+                  canRemove={Boolean(credential?.id)}
+                  onRemove={handleRemoveShipstation}
                 />
               ) : (
                 <IntegrationsPlaceholder tSettings={tSettings} />

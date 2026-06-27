@@ -770,6 +770,7 @@ export const ShipStationAPI = {
 
   // GÜNCELLE
   update: (id, data) => api.put(`/shipstation/credentials/${id}`, data),
+  remove: (id) => api.del(`/shipstation/credentials/${id}`),
   // data (update): { api_key?: string, api_secret?: string, label?: string, status?: "active"|"inactive" }
 
   storeList: () => api.get("/shipstation/store/list"),

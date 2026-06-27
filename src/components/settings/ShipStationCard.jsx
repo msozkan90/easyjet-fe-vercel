@@ -19,6 +19,7 @@ import {
   SaveOutlined,
   CloseOutlined,
   EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 
 const { Text } = Typography;
@@ -49,6 +50,8 @@ export default function ShipStationCard({
   shouldShowStoreId,
   canVerify,
   isShipstation,
+  canRemove,
+  onRemove,
 }) {
   const isSaving = loading.ship_save;
   const isFetching = loading.ship_fetch;
@@ -284,12 +287,23 @@ export default function ShipStationCard({
                 </Button>
               </Space>
             ) : (
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => onEdit?.(activeSourceId)}
-              >
-                {tProfile("shipStation.buttons.edit")}
-              </Button>
+              <Space>
+                {canRemove && (
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => onRemove?.(activeSourceId)}
+                  >
+                    {tCommon("actions.delete")}
+                  </Button>
+                )}
+                <Button
+                  icon={<EditOutlined />}
+                  onClick={() => onEdit?.(activeSourceId)}
+                >
+                  {tProfile("shipStation.buttons.edit")}
+                </Button>
+              </Space>
             )}
           </Space>
 
