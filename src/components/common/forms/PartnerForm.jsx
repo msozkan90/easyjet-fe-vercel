@@ -13,7 +13,7 @@ export default function PartnerForm({
 }) {
   const [form] = Form.useForm();
   const user = useSelector((s) => s.auth.user);
-  const isShippingOwner = user?.entity?.is_shipping_owner || false;
+  const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
   const tCommonForms = useTranslations("forms.common");
   const tForm = useTranslations("forms.partner");
   const tStatus = useTranslations("common.status");

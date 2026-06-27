@@ -25,7 +25,7 @@ export default function CustomersPage() {
   const t = useTranslations("dashboard.customer");
   const user = useSelector((s) => s.auth.user);
   const isPartnerEntity = user?.entity?.entity_type === "partner";
-  const isShippingOwner = user?.entity?.is_shipping_owner || false;
+  const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
 
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);

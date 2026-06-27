@@ -24,7 +24,7 @@ export default function PartnersPage() {
   const t = useTranslations("dashboard.partner");
   const tStatus = useTranslations("common.status");
   const user = useSelector((s) => s.auth.user);
-  const isShippingOwner = user?.entity?.is_shipping_owner || false;
+  const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);

@@ -170,7 +170,7 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
     tOrders("common.none"),
   );
   const canVoid =
-    detail?.status === "PURCHASED" || detail?.status === "completed";
+    detail?.status === "PURCHASED" || detail?.status === "completed" || label?.status === "active";
   const carrierValue =
     detail?.carrier_code || detail?.carrier || tOrders("common.none");
   const serviceValue =

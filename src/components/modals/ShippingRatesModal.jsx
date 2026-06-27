@@ -225,10 +225,10 @@ const ShippingRatesModal = ({
   const companyInfo = parentEntity?.company;
   const partnerInfo = parentEntity?.partner;
   const hasCompanySSApi =
-    Boolean(companyInfo?.has_api_v2) &&
+    Boolean(companyInfo?.has_shipstation_shipping) &&
     Boolean(companyInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasPartnerSSApi =
-    Boolean(partnerInfo?.has_api_v2) &&
+    Boolean(partnerInfo?.has_shipstation_shipping) &&
     Boolean(partnerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasSystemApi = Boolean(companyInfo?.permissions?.CAN_USE_NS_SHIPMENT);
 
