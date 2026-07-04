@@ -206,7 +206,15 @@ export default function SettingsPage() {
   );
 
   const isShipstationSource = useCallback((source) => {
+    return (source?.name || "").toLowerCase().startsWith("shipstation_api");
+  }, []);
+
+  const isShipstationV1Source = useCallback((source) => {
     return (source?.name || "").toLowerCase() === "shipstation_api";
+  }, []);
+
+  const isShipstationV2Source = useCallback((source) => {
+    return (source?.name || "").toLowerCase() === "shipstation_api_v2";
   }, []);
 
   const isShopifySource = useCallback((source) => {
@@ -456,12 +464,17 @@ export default function SettingsPage() {
           hasApiKeyField && values.api_key && values.api_key !== maskedKey;
         const secretProvided = hasApiSecretField && !!values.api_secret;
 
-        const isShipstation = isShipstationSource(source);
+        const isShipstationV1 = isShipstationV1Source(source);
         const isShopify = isShopifySource(source);
         const isRexven = isRexvenSource(source);
         const resolvedStoreId = values.store_id ?? credential?.store_id ?? "";
 
-        if (isShipstation && canManageCustomerApiCredentials && isCustomerAdmin && !resolvedStoreId) {
+        if (
+          isShipstationV1 &&
+          canManageCustomerApiCredentials &&
+          isCustomerAdmin &&
+          !resolvedStoreId
+        ) {
           message.error(tProfile("messages.storeIdRequired"));
           return;
         }
@@ -481,7 +494,7 @@ export default function SettingsPage() {
           payload.api_source_id = sourceId;
         }
 
-        if (isShipstation && canManageCustomerApiCredentials && isCustomerAdmin) {
+        if (isShipstationV1 && canManageCustomerApiCredentials && isCustomerAdmin) {
           payload.store_id = resolvedStoreId;
         }
 
@@ -547,7 +560,7 @@ export default function SettingsPage() {
       isCustomerAdmin,
       isShopifySource,
       isRexvenSource,
-      isShipstationSource,
+      isShipstationV1Source,
       loadShipStation,
       message,
       refreshUser,
@@ -567,6 +580,7 @@ export default function SettingsPage() {
         const source = getSourceById(sourceId);
         const fields = source?.config?.form?.fields || [];
         const isRexven = isRexvenSource(source);
+        const isShipstationV2 = isShipstationV2Source(source);
         const masked = credential?.api_key_mask || "";
         const currentKey = values.api_key;
         const currentSecret = values.api_secret;
@@ -579,6 +593,11 @@ export default function SettingsPage() {
             message.warning(tProfile("messages.verificationMissing"));
             return;
           }
+        } else if (isShipstationV2) {
+          if (!keyProvided) {
+            message.warning(tProfile("messages.verificationMissing"));
+            return;
+          }
         } else if (!keyProvided || !secretProvided) {
           message.warning(tProfile("messages.verificationMissing"));
           return;
@@ -587,6 +606,8 @@ export default function SettingsPage() {
         const payload = { api_source_id: sourceId };
         if (isRexven) {
           payload["x-api-secret"] = rexvenSecret;
+        } else if (isShipstationV2) {
+          payload.api_key = currentKey;
         } else {
           payload.api_key = currentKey;
           payload.api_secret = currentSecret;
@@ -619,6 +640,7 @@ export default function SettingsPage() {
       credentialsBySource,
       getSourceById,
       isRexvenSource,
+      isShipstationV2Source,
       message,
       setLoadingFlag,
       shipForm,
@@ -680,16 +702,19 @@ export default function SettingsPage() {
     (field) => field.key === "api_secret"
   );
   const isShipstationActive = isShipstationSource(activeSource);
+  const isShipstationV1Active = isShipstationV1Source(activeSource);
+  const isShipstationV2Active = isShipstationV2Source(activeSource);
   const isRexvenActive = isRexvenSource(activeSource);
   const shouldShowStoreId =
-    isShipstationActive && isCustomerAdmin && canManageCustomerApiCredentials;
+    isShipstationV1Active && isCustomerAdmin && canManageCustomerApiCredentials;
   const credential = credentialsBySource[activeSourceId] || null;
   const isEditing =
     editingSources[activeSourceId] ?? (credential ? false : true);
   const storeList = storeLists[activeSourceId] || [];
   const activeSourceLabel = formatSourceLabel(activeSource);
   const canVerifyCredentials =
-    (shouldShowStoreId && hasApiKeyField && hasApiSecretField) ||
+    (isShipstationV1Active && hasApiKeyField && hasApiSecretField) ||
+    (isShipstationV2Active && hasApiKeyField) ||
     (isRexvenActive &&
       activeSourceFields.some((field) => field.key === "x-api-secret"));
 
