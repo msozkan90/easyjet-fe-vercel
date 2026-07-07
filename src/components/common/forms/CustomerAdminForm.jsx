@@ -19,6 +19,7 @@ export default function CustomerAdminForm({
   initialValues,
   onSubmit,
   onCancel,
+  onDirtyChange,
 }) {
   const [form] = Form.useForm();
   const tCommonForms = useTranslations("forms.common");
@@ -42,6 +43,7 @@ export default function CustomerAdminForm({
       layout="vertical"
       preserve={false}
       initialValues={initialValues}
+      onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
         name="first_name"

@@ -9,6 +9,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { CategoriesAPI, CompanyAdminsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import CompanyUserForm from "@/components/common/forms/CompanyUserForm";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
@@ -32,6 +33,9 @@ export default function CompanyUsersPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [formDirty, setFormDirty] = useState(false);
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     let alive = true;
@@ -230,6 +234,7 @@ export default function CompanyUsersPage() {
         await CompanyAdminsAPI.create(payload);
         message.success(t("messages.createSuccess"));
       }
+      setFormDirty(false);
       setOpen(false);
       setEditing(null);
       tableRef.current?.setPage(1);
@@ -253,6 +258,7 @@ export default function CompanyUsersPage() {
 
   return (
     <RequireRole anyOfRoles={["companyadmin"]}>
+      {unsavedChangesModalContextHolder}
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -272,6 +278,7 @@ export default function CompanyUsersPage() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
+                setFormDirty(false);
                 setEditing(null);
                 setOpen(true);
               }}
@@ -289,37 +296,51 @@ export default function CompanyUsersPage() {
       <Modal
         title={editing ? t("modal.editTitle") : t("modal.createTitle")}
         open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditing(null);
-        }}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: formDirty,
+            onDiscard: () => {
+              setFormDirty(false);
+              setOpen(false);
+              setEditing(null);
+            },
+          })
+        }
         footer={null}
         destroyOnHidden
       >
-        <CompanyUserForm
-          mode={editing ? "edit" : "create"}
-          categories={categories}
-          initialValues={
-            editing
-              ? {
-                  first_name: editing.first_name,
-                  last_name: editing.last_name,
-                  email: editing.email,
-                  mobile_phone: editing.mobile_phone,
-                  status: editing.status || "active",
-                  role_code: editing.role.code,
-                  categories: (editing?.user_categories || []).map(
-                    (category) => category.id,
-                  ),
-                }
-              : { role_code: RoleEnum.COMPANY_ADMIN }
-          }
-          onSubmit={onSubmit}
-          onCancel={() => {
-            setOpen(false);
-            setEditing(null);
-          }}
-        />
+        <div onChangeCapture={() => setFormDirty(true)}>
+          <CompanyUserForm
+            mode={editing ? "edit" : "create"}
+            categories={categories}
+            initialValues={
+              editing
+                ? {
+                    first_name: editing.first_name,
+                    last_name: editing.last_name,
+                    email: editing.email,
+                    mobile_phone: editing.mobile_phone,
+                    status: editing.status || "active",
+                    role_code: editing.role.code,
+                    categories: (editing?.user_categories || []).map(
+                      (category) => category.id,
+                    ),
+                  }
+                : { role_code: RoleEnum.COMPANY_ADMIN }
+            }
+            onSubmit={onSubmit}
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditing(null);
+                },
+              })
+            }
+          />
+        </div>
       </Modal>
     </RequireRole>
   );

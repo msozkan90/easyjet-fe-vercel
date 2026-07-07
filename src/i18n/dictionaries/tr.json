@@ -3,6 +3,12 @@
     "language": "Dil",
     "languageChanged": "Dil {language} olarak güncellendi.",
     "languageChangeError": "Dil değiştirilemedi. Lütfen tekrar deneyin.",
+    "unsavedChanges": {
+      "title": "Kaydedilmemiş değişiklikler var",
+      "description": "Bu modalı kapatmak istediğinize emin misiniz? Değişiklikleriniz kaybolacak.",
+      "discard": "Değişiklikleri sil",
+      "continueEditing": "Düzenlemeye devam et"
+    },
     "navbar": {
       "profile": "Profil",
       "settings": "Ayarlar",
@@ -2398,6 +2404,9 @@
         },
         "fields": {
           "billToName": "Fatura Adı",
+          "shipToName": "Teslimat Adı",
+          "shipToCompany": "Teslimat Şirketi",
+          "shipToPhone": "Teslimat Telefonu",
           "searchAddress": "Adres ara",
           "street1": "Adres Satırı 1",
           "street2": "Adres Satırı 2",
@@ -2409,6 +2418,9 @@
         },
         "placeholders": {
           "billToName": "Müşterinin tam adı",
+          "shipToName": "Teslimat alıcısının adı",
+          "shipToCompany": "Teslimat şirketi",
+          "shipToPhone": "Teslimat telefonu",
           "street1": "Adres satırı 1",
           "street2": "Apartman, daire vb. (opsiyonel)",
           "street3": "Adres satırı 3 (opsiyonel)",

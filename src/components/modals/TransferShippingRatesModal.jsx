@@ -25,6 +25,7 @@ import { EditOutlined, ReloadOutlined } from "@ant-design/icons";
 import { TransferOrdersAPI } from "@/utils/api";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { useTranslations } from "@/i18n/use-translations";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -173,6 +174,8 @@ export default function TransferShippingRatesModal({
   const tCommonActions = useTranslations("common.actions");
   const user = useSelector((state) => state.auth.user);
   const [form] = Form.useForm();
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   const [weightLb, setWeightLb] = useState(null);
   const [weightOz, setWeightOz] = useState(null);
@@ -529,13 +532,28 @@ export default function TransferShippingRatesModal({
   ]);
 
   return (
-    <Modal
+    <>
+      {unsavedChangesModalContextHolder}
+      <Modal
       open={open}
-      onCancel={onClose}
+      onCancel={() =>
+        confirmIfDirty({
+          isDirty: form.isFieldsTouched(true),
+          onDiscard: onClose,
+        })
+      }
       title={tModal("title")}
       width={1280}
       footer={[
-        <Button key="close" onClick={onClose}>
+        <Button
+          key="close"
+          onClick={() =>
+            confirmIfDirty({
+              isDirty: form.isFieldsTouched(true),
+              onDiscard: onClose,
+            })
+          }
+        >
           {tCommonActions("close")}
         </Button>,
         <Popconfirm
@@ -892,6 +910,7 @@ export default function TransferShippingRatesModal({
         }
         zIndex={1500}
       />
-    </Modal>
+      </Modal>
+    </>
   );
 }

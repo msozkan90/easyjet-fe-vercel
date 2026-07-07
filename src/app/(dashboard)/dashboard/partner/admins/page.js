@@ -8,6 +8,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { CategoriesAPI, PartnerAdminsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import PartnerAdminForm from "@/components/common/forms/PartnerAdminForm";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
@@ -24,6 +25,9 @@ export default function PartnerAdminsPage() {
   const [editing, setEditing] = useState(null);
   const [partners, setPartners] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [formDirty, setFormDirty] = useState(false);
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     let alive = true;
@@ -226,6 +230,7 @@ export default function PartnerAdminsPage() {
         await PartnerAdminsAPI.create(payload);
         message.success(t("messages.createSuccess"));
       }
+      setFormDirty(false);
       setOpen(false);
       setEditing(null);
       tableRef.current?.setPage(1);
@@ -249,6 +254,7 @@ export default function PartnerAdminsPage() {
 
   return (
     <RequireRole anyOfRoles={["companyAdmin"]}>
+      {unsavedChangesModalContextHolder}
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -270,6 +276,7 @@ export default function PartnerAdminsPage() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
+                setFormDirty(false);
                 setEditing(null);
                 setOpen(true);
               }}
@@ -287,38 +294,52 @@ export default function PartnerAdminsPage() {
       <Modal
         title={editing ? t("modal.editTitle") : t("modal.createTitle")}
         open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditing(null);
-        }}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: formDirty,
+            onDiscard: () => {
+              setFormDirty(false);
+              setOpen(false);
+              setEditing(null);
+            },
+          })
+        }
         footer={null}
         destroyOnHidden
       >
-        <PartnerAdminForm
-          mode={editing ? "edit" : "create"}
-          partners={partners}
-          categories={categories}
-          initialValues={
-            editing
-              ? {
-                  first_name: editing.first_name,
-                  last_name: editing.last_name,
-                  email: editing.email,
-                  mobile_phone: editing.mobile_phone,
-                  status: editing.status || "active",
-                  role_code: editing.role_code,
-                  categories: (editing?.user_categories || []).map(
-                    (category) => category.id
-                  ),
-                }
-              : { status: "active", role_code: RoleEnum.PARTNER_ADMIN }
-          }
-          onSubmit={onSubmit}
-          onCancel={() => {
-            setOpen(false);
-            setEditing(null);
-          }}
-        />
+        <div onChangeCapture={() => setFormDirty(true)}>
+          <PartnerAdminForm
+            mode={editing ? "edit" : "create"}
+            partners={partners}
+            categories={categories}
+            initialValues={
+              editing
+                ? {
+                    first_name: editing.first_name,
+                    last_name: editing.last_name,
+                    email: editing.email,
+                    mobile_phone: editing.mobile_phone,
+                    status: editing.status || "active",
+                    role_code: editing.role_code,
+                    categories: (editing?.user_categories || []).map(
+                      (category) => category.id
+                    ),
+                  }
+                : { status: "active", role_code: RoleEnum.PARTNER_ADMIN }
+            }
+            onSubmit={onSubmit}
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditing(null);
+                },
+              })
+            }
+          />
+        </div>
       </Modal>
     </RequireRole>
   );

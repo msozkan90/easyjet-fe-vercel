@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { fileToDataUrl } from "@/utils/fileToDataUrl";
 
@@ -55,6 +56,8 @@ export default function RefundRemakeCreateModal({
   const t = useTranslations("dashboard.refundRemake");
   const [form] = Form.useForm();
   const [itemSelections, setItemSelections] = useState({});
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     if (!open) return;
@@ -300,11 +303,18 @@ export default function RefundRemakeCreateModal({
   );
 
   return (
-    <Modal
+    <>
+      {unsavedChangesModalContextHolder}
+      <Modal
       open={open}
       title={t("create.title")}
       width={980}
-      onCancel={onCancel}
+      onCancel={() =>
+        confirmIfDirty({
+          isDirty: form.isFieldsTouched(true),
+          onDiscard: onCancel,
+        })
+      }
       onOk={handleConfirm}
       okText={t("create.actions.submit")}
       confirmLoading={submitting}
@@ -406,6 +416,7 @@ export default function RefundRemakeCreateModal({
           display: none !important;
         }
       `}</style>
-    </Modal>
+      </Modal>
+    </>
   );
 }

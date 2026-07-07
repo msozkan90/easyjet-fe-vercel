@@ -9,6 +9,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { CompaniesAPI, CategoriesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import CompanyForm from "@/components/common/forms/CompanyForm";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
 import {
@@ -25,6 +26,9 @@ export default function CompaniesPage() {
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [formDirty, setFormDirty] = useState(false);
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     let alive = true;
@@ -229,12 +233,14 @@ export default function CompaniesPage() {
       if (editingRow) {
         await CompaniesAPI.update(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
+        setFormDirty(false);
         setOpen(false);
         setEditingRow(null);
         tableRef.current?.reload();
       } else {
         await CompaniesAPI.create(payload);
         message.success(t("messages.createSuccess"));
+        setFormDirty(false);
         setOpen(false);
         tableRef.current?.setPage(1);
         tableRef.current?.reload();
@@ -248,6 +254,7 @@ export default function CompaniesPage() {
 
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
+      {unsavedChangesModalContextHolder}
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -265,6 +272,7 @@ export default function CompaniesPage() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
+                setFormDirty(false);
                 setEditingRow(null);
                 setOpen(true);
               }}
@@ -283,22 +291,30 @@ export default function CompaniesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditingRow(null);
-        }}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: formDirty,
+            onDiscard: () => {
+              setFormDirty(false);
+              setOpen(false);
+              setEditingRow(null);
+            },
+          })
+        }
         footer={null}
         destroyOnHidden
         width={1040}
       >
-        <CompanyForm
-          onFinish={onSubmit}
-          submitText={
-            editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
-          }
-          categories={categories}
-          initialValues={formInitialValues}
-        />
+        <div onChangeCapture={() => setFormDirty(true)}>
+          <CompanyForm
+            onFinish={onSubmit}
+            submitText={
+              editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
+            }
+            categories={categories}
+            initialValues={formInitialValues}
+          />
+        </div>
       </Modal>
     </RequireRole>
   );
