@@ -30,6 +30,7 @@ export default function CustomerForm({
   categories = [],
   showProductMultiplier = false,
   showShipmentMultiplier = false,
+  onDirtyChange,
 }) {
   const { message } = AntdApp.useApp();
   const [form] = Form.useForm();
@@ -168,6 +169,7 @@ export default function CustomerForm({
       layout="vertical"
       initialValues={initialValues}
       onFinish={onFinish}
+      onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
         name="name"

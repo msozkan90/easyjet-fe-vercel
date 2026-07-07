@@ -3,6 +3,12 @@
     "language": "Dil",
     "languageChanged": "Dil {language} olarak güncellendi.",
     "languageChangeError": "Dil değiştirilemedi. Lütfen tekrar deneyin.",
+    "unsavedChanges": {
+      "title": "Kaydedilmemiş değişiklikler var",
+      "description": "Bu modalı kapatmak istediğinize emin misiniz? Değişiklikleriniz kaybolacak.",
+      "discard": "Değişiklikleri sil",
+      "continueEditing": "Düzenlemeye devam et"
+    },
     "navbar": {
       "profile": "Profil",
       "settings": "Ayarlar",
@@ -1824,23 +1830,35 @@
         "fetchCountdown": "ShipStation çek ({seconds} sn)",
         "approve": "Siparişi onayla",
         "approveSelected": "Seçilenleri onayla",
+        "bulkActionHint": "Seçili siparişler için toplu işlem yapın",
+        "selectedCount": "{count} sipariş seçildi",
         "cancel": "Siparişi iptal et",
+        "cancelSelected": "Seçilenleri iptal et",
         "confirmApproveTitle": "Bu siparişi onaylamak istiyor musunuz?",
         "confirmApproveSelectedTitle": "Seçili siparişleri onaylamak istiyor musunuz?",
         "confirmApproveOk": "Onayla",
         "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
+        "confirmCancelSelectedTitle": "Seçili siparişleri iptal etmek istiyor musunuz?",
         "confirmCancelOk": "İptal et"
       },
       "messages": {
         "fetchSuccess": "ShipStation siparişleri alındı.",
         "fetchError": "Veri alınamadı.",
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
+        "storeRefreshQueued": "Mağaza yenileme başlatıldı.",
+        "storeRefreshError": "Mağaza yenilenemedi.",
+        "storeRefreshStatusError": "Mağaza yenileme durumu alınamadı.",
         "updateSuccess": "Sipariş ürünü güncellendi.",
         "updateError": "Sipariş ürünü güncellenemedi.",
         "approveSuccess": "Sipariş başarıyla onaylandı.",
         "approveError": "Sipariş onaylanamadı.",
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
         "cancelError": "Sipariş iptal edilemedi."
+      },
+      "shipStationStatus": {
+        "lastUpdated": "Son güncelleme {date}",
+        "neverUpdated": "Hiç",
+        "refreshAction": "Mağazayı yenile"
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -2398,6 +2416,9 @@
         },
         "fields": {
           "billToName": "Fatura Adı",
+          "shipToName": "Teslimat Adı",
+          "shipToCompany": "Teslimat Şirketi",
+          "shipToPhone": "Teslimat Telefonu",
           "searchAddress": "Adres ara",
           "street1": "Adres Satırı 1",
           "street2": "Adres Satırı 2",
@@ -2409,6 +2430,9 @@
         },
         "placeholders": {
           "billToName": "Müşterinin tam adı",
+          "shipToName": "Teslimat alıcısının adı",
+          "shipToCompany": "Teslimat şirketi",
+          "shipToPhone": "Teslimat telefonu",
           "street1": "Adres satırı 1",
           "street2": "Apartman, daire vb. (opsiyonel)",
           "street3": "Adres satırı 3 (opsiyonel)",

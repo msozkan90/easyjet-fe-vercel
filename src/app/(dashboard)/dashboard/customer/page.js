@@ -9,6 +9,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { CustomersAPI, CategoriesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import CustomerForm from "@/components/common/forms/CustomerForm";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
 import { useSelector } from "react-redux";
@@ -30,6 +31,9 @@ export default function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [formDirty, setFormDirty] = useState(false);
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     let alive = true;
@@ -236,12 +240,14 @@ export default function CustomersPage() {
       if (editingRow) {
         await CustomersAPI.update(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
+        setFormDirty(false);
         setOpen(false);
         setEditingRow(null);
         tableRef.current?.reload();
       } else {
         await CustomersAPI.create(payload);
         message.success(t("messages.createSuccess"));
+        setFormDirty(false);
         setOpen(false);
         tableRef.current?.setPage(1);
         tableRef.current?.reload();
@@ -265,6 +271,7 @@ export default function CustomersPage() {
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin"]}>
+      {unsavedChangesModalContextHolder}
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -282,6 +289,7 @@ export default function CustomersPage() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
+                setFormDirty(false);
                 setEditingRow(null);
                 setOpen(true);
               }}
@@ -303,54 +311,62 @@ export default function CustomersPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditingRow(null);
-        }}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: formDirty,
+            onDiscard: () => {
+              setFormDirty(false);
+              setOpen(false);
+              setEditingRow(null);
+            },
+          })
+        }
         footer={null}
         destroyOnHidden
       >
-        <CustomerForm
-          onFinish={onSubmit}
-          submitText={
-            editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
-          }
-          categories={categories}
-          has_api_key={editingRow?.has_api_key}
-          initialValues={
-            editingRow
-              ? {
-                  name: editingRow?.name,
-                  description: editingRow?.description,
-                  categories: (editingRow?.customer_categories || []).map(
-                    (c) => c.id,
-                  ),
-                  status: editingRow?.status,
-                  store_id: editingRow?.store_id,
-                  ...(isPartnerEntity
-                    ? {
-                        product_multiplier: multiplierToPercent(
-                          getPrimaryProductMultiplier(editingRow),
-                        ),
-                      }
-                    : {}),
-                  ...(isShippingOwner
-                    ? {
-                        shipment_multiplier: multiplierToPercent(
-                          getPrimaryShipmentMultiplier(editingRow),
-                        ),
-                      }
-                    : {}),
-                }
-              : {
-                  status: "active",
-                  ...(isPartnerEntity ? { product_multiplier: 0 } : {}),
-                  ...(isShippingOwner ? { shipment_multiplier: 0 } : {}),
-                }
-          }
-          showProductMultiplier={isPartnerEntity}
-          showShipmentMultiplier={isShippingOwner}
-        />
+        <div onChangeCapture={() => setFormDirty(true)}>
+          <CustomerForm
+            onFinish={onSubmit}
+            submitText={
+              editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
+            }
+            categories={categories}
+            has_api_key={editingRow?.has_api_key}
+            initialValues={
+              editingRow
+                ? {
+                    name: editingRow?.name,
+                    description: editingRow?.description,
+                    categories: (editingRow?.customer_categories || []).map(
+                      (c) => c.id,
+                    ),
+                    status: editingRow?.status,
+                    store_id: editingRow?.store_id,
+                    ...(isPartnerEntity
+                      ? {
+                          product_multiplier: multiplierToPercent(
+                            getPrimaryProductMultiplier(editingRow),
+                          ),
+                        }
+                      : {}),
+                    ...(isShippingOwner
+                      ? {
+                          shipment_multiplier: multiplierToPercent(
+                            getPrimaryShipmentMultiplier(editingRow),
+                          ),
+                        }
+                      : {}),
+                  }
+                : {
+                    status: "active",
+                    ...(isPartnerEntity ? { product_multiplier: 0 } : {}),
+                    ...(isShippingOwner ? { shipment_multiplier: 0 } : {}),
+                  }
+            }
+            showProductMultiplier={isPartnerEntity}
+            showShipmentMultiplier={isShippingOwner}
+          />
+        </div>
       </Modal>
     </RequireRole>
   );

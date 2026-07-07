@@ -3,6 +3,12 @@
     "language": "Language",
     "languageChanged": "Dil {language} olarak güncellendi.",
     "languageChangeError": "We couldn't update the language. Please try again.",
+    "unsavedChanges": {
+      "title": "You have unsaved changes",
+      "description": "Are you sure you want to close this modal? Your changes will be lost.",
+      "discard": "Discard changes",
+      "continueEditing": "Continue editing"
+    },
     "navbar": {
       "profile": "Profile",
       "settings": "Settings",
@@ -2022,23 +2028,35 @@
         "fetchCountdown": "Fetch ShipStation ({seconds}s)",
         "approve": "Approve Order",
         "approveSelected": "Approve Selected",
+        "bulkActionHint": "Run a bulk action for the selected orders",
+        "selectedCount": "{count} orders selected",
         "cancel": "Cancel Order",
+        "cancelSelected": "Cancel Selected",
         "confirmApproveTitle": "Approve this order?",
         "confirmApproveSelectedTitle": "Approve selected orders?",
         "confirmApproveOk": "Approve",
         "confirmCancelTitle": "Cancel this order?",
+        "confirmCancelSelectedTitle": "Cancel selected orders?",
         "confirmCancelOk": "Cancel"
       },
       "messages": {
         "fetchSuccess": "ShipStation orders fetched.",
         "fetchError": "Fetch failed.",
         "loadVariationsError": "Failed to load product variations.",
+        "storeRefreshQueued": "Store refresh started.",
+        "storeRefreshError": "Failed to refresh store.",
+        "storeRefreshStatusError": "Failed to load store refresh status.",
         "updateSuccess": "Order item updated.",
         "updateError": "Failed to update order item.",
         "approveSuccess": "Order approved successfully.",
         "approveError": "Failed to approve order.",
         "cancelSuccess": "Order cancelled successfully.",
         "cancelError": "Failed to cancel order."
+      },
+      "shipStationStatus": {
+        "lastUpdated": "Last updated {date}",
+        "neverUpdated": "Never",
+        "refreshAction": "Refresh store"
       },
       "table": {
         "noData": "No data"
@@ -2596,6 +2614,9 @@
         },
         "fields": {
           "billToName": "Bill To Name",
+          "shipToName": "Ship To Name",
+          "shipToCompany": "Ship To Company",
+          "shipToPhone": "Ship To Phone",
           "searchAddress": "Search address",
           "street1": "Address Line 1",
           "street2": "Address Line 2",
@@ -2607,6 +2628,9 @@
         },
         "placeholders": {
           "billToName": "Enter customer's full name",
+          "shipToName": "Enter recipient name",
+          "shipToCompany": "Enter recipient company",
+          "shipToPhone": "Enter recipient phone",
           "street1": "Address line 1",
           "street2": "Apartment, suite, etc. (optional)",
           "street3": "Address line 3 (optional)",

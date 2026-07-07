@@ -277,6 +277,14 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/payments/request", payload),
   sendToProduction: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/production", payload, config),
+  initDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/init", payload),
+  designUploadPartUrls: (payload) =>
+    api.post("/transfer-orders/designs/upload/part-urls", payload),
+  completeDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/complete", payload),
+  abortDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/abort", payload),
   uploadDesigns: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/designs", payload, config),
   uploadDesignProgress: (uploadId) =>
@@ -775,6 +783,10 @@ export const ShipStationAPI = {
   // data (update): { api_key?: string, api_secret?: string, label?: string, status?: "active"|"inactive" }
 
   storeList: () => api.get("/shipstation/store/list"),
+  storeRefreshStatus: (storeId) =>
+    api.get("/shipstation/store/refresh-status", { store_id: storeId }),
+  refreshStore: (storeId) =>
+    api.post("/shipstation/store/refresh", { store_id: storeId }),
 
   keyCheck: (data) => api.post("/shipstation/key/check", data),
   manualOrderGet: (data) => api.post(`/shipstation/orders/manual`, data),

@@ -432,7 +432,7 @@ const CrudTable = forwardRef(function CrudTable(
   };
 
   return (
-    <div className=" gap-4">
+    <div className="flex flex-col gap-4">
       {/* Toolbar */}
       <Card className="shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

@@ -31,6 +31,8 @@ import {
   DownloadOutlined,
   EyeOutlined,
   FileSearchOutlined,
+  LinkOutlined,
+  ProfileOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -93,6 +95,85 @@ const renderTruncatedWithPopover = (value, fallback, maxWidth = 240) => {
     </Popover>
   );
 };
+
+const normalizeOptions = (rawOptions) => {
+  if (Array.isArray(rawOptions)) {
+    return rawOptions
+      .map((entry) => ({
+        name: entry?.name ?? entry?.key ?? "",
+        value: entry?.value,
+      }))
+      .filter((entry) => entry.name || entry.value);
+  }
+  if (rawOptions && typeof rawOptions === "object") {
+    return Object.entries(rawOptions).map(([name, value]) => ({
+      name,
+      value: value == null ? "" : String(value),
+    }));
+  }
+  return [];
+};
+
+const isExternalUrl = (value) => {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const renderOptionInlineValue = (option, fallback) => {
+  const value = option?.value || "";
+  if (isExternalUrl(value)) {
+    return (
+      <a
+        href={value}
+        target="_blank"
+        rel="noreferrer"
+        className="order-option-link"
+      >
+        <LinkOutlined />
+        <span>{option?.name || fallback}</span>
+      </a>
+    );
+  }
+
+  return (
+    <span className="order-option-value">
+      {value || fallback}
+    </span>
+  );
+};
+
+const renderOptionsSummary = (options, fallback) => (
+  <div className="order-options-popover">
+    {options.map((option, index) => (
+      <div
+        key={`${option?.name || "option"}-${index}`}
+        className="order-option-row"
+      >
+        <span className="order-option-label">{option?.name || fallback}</span>
+        {isExternalUrl(option?.value || "") ? (
+          <a
+            href={option.value}
+            target="_blank"
+            rel="noreferrer"
+            className="order-option-link"
+          >
+            <LinkOutlined />
+            <span>{option?.name || fallback}</span>
+          </a>
+        ) : (
+          <span className="order-option-value">{option?.value || fallback}</span>
+        )}
+      </div>
+    ))}
+  </div>
+);
 
 const extractBarcodeFilename = (url, fallbackName = "barcode.png") => {
   if (!url) return fallbackName;
@@ -498,6 +579,30 @@ export default function TransferOrdersStatusListPage({
         render: (value, record) => {
           if (record?.__hasChildren && !record?.__isChild) return null;
           return renderTruncatedWithPopover(value, t("common.none"), 220);
+        },
+      },
+      {
+        title: t("columns.options"),
+        dataIndex: "options",
+        width: 140,
+        render: (value, record) => {
+          if (record?.__hasChildren && !record?.__isChild) return null;
+          const options = normalizeOptions(value);
+          if (!options.length) return t("values.noOptions");
+
+          return (
+            <Popover
+              trigger="hover"
+              placement="rightTop"
+              content={renderOptionsSummary(options, t("common.none"))}
+            >
+              <button type="button" className="order-options-trigger">
+                <ProfileOutlined />
+                <span>{t("columns.options")}</span>
+                <span className="order-options-count">{options.length}</span>
+              </button>
+            </Popover>
+          );
         },
       },
       {

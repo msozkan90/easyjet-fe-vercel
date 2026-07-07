@@ -19,6 +19,7 @@ export default function CompanyUserForm({
   initialValues,
   onSubmit,
   onCancel,
+  onDirtyChange,
 }) {
   const [form] = Form.useForm();
   const tCommonForms = useTranslations("forms.common");
@@ -64,6 +65,7 @@ export default function CompanyUserForm({
       layout="vertical"
       preserve={false}
       initialValues={initialValues}
+      onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
         name="first_name"

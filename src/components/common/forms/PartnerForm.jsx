@@ -10,6 +10,7 @@ export default function PartnerForm({
   onFinish,
   submitText,
   categories = [],
+  onDirtyChange,
 }) {
   const [form] = Form.useForm();
   const user = useSelector((s) => s.auth.user);
@@ -25,6 +26,7 @@ export default function PartnerForm({
       layout="vertical"
       initialValues={initialValues}
       onFinish={onFinish}
+      onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
         name="name"

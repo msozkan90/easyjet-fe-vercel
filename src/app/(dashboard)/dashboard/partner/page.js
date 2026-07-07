@@ -9,6 +9,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { PartnersAPI, CategoriesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import PartnerForm from "@/components/common/forms/PartnerForm";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
 import { useSelector } from "react-redux";
@@ -28,6 +29,9 @@ export default function PartnersPage() {
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [formDirty, setFormDirty] = useState(false);
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
 
   useEffect(() => {
     let alive = true;
@@ -201,12 +205,14 @@ export default function PartnersPage() {
       if (editingRow) {
         await PartnersAPI.update(editingRow.id, payload);
         message.success(t("messages.updateSuccess"));
+        setFormDirty(false);
         setOpen(false);
         setEditingRow(null);
         tableRef.current?.reload();
       } else {
         await PartnersAPI.create(payload);
         message.success(t("messages.createSuccess"));
+        setFormDirty(false);
         setOpen(false);
         tableRef.current?.setPage(1);
         tableRef.current?.reload();
@@ -230,6 +236,7 @@ export default function PartnersPage() {
 
   return (
     <RequireRole anyOfRoles={["companyAdmin"]}>
+      {unsavedChangesModalContextHolder}
       <CrudTable
         ref={tableRef}
         columns={columns}
@@ -247,6 +254,7 @@ export default function PartnersPage() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
+                setFormDirty(false);
                 setEditingRow(null);
                 setOpen(true);
               }}
@@ -268,37 +276,45 @@ export default function PartnersPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditingRow(null);
-        }}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: formDirty,
+            onDiscard: () => {
+              setFormDirty(false);
+              setOpen(false);
+              setEditingRow(null);
+            },
+          })
+        }
         footer={null}
         destroyOnHidden
       >
-        <PartnerForm
-          onFinish={onSubmit}
-          submitText={
-            editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
-          }
-          categories={categories}
-          initialValues={
-            editingRow
-              ? {
-                  name: editingRow?.name,
-                  description: editingRow?.description,
-                  categories: (
-                    editingRow?.partner_categories ||
-                    editingRow?.categories ||
-                    []
-                  ).map((category) => category.id),
-                  status: editingRow?.status,
-                  shipment_multiplier: multiplierToPercent(
-                    getPrimaryShipmentMultiplier(editingRow),
-                  ),
-                }
-              : { status: "active", shipment_multiplier: 0 }
-          }
-        />
+        <div onChangeCapture={() => setFormDirty(true)}>
+          <PartnerForm
+            onFinish={onSubmit}
+            submitText={
+              editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
+            }
+            categories={categories}
+            initialValues={
+              editingRow
+                ? {
+                    name: editingRow?.name,
+                    description: editingRow?.description,
+                    categories: (
+                      editingRow?.partner_categories ||
+                      editingRow?.categories ||
+                      []
+                    ).map((category) => category.id),
+                    status: editingRow?.status,
+                    shipment_multiplier: multiplierToPercent(
+                      getPrimaryShipmentMultiplier(editingRow),
+                    ),
+                  }
+                : { status: "active", shipment_multiplier: 0 }
+            }
+          />
+        </div>
       </Modal>
     </RequireRole>
   );

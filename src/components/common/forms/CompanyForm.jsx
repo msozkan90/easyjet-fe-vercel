@@ -11,6 +11,7 @@ export default function CompanyForm({
   onFinish,
   submitText,
   categories = [],
+  onDirtyChange,
 }) {
   const [form] = Form.useForm();
   const [searchAddress, setSearchAddress] = useState("");
@@ -65,6 +66,7 @@ export default function CompanyForm({
       layout="vertical"
       initialValues={initialValues}
       onFinish={onFinish}
+      onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex-1 space-y-4">

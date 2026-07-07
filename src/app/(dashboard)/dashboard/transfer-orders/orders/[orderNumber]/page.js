@@ -12,6 +12,7 @@ import {
   Descriptions,
   Empty,
   Input,
+  Popover,
   Popconfirm,
   Row,
   Space,
@@ -28,6 +29,8 @@ import { TransferOrdersAPI } from "@/utils/api";
 import {
   DeleteOutlined,
   ExportOutlined,
+  LinkOutlined,
+  ProfileOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
@@ -68,6 +71,62 @@ const formatCurrency = (value, currency = "USD") => {
     return formatAmount(numericValue);
   }
 };
+
+const normalizeOptions = (rawOptions) => {
+  if (Array.isArray(rawOptions)) {
+    return rawOptions
+      .map((entry) => ({
+        name: entry?.name ?? entry?.key ?? "",
+        value: entry?.value,
+      }))
+      .filter((entry) => entry.name || entry.value);
+  }
+  if (rawOptions && typeof rawOptions === "object") {
+    return Object.entries(rawOptions).map(([name, value]) => ({
+      name,
+      value: value == null ? "" : String(value),
+    }));
+  }
+  return [];
+};
+
+const isExternalUrl = (value) => {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const renderOptionsSummary = (options, fallback) => (
+  <div className="order-options-popover">
+    {options.map((option, index) => (
+      <div
+        key={`${option?.name || "option"}-${index}`}
+        className="order-option-row"
+      >
+        <span className="order-option-label">{option?.name || fallback}</span>
+        {isExternalUrl(option?.value || "") ? (
+          <a
+            href={option.value}
+            target="_blank"
+            rel="noreferrer"
+            className="order-option-link"
+          >
+            <LinkOutlined />
+            <span>{option?.name || fallback}</span>
+          </a>
+        ) : (
+          <span className="order-option-value">{option?.value || fallback}</span>
+        )}
+      </div>
+    ))}
+  </div>
+);
 
 function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
   const containerRef = useRef(null);
@@ -204,6 +263,29 @@ export default function TransferOrderDetailPage() {
         title: tOrders("columns.item"),
         dataIndex: "name",
         render: (value) => value || tOrders("common.none"),
+      },
+      {
+        title: tOrders("columns.options"),
+        dataIndex: "options",
+        width: 140,
+        render: (value) => {
+          const options = normalizeOptions(value);
+          if (!options.length) return tOrders("values.noOptions");
+
+          return (
+            <Popover
+              trigger="hover"
+              placement="rightTop"
+              content={renderOptionsSummary(options, tOrders("common.none"))}
+            >
+              <button type="button" className="order-options-trigger">
+                <ProfileOutlined />
+                <span>{tOrders("columns.options")}</span>
+                <span className="order-options-count">{options.length}</span>
+              </button>
+            </Popover>
+          );
+        },
       },
       {
         title: tOrders("columns.product"),
