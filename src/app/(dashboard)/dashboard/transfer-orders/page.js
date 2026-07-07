@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
+import { useSelector } from "react-redux";
 import {
   Button,
   Space,
@@ -13,6 +14,7 @@ import {
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
+import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
 import { OrdersAPI, TransferOrdersAPI, TransferProductPricesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
@@ -51,8 +53,12 @@ export default function OrdersPage() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [bulkApproving, setBulkApproving] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
+  const user = useSelector((state) => state.auth.user);
 
   const t = useTranslations("dashboard.preOrders");
+  const storeId = user?.entity?.store_id;
+  const customerName =
+    user?.entity?.entity_name || user?.displayName || user?.email || "";
 
   useEffect(() => {
     if (!cooldownEnd) {
@@ -618,6 +624,15 @@ export default function OrdersPage() {
           order_status: undefined,
           order_date: undefined,
         }}
+        toolbarLeft={
+          storeId ? (
+            <ShipStationStoreStatusCard
+              storeId={storeId}
+              customerName={customerName}
+              t={t}
+            />
+          ) : null
+        }
         toolbarRight={
           <Space>
             <Popconfirm

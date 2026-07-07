@@ -775,6 +775,10 @@ export const ShipStationAPI = {
   // data (update): { api_key?: string, api_secret?: string, label?: string, status?: "active"|"inactive" }
 
   storeList: () => api.get("/shipstation/store/list"),
+  storeRefreshStatus: (storeId) =>
+    api.get("/shipstation/store/refresh-status", { store_id: storeId }),
+  refreshStore: (storeId) =>
+    api.post("/shipstation/store/refresh", { store_id: storeId }),
 
   keyCheck: (data) => api.post("/shipstation/key/check", data),
   manualOrderGet: (data) => api.post(`/shipstation/orders/manual`, data),

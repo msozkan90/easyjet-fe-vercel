@@ -1841,12 +1841,20 @@
         "fetchSuccess": "ShipStation siparişleri alındı.",
         "fetchError": "Veri alınamadı.",
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
+        "storeRefreshQueued": "Mağaza yenileme başlatıldı.",
+        "storeRefreshError": "Mağaza yenilenemedi.",
+        "storeRefreshStatusError": "Mağaza yenileme durumu alınamadı.",
         "updateSuccess": "Sipariş ürünü güncellendi.",
         "updateError": "Sipariş ürünü güncellenemedi.",
         "approveSuccess": "Sipariş başarıyla onaylandı.",
         "approveError": "Sipariş onaylanamadı.",
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
         "cancelError": "Sipariş iptal edilemedi."
+      },
+      "shipStationStatus": {
+        "lastUpdated": "Son güncelleme {date}",
+        "neverUpdated": "Hiç",
+        "refreshAction": "Mağazayı yenile"
       },
       "table": {
         "noData": "Kayıt bulunamadı"

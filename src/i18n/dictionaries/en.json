@@ -2039,12 +2039,20 @@
         "fetchSuccess": "ShipStation orders fetched.",
         "fetchError": "Fetch failed.",
         "loadVariationsError": "Failed to load product variations.",
+        "storeRefreshQueued": "Store refresh started.",
+        "storeRefreshError": "Failed to refresh store.",
+        "storeRefreshStatusError": "Failed to load store refresh status.",
         "updateSuccess": "Order item updated.",
         "updateError": "Failed to update order item.",
         "approveSuccess": "Order approved successfully.",
         "approveError": "Failed to approve order.",
         "cancelSuccess": "Order cancelled successfully.",
         "cancelError": "Failed to cancel order."
+      },
+      "shipStationStatus": {
+        "lastUpdated": "Last updated {date}",
+        "neverUpdated": "Never",
+        "refreshAction": "Refresh store"
       },
       "table": {
         "noData": "No data"
