@@ -14,6 +14,7 @@ import {
   Popover,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
+import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
 import CrudTable from "@/components/common/table/CrudTable";
 import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
 import { OrdersAPI, ProductVariationAPI, ShipStationAPI } from "@/utils/api";
@@ -53,6 +54,7 @@ export default function OrdersPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [bulkApproving, setBulkApproving] = useState(false);
+  const [bulkCancelling, setBulkCancelling] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
   const user = useSelector((state) => state.auth.user);
 
@@ -544,25 +546,56 @@ export default function OrdersPage() {
     approveOrders(selectedRows, { bulk: true });
   }, [approveOrders, selectedRows]);
 
-  const handleCancelOrder = useCallback(
-    async (record) => {
-      if (!record?.id) return;
-      setRowActionLoadingState(record.id, "cancel", true);
+  const cancelOrders = useCallback(
+    async (records, options = {}) => {
+      if (!Array.isArray(records) || !records.length) return;
+      const ids = records.map((item) => item?.id).filter(Boolean);
+      const isBulk = Boolean(options?.bulk);
+      if (isBulk) {
+        setBulkCancelling(true);
+      }
+      ids.forEach((id) => setRowActionLoadingState(id, "cancel", true));
       try {
-        await OrdersAPI.preCancel(record.id);
+        await Promise.all(ids.map((id) => OrdersAPI.preCancel(id)));
         message.success(t("messages.cancelSuccess"));
-        clearSelectionForIds([record.id]);
+        if (isBulk) {
+          resetSelections();
+        } else {
+          clearSelectionForIds(ids);
+        }
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message || t("messages.cancelError")
         );
       } finally {
-        setRowActionLoadingState(record.id, "cancel", false);
+        ids.forEach((id) => setRowActionLoadingState(id, "cancel", false));
+        if (isBulk) {
+          setBulkCancelling(false);
+        }
       }
     },
-    [clearSelectionForIds, message, setRowActionLoadingState, t]
+    [
+      clearSelectionForIds,
+      message,
+      resetSelections,
+      setRowActionLoadingState,
+      t,
+    ]
   );
+
+  const handleCancelOrder = useCallback(
+    (record) => {
+      if (!record) return;
+      cancelOrders([record], { bulk: false });
+    },
+    [cancelOrders]
+  );
+
+  const handleBulkCancel = useCallback(() => {
+    if (!selectedRows?.length) return;
+    cancelOrders(selectedRows, { bulk: true });
+  }, [cancelOrders, selectedRows]);
 
   const onManualFetch = async () => {
     if (pulling || remainingSec > 0) return;
@@ -587,8 +620,10 @@ export default function OrdersPage() {
     }
   };
 
-  const formatDateTime = (value) =>
-    value ? moment(value).format("LLL") : t("common.none");
+  const formatDateTime = useCallback(
+    (value) => (value ? moment(value).format("LLL") : t("common.none")),
+    [t]
+  );
 
   const formatAmount = (value) => {
     if (value === null || value === undefined || value === "") {
@@ -818,7 +853,10 @@ export default function OrdersPage() {
           const approveLoading = isRowActionLoading(record.id, "approve");
           const cancelLoading = isRowActionLoading(record.id, "cancel");
           const disableActions =
-            bulkApproving || approveLoading || cancelLoading;
+            bulkApproving ||
+            bulkCancelling ||
+            approveLoading ||
+            cancelLoading;
           return (
             <Space>
               <Popover content={t("actions.approve")}>
@@ -860,6 +898,7 @@ export default function OrdersPage() {
     ];
   }, [
     bulkApproving,
+    bulkCancelling,
     getColorOptions,
     getSizeOptions,
     handleColorSelect,
@@ -872,6 +911,7 @@ export default function OrdersPage() {
     productOptions,
     rowSelections,
     t,
+    formatDateTime,
     variationsLoading,
   ]);
 
@@ -930,22 +970,6 @@ export default function OrdersPage() {
         }
         toolbarRight={
           <Space>
-            <Popconfirm
-              title={t("actions.confirmApproveSelectedTitle")}
-              okText={t("actions.confirmApproveOk")}
-              okButtonProps={{ loading: bulkApproving, type: "primary" }}
-              onConfirm={handleBulkApprove}
-              disabled={!selectedRowKeys.length || bulkApproving}
-            >
-              <Button
-                icon={<CheckOutlined />}
-                type="primary"
-                disabled={!selectedRowKeys.length || bulkApproving}
-                loading={bulkApproving}
-              >
-                {t("actions.approveSelected")}
-              </Button>
-            </Popconfirm>
             <Button
               type="primary"
               loading={pulling}
@@ -958,6 +982,24 @@ export default function OrdersPage() {
         }
         tableProps={tableProps}
       />
+      {selectedRowKeys.length ? (
+        <SelectionFloatActions
+          count={selectedRowKeys.length}
+          selectedLabel={t("actions.selectedCount", {
+            count: selectedRowKeys.length,
+          })}
+          approveTooltip={t("actions.approveSelected")}
+          cancelTooltip={t("actions.cancelSelected")}
+          confirmApproveTitle={t("actions.confirmApproveSelectedTitle")}
+          confirmApproveOk={t("actions.confirmApproveOk")}
+          confirmCancelTitle={t("actions.confirmCancelSelectedTitle")}
+          confirmCancelOk={t("actions.confirmCancelOk")}
+          approving={bulkApproving}
+          cancelling={bulkCancelling}
+          onApprove={handleBulkApprove}
+          onCancel={handleBulkCancel}
+        />
+      ) : null}
     </RequireRole>
   );
 }

@@ -1830,11 +1830,15 @@
         "fetchCountdown": "ShipStation çek ({seconds} sn)",
         "approve": "Siparişi onayla",
         "approveSelected": "Seçilenleri onayla",
+        "bulkActionHint": "Seçili siparişler için toplu işlem yapın",
+        "selectedCount": "{count} sipariş seçildi",
         "cancel": "Siparişi iptal et",
+        "cancelSelected": "Seçilenleri iptal et",
         "confirmApproveTitle": "Bu siparişi onaylamak istiyor musunuz?",
         "confirmApproveSelectedTitle": "Seçili siparişleri onaylamak istiyor musunuz?",
         "confirmApproveOk": "Onayla",
         "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
+        "confirmCancelSelectedTitle": "Seçili siparişleri iptal etmek istiyor musunuz?",
         "confirmCancelOk": "İptal et"
       },
       "messages": {

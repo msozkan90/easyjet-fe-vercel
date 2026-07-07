@@ -2028,11 +2028,15 @@
         "fetchCountdown": "Fetch ShipStation ({seconds}s)",
         "approve": "Approve Order",
         "approveSelected": "Approve Selected",
+        "bulkActionHint": "Run a bulk action for the selected orders",
+        "selectedCount": "{count} orders selected",
         "cancel": "Cancel Order",
+        "cancelSelected": "Cancel Selected",
         "confirmApproveTitle": "Approve this order?",
         "confirmApproveSelectedTitle": "Approve selected orders?",
         "confirmApproveOk": "Approve",
         "confirmCancelTitle": "Cancel this order?",
+        "confirmCancelSelectedTitle": "Cancel selected orders?",
         "confirmCancelOk": "Cancel"
       },
       "messages": {
