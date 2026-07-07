@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import {
   createContext,
   useCallback,
@@ -20,9 +21,8 @@ import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
 const MAX_CONCURRENT_UPLOADS = 3;
-const DEFAULT_POLL_INTERVAL_MS = 3000;
-const PENDING_POLL_INTERVAL_MS = 4000;
-const SAVING_POLL_INTERVAL_MS = 2000;
+const PART_UPLOAD_CONCURRENCY = 4;
+const PART_UPLOAD_RETRY_COUNT = 3;
 
 const TransferDesignUploadQueueContext = createContext(null);
 
@@ -66,135 +66,172 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
       const controller = new AbortController();
       controllersRef.current.set(taskId, controller);
-      let pollStopped = false;
-      let progressTimer = null;
-      let lastServerStatus = "pending";
       updateTask(taskId, {
         status: "uploading",
-        serverStatus: "pending",
+        serverStatus: "preparing",
         startedAt: Date.now(),
         progress: currentTask.progress || 0,
         errorMessage: null,
       });
 
       try {
-        const formData = new FormData();
-        formData.append("transfer_order_id", currentTask.orderId);
-        formData.append("sub_category_id", currentTask.subCategoryId);
-        formData.append("upload_id", currentTask.id);
-        formData.append("quantity", String(currentTask.quantity || 1));
-        formData.append("design_files", currentTask.file);
-
-        const pollProgress = async () => {
-          if (pollStopped) return;
-          try {
-            const progressResponse = await TransferOrdersAPI.uploadDesignProgress(currentTask.id);
-            const progressData =
-              progressResponse?.data && typeof progressResponse.data === "object"
-                ? progressResponse.data
-                : progressResponse;
-            const serverPercent = Number(progressData?.progress_percent);
-            const nestedServerPercent = Number(progressData?.data?.progress_percent);
-            const percent = Number.isFinite(serverPercent)
-              ? serverPercent
-              : nestedServerPercent;
-            const serverStatus =
-              typeof progressData?.status === "string"
-                ? progressData.status
-                : typeof progressData?.data?.status === "string"
-                  ? progressData.data.status
-                  : "pending";
-            lastServerStatus = serverStatus;
-
-            if (serverStatus === "pending") {
-              const taskSnapshot = tasksRef.current.find((item) => item.id === taskId);
-              const nextPreparing = Math.min(95, Number(taskSnapshot?.progress || 0) + 2);
-              updateTask(taskId, {
-                serverStatus: "pending",
-                progress: Math.max(1, nextPreparing),
-              });
-              return;
-            }
-
-            if (serverStatus === "saving") {
-              const taskSnapshot = tasksRef.current.find((item) => item.id === taskId);
-              updateTask(taskId, {
-                serverStatus: "saving",
-                progress: Math.max(99, Number(taskSnapshot?.progress || 99)),
-              });
-              return;
-            }
-
-            if (Number.isFinite(percent)) {
-              updateTask(taskId, {
-                serverStatus: serverStatus === "uploading" ? "uploading" : serverStatus,
-                progress: Math.max(1, Math.min(99, Math.round(percent))),
-              });
-            }
-          } catch {
-            // progress endpoint may be briefly unavailable at upload start
-          }
-        };
-        const getNextPollDelay = () => {
-          if (lastServerStatus === "pending") return PENDING_POLL_INTERVAL_MS;
-          if (lastServerStatus === "saving") return SAVING_POLL_INTERVAL_MS;
-          return DEFAULT_POLL_INTERVAL_MS;
-        };
-        const scheduleNextPoll = () => {
-          if (pollStopped) return;
-          progressTimer = setTimeout(async () => {
-            await pollProgress();
-            scheduleNextPoll();
-          }, getNextPollDelay());
-        };
-        void pollProgress();
-        scheduleNextPoll();
-
-        await TransferOrdersAPI.uploadDesigns(formData, {
-          signal: controller.signal,
-          onUploadProgress: (event) => {
-            const taskSnapshot = tasksRef.current.find((item) => item.id === taskId);
-            if (taskSnapshot?.serverStatus !== "pending") {
-              return;
-            }
-            const total = Number(event?.total || currentTask?.fileSize || 0);
-            const loaded = Number(event?.loaded || 0);
-            if (!total || !Number.isFinite(total) || total <= 0) return;
-            const phaseOnePercent = (loaded / total) * 100;
-            updateTask(taskId, {
-              serverStatus: "pending",
-              progress: Math.max(1, Math.min(95, Math.round(phaseOnePercent))),
-            });
-          },
+        const initResponse = await TransferOrdersAPI.initDesignUpload({
+          transfer_order_id: currentTask.orderId,
+          sub_category_id: currentTask.subCategoryId,
+          quantity: Number(currentTask.quantity || 1),
+          file_name: currentTask.fileName,
+          file_size: Number(currentTask.fileSize || currentTask.file?.size || 0),
+          content_type: currentTask.file?.type || undefined,
         });
-        pollStopped = true;
-        if (progressTimer) clearTimeout(progressTimer);
-        updateTask(taskId, { progress: 100 });
+
+        const initData =
+          initResponse?.data && typeof initResponse.data === "object"
+            ? initResponse.data
+            : initResponse;
+        const uploadSessionId = String(initData?.upload_session_id || "");
+        const partSize = Number(initData?.part_size || 0);
+        const totalParts = Number(initData?.total_parts || 0);
+        if (!uploadSessionId || !partSize || !totalParts) {
+          throw new Error(tQueue("messages.uploadFailed"));
+        }
+
+        updateTask(taskId, {
+          uploadSessionId,
+          serverStatus: "uploading",
+          progress: 1,
+        });
+
+        const partNumbers = Array.from({ length: totalParts }, (_, index) => index + 1);
+        const partUrlsResponse = await TransferOrdersAPI.designUploadPartUrls({
+          upload_session_id: uploadSessionId,
+          part_numbers: partNumbers,
+        });
+        const partUrlsData =
+          partUrlsResponse?.data && typeof partUrlsResponse.data === "object"
+            ? partUrlsResponse.data
+            : partUrlsResponse;
+        const urlEntries = Array.isArray(partUrlsData?.urls) ? partUrlsData.urls : [];
+        const urlMap = new Map(
+          urlEntries.map((entry) => [Number(entry?.part_number), String(entry?.url || "")]),
+        );
+        if (urlMap.size !== totalParts) {
+          throw new Error(tQueue("messages.uploadFailed"));
+        }
+
+        const loadedByPart = new Map();
+        const reportAggregateProgress = () => {
+          const loadedTotal = Array.from(loadedByPart.values()).reduce(
+            (sum, value) => sum + Number(value || 0),
+            0,
+          );
+          const totalSize = Math.max(1, Number(currentTask.fileSize || currentTask.file?.size || 0));
+          const percent = Math.max(
+            1,
+            Math.min(95, Math.round((loadedTotal / totalSize) * 95)),
+          );
+          updateTask(taskId, {
+            serverStatus: "uploading",
+            progress: percent,
+          });
+        };
+
+        const uploadPart = async (partNumber) => {
+          const start = (partNumber - 1) * partSize;
+          const end = Math.min(start + partSize, currentTask.file.size);
+          const blob = currentTask.file.slice(start, end);
+          const signedUrl = urlMap.get(partNumber);
+          if (!signedUrl) {
+            throw new Error(`Missing signed URL for part ${partNumber}`);
+          }
+
+          let lastError = null;
+          for (let attempt = 1; attempt <= PART_UPLOAD_RETRY_COUNT; attempt += 1) {
+            try {
+              loadedByPart.set(partNumber, 0);
+              const response = await axios.put(signedUrl, blob, {
+                headers: {
+                  "Content-Type": currentTask.file?.type || "application/octet-stream",
+                },
+                signal: controller.signal,
+                onUploadProgress: (event) => {
+                  loadedByPart.set(partNumber, Number(event?.loaded || 0));
+                  reportAggregateProgress();
+                },
+              });
+              loadedByPart.set(partNumber, blob.size);
+              reportAggregateProgress();
+              const etag =
+                response?.headers?.etag ||
+                response?.headers?.ETag ||
+                response?.headers?.["etag"] ||
+                response?.headers?.["ETag"];
+              return {
+                part_number: partNumber,
+                etag: etag ? String(etag) : "__missing__",
+              };
+            } catch (error) {
+              lastError = error;
+              if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+                throw error;
+              }
+              if (attempt >= PART_UPLOAD_RETRY_COUNT) {
+                throw error;
+              }
+            }
+          }
+          throw lastError || new Error(`Failed to upload part ${partNumber}`);
+        };
+
+        const parts = [];
+        const queue = [...partNumbers];
+        const workers = Array.from(
+          { length: Math.min(PART_UPLOAD_CONCURRENCY, queue.length) },
+          async () => {
+            while (queue.length) {
+              const nextPartNumber = queue.shift();
+              if (!nextPartNumber) return;
+              const part = await uploadPart(nextPartNumber);
+              parts.push(part);
+            }
+          },
+        );
+        await Promise.all(workers);
+
+        updateTask(taskId, {
+          serverStatus: "saving",
+          progress: 99,
+        });
+
+        await TransferOrdersAPI.completeDesignUpload({
+          upload_session_id: uploadSessionId,
+          parts: parts.sort((left, right) => left.part_number - right.part_number),
+        });
 
         updateTask(taskId, {
           status: "success",
           progress: 100,
           finishedAt: Date.now(),
           errorMessage: null,
+          serverStatus: "completed",
         });
       } catch (error) {
-        pollStopped = true;
-        if (progressTimer) {
-          clearTimeout(progressTimer);
-        }
         const canceled = error?.name === "CanceledError" || error?.code === "ERR_CANCELED";
+        const taskSnapshot = tasksRef.current.find((item) => item.id === taskId);
+        const uploadSessionId = taskSnapshot?.uploadSessionId;
+        if (canceled && uploadSessionId) {
+          await TransferOrdersAPI.abortDesignUpload({
+            upload_session_id: uploadSessionId,
+          }).catch(() => {});
+        }
         updateTask(taskId, {
           status: canceled ? "canceled" : "failed",
           finishedAt: Date.now(),
           errorMessage: canceled
             ? null
             : error?.response?.data?.error?.message || error?.message || tQueue("messages.uploadFailed"),
+          serverStatus: canceled ? "canceled" : "failed",
         });
       } finally {
-        pollStopped = true;
-        if (progressTimer) {
-          clearTimeout(progressTimer);
-        }
         controllersRef.current.delete(taskId);
       }
     },
@@ -244,6 +281,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
       finishedAt: null,
       errorMessage: null,
       serverStatus: null,
+      uploadSessionId: null,
     }));
 
     setTasks((prev) => [...newTasks, ...prev]);
@@ -278,6 +316,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
       finishedAt: null,
       errorMessage: null,
       serverStatus: null,
+      uploadSessionId: null,
     });
   }, [updateTask]);
 
@@ -391,7 +430,8 @@ export function TransferDesignUploadQueueProvider({ children }) {
               </Space>
 
               {tasks.map((task) => {
-                const isPreparing = task.status === "uploading" && task.serverStatus === "pending";
+                const isPreparing =
+                  task.status === "uploading" && task.serverStatus === "preparing";
                 const isSaving = task.status === "uploading" && task.serverStatus === "saving";
                 const meta = isPreparing
                   ? statusMeta.preparing

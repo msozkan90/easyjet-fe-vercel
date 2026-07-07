@@ -277,6 +277,14 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/payments/request", payload),
   sendToProduction: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/production", payload, config),
+  initDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/init", payload),
+  designUploadPartUrls: (payload) =>
+    api.post("/transfer-orders/designs/upload/part-urls", payload),
+  completeDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/complete", payload),
+  abortDesignUpload: (payload) =>
+    api.post("/transfer-orders/designs/upload/abort", payload),
   uploadDesigns: (payload, config = {}) =>
     api.postMultipart("/transfer-orders/designs", payload, config),
   uploadDesignProgress: (uploadId) =>
