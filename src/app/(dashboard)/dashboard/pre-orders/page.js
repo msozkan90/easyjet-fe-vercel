@@ -51,8 +51,7 @@ export default function OrdersPage() {
   const [variationsLoading, setVariationsLoading] = useState(false);
   const [rowSelections, setRowSelections] = useState({});
   const [cellLoading, setCellLoading] = useState({});
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowMap, setSelectedRowMap] = useState({});
   const [bulkApproving, setBulkApproving] = useState(false);
   const [bulkCancelling, setBulkCancelling] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
@@ -189,30 +188,41 @@ export default function OrdersPage() {
     });
   }, []);
 
+  const selectedRowKeys = useMemo(
+    () => Object.keys(selectedRowMap),
+    [selectedRowMap]
+  );
+
+  const selectedRows = useMemo(
+    () => Object.values(selectedRowMap),
+    [selectedRowMap]
+  );
+
   const resetSelections = useCallback(() => {
-    setSelectedRowKeys([]);
-    setSelectedRows([]);
+    setSelectedRowMap({});
   }, []);
 
   const clearSelectionForIds = useCallback((ids) => {
     if (!Array.isArray(ids) || !ids.length) return;
     const lookup = new Set(ids.map((value) => String(value)));
-    setSelectedRowKeys((prev) =>
-      prev.filter((key) => !lookup.has(String(key)))
-    );
-    setSelectedRows((prev) =>
-      prev.filter((row) => !lookup.has(String(row?.id)))
-    );
+    setSelectedRowMap((prev) => {
+      const next = { ...prev };
+      Object.keys(next).forEach((key) => {
+        if (lookup.has(String(key))) {
+          delete next[key];
+        }
+      });
+      return next;
+    });
   }, []);
 
   const request = useCallback(
     async (params) => {
       const result = await baseRequest(params);
       clearSelectionOverrides();
-      resetSelections();
       return result;
     },
-    [baseRequest, clearSelectionOverrides, resetSelections]
+    [baseRequest, clearSelectionOverrides]
   );
 
   const setRowSelectionFields = useCallback((rowId, updates) => {
@@ -485,11 +495,6 @@ export default function OrdersPage() {
       setRowSelectionFields,
     ]
   );
-
-  const onRowSelectionChange = useCallback((keys, rows) => {
-    setSelectedRowKeys(keys);
-    setSelectedRows(rows);
-  }, []);
 
   const approveOrders = useCallback(
     async (records, options = {}) => {
@@ -924,10 +929,34 @@ export default function OrdersPage() {
   const rowSelectionConfig = useMemo(
     () => ({
       selectedRowKeys,
-      onChange: onRowSelectionChange,
-      preserveSelectedRowKeys: false,
+      preserveSelectedRowKeys: true,
+      onSelect: (record, selected) => {
+        setSelectedRowMap((prev) => {
+          const next = { ...prev };
+          if (selected) {
+            next[record.id] = record;
+          } else {
+            delete next[record.id];
+          }
+          return next;
+        });
+      },
+      onSelectAll: (selected, _selectedRows, changeRows) => {
+        setSelectedRowMap((prev) => {
+          const next = { ...prev };
+          (changeRows || []).forEach((row) => {
+            if (!row?.id) return;
+            if (selected) {
+              next[row.id] = row;
+            } else {
+              delete next[row.id];
+            }
+          });
+          return next;
+        });
+      },
     }),
-    [onRowSelectionChange, selectedRowKeys]
+    [selectedRowKeys]
   );
 
   const getRowClassName = useCallback((record) => {

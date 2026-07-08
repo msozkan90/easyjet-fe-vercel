@@ -64,7 +64,13 @@ export default function LoginPage() {
       message.success(t("messages.welcome"));
       router.push("/dashboard");
     } catch (e) {
-      dispatch(setAuthError(e?.response?.data?.message || t("messages.loginFailed")));
+      dispatch(
+        setAuthError(
+          e?.response?.data?.error?.message ||
+            e?.response?.data?.message ||
+            t("messages.loginFailed"),
+        ),
+      );
       message.error(t("messages.invalidCredentials"));
     } finally {
       setLoading(false);

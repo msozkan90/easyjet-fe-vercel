@@ -78,7 +78,7 @@ export default function TransferOrdersPage() {
   const [productionModalOpen, setProductionModalOpen] = useState(false);
   const [productionSubmitting, setProductionSubmitting] = useState(false);
   const [productionRecord, setProductionRecord] = useState(null);
-  const [productionOption, setProductionOption] = useState("local_pickup");
+  const [productionOption, setProductionOption] = useState("has_label");
   const [productionLabelFiles, setProductionLabelFiles] = useState([]);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [manualModalSubmitting, setManualModalSubmitting] = useState(false);
@@ -480,7 +480,7 @@ export default function TransferOrdersPage() {
                     onClick={() => {
                       if (!canSendToProduction) return;
                       setProductionRecord(record);
-                      setProductionOption("local_pickup");
+                      setProductionOption("has_label");
                       setProductionLabelFiles([]);
                       setProductionModalOpen(true);
                     }}
@@ -565,7 +565,7 @@ export default function TransferOrdersPage() {
     setProductionModalOpen(false);
     setProductionSubmitting(false);
     setProductionRecord(null);
-    setProductionOption("local_pickup");
+    setProductionOption("has_label");
     setProductionLabelFiles([]);
   }, []);
 
@@ -987,14 +987,14 @@ export default function TransferOrdersPage() {
             }}
           >
             <Space direction="vertical">
-              <Radio value="local_pickup">
-                {t("productionModal.options.localPickup")}
-              </Radio>
               <Radio value="has_label">
                 {t("productionModal.options.hasLabel")}
               </Radio>
               <Radio value="no_label">
                 {t("productionModal.options.noLabel")}
+              </Radio>
+              <Radio value="local_pickup">
+                {t("productionModal.options.localPickup")}
               </Radio>
             </Space>
           </Radio.Group>

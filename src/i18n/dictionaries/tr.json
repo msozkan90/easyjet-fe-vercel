@@ -2219,7 +2219,7 @@
           "quantity": "Adet"
         },
         "actions": {
-          "queue": "Yüklemeye Al",
+          "queue": "Tasarımı Yükle",
           "cancel": "İptal",
           "add": "Tasarım Ekle",
           "remove": "Kaldır",
