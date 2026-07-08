@@ -188,15 +188,6 @@ export default function OrdersPage() {
   const request = useCallback(
     async (params) => {
       const result = await baseRequest(params);
-      if (Array.isArray(result?.data)) {
-        result.data = [...result.data].sort((a, b) => {
-          const aProductId = getNormalizedRecordValue(a, "product");
-          const bProductId = getNormalizedRecordValue(b, "product");
-          const aMissing = aProductId === null || aProductId === undefined ? 1 : 0;
-          const bMissing = bProductId === null || bProductId === undefined ? 1 : 0;
-          return bMissing - aMissing;
-        });
-      }
       clearSelectionOverrides();
       return result;
     },

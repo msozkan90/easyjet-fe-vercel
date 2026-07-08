@@ -236,8 +236,21 @@ const CrudTable = forwardRef(function CrudTable(
         sort: { orderBy: sortState.orderBy, orderDir: sortState.orderDir },
         filters,
       });
+      const nextTotal = Number(total) || 0;
+      const maxPage = Math.max(
+        1,
+        Math.ceil(nextTotal / Math.max(1, pageState.pageSize))
+      );
+
+      if (pageState.page > maxPage) {
+        setPageState((prev) =>
+          prev.page === maxPage ? prev : { ...prev, page: maxPage }
+        );
+        return;
+      }
+
       setRows(list || []);
-      setTotal(Number(total) || 0);
+      setTotal(nextTotal);
     } finally {
       setLoading(false);
     }
