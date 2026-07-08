@@ -258,7 +258,7 @@ export default function TransferOrdersStatusListPage({
       makeListRequest(
         listApiFn,
         {
-          defaultSort: [{ field: "order_date", direction: "desc" }],
+          defaultSort: [{ field: "order_date", direction: "asc" }],
           fixedFilters: fixedFilters || {},
           filterTransform: (filters = {}) => {
             const next = { ...filters };

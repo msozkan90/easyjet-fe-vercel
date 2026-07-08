@@ -50,27 +50,55 @@ http.interceptors.request.use((config) => {
 // 401 yakala → refresh dene → tekrar et
 let isRefreshing = false;
 let subscribers = [];
-const subscribeTokenRefresh = (cb) => subscribers.push(cb);
+const subscribeTokenRefresh = (resolve, reject) =>
+  subscribers.push({ resolve, reject });
 const onRefreshed = () => {
-  subscribers.forEach((cb) => cb());
+  subscribers.forEach(({ resolve }) => resolve());
   subscribers = [];
 };
+const onRefreshFailed = (error) => {
+  subscribers.forEach(({ reject }) => reject(error));
+  subscribers = [];
+};
+
+const getRequestPath = (config) => {
+  const rawUrl = String(config?.url || "");
+  if (!rawUrl) return "";
+  try {
+    const normalized = rawUrl.startsWith("http")
+      ? new URL(rawUrl).pathname
+      : new URL(rawUrl, "http://localhost").pathname;
+    return normalized;
+  } catch {
+    return rawUrl;
+  }
+};
+
+const isAuthRefreshPath = (path) => path === "/auth/refresh" || path.endsWith("/auth/refresh");
+const isAuthLoginPath = (path) => path === "/auth/login" || path.endsWith("/auth/login");
 
 http.interceptors.response.use(
   (res) => res,
   async (error) => {
     const { config, response } = error || {};
     if (!response) return Promise.reject(error);
+    const requestPath = getRequestPath(config);
 
     if (response.status === 403) {
       return Promise.reject(error);
     }
 
-    if (response.status === 401 && !config._retry) {
+    if (
+      response.status === 401 &&
+      !config?._retry &&
+      !isAuthLoginPath(requestPath) &&
+      !isAuthRefreshPath(requestPath)
+    ) {
       if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh(() =>
-            resolve(http({ ...config, _retry: true }))
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh(
+            () => resolve(http({ ...config, _retry: true })),
+            reject,
           );
         });
       }
@@ -83,6 +111,7 @@ http.interceptors.response.use(
         return http(config);
       } catch (e) {
         isRefreshing = false;
+        onRefreshFailed(e);
         return Promise.reject(e);
       }
     }

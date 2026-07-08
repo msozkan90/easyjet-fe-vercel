@@ -2417,7 +2417,7 @@
           "quantity": "Quantity"
         },
         "actions": {
-          "queue": "Queue Uploads",
+          "queue": "Upload Design",
           "cancel": "Cancel",
           "add": "Add Design",
           "remove": "Remove",
