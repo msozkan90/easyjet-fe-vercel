@@ -140,7 +140,7 @@ export default function CancelOrdersPage() {
       makeListRequest(
         OrdersAPI.cancelItemsList,
         {
-          defaultSort: [{ field: "order_date", direction: "desc" }],
+          defaultSort: [{ field: "order_date", direction: "asc" }],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
             const orderDate = next.order_date;

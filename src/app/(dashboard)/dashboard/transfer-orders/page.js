@@ -129,7 +129,7 @@ export default function OrdersPage() {
       makeListRequest(
         OrdersAPI.transferPreList,
         {
-          defaultSort: [{ field: "order_date", direction: "desc" }],
+          defaultSort: [{ field: "order_date", direction: "asc" }],
           filterMap: {},
           numericArrayKeys: [""],
           filterTransform: (filters = {}) => {

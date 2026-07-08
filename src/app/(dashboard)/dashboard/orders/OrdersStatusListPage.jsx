@@ -217,7 +217,7 @@ export default function OrdersStatusListPage({
       makeListRequest(
         listApiFn,
         {
-          defaultSort: [{ field: "order_date", direction: "desc" }],
+          defaultSort: [{ field: "order_date", direction: "asc" }],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
             if (allowedStatuses?.length) {
