@@ -9,7 +9,6 @@ import {
   Card,
   Descriptions,
   Empty,
-  Image,
   Input,
   Popconfirm,
   Space,
@@ -19,6 +18,7 @@ import {
 } from "antd";
 import { ExportOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { GuardedPreviewImage, LazyGuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
@@ -78,53 +78,13 @@ const normalizeOptions = (rawOptions) => {
   return [];
 };
 
-function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
-  const [failed, setFailed] = useState(false);
-
-  if (!src || failed) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "1 / 1",
-          borderRadius: 8,
-          overflow: "hidden",
-          background: "#f5f5f5",
-          border: "1px solid #f0f0f0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography.Text type="secondary">{emptyText}</Typography.Text>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        borderRadius: 8,
-        overflow: "hidden",
-        background: "#f5f5f5",
-        border: "1px solid #f0f0f0",
-      }}
-    >
-      <img
-        src={src}
-        alt={alt || preparingText}
-        loading="lazy"
-        decoding="async"
-        onError={() => setFailed(true)}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    </div>
-  );
-}
-
-const TransferOrderItemCard = ({ item, tOrders, tDetail, currency }) => {
+const TransferOrderItemCard = ({
+  item,
+  tOrders,
+  tDetail,
+  tCommonActions,
+  currency,
+}) => {
   const options = normalizeOptions(item?.options);
   const statusKey = item?.status || "";
   const statusLabel = statusKey
@@ -207,9 +167,10 @@ const TransferOrderItemCard = ({ item, tOrders, tDetail, currency }) => {
                   styles={{ body: { padding: 10 } }}
                 >
                   <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                    <LazyPreviewImage
+                    <LazyGuardedPreviewImage
                       src={design?.design_url}
                       alt={`design-${design?.id}`}
+                      openLabel={tCommonActions("open")}
                       preparingText={tDetail("preview.preparing")}
                       emptyText={tDetail("preview.empty")}
                     />
@@ -478,10 +439,13 @@ export default function TransferShippedPrinterSearchPage() {
                 <div>{statusTag}</div>
               </div>
               {orderSummary?.barcode_url ? (
-                <Image
+                <GuardedPreviewImage
                   src={orderSummary.barcode_url}
                   alt={`${orderSummary?.order_number || "transfer-order"}-barcode`}
                   width={120}
+                  openLabel={tCommonActions("open")}
+                  preparingText={tDetail("preview.preparing")}
+                  emptyText={tOrders("common.none")}
                   preview
                 />
               ) : null}
@@ -613,6 +577,7 @@ export default function TransferShippedPrinterSearchPage() {
                 item={item}
                 tOrders={tOrders}
                 tDetail={tDetail}
+                tCommonActions={tCommonActions}
                 currency={orderSummary?.currency || "USD"}
               />
             ))}

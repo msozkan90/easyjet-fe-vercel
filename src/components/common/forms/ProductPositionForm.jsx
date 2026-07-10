@@ -6,6 +6,10 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import DesignAreaSelector from "@/components/common/forms/DesignAreaSelector";
+import {
+  isFilePreviewAllowed,
+  openFileInNewTab,
+} from "@/components/common/media/ImagePreviewGate";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -72,6 +76,10 @@ export default function ProductPositionForm({
   }, [form, transformedInitialValues]);
 
   const handlePreview = async (file) => {
+    if (file?.originFileObj && !isFilePreviewAllowed(file.originFileObj)) {
+      openFileInNewTab(file.originFileObj);
+      return;
+    }
     if (!file.url && !file.preview) {
       try {
         file.preview = await getBase64(file.originFileObj);

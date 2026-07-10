@@ -39,7 +39,8 @@
       "cancel": "İptal",
       "edit": "Düzenle",
       "delete": "Sil",
-      "detail": "Detay"
+      "detail": "Detay",
+      "open": "Aç"
     },
     "status": {
       "active": "Aktif",

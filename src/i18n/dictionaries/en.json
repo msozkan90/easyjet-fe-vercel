@@ -39,7 +39,8 @@
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
-      "detail": "Detail"
+      "detail": "Detail",
+      "open": "Open"
     },
     "status": {
       "active": "Active",

@@ -7,12 +7,12 @@ import {
   Button,
   Card,
   Empty,
-  Image,
   Input,
   Spin,
   Tag,
   Typography,
 } from "antd";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
@@ -55,9 +55,11 @@ const OrderItemCard = ({ item, tOrders }) => {
         <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
           <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
             {item?.image_url ? (
-              <Image
+              <GuardedPreviewImage
                 src={item.image_url}
                 alt={item?.name || "order item"}
+                openLabel={tCommonActions("open")}
+                emptyText={tOrders("common.none")}
                 preview
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />

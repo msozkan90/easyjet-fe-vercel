@@ -9,7 +9,6 @@ import {
   Card,
   Empty,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
@@ -22,6 +21,7 @@ import {
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
@@ -445,9 +445,11 @@ const OrderItemCard = ({
         <div className="w-full max-w-[260px] rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
           <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50">
             {item?.image_url ? (
-              <Image
+              <GuardedPreviewImage
                 src={item.image_url}
                 alt={item?.name || "order item"}
+                openLabel={tCommonActions("open")}
+                emptyText={tOrders("common.none")}
                 preview
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />

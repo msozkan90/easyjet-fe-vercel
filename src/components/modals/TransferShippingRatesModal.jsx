@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   App as AntdApp,
@@ -28,6 +28,9 @@ import {
 } from "@ant-design/icons";
 import { TransferOrdersAPI } from "@/utils/api";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
+import {
+  LazyGuardedPreviewImage,
+} from "@/components/common/media/ImagePreviewGate";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 
@@ -104,64 +107,22 @@ const normalizeAddress = (order) => ({
   customer_email: order?.shipping_address?.customer_email || "",
 });
 
-function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
-  const containerRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) return undefined;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first?.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "300px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
+function TransferDesignPreviewCard({ design, tCommonActions, tModal }) {
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        borderRadius: 8,
-        overflow: "hidden",
-        background: "#f5f5f5",
-        border: "1px solid #f0f0f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+    <Space
+      direction="vertical"
+      size={8}
+      style={{ width: "100%" }}
     >
-      {!visible ? (
-        <Typography.Text type="secondary">{preparingText}</Typography.Text>
-      ) : !src || failed ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />
-      ) : (
-        <img
-          src={src}
-          alt={alt || "design"}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      )}
-    </div>
+      <LazyGuardedPreviewImage
+        src={design?.design_url}
+        alt={`design-${design?.id}`}
+        openLabel={tCommonActions("open")}
+        preparingText={tModal("preview.preparing")}
+        emptyText={tModal("preview.empty")}
+        blockedButtonProps={{ block: true }}
+      />
+    </Space>
   );
 }
 
@@ -906,17 +867,16 @@ export default function TransferShippingRatesModal({
                               size="small"
                               styles={{ body: { padding: 10 } }}
                             >
+                              <TransferDesignPreviewCard
+                                design={design}
+                                tCommonActions={tCommonActions}
+                                tModal={tModal}
+                              />
                               <Space
                                 direction="vertical"
                                 size={8}
                                 style={{ width: "100%" }}
                               >
-                                <LazyPreviewImage
-                                  src={design?.design_url}
-                                  alt={`design-${design?.id}`}
-                                  preparingText={tModal("preview.preparing")}
-                                  emptyText={tModal("preview.empty")}
-                                />
                                 <Typography.Text
                                   type="secondary"
                                   style={{ fontSize: 12 }}

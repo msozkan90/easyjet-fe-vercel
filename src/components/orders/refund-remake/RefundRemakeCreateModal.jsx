@@ -6,7 +6,6 @@ import {
   App as AntdApp,
   Checkbox,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
@@ -21,6 +20,7 @@ import {
   ProfileOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
@@ -114,6 +114,7 @@ export default function RefundRemakeCreateModal({
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
+  const tCommonActions = useTranslations("common.actions");
   const [form] = Form.useForm();
   const [itemSelections, setItemSelections] = useState({});
   const { confirmIfDirty, unsavedChangesModalContextHolder } =
@@ -167,11 +168,13 @@ export default function RefundRemakeCreateModal({
         width: 78,
         render: (value) =>
           value ? (
-            <Image
+            <GuardedPreviewImage
               src={value}
               alt="order-item"
               width={44}
               height={44}
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               style={{ borderRadius: 8, objectFit: "cover" }}
             />
           ) : (
@@ -244,7 +247,7 @@ export default function RefundRemakeCreateModal({
         render: (_, record) => formatPriceDisplay(record?.initialPrice),
       },
     ],
-    [itemSelections, t, updateItemSelection]
+    [itemSelections, t, tCommonActions, updateItemSelection]
   );
 
   const handleConfirm = useCallback(async () => {

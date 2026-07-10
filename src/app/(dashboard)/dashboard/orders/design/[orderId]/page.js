@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   Empty,
-  Image,
   Input,
   Popconfirm,
   Select,
@@ -25,6 +24,10 @@ import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
+import {
+  GuardedPreviewImage,
+  isFilePreviewAllowed,
+} from "@/components/common/media/ImagePreviewGate";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -300,6 +303,9 @@ export default function OrderDesignPage() {
     const mapped = await Promise.all(
       fileList.map(async (file) => {
         if (file?.thumbUrl || !file?.originFileObj) {
+          return file;
+        }
+        if (!isFilePreviewAllowed(file.originFileObj)) {
           return file;
         }
         try {
@@ -667,9 +673,10 @@ export default function OrderDesignPage() {
 
                     <div className="mt-4 flex aspect-[3/4] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-3">
                       {orderDetail?.image_url ? (
-                        <Image
+                        <GuardedPreviewImage
                           src={orderDetail.image_url}
                           alt="order item"
+                          openLabel={tCommon("actions.open")}
                           preview={true}
                           style={{
                             width: "100%",

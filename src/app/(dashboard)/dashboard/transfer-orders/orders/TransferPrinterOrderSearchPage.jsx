@@ -8,13 +8,13 @@ import {
   Card,
   Empty,
   Descriptions,
-  Image,
   Input,
   Spin,
   Tag,
   Typography,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
@@ -281,10 +281,12 @@ export default function TransferPrinterOrderSearchPage({
                 <div>{statusTag}</div>
               </div>
               {orderSummary?.barcode_url ? (
-                <Image
+                <GuardedPreviewImage
                   src={orderSummary.barcode_url}
                   alt={`${orderSummary?.order_number || "transfer-order"}-barcode`}
                   width={120}
+                  openLabel={tCommonActions("open")}
+                  emptyText={tOrders("common.none")}
                   preview
                 />
               ) : null}
@@ -328,9 +330,11 @@ export default function TransferPrinterOrderSearchPage({
                                     bodyStyle={{ padding: 10 }}
                                   >
                                     <div className="space-y-2">
-                                      <Image
+                                      <GuardedPreviewImage
                                         src={design?.design_url}
                                         alt="transfer-design"
+                                        openLabel={tCommonActions("open")}
+                                        emptyText={tOrders("common.none")}
                                         style={{
                                           width: "100%",
                                           maxHeight: 220,

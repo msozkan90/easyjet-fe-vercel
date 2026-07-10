@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -25,6 +25,7 @@ import {
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { LazyGuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { TransferOrdersAPI } from "@/utils/api";
 import {
   DeleteOutlined,
@@ -127,67 +128,6 @@ const renderOptionsSummary = (options, fallback) => (
     ))}
   </div>
 );
-
-function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
-  const containerRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) return undefined;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first?.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "300px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        borderRadius: 8,
-        overflow: "hidden",
-        background: "#f5f5f5",
-        border: "1px solid #f0f0f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {!visible ? (
-        <Typography.Text type="secondary">{preparingText}</Typography.Text>
-      ) : !src || failed ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />
-      ) : (
-        <img
-          src={src}
-          alt={alt || "design"}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      )}
-    </div>
-  );
-}
 
 export default function TransferOrderDetailPage() {
   const { message } = AntdApp.useApp();
@@ -532,9 +472,10 @@ export default function TransferOrderDetailPage() {
                                 size={8}
                                 style={{ width: "100%" }}
                               >
-                                <LazyPreviewImage
+                                <LazyGuardedPreviewImage
                                   src={design?.design_url}
                                   alt={`design-${design?.id}`}
+                                  openLabel={tDetail("actions.open")}
                                   preparingText={tDetail("preview.preparing")}
                                   emptyText={tDetail("preview.empty")}
                                 />
