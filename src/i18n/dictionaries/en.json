@@ -2790,17 +2790,22 @@
         "fields": {
           "orderName": "Order Name",
           "currency": "Currency",
-          "orderTotal": "Order Total"
+          "orderTotal": "Order Total",
+          "requestLink": "Request Link",
+          "orderLink": "Order Link"
         },
         "sections": {
           "priceSummary": "Price Summary",
           "items": "Items",
-          "uploadedDesigns": "Uploaded Designs"
+          "uploadedDesigns": "Uploaded Designs",
+          "remakeRequest": "Remake Request",
+          "originalTransferOrder": "Original Transfer Order"
         },
         "tabs": {
           "overview": "Overview",
           "itemsAndDesigns": "Items & Designs",
           "labelsAndPricing": "Labels & Pricing",
+          "remakedOrder": "Remaked Order",
           "activity": "Activity"
         },
         "priceSummary": {
@@ -2824,6 +2829,8 @@
         "actions": {
           "saveNotes": "Save Notes",
           "open": "Open",
+          "viewRequest": "View Request",
+          "openOrder": "Open Order",
           "delete": "Delete",
           "deleteConfirmTitle": "Delete this design?",
           "deleteConfirmDescription": "This will delete the record and remove the file from storage."

@@ -2592,17 +2592,22 @@
         "fields": {
           "orderName": "Sipariş Adı",
           "currency": "Para Birimi",
-          "orderTotal": "Sipariş Toplamı"
+          "orderTotal": "Sipariş Toplamı",
+          "requestLink": "Talep Linki",
+          "orderLink": "Sipariş Linki"
         },
         "sections": {
           "priceSummary": "Fiyat Özeti",
           "items": "Kalemler",
-          "uploadedDesigns": "Yüklenen Tasarımlar"
+          "uploadedDesigns": "Yüklenen Tasarımlar",
+          "remakeRequest": "Remake Talebi",
+          "originalTransferOrder": "Orijinal Transfer Siparişi"
         },
         "tabs": {
           "overview": "Genel Bakış",
           "itemsAndDesigns": "Kalemler ve Tasarımlar",
           "labelsAndPricing": "Etiket ve Fiyatlama",
+          "remakedOrder": "Remaked Order",
           "activity": "Aktivite"
         },
         "priceSummary": {
@@ -2626,6 +2631,8 @@
         "actions": {
           "saveNotes": "Notları Kaydet",
           "open": "Aç",
+          "viewRequest": "Talebi Görüntüle",
+          "openOrder": "Siparişi Aç",
           "delete": "Sil",
           "deleteConfirmTitle": "Bu tasarım silinsin mi?",
           "deleteConfirmDescription": "Kayıt silinir ve dosya depolamadan kaldırılır."
