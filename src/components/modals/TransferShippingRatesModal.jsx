@@ -21,7 +21,11 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { EditOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  EditOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { TransferOrdersAPI } from "@/utils/api";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { useTranslations } from "@/i18n/use-translations";
@@ -286,6 +290,7 @@ export default function TransferShippingRatesModal({
 
   const shippingAmount = Number(selectedRate?.amount || 0);
   const deliveryMethod = transferOrder?.delivery_method || null;
+  const deliveryMethodDisplay = deliveryMethod || "-";
 
   const validateInputs = useCallback(() => {
     if (!transferOrder?.id) {
@@ -367,6 +372,41 @@ export default function TransferShippingRatesModal({
       setSavingAddress(false);
     }
   }, [form, message, tModal, transferOrder?.id]);
+
+  const handleCopyDeliveryMethod = useCallback(async () => {
+    const value = String(deliveryMethod || "").trim();
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      message.success(`${tOrders("columns.deliveryMethod")} copied.`);
+    } catch {
+      message.error(`${tOrders("columns.deliveryMethod")} could not be copied.`);
+    }
+  }, [deliveryMethod, message, tOrders]);
+
+  const deliveryMethodTag = (
+    <Tag className="rounded-full" color="cyan">
+      <Space size={4}>
+        <span>
+          {tOrders("columns.deliveryMethod")}: {deliveryMethodDisplay}
+        </span>
+        {deliveryMethod ? (
+          <Button
+            size="small"
+            type="text"
+            icon={<CopyOutlined />}
+            aria-label={tCommonActions("copy")}
+            title={tCommonActions("copy")}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void handleCopyDeliveryMethod();
+            }}
+          />
+        ) : null}
+      </Space>
+    </Tag>
+  );
 
   const handleAddressSelect = useCallback(
     (payload) => {
@@ -535,381 +575,401 @@ export default function TransferShippingRatesModal({
     <>
       {unsavedChangesModalContextHolder}
       <Modal
-      open={open}
-      onCancel={() =>
-        confirmIfDirty({
-          isDirty: form.isFieldsTouched(true),
-          onDiscard: onClose,
-        })
-      }
-      title={tModal("title")}
-      width={1280}
-      footer={[
-        <Button
-          key="close"
-          onClick={() =>
-            confirmIfDirty({
-              isDirty: form.isFieldsTouched(true),
-              onDiscard: onClose,
-            })
-          }
-        >
-          {tCommonActions("close")}
-        </Button>,
-        <Popconfirm
-          key="create"
-          title="Create shipping label for this transfer order?"
-          okText={tModal("actions.createLabel")}
-          cancelText={tCommonActions("cancel")}
-          okButtonProps={{ type: "primary", loading: creatingLabel }}
-          disabled={creatingLabel}
-          onConfirm={handleCreateLabel}
-        >
-          <Button type="primary" loading={creatingLabel}>
-            {tModal("actions.createLabel")}
-          </Button>
-        </Popconfirm>,
-      ]}
-    >
-      <Space direction="vertical" style={{ width: "100%" }} size={16}>
-        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-start gap-1">
-              <div>
+        open={open}
+        onCancel={() =>
+          confirmIfDirty({
+            isDirty: form.isFieldsTouched(true),
+            onDiscard: onClose,
+          })
+        }
+        title={tModal("title")}
+        width={1280}
+        footer={[
+          <Button
+            key="close"
+            onClick={() =>
+              confirmIfDirty({
+                isDirty: form.isFieldsTouched(true),
+                onDiscard: onClose,
+              })
+            }
+          >
+            {tCommonActions("close")}
+          </Button>,
+          <Popconfirm
+            key="create"
+            title="Create shipping label for this transfer order?"
+            okText={tModal("actions.createLabel")}
+            cancelText={tCommonActions("cancel")}
+            okButtonProps={{ type: "primary", loading: creatingLabel }}
+            disabled={creatingLabel}
+            onConfirm={handleCreateLabel}
+          >
+            <Button type="primary" loading={creatingLabel}>
+              {tModal("actions.createLabel")}
+            </Button>
+          </Popconfirm>,
+        ]}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size={16}>
+          <div className="flex flex-wrap items-start gap-1">
+            <div>
+              <Tag className="rounded-full" color="geekblue">
+                {tOrders("columns.orderNumber")}:{" "}
+                {transferOrder?.order_number || "-"}
+              </Tag>
+            </div>
+            <div>
+              <Tag className="rounded-full" color="gold">
+                {tOrders("columns.customerName")}:{" "}
+                {transferOrder?.bill_to_name || "-"}
+              </Tag>
+            </div>
+            <div>
+              {deliveryMethodTag}
+            </div>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
-                  {tModal("items.title")}
+                  {tModal("package.title")}
+                </Typography.Title>
+                <Button
+                  icon={<ReloadOutlined />}
+                  type="primary"
+                  ghost
+                  onClick={handleQuoteRates}
+                  loading={loadingRates}
+                >
+                  {tModal("package.refreshRates")}
+                </Button>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {tModal("package.weightLb")}
+                  </div>
+                  <InputNumber
+                    placeholder="0"
+                    min={0}
+                    style={{ width: "100%" }}
+                    value={weightLb}
+                    onChange={setWeightLb}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {tModal("package.weightOz")}
+                  </div>
+                  <InputNumber
+                    placeholder="0"
+                    min={0}
+                    style={{ width: "100%" }}
+                    value={weightOz}
+                    onChange={setWeightOz}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {tModal("package.lengthIn")}
+                  </div>
+                  <InputNumber
+                    placeholder="0"
+                    min={0}
+                    style={{ width: "100%" }}
+                    value={lengthIn}
+                    onChange={setLengthIn}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {tModal("package.widthIn")}
+                  </div>
+                  <InputNumber
+                    placeholder="0"
+                    min={0}
+                    style={{ width: "100%" }}
+                    value={widthIn}
+                    onChange={setWidthIn}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {tModal("package.heightIn")}
+                  </div>
+                  <InputNumber
+                    placeholder="0"
+                    min={0}
+                    style={{ width: "100%" }}
+                    value={heightIn}
+                    onChange={setHeightIn}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <Typography.Title level={4} style={{ margin: 0 }}>
+                  {tModal("service.title")}
                 </Typography.Title>
                 <Typography.Text type="secondary">
-                  {tModal("items.subtitle")}
+                  {tModal("service.subtitle")}
                 </Typography.Text>
               </div>
-              <div>
-                <Tag className="rounded-full" color="geekblue">
-                  {tOrders("columns.orderNumber")}:{" "}
-                  {transferOrder?.order_number || "-"}
-                </Tag>
-              </div>
-              <div>
-                <Tag className="rounded-full" color="gold">
-                  {tOrders("columns.customerName")}:{" "}
-                  {transferOrder?.bill_to_name || "-"}
-                </Tag>
-              </div>
-              <div>
-                <Tag className="rounded-full" color="green">
-                  {tModal("items.itemCount")}: {items.length}
-                </Tag>
-              </div>
-              <div>
-                <Tag className="rounded-full" color="cyan">
-                  {tOrders("columns.deliveryMethod")}: {deliveryMethod || "-"}
-                </Tag>
-              </div>
+              <Tabs
+                activeKey={activeTab}
+                onChange={(key) => {
+                  setActiveTab(key);
+                  setSelectedRateKey(null);
+                }}
+                items={tabs}
+              />
+              <Spin spinning={loadingRates}>
+                <Select
+                  placeholder={tModal("service.selectPlaceholder")}
+                  options={sortedActiveRates.map((rate) => ({
+                    label: `${rate.carrier || "-"} • ${rate.serviceName || "-"} ($${formatAmount(rate.amount, "0.00")})`,
+                    value: getRateKey(rate),
+                  }))}
+                  value={selectedRateKey || undefined}
+                  onChange={setSelectedRateKey}
+                  style={{ width: "100%" }}
+                  showSearch
+                  optionFilterProp="label"
+                />
+              </Spin>
+              {selectedRate ? (
+                <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                  <div className="flex flex-wrap justify-between gap-2">
+                    <span className="font-semibold text-gray-900">
+                      {selectedRate.carrier} •{" "}
+                      {selectedRate.serviceName || selectedRate.serviceCode}
+                    </span>
+                    <span className="text-base font-semibold text-gray-900">
+                      $ {formatAmount(selectedRate.amount, "0.00")}
+                    </span>
+                  </div>
+                  {selectedRate.zone ? (
+                    <div className="text-xs text-gray-500">
+                      {tModal("service.zoneLabel")}: {selectedRate.zone}
+                    </div>
+                  ) : null}
+                  {selectedRate.deliveryDays ? (
+                    <div className="text-xs text-gray-500">
+                      {tModal("service.deliveryDaysLabel")}:{" "}
+                      {selectedRate.deliveryDays}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
-          <div className="mt-4 space-y-3 max-h-[285px] overflow-y-auto pr-1">
-            {items.map((item, index) => (
-              <div
-                key={item?.id ?? `transfer-item-${index}`}
-                className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4 shadow-sm"
-              >
-                <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                  <div className="font-semibold text-gray-900">
-                    {item?.name || "-"}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {tOrders("columns.product")}:{" "}
-                    {item?.transfer_product?.name || "-"}
-                  </div>
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                  <div className="font-semibold text-gray-900">
-                    {tOrders("columns.quantity")}: {item?.quantity ?? "-"}
-                  </div>
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                  <div className="font-semibold text-gray-900">
-                    {tOrders("columns.status")}:{" "}
-                    <Tag
-                      color={STATUS_COLORS[item?.status] || "default"}
-                      style={{ marginInlineEnd: 0 }}
-                    >
-                      {item?.status
-                        ? tOrders(`status.values.${item.status}`) || item.status
-                        : "-"}
-                    </Tag>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {designGroups.length ? (
-          <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
-            <Typography.Title
-              level={4}
-              style={{ marginTop: 0, marginBottom: 8 }}
-            >
-              {tModal("designs.title")}
-            </Typography.Title>
-            <Typography.Text type="secondary">
-              {tModal("designs.subtitle")}
-            </Typography.Text>
-            <Space
-              direction="vertical"
-              size={16}
-              style={{ width: "100%", marginTop: 16 }}
-            >
-              {designGroups.map((group, groupIndex) => (
-                <Card
-                  key={group?.sub_category_id || `group-${groupIndex}`}
-                  type="inner"
-                  title={group?.sub_category_name || "-"}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
+              <div className="flex items-center justify-between gap-3">
+                <Typography.Title level={4} style={{ margin: 0 }}>
+                  {tModal("address.title")}
+                </Typography.Title>
+                <Button
+                  icon={<EditOutlined />}
+                  type="text"
+                  onClick={() => setAddressEditorOpen(true)}
                 >
-                  <Row gutter={[12, 12]}>
-                    {(Array.isArray(group?.designs) ? group.designs : []).map(
-                      (design) => (
-                        <Col xs={12} sm={8} md={6} lg={3} key={design?.id}>
-                          <Card size="small" styles={{ body: { padding: 10 } }}>
-                            <Space
-                              direction="vertical"
-                              size={8}
-                              style={{ width: "100%" }}
-                            >
-                              <LazyPreviewImage
-                                src={design?.design_url}
-                                alt={`design-${design?.id}`}
-                                preparingText={tModal("preview.preparing")}
-                                emptyText={tModal("preview.empty")}
-                              />
-                              <Typography.Text
-                                type="secondary"
-                                style={{ fontSize: 12 }}
-                              >
-                                {tModal("designs.size")}:{" "}
-                                {formatAmount(design?.width)}" x{" "}
-                                {formatAmount(design?.height)}"
-                              </Typography.Text>
-                              <Typography.Text strong>
-                                {tOrders("columns.price")}:{" "}
-                                {formatCurrency(
-                                  design?.price,
-                                  transferOrder?.currency,
-                                )}
-                              </Typography.Text>
-                              <Typography.Text
-                                type="secondary"
-                                style={{ fontSize: 12 }}
-                              >
-                                {design?.created_at
-                                  ? new Date(design.created_at).toLocaleString()
-                                  : "-"}
-                              </Typography.Text>
-                            </Space>
-                          </Card>
-                        </Col>
-                      ),
-                    )}
-                  </Row>
-                </Card>
-              ))}
-            </Space>
-          </div>
-        ) : null}
+                  {tCommonActions("edit")}
+                </Button>
+              </div>
+              <Divider style={{ margin: "16px 0" }} />
+              {renderAddress()}
+            </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                {tModal("package.title")}
-              </Typography.Title>
-              <Button
-                icon={<ReloadOutlined />}
-                type="primary"
-                ghost
-                onClick={handleQuoteRates}
-                loading={loadingRates}
-              >
-                {tModal("package.refreshRates")}
-              </Button>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {tModal("package.weightLb")}
-                </div>
-                <InputNumber
-                  placeholder="0"
-                  min={0}
-                  style={{ width: "100%" }}
-                  value={weightLb}
-                  onChange={setWeightLb}
-                />
+            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">
+                  {tModal("summary.selectedShippingRate")}
+                </span>
+                <span className="text-base font-semibold text-gray-900">
+                  $ {formatAmount(shippingAmount, "0.00")}
+                </span>
               </div>
-              <div className="space-y-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {tModal("package.weightOz")}
-                </div>
-                <InputNumber
-                  placeholder="0"
-                  min={0}
-                  style={{ width: "100%" }}
-                  value={weightOz}
-                  onChange={setWeightOz}
-                />
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {tModal("package.lengthIn")}
-                </div>
-                <InputNumber
-                  placeholder="0"
-                  min={0}
-                  style={{ width: "100%" }}
-                  value={lengthIn}
-                  onChange={setLengthIn}
-                />
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {tModal("package.widthIn")}
-                </div>
-                <InputNumber
-                  placeholder="0"
-                  min={0}
-                  style={{ width: "100%" }}
-                  value={widthIn}
-                  onChange={setWidthIn}
-                />
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {tModal("package.heightIn")}
-                </div>
-                <InputNumber
-                  placeholder="0"
-                  min={0}
-                  style={{ width: "100%" }}
-                  value={heightIn}
-                  onChange={setHeightIn}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                {tModal("service.title")}
-              </Typography.Title>
               <Typography.Text type="secondary">
-                {tModal("service.subtitle")}
+                {tModal("summary.selectedService")}:{" "}
+                {selectedRate
+                  ? `${selectedRate?.carrier || "-"} / ${selectedRate?.serviceName || selectedRate?.serviceCode || "-"}`
+                  : "-"}
               </Typography.Text>
             </div>
-            <Tabs
-              activeKey={activeTab}
-              onChange={(key) => {
-                setActiveTab(key);
-                setSelectedRateKey(null);
-              }}
-              items={tabs}
-            />
-            <Spin spinning={loadingRates}>
-              <Select
-                placeholder={tModal("service.selectPlaceholder")}
-                options={sortedActiveRates.map((rate) => ({
-                  label: `${rate.carrier || "-"} • ${rate.serviceName || "-"} ($${formatAmount(rate.amount, "0.00")})`,
-                  value: getRateKey(rate),
-                }))}
-                value={selectedRateKey || undefined}
-                onChange={setSelectedRateKey}
-                style={{ width: "100%" }}
-                showSearch
-                optionFilterProp="label"
-              />
-            </Spin>
-            {selectedRate ? (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                <div className="flex flex-wrap justify-between gap-2">
-                  <span className="font-semibold text-gray-900">
-                    {selectedRate.carrier} •{" "}
-                    {selectedRate.serviceName || selectedRate.serviceCode}
-                  </span>
-                  <span className="text-base font-semibold text-gray-900">
-                    $ {formatAmount(selectedRate.amount, "0.00")}
-                  </span>
+          </div>
+          <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-start gap-1">
+                <div>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    {tModal("items.title")}
+                  </Typography.Title>
+                  <Typography.Text type="secondary">
+                    {tModal("items.subtitle")}
+                  </Typography.Text>
                 </div>
-                {selectedRate.zone ? (
-                  <div className="text-xs text-gray-500">
-                    {tModal("service.zoneLabel")}: {selectedRate.zone}
-                  </div>
-                ) : null}
-                {selectedRate.deliveryDays ? (
-                  <div className="text-xs text-gray-500">
-                    {tModal("service.deliveryDaysLabel")}:{" "}
-                    {selectedRate.deliveryDays}
-                  </div>
-                ) : null}
+                <div>
+                  <Tag className="rounded-full" color="geekblue">
+                    {tOrders("columns.orderNumber")}:{" "}
+                    {transferOrder?.order_number || "-"}
+                  </Tag>
+                </div>
+                <div>
+                  <Tag className="rounded-full" color="gold">
+                    {tOrders("columns.customerName")}:{" "}
+                    {transferOrder?.bill_to_name || "-"}
+                  </Tag>
+                </div>
+                <div>
+                  <Tag className="rounded-full" color="green">
+                    {tModal("items.itemCount")}: {items.length}
+                  </Tag>
+                </div>
+                <div>
+                  {deliveryMethodTag}
+                </div>
               </div>
-            ) : null}
+            </div>
+            <div className="mt-4 space-y-3 max-h-[285px] overflow-y-auto pr-1">
+              {items.map((item, index) => (
+                <div
+                  key={item?.id ?? `transfer-item-${index}`}
+                  className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4 shadow-sm"
+                >
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                    <div className="font-semibold text-gray-900">
+                      {item?.name || "-"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {tOrders("columns.product")}:{" "}
+                      {item?.transfer_product?.name || "-"}
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                    <div className="font-semibold text-gray-900">
+                      {tOrders("columns.quantity")}: {item?.quantity ?? "-"}
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                    <div className="font-semibold text-gray-900">
+                      {tOrders("columns.status")}:{" "}
+                      <Tag
+                        color={STATUS_COLORS[item?.status] || "default"}
+                        style={{ marginInlineEnd: 0 }}
+                      >
+                        {item?.status
+                          ? tOrders(`status.values.${item.status}`) ||
+                            item.status
+                          : "-"}
+                      </Tag>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
-            <div className="flex items-center justify-between gap-3">
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                {tModal("address.title")}
-              </Typography.Title>
-              <Button
-                icon={<EditOutlined />}
-                type="text"
-                onClick={() => setAddressEditorOpen(true)}
+          {designGroups.length ? (
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+              <Typography.Title
+                level={4}
+                style={{ marginTop: 0, marginBottom: 8 }}
               >
-                {tCommonActions("edit")}
-              </Button>
+                {tModal("designs.title")}
+              </Typography.Title>
+              <Typography.Text type="secondary">
+                {tModal("designs.subtitle")}
+              </Typography.Text>
+              <Space
+                direction="vertical"
+                size={16}
+                style={{ width: "100%", marginTop: 16 }}
+              >
+                {designGroups.map((group, groupIndex) => (
+                  <Card
+                    key={group?.sub_category_id || `group-${groupIndex}`}
+                    type="inner"
+                    title={group?.sub_category_name || "-"}
+                  >
+                    <Row gutter={[12, 12]}>
+                      {(Array.isArray(group?.designs) ? group.designs : []).map(
+                        (design) => (
+                          <Col xs={12} sm={8} md={6} lg={3} key={design?.id}>
+                            <Card
+                              size="small"
+                              styles={{ body: { padding: 10 } }}
+                            >
+                              <Space
+                                direction="vertical"
+                                size={8}
+                                style={{ width: "100%" }}
+                              >
+                                <LazyPreviewImage
+                                  src={design?.design_url}
+                                  alt={`design-${design?.id}`}
+                                  preparingText={tModal("preview.preparing")}
+                                  emptyText={tModal("preview.empty")}
+                                />
+                                <Typography.Text
+                                  type="secondary"
+                                  style={{ fontSize: 12 }}
+                                >
+                                  {tModal("designs.size")}:{" "}
+                                  {formatAmount(design?.width)}" x{" "}
+                                  {formatAmount(design?.height)}"
+                                </Typography.Text>
+                                <Typography.Text strong>
+                                  {tOrders("columns.price")}:{" "}
+                                  {formatCurrency(
+                                    design?.price,
+                                    transferOrder?.currency,
+                                  )}
+                                </Typography.Text>
+                                <Typography.Text
+                                  type="secondary"
+                                  style={{ fontSize: 12 }}
+                                >
+                                  {design?.created_at
+                                    ? new Date(
+                                        design.created_at,
+                                      ).toLocaleString()
+                                    : "-"}
+                                </Typography.Text>
+                              </Space>
+                            </Card>
+                          </Col>
+                        ),
+                      )}
+                    </Row>
+                  </Card>
+                ))}
+              </Space>
             </div>
-            <Divider style={{ margin: "16px 0" }} />
-            {renderAddress()}
-          </div>
-
-          <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">
-                {tModal("summary.selectedShippingRate")}
-              </span>
-              <span className="text-base font-semibold text-gray-900">
-                $ {formatAmount(shippingAmount, "0.00")}
-              </span>
-            </div>
-            <Typography.Text type="secondary">
-              {tModal("summary.selectedService")}:{" "}
-              {selectedRate
-                ? `${selectedRate?.carrier || "-"} / ${selectedRate?.serviceName || selectedRate?.serviceCode || "-"}`
-                : "-"}
-            </Typography.Text>
-          </div>
-        </div>
-      </Space>
-      <AddressEditorModal
-        open={addressEditorOpen}
-        loading={false}
-        saving={savingAddress}
-        onCancel={() => setAddressEditorOpen(false)}
-        onSave={handleAddressSave}
-        editForm={form}
-        editingOrder={transferOrder}
-        onAddressSelect={handleAddressSelect}
-        orderDateLabel={
-          transferOrder?.order_date
-            ? new Date(transferOrder.order_date).toLocaleString()
-            : "-"
-        }
-        zIndex={1500}
-      />
+          ) : null}
+        </Space>
+        <AddressEditorModal
+          open={addressEditorOpen}
+          loading={false}
+          saving={savingAddress}
+          onCancel={() => setAddressEditorOpen(false)}
+          onSave={handleAddressSave}
+          editForm={form}
+          editingOrder={transferOrder}
+          onAddressSelect={handleAddressSelect}
+          orderDateLabel={
+            transferOrder?.order_date
+              ? new Date(transferOrder.order_date).toLocaleString()
+              : "-"
+          }
+          zIndex={1500}
+        />
       </Modal>
     </>
   );
