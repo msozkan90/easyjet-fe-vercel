@@ -7,7 +7,6 @@ import {
   Button,
   Divider,
   Empty,
-  Image,
   InputNumber,
   Modal,
   Popconfirm,
@@ -18,6 +17,7 @@ import {
   Typography,
 } from "antd";
 import { EditOutlined, ReloadOutlined } from "@ant-design/icons";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import {
   NestShipperAPI,
   OrdersAPI,
@@ -675,9 +675,11 @@ const ShippingRatesModal = ({
                   >
                     <div className="h-10 w-10 overflow-hidden rounded-xl bg-white">
                       {imageUrl ? (
-                        <Image
+                        <GuardedPreviewImage
                           src={imageUrl}
                           alt={item?.name || item?.sku || "order-item"}
+                          openLabel={tCommonActions("open")}
+                          emptyText={tShipping("items.noImage")}
                           preview={{ mask: tShipping("items.preview") }}
                           style={{
                             width: "100%",

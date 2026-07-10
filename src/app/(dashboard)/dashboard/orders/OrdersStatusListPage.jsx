@@ -7,7 +7,6 @@ import {
   App as AntdApp,
   Button,
   DatePicker,
-  Image,
   Input,
   Select,
   Space,
@@ -20,6 +19,7 @@ import {
   EyeOutlined,
   FileSearchOutlined,
 } from "@ant-design/icons";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { ProductVariationAPI } from "@/utils/api";
@@ -432,10 +432,12 @@ export default function OrdersStatusListPage({
         width: 80,
         render: (value) =>
           value ? (
-            <Image
+            <GuardedPreviewImage
               loading="lazy"
               src={value}
               alt="Item"
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               preview={{ mask: <EyeOutlined /> }}
               style={{
                 maxWidth: "45px",
@@ -647,6 +649,7 @@ export default function OrdersStatusListPage({
     statusOptions,
     skuFilterKey,
     t,
+    tCommonActions,
   ]);
 
   const getRowClassName = useCallback((record, _index, indent = 0) => {

@@ -7,7 +7,6 @@ import {
   Button,
   Space,
   App as AntdApp,
-  Image,
   Select,
   Tooltip,
   Popconfirm,
@@ -17,6 +16,7 @@ import RequireRole from "@/components/common/Access/RequireRole";
 import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
 import CrudTable from "@/components/common/table/CrudTable";
 import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { OrdersAPI, ProductVariationAPI, ShipStationAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
@@ -58,6 +58,7 @@ export default function OrdersPage() {
   const user = useSelector((state) => state.auth.user);
 
   const t = useTranslations("dashboard.preOrders");
+  const tCommonActions = useTranslations("common.actions");
   const storeId = user?.entity?.store_id;
   const customerName =
     user?.entity?.entity_name || user?.displayName || user?.email || "";
@@ -651,10 +652,12 @@ export default function OrdersPage() {
         dataIndex: "image_url",
         render: (value) =>
           value ? (
-            <Image
+            <GuardedPreviewImage
               loading="lazy"
               src={value}
               alt="Item"
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               preview={{ mask: <EyeOutlined /> }}
               style={{
                 maxWidth: "45px",
@@ -916,6 +919,7 @@ export default function OrdersPage() {
     productOptions,
     rowSelections,
     t,
+    tCommonActions,
     formatDateTime,
     variationsLoading,
   ]);

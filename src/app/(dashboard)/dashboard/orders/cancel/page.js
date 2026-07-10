@@ -7,7 +7,6 @@ import {
   App as AntdApp,
   Button,
   DatePicker,
-  Image,
   Input,
   Popconfirm,
   Popover,
@@ -28,6 +27,7 @@ import {
   SearchOutlined,
   FileSearchOutlined,
 } from "@ant-design/icons";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { STATUS_COLORS } from "../statusConstants";
 
 const { RangePicker } = DatePicker;
@@ -338,10 +338,12 @@ export default function CancelOrdersPage() {
         width: 80,
         render: (value) =>
           value ? (
-            <Image
+            <GuardedPreviewImage
               loading="lazy"
               src={value}
               alt="Item"
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               preview={{ mask: <EyeOutlined /> }}
               style={{
                 maxWidth: "45px",
@@ -567,6 +569,7 @@ export default function CancelOrdersPage() {
     handleStatusUpdate,
     isRowActionLoading,
     t,
+    tCommonActions,
   ]);
 
   const getRowClassName = useCallback((record, _index, indent = 0) => {

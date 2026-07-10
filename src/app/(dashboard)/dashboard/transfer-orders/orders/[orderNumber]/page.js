@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import {
@@ -25,6 +26,7 @@ import {
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { LazyGuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { TransferOrdersAPI } from "@/utils/api";
 import {
   DeleteOutlined,
@@ -45,6 +47,12 @@ const STATUS_COLORS = {
   completed: "green",
   shipped: "volcano",
   cancel: "red",
+};
+
+const REMAKE_REQUEST_STATUS_COLORS = {
+  pending: "gold",
+  completed: "green",
+  canceled: "red",
 };
 
 const formatAmount = (value) => {
@@ -128,71 +136,11 @@ const renderOptionsSummary = (options, fallback) => (
   </div>
 );
 
-function LazyPreviewImage({ src, alt, preparingText, emptyText }) {
-  const containerRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) return undefined;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first?.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "300px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        borderRadius: 8,
-        overflow: "hidden",
-        background: "#f5f5f5",
-        border: "1px solid #f0f0f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {!visible ? (
-        <Typography.Text type="secondary">{preparingText}</Typography.Text>
-      ) : !src || failed ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />
-      ) : (
-        <img
-          src={src}
-          alt={alt || "design"}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      )}
-    </div>
-  );
-}
-
 export default function TransferOrderDetailPage() {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
   const tDetail = useTranslations("dashboard.orders.transferDetail");
+  const tRefundRemake = useTranslations("dashboard.refundRemake");
   const user = useSelector((state) => state.auth.user);
   const params = useParams();
   const orderNumber = useMemo(
@@ -402,6 +350,14 @@ export default function TransferOrderDetailPage() {
     const items = Array.isArray(detail?.items) ? detail.items : [];
     return items.reduce((sum, item) => sum + Number(item?.price || 0), 0);
   }, [detail?.items]);
+  const remakeContext = useMemo(
+    () => detail?.remake_context || null,
+    [detail?.remake_context],
+  );
+  const showRemakeTab = useMemo(
+    () => remakeContext?.is_remake_child === true,
+    [remakeContext?.is_remake_child],
+  );
 
   if (loading) {
     return (
@@ -532,9 +488,10 @@ export default function TransferOrderDetailPage() {
                                 size={8}
                                 style={{ width: "100%" }}
                               >
-                                <LazyPreviewImage
+                                <LazyGuardedPreviewImage
                                   src={design?.design_url}
                                   alt={`design-${design?.id}`}
+                                  openLabel={tDetail("actions.open")}
                                   preparingText={tDetail("preview.preparing")}
                                   emptyText={tDetail("preview.empty")}
                                 />
@@ -760,6 +717,168 @@ export default function TransferOrderDetailPage() {
         </div>
       ),
     },
+    ...(showRemakeTab
+      ? [
+          {
+            key: "remaked-order",
+            label: tDetail("tabs.remakedOrder"),
+            children: (
+              <div className="space-y-6">
+                <Card title={tDetail("sections.remakeRequest")}>
+                  <Descriptions
+                    column={{ xs: 1, sm: 2, md: 3 }}
+                    bordered
+                    size="small"
+                  >
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.requestType")}
+                    >
+                      {remakeContext?.request?.request_type
+                        ? tRefundRemake(
+                            `requestType.${remakeContext.request.request_type}`,
+                          ) || remakeContext.request.request_type
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.status")}
+                    >
+                      {remakeContext?.request?.status ? (
+                        <Tag
+                          color={
+                            REMAKE_REQUEST_STATUS_COLORS[
+                              remakeContext.request.status
+                            ] || "default"
+                          }
+                        >
+                          {tRefundRemake(
+                            `status.${remakeContext.request.status}`,
+                          ) || remakeContext.request.status}
+                        </Tag>
+                      ) : (
+                        "-"
+                      )}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.responsibleEntity")}
+                    >
+                      {remakeContext?.request?.responsible_entity_name || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.company")}
+                    >
+                      {remakeContext?.request?.company_name || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.customer")}
+                    >
+                      {remakeContext?.request?.customer_name || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.createdAt")}
+                    >
+                      {remakeContext?.request?.created_at
+                        ? moment(remakeContext.request.created_at).format("LLL")
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.updatedAt")}
+                    >
+                      {remakeContext?.request?.updated_at
+                        ? moment(remakeContext.request.updated_at).format("LLL")
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tDetail("fields.requestLink")}>
+                      {remakeContext?.request?.id ? (
+                        <Link
+                          href={`/dashboard/transfer-orders/orders/refund-remake/${remakeContext.request.id}`}
+                        >
+                          <Button icon={<ExportOutlined />}>
+                            {tDetail("actions.viewRequest")}
+                          </Button>
+                        </Link>
+                      ) : (
+                        "-"
+                      )}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tRefundRemake("detail.fields.description")}
+                      span={3}
+                    >
+                      {remakeContext?.request?.description || "-"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+
+                <Card title={tDetail("sections.originalTransferOrder")}>
+                  <Descriptions
+                    column={{ xs: 1, sm: 2, md: 3 }}
+                    bordered
+                    size="small"
+                  >
+                    <Descriptions.Item label={tOrders("columns.orderNumber")}>
+                      {remakeContext?.source_order?.order_number || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tDetail("fields.orderName")}>
+                      {remakeContext?.source_order?.order_name || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tOrders("columns.status")}>
+                      {remakeContext?.source_order?.order_status ? (
+                        <Tag
+                          color={
+                            STATUS_COLORS[
+                              remakeContext.source_order.order_status
+                            ] || "default"
+                          }
+                        >
+                          {tOrders(
+                            `status.values.${remakeContext.source_order.order_status}`,
+                          ) || remakeContext.source_order.order_status}
+                        </Tag>
+                      ) : (
+                        "-"
+                      )}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tOrders("columns.orderDate")}>
+                      {remakeContext?.source_order?.order_date
+                        ? moment(remakeContext.source_order.order_date).format(
+                            "LLL",
+                          )
+                        : "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item
+                      label={tOrders("columns.customerName")}
+                    >
+                      {remakeContext?.source_order?.bill_to_name || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tDetail("fields.currency")}>
+                      {remakeContext?.source_order?.currency || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tDetail("fields.orderTotal")}>
+                      {formatCurrency(
+                        remakeContext?.source_order?.order_total,
+                        remakeContext?.source_order?.currency,
+                      )}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={tDetail("fields.orderLink")}>
+                      {remakeContext?.source_order?.order_number ? (
+                        <Link
+                          href={`/dashboard/transfer-orders/orders/${encodeURIComponent(remakeContext.source_order.order_number)}`}
+                        >
+                          <Button icon={<ExportOutlined />}>
+                            {tDetail("actions.openOrder")}
+                          </Button>
+                        </Link>
+                      ) : (
+                        "-"
+                      )}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </div>
+            ),
+          },
+        ]
+      : []),
     ...(canViewAuditTimeline
       ? [
           {

@@ -15,7 +15,6 @@ import {
   App as AntdApp,
   Button,
   DatePicker,
-  Image,
   Input,
   Popover,
   Select,
@@ -38,6 +37,7 @@ import {
 import { useSelector } from "react-redux";
 import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { TransferOrdersAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
@@ -474,10 +474,12 @@ export default function TransferOrdersStatusListPage({
                 if (record?.__isChild) return null;
                 if (!value) return t("common.none");
                 return (
-                  <Image
+                  <GuardedPreviewImage
                     loading="lazy"
                     src={value}
                     alt={`${record?.order_number || "transfer-order"}-barcode`}
+                    openLabel={tCommonActions("open")}
+                    emptyText={t("common.none")}
                     preview={{
                       mask: <EyeOutlined />,
                       toolbarRender: (originalNode, info) =>
@@ -812,6 +814,7 @@ export default function TransferOrdersStatusListPage({
     statusLabels,
     statusOptions,
     t,
+    tCommonActions,
     handleBarcodeDownload,
     handleCopyTransferOrderId,
     rowActionsRenderer,

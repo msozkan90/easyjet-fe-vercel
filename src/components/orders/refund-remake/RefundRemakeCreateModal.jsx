@@ -6,17 +6,21 @@ import {
   App as AntdApp,
   Checkbox,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
+  Popover,
   Select,
   Space,
   Table,
-  Tooltip,
   Upload,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  LinkOutlined,
+  ProfileOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
@@ -41,6 +45,62 @@ const formatPriceDisplay = (value) => {
   });
 };
 
+const normalizeOptions = (rawOptions) => {
+  if (Array.isArray(rawOptions)) {
+    return rawOptions
+      .map((entry) => ({
+        name: entry?.name ?? entry?.key ?? "",
+        value: entry?.value,
+      }))
+      .filter((entry) => entry.name || entry.value);
+  }
+  if (rawOptions && typeof rawOptions === "object") {
+    return Object.entries(rawOptions).map(([name, value]) => ({
+      name,
+      value: value == null ? "" : String(value),
+    }));
+  }
+  return [];
+};
+
+const isExternalUrl = (value) => {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const renderOptionsSummary = (options, fallback) => (
+  <div className="order-options-popover">
+    {options.map((option, index) => (
+      <div
+        key={`${option?.name || "option"}-${index}`}
+        className="order-option-row"
+      >
+        <span className="order-option-label">{option?.name || fallback}</span>
+        {isExternalUrl(option?.value || "") ? (
+          <a
+            href={option.value}
+            target="_blank"
+            rel="noreferrer"
+            className="order-option-link"
+          >
+            <LinkOutlined />
+            <span>{option?.name || fallback}</span>
+          </a>
+        ) : (
+          <span className="order-option-value">{option?.value || fallback}</span>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
 export default function RefundRemakeCreateModal({
   open,
   submitting = false,
@@ -54,6 +114,7 @@ export default function RefundRemakeCreateModal({
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
+  const tCommonActions = useTranslations("common.actions");
   const [form] = Form.useForm();
   const [itemSelections, setItemSelections] = useState({});
   const { confirmIfDirty, unsavedChangesModalContextHolder } =
@@ -107,11 +168,13 @@ export default function RefundRemakeCreateModal({
         width: 78,
         render: (value) =>
           value ? (
-            <Image
+            <GuardedPreviewImage
               src={value}
               alt="order-item"
               width={44}
               height={44}
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               style={{ borderRadius: 8, objectFit: "cover" }}
             />
           ) : (
@@ -134,35 +197,22 @@ export default function RefundRemakeCreateModal({
         title: t("create.columns.options"),
         dataIndex: "options",
         width: 230,
-        render: (options) => {
-          if (!Array.isArray(options) || options.length === 0) {
-            return <span style={{ color: "#8c8c8c" }}>{t("common.none")}</span>;
-          }
+        render: (value) => {
+          const options = normalizeOptions(value);
+          if (!options.length) return t("values.noOptions");
+
           return (
-            <Space direction="vertical" size={0}>
-              {options.map((option, index) => {
-                const name = option?.name ?? t("common.none");
-                const value = option?.value ?? t("common.none");
-                const key = `${name}-${value}-${index}`;
-                const displayText = `${name}: ${value}`;
-                return (
-                  <Tooltip title={displayText} key={key}>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        maxWidth: 190,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      <span style={{ fontWeight: 600 }}>{name}: </span>
-                      {value}
-                    </span>
-                  </Tooltip>
-                );
-              })}
-            </Space>
+            <Popover
+              trigger="hover"
+              placement="rightTop"
+              content={renderOptionsSummary(options, t("common.none"))}
+            >
+              <button type="button" className="order-options-trigger">
+                <ProfileOutlined />
+                <span>{t("create.columns.options")}</span>
+                <span className="order-options-count">{options.length}</span>
+              </button>
+            </Popover>
           );
         },
       },
@@ -197,7 +247,7 @@ export default function RefundRemakeCreateModal({
         render: (_, record) => formatPriceDisplay(record?.initialPrice),
       },
     ],
-    [itemSelections, t, updateItemSelection]
+    [itemSelections, t, tCommonActions, updateItemSelection]
   );
 
   const handleConfirm = useCallback(async () => {

@@ -5,7 +5,6 @@ import moment from "moment";
 import {
   App as AntdApp,
   Button,
-  Image,
   Modal,
   Popconfirm,
   Popover,
@@ -21,6 +20,7 @@ import {
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import ProductPositionForm from "@/components/common/forms/ProductPositionForm";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { ProductPositionsAPI } from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { buildSingleFileSubmitPayload } from "@/utils/formDataHelpers";
@@ -35,6 +35,7 @@ import {
 export default function ProductPositionsPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.productPosition");
+  const tCommonActions = useTranslations("common.actions");
   const tStatus = useTranslations("common.status");
   const tableRef = useRef(null);
 
@@ -100,11 +101,13 @@ export default function ProductPositionsPage() {
         render: (value, record) => {
           const url = value?.[0]?.image_url ?? record?.images?.[0]?.image_url;
           return url ? (
-            <Image
+            <GuardedPreviewImage
               src={url}
               width={64}
               height={64}
               loading="lazy"
+              openLabel={tCommonActions("open")}
+              emptyText={t("common.none")}
               style={{ objectFit: "cover", borderRadius: 8, background: "#b2b2b2" }}
               preview={{ mask: <EyeOutlined /> }}
             />
@@ -172,7 +175,7 @@ export default function ProductPositionsPage() {
         ),
       },
     ],
-    [products, t, tStatus],
+    [onDelete, products, t, tCommonActions, tStatus],
   );
 
   const onSubmit = async (values) => {

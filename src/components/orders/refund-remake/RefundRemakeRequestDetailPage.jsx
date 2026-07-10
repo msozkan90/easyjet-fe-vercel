@@ -24,6 +24,7 @@ import moment from "moment";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import { useTranslations } from "@/i18n/use-translations";
 import { RefundRemakeRequestsAPI } from "@/utils/api";
 import {
@@ -49,6 +50,7 @@ export default function RefundRemakeRequestDetailPage({
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.refundRemake");
+  const tCommonActions = useTranslations("common.actions");
   const params = useParams();
   const requestId = params?.id;
   const userRoles = useSelector((state) => state.auth.user?.roles || []);
@@ -138,7 +140,17 @@ export default function RefundRemakeRequestDetailPage({
         dataIndex: "imageUrl",
         width: 92,
         render: (value) =>
-          value ? <Image src={value} width={50} alt="order-item-image" /> : "-",
+          value ? (
+            <GuardedPreviewImage
+              src={value}
+              width={50}
+              alt="order-item-image"
+              openLabel={tCommonActions("open")}
+              emptyText="-"
+            />
+          ) : (
+            "-"
+          ),
       },
       {
         title: t("detail.items.sku"),
@@ -201,7 +213,7 @@ export default function RefundRemakeRequestDetailPage({
             : Number(value).toFixed(2),
       },
     ],
-    [t],
+    [t, tCommonActions],
   );
 
   return (
@@ -307,11 +319,13 @@ export default function RefundRemakeRequestDetailPage({
                   <Image.PreviewGroup>
                     <Space wrap>
                       {images.map((url, index) => (
-                        <Image
+                        <GuardedPreviewImage
                           key={`${url}-${index}`}
                           src={url}
                           width={110}
                           alt="request-image"
+                          openLabel={tCommonActions("open")}
+                          emptyText={t("messages.noImages")}
                         />
                       ))}
                     </Space>
