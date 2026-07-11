@@ -101,91 +101,41 @@
       "completed": "Completed"
     },
     "overview": {
-      "title": "Dashboard",
-      "subtitle": "Role-aware operational visibility tailored to your entity and category scope.",
+      "title": "Transfer Production Dashboard",
+      "subtitle": "Track the production workload of transfer orders in linear inches.",
+      "shipmentTitle": "Transfer Shipment Dashboard",
+      "shipmentSubtitle": "Track the number of printed and shipped transfer orders.",
+      "lastUpdated": "Last updated: {date}",
       "filters": {
-        "categories": "Filter categories",
-        "startDate": "Start date",
-        "endDate": "End date"
+        "dateRange": "Date range",
+        "subCategories": "Sub-categories",
+        "allSubCategories": "All sub-categories",
+        "today": "Today",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "thisMonth": "This month"
+      },
+      "statuses": {
+        "processing": "Processing",
+        "downloaded": "Downloaded",
+        "printed": "Printed",
+        "shipped": "Shipped",
+        "total": "Total"
+      },
+      "charts": {
+        "distribution": "Status Distribution",
+        "dailyTrend": "Daily Inch Trend",
+        "shipmentDailyTrend": "Daily Order Trend"
+      },
+      "units": {
+        "order": "orders"
       },
       "messages": {
         "loadError": "Dashboard data could not be loaded.",
-        "empty": "No dashboard data available for this selection."
+        "empty": "There is no production data for the selected date range."
       },
-      "badges": {
-        "title": "Operational signals",
-        "enabled": "Enabled",
-        "disabled": "Disabled",
-        "wallet": "Wallet",
-        "has_api_key": "API Ready",
-        "shipment_enabled": "Shipment Access",
-        "stock_alert": "Stock Alert",
-        "low_stock_count": "Low Stock Count"
-      },
-      "charts": {
-        "ordersTrend": "Orders trend",
-        "statusBreakdown": "Queue breakdown",
-        "paymentsTrend": "Payments trend",
-        "stockMovementTrend": "Stock movement trend"
-      },
-      "series": {
-        "standard": "Standard",
-        "transfer": "Transfer",
-        "topups": "Top-Ups",
-        "transactions": "Transactions"
-      },
-      "statusLabels": {
-        "pending": "Pending",
-        "in_production": "In Production",
-        "completed_printed": "Completed / Printed",
-        "shipped": "Shipped",
-        "waiting_for_design": "Waiting For Design"
-      },
-      "tables": {
-        "attentionOrders": "Attention orders",
-        "recentTransactions": "Recent transactions",
-        "lowStockItems": "Low stock items",
-        "recentRefundRemakeRequests": "Recent refund / remake requests",
-        "orderNumber": "Order",
-        "customer": "Customer",
-        "status": "Status",
-        "createdAt": "Created",
-        "type": "Type",
-        "amount": "Amount",
-        "product": "Product",
-        "variant": "Variant",
-        "quantity": "Qty",
-        "threshold": "Threshold"
-      },
-      "kpis": {
-        "wallet_balance": "Wallet Balance",
-        "active_companies": "Active Companies",
-        "pending_company_topups": "Pending Company Top-Ups",
-        "completed_company_topups": "Approved Company Top-Ups",
-        "company_wallets": "Company Wallets",
-        "total_orders": "Standard Orders",
-        "transfer_orders": "Transfer Orders",
-        "pending_items": "Pending Items",
-        "in_production": "In Production",
-        "completed_or_printed": "Completed / Printed",
-        "shipped": "Shipped",
-        "pending_topups": "Pending Top-Ups",
-        "pending_refund_remake": "Pending Refund / Remake",
-        "low_stock_count": "Low Stock",
-        "pending_transfer_payments": "Pending Transfer Payments",
-        "active_customers": "Active Customers",
-        "active_partners": "Active Partners",
-        "partner_pending_collections": "Pending Collections",
-        "payment_processing_count": "Payments Processing",
-        "ready_for_design": "Waiting For Design",
-        "awaiting_payment": "Awaiting Payment",
-        "my_topup_requests": "My Top-Up Requests",
-        "items_ready_to_complete": "Ready To Complete",
-        "completed_today": "Completed Today",
-        "aged_completed_queue": "Aged Completed Queue",
-        "items_ready_to_ship": "Ready To Ship",
-        "shipped_today": "Shipped Today",
-        "label_issue_count": "Label Issues"
+      "actions": {
+        "retry": "Retry"
       }
     },
     "table": {

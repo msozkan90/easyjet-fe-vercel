@@ -87,7 +87,7 @@ export const AuthAPI = {
 };
 
 export const DashboardAPI = {
-  overview: (payload = {}) => api.post("/dashboard/overview", payload),
+  overview: (payload) => api.post("/dashboard/overview", payload),
 };
 
 export const WalletAPI = {
