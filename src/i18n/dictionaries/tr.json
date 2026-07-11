@@ -101,91 +101,41 @@
       "completed": "Tamamlanan"
     },
     "overview": {
-      "title": "Kontrol Paneli",
-      "subtitle": "Rol, entity ve kategori yetkilerine gore operasyon gorunurlugu.",
+      "title": "Transfer Üretim Paneli",
+      "subtitle": "Transfer siparişlerindeki üretim iş yükünü lineer inch bazında takip edin.",
+      "shipmentTitle": "Transfer Kargo Paneli",
+      "shipmentSubtitle": "Yazdırılan ve kargolanan transfer siparişlerinin adetlerini takip edin.",
+      "lastUpdated": "Son güncelleme: {date}",
       "filters": {
-        "categories": "Kategorileri filtrele",
-        "startDate": "Baslangic tarihi",
-        "endDate": "Bitis tarihi"
+        "dateRange": "Tarih aralığı",
+        "subCategories": "Alt kategoriler",
+        "allSubCategories": "Tüm alt kategoriler",
+        "today": "Bugün",
+        "last7Days": "Son 7 gün",
+        "last30Days": "Son 30 gün",
+        "thisMonth": "Bu ay"
       },
-      "messages": {
-        "loadError": "Dashboard verileri yuklenemedi.",
-        "empty": "Bu secim icin gosterilecek dashboard verisi yok."
-      },
-      "badges": {
-        "title": "Operasyon sinyalleri",
-        "enabled": "Aktif",
-        "disabled": "Pasif",
-        "wallet": "Bakiye",
-        "has_api_key": "API Hazir",
-        "shipment_enabled": "Kargo Yetkisi",
-        "stock_alert": "Stok Uyarisi",
-        "low_stock_count": "Dusuk Stok Adedi"
+      "statuses": {
+        "processing": "İşleniyor",
+        "downloaded": "İndirildi",
+        "printed": "Yazdırıldı",
+        "shipped": "Kargolandı",
+        "total": "Toplam"
       },
       "charts": {
-        "ordersTrend": "Siparis trendi",
-        "statusBreakdown": "Kuyruk dagilimi",
-        "paymentsTrend": "Odeme trendi",
-        "stockMovementTrend": "Stok hareket trendi"
+        "distribution": "Statü Dağılımı",
+        "dailyTrend": "Günlük Inch Trendi",
+        "shipmentDailyTrend": "Günlük Sipariş Trendi"
       },
-      "series": {
-        "standard": "Standart",
-        "transfer": "Transfer",
-        "topups": "Yuklemeler",
-        "transactions": "Hareketler"
+      "units": {
+        "order": "sipariş"
       },
-      "statusLabels": {
-        "pending": "Bekleyen",
-        "in_production": "Uretimde",
-        "completed_printed": "Tamamlanan / Basilan",
-        "shipped": "Kargolanan",
-        "waiting_for_design": "Tasarim Bekleyen"
+      "messages": {
+        "loadError": "Dashboard verileri yüklenemedi.",
+        "empty": "Seçilen tarih aralığında gösterilecek üretim verisi yok."
       },
-      "tables": {
-        "attentionOrders": "Takip gereken siparisler",
-        "recentTransactions": "Son hareketler",
-        "lowStockItems": "Dusuk stok kalemleri",
-        "recentRefundRemakeRequests": "Son iade / remake talepleri",
-        "orderNumber": "Siparis",
-        "customer": "Musteri",
-        "status": "Durum",
-        "createdAt": "Tarih",
-        "type": "Tip",
-        "amount": "Tutar",
-        "product": "Urun",
-        "variant": "Varyant",
-        "quantity": "Adet",
-        "threshold": "Esik"
-      },
-      "kpis": {
-        "wallet_balance": "Bakiye",
-        "active_companies": "Aktif Sirket",
-        "pending_company_topups": "Bekleyen Sirket Yuklemeleri",
-        "completed_company_topups": "Onaylanan Sirket Yuklemeleri",
-        "company_wallets": "Sirket Cuzdanlari",
-        "total_orders": "Standart Siparis",
-        "transfer_orders": "Transfer Siparis",
-        "pending_items": "Bekleyen Kalem",
-        "in_production": "Uretimde",
-        "completed_or_printed": "Tamamlanan / Basilan",
-        "shipped": "Kargolanan",
-        "pending_topups": "Bekleyen Yüklemeler",
-        "pending_refund_remake": "Bekleyen Iade / Remake",
-        "low_stock_count": "Dusuk Stok",
-        "pending_transfer_payments": "Bekleyen Transfer Odemeleri",
-        "active_customers": "Aktif Musteri",
-        "active_partners": "Aktif Partner",
-        "partner_pending_collections": "Bekleyen Tahsilat",
-        "payment_processing_count": "Islemdeki Odemeler",
-        "ready_for_design": "Tasarim Bekleyen",
-        "awaiting_payment": "Odeme Bekleyen",
-        "my_topup_requests": "Yukleme Taleplerim",
-        "items_ready_to_complete": "Tamamlamaya Hazir",
-        "completed_today": "Bugun Tamamlanan",
-        "aged_completed_queue": "Bekleyen Tamamlanmis Kuyruk",
-        "items_ready_to_ship": "Kargoya Hazir",
-        "shipped_today": "Bugun Kargolanan",
-        "label_issue_count": "Etiket Sorunlari"
+      "actions": {
+        "retry": "Tekrar dene"
       }
     },
     "table": {
