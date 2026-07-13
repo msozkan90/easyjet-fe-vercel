@@ -2000,6 +2000,7 @@
         "updateSuccess": "Order item updated.",
         "updateError": "Failed to update order item.",
         "approveSuccess": "Order approved successfully.",
+        "orderNumberWhitespaceError": "Order number cannot contain spaces.",
         "approveError": "Failed to approve order.",
         "cancelSuccess": "Order cancelled successfully.",
         "cancelError": "Failed to cancel order."
@@ -2063,6 +2064,7 @@
         "size": "Size",
         "color": "Color",
         "price": "Price",
+        "height": "Height",
         "customer": "Customer",
         "customerName": "Customer Name",
         "ownerEntity": "Owner Entity",
@@ -2079,6 +2081,8 @@
         "searchOrderNumber": "Search order number",
         "searchSku": "Search SKU",
         "searchItem": "Search item",
+        "searchOwnerEntity": "Search owner entity",
+        "selectOwnerEntity": "Select owner entity",
         "selectStatus": "Select status",
         "selectProduct": "Select product",
         "selectSize": "Select size",
@@ -2350,6 +2354,7 @@
         },
         "validation": {
           "orderNumberRequired": "Order number is required.",
+          "orderNumberWhitespace": "Order number cannot contain spaces.",
           "orderDateRequired": "Order date is required.",
           "itemsRequired": "At least one item is required.",
           "itemNameRequired": "Item name is required.",
@@ -2375,7 +2380,8 @@
           "selectFile": "Select File"
         },
         "validation": {
-          "fileRequired": "Please select a file for each design row."
+          "fileRequired": "Please select a file for each design row.",
+          "maxWidth": "{fileName} is {width}\" wide. Design width cannot exceed {max}\"."
         }
       },
       "design": {

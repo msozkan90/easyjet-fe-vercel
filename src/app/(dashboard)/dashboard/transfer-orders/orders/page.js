@@ -33,6 +33,11 @@ import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { TransferOrdersAPI } from "@/utils/api";
+import { isValidOrderNumber } from "@/utils/orderNumberValidation";
+import {
+  MAX_TRANSFER_DESIGN_WIDTH_INCHES,
+  validateTransferDesignWidth,
+} from "@/utils/transferDesignValidation";
 import TransferOrdersStatusListPage from "./TransferOrdersStatusListPage";
 import { useTransferDesignUploadQueue } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 
@@ -356,7 +361,7 @@ export default function TransferOrdersPage() {
     );
   }, []);
 
-  const handleSubmitDesignUploads = useCallback(() => {
+  const handleSubmitDesignUploads = useCallback(async () => {
     if (!designUploadTarget || !subCategoryId) {
       message.error(t("messages.subCategoryRequiredForDesignUpload"));
       return;
@@ -372,6 +377,20 @@ export default function TransferOrdersPage() {
     if (!uploadEntries.length || uploadEntries.length !== designUploadEntries.length) {
       message.error(t("designUploadModal.validation.fileRequired"));
       return;
+    }
+
+    for (const entry of uploadEntries) {
+      const validation = await validateTransferDesignWidth(entry.file);
+      if (!validation.valid) {
+        message.error(
+          t("designUploadModal.validation.maxWidth", {
+            fileName: entry.file.name || "-",
+            width: validation.dimensions.widthInches.toFixed(2),
+            max: MAX_TRANSFER_DESIGN_WIDTH_INCHES,
+          }),
+        );
+        return;
+      }
     }
 
     enqueueUploads({
@@ -716,6 +735,10 @@ export default function TransferOrdersPage() {
       notes: toNullableField(values.notes),
       items: normalizedItems,
     };
+    if (!isValidOrderNumber(payload.order_number)) {
+      message.error(t("manualOrderModal.validation.orderNumberWhitespace"));
+      return;
+    }
 
     setManualModalSubmitting(true);
     try {
@@ -1034,7 +1057,15 @@ export default function TransferOrdersPage() {
             <Form.Item
               name="order_number"
               label={t("manualOrderModal.fields.orderNumber")}
-              rules={[{ required: true, message: t("manualOrderModal.validation.orderNumberRequired") }]}
+              rules={[
+                { required: true, message: t("manualOrderModal.validation.orderNumberRequired") },
+                {
+                  validator: (_, value) =>
+                    !value || isValidOrderNumber(value)
+                      ? Promise.resolve()
+                      : Promise.reject(new Error(t("manualOrderModal.validation.orderNumberWhitespace"))),
+                },
+              ]}
             >
               <Input placeholder={t("manualOrderModal.placeholders.orderNumber")} />
             </Form.Item>

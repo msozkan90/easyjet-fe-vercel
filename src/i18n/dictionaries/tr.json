@@ -1802,6 +1802,7 @@
         "updateSuccess": "Sipariş ürünü güncellendi.",
         "updateError": "Sipariş ürünü güncellenemedi.",
         "approveSuccess": "Sipariş başarıyla onaylandı.",
+        "orderNumberWhitespaceError": "Order number boşluk içeremez.",
         "approveError": "Sipariş onaylanamadı.",
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
         "cancelError": "Sipariş iptal edilemedi."
@@ -1865,6 +1866,7 @@
         "size": "Beden",
         "color": "Renk",
         "price": "Fiyat",
+        "height": "Height",
         "customer": "Müşteri",
         "customerName": "Müşteri Adı",
         "ownerEntity": "Bağlı Entity",
@@ -1881,6 +1883,8 @@
         "searchOrderNumber": "Sipariş numarası ara",
         "searchSku": "Stok kodu ara",
         "searchItem": "Ürün ara",
+        "searchOwnerEntity": "Owner entity ara",
+        "selectOwnerEntity": "Owner entity seç",
         "selectStatus": "Durum seçin",
         "selectProduct": "Ürün seçin",
         "selectSize": "Beden seçin",
@@ -2152,6 +2156,7 @@
         },
         "validation": {
           "orderNumberRequired": "Order number zorunludur.",
+          "orderNumberWhitespace": "Order number boşluk içeremez.",
           "orderDateRequired": "Order date zorunludur.",
           "itemsRequired": "En az bir kalem zorunludur.",
           "itemNameRequired": "Item name zorunludur.",
@@ -2177,7 +2182,8 @@
           "selectFile": "Dosya Seç"
         },
         "validation": {
-          "fileRequired": "Her tasarım satırı için bir dosya seçin."
+          "fileRequired": "Her tasarım satırı için bir dosya seçin.",
+          "maxWidth": "{fileName} genişliği {width}\". Tasarım genişliği {max}\" değerini geçemez."
         }
       },
       "design": {
