@@ -20,6 +20,7 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import { OrdersAPI, ProductVariationAPI, ShipStationAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
+import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
 import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
@@ -507,6 +508,10 @@ export default function OrdersPage() {
       }
       ids.forEach((id) => setRowActionLoadingState(id, "approve", true));
       try {
+        if (getFirstInvalidOrderNumber(records) !== null) {
+          message.error(t("messages.orderNumberWhitespaceError"));
+          return;
+        }
         const payload = records.map((item) => ({
           order_number: item?.order_number,
           order_pool_item_id: item?.id,

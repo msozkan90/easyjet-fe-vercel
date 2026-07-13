@@ -19,6 +19,7 @@ import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStat
 import { OrdersAPI, TransferOrdersAPI, TransferProductPricesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
+import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
@@ -323,6 +324,10 @@ export default function OrdersPage() {
       }
       ids.forEach((id) => setRowActionLoadingState(id, "approve", true));
       try {
+        if (getFirstInvalidOrderNumber(records) !== null) {
+          message.error(t("messages.orderNumberWhitespaceError"));
+          return;
+        }
         const payload = records.map((item) => ({
           order_number: item?.order_number,
           transfer_order_pool_item_id: item?.id,

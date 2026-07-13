@@ -53,6 +53,23 @@ const createDefaultToolbarFilters = () => ({
   order_date: undefined,
 });
 
+const buildOwnerEntityFilterOptions = (items = []) => {
+  const optionMap = new Map();
+  (items || []).forEach((item) => {
+    if (item?.__isChild) return;
+    const name = String(item?.entity_name || item?.owner_entity?.name || "").trim();
+    if (!name) return;
+    const type = item?.entity_type || item?.owner_entity?.type;
+    const label = type ? `${name} (${type})` : name;
+    optionMap.set(name, { value: name, label });
+  });
+  return Array.from(optionMap.values()).sort((left, right) =>
+    String(left.label).localeCompare(String(right.label), undefined, {
+      sensitivity: "base",
+    }),
+  );
+};
+
 const formatAmount = (value, fallback) => {
   if (value === null || value === undefined || value === "") return fallback;
   const numericValue = Number(value);
@@ -226,6 +243,7 @@ export default function TransferOrdersStatusListPage({
       ? { ...createDefaultToolbarFilters(), ...initialFiltersProp }
       : createDefaultToolbarFilters(),
   );
+  const [ownerEntityFilterOptions, setOwnerEntityFilterOptions] = useState([]);
 
   const statusLabels = useMemo(
     () => ({
@@ -311,9 +329,20 @@ export default function TransferOrdersStatusListPage({
   const request = useCallback(
     async (params) => {
       const result = await baseRequest(params);
+      const annotatedList = annotateRows(result?.list || []);
+      setOwnerEntityFilterOptions((prev) => {
+        const next = buildOwnerEntityFilterOptions(annotatedList);
+        const merged = new Map(prev.map((option) => [option.value, option]));
+        next.forEach((option) => merged.set(option.value, option));
+        return Array.from(merged.values()).sort((left, right) =>
+          String(left.label).localeCompare(String(right.label), undefined, {
+            sensitivity: "base",
+          }),
+        );
+      });
       return {
         ...result,
-        list: annotateRows(result?.list || []),
+        list: annotatedList,
       };
     },
     [annotateRows, baseRequest],
@@ -653,6 +682,14 @@ export default function TransferOrdersStatusListPage({
         },
       },
       {
+        title: t("columns.height"),
+        dataIndex: "height",
+        render: (value, record) => {
+          if (record?.__isChild) return null;
+          return formatAmount(value, t("common.none"));
+        },
+      },
+      {
         title: t("columns.customerName"),
         dataIndex: "bill_to_name",
         render: (value) => value || t("common.none"),
@@ -662,6 +699,13 @@ export default function TransferOrdersStatusListPage({
             {
               title: t("columns.ownerEntity"),
               dataIndex: "entity_name",
+              sorter: true,
+              filter: {
+                type: "select",
+                placeholder: t("filters.selectOwnerEntity"),
+                options: ownerEntityFilterOptions,
+                width: 240,
+              },
               render: (value, record) => {
                 if (record?.__isChild) return null;
                 const name = value || record?.owner_entity?.name;
@@ -817,6 +861,7 @@ export default function TransferOrdersStatusListPage({
     tCommonActions,
     handleBarcodeDownload,
     handleCopyTransferOrderId,
+    ownerEntityFilterOptions,
     rowActionsRenderer,
     showTransferOrderIdCopy,
     showOwnerEntityColumn,
