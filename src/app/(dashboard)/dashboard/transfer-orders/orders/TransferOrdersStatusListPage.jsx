@@ -49,6 +49,7 @@ const { RangePicker } = DatePicker;
 
 const createDefaultToolbarFilters = () => ({
   order_number: "",
+  owner_entity: "",
   status: [],
   order_date: undefined,
 });
@@ -220,6 +221,7 @@ export default function TransferOrdersStatusListPage({
   requireRoles = ["companyAdmin", "partnerAdmin", "customerAdmin"],
   toolbarRight,
   showTransferOrderIdCopy = false,
+  showOwnerEntityToolbarSearch = false,
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
@@ -361,6 +363,10 @@ export default function TransferOrdersStatusListPage({
     setQuickFilters((prev) => ({ ...prev, order_number: value }));
   }, []);
 
+  const handleOwnerEntityChange = useCallback((value) => {
+    setQuickFilters((prev) => ({ ...prev, owner_entity: value }));
+  }, []);
+
   const handleStatusChange = useCallback(
     (value) => {
       const arr = Array.isArray(value) ? value : value ? [value] : [];
@@ -397,6 +403,11 @@ export default function TransferOrdersStatusListPage({
 
       const nextState = {
         order_number: nextFilters?.order_number ?? "",
+        owner_entity:
+          nextFilters?.owner_entity ??
+          nextFilters?.entity_name ??
+          nextFilters?.ownerEntity ??
+          "",
         status:
           Array.isArray(nextFilters?.status) && nextFilters.status.length
             ? [...nextFilters.status]
@@ -412,6 +423,7 @@ export default function TransferOrdersStatusListPage({
           prev.order_date.lte === nextState.order_date.lte);
       if (
         prev.order_number === nextState.order_number &&
+        prev.owner_entity === nextState.owner_entity &&
         dateEqual &&
         prev.status.length === nextState.status.length &&
         prev.status.every((v, idx) => v === nextState.status[idx])
@@ -425,6 +437,9 @@ export default function TransferOrdersStatusListPage({
   const handleToolbarSearch = useCallback(() => {
     applyFilterPatch({
       order_number: quickFilters.order_number || "",
+      ...(showOwnerEntityToolbarSearch
+        ? { owner_entity: quickFilters.owner_entity || "" }
+        : {}),
       status:
         Array.isArray(quickFilters.status) && quickFilters.status.length
           ? [...quickFilters.status]
@@ -433,7 +448,7 @@ export default function TransferOrdersStatusListPage({
         ? { ...quickFilters.order_date }
         : undefined,
     });
-  }, [applyFilterPatch, quickFilters]);
+  }, [applyFilterPatch, quickFilters, showOwnerEntityToolbarSearch]);
 
   const handleToolbarReset = useCallback(() => {
     const resetState = createDefaultToolbarFilters();
@@ -486,7 +501,8 @@ export default function TransferOrdersStatusListPage({
   );
 
   const columns = useMemo(() => {
-    const showDetailAction = typeof columnsBuilder !== "function";
+    const showDetailAction =
+      typeof columnsBuilder !== "function" || typeof rowActionsRenderer === "function";
     const isPendingList = listApiFn === TransferOrdersAPI.pendingItemsList;
     const showDeliveryMethodColumn = true;
     const showLocalPickupColumn = true;
@@ -617,6 +633,7 @@ export default function TransferOrdersStatusListPage({
         dataIndex: "options",
         width: 140,
         render: (value, record) => {
+          if (record?.__isChild && record?.design_id) return null;
           if (record?.__hasChildren && !record?.__isChild) return null;
           const options = normalizeOptions(value);
           if (!options.length) return t("values.noOptions");
@@ -640,6 +657,7 @@ export default function TransferOrdersStatusListPage({
         title: t("columns.product"),
         dataIndex: "product",
         render: (_, record) => {
+          if (record?.__isChild && record?.design_id) return null;
           if (record?.__hasChildren && !record?.__isChild) return null;
           return record?.product?.name || t("common.none");
         },
@@ -651,6 +669,16 @@ export default function TransferOrdersStatusListPage({
         render: (_, record) => {
           if (record?.__hasChildren && !record?.__isChild) return null;
           return record?.quantity ?? t("common.none");
+        },
+      },
+      {
+        title: t("columns.width"),
+        dataIndex: "width",
+        render: (value, record) => {
+          if (record?.__isChild && record?.design_id) {
+            return formatAmount(value, t("common.none"));
+          }
+          return null;
         },
       },
       {
@@ -677,7 +705,7 @@ export default function TransferOrdersStatusListPage({
         dataIndex: "price",
         sorter: true,
         render: (value, record) => {
-          if (record?.__isChild) return null;
+          if (record?.__isChild && !record?.design_id) return null;
           return formatAmount(value, t("common.none"));
         },
       },
@@ -685,7 +713,7 @@ export default function TransferOrdersStatusListPage({
         title: t("columns.height"),
         dataIndex: "height",
         render: (value, record) => {
-          if (record?.__isChild) return null;
+          if (record?.__isChild && !record?.design_id) return null;
           return formatAmount(value, t("common.none"));
         },
       },
@@ -901,6 +929,7 @@ export default function TransferOrdersStatusListPage({
         initialPageSize={10}
         initialFilters={{
           order_number: "",
+          owner_entity: "",
           name: "",
           status: Array.isArray(initialFiltersProp?.status)
             ? initialFiltersProp.status
@@ -916,6 +945,18 @@ export default function TransferOrdersStatusListPage({
               onChange={handleOrderNumberChange}
               style={{ minWidth: 180 }}
             />
+            {showOwnerEntityToolbarSearch ? (
+              <Select
+                allowClear
+                placeholder={t("filters.searchOwnerEntity")}
+                value={quickFilters.owner_entity}
+                onChange={handleOwnerEntityChange}
+                style={{ minWidth: 220 }}
+                options={ownerEntityFilterOptions}
+                optionFilterProp="label"
+                showSearch
+              />
+            ) : null}
             {enableStatusFilter && statusOptions.length ? (
               <Select
                 mode="multiple"
