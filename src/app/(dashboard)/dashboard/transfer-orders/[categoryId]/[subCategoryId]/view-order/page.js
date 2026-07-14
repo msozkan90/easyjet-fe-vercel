@@ -14,6 +14,26 @@ const openDownloadInNewTab = (url) => {
   window.open(url, "_blank", "noopener,noreferrer");
 };
 
+const WORKER_COMPLETED_COLUMN_ORDER = [
+  "barcode_url",
+  "id",
+  "order_number",
+  "name",
+  "width",
+  "height",
+  "quantity",
+  "price",
+  "status",
+  "bill_to_name",
+  "entity_name",
+  "delivery_method",
+  "local_pickup",
+  "notes",
+  "designer_notes",
+  "order_date",
+  "actions",
+];
+
 export default function TransferSubCategoryViewOrderPage({ params }) {
   const { message } = AntdApp.useApp();
   const tOrders = useTranslations("dashboard.orders");
@@ -48,6 +68,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
         transfer_order_id: transferOrderId,
         category_id: categoryId,
         sub_category_id: subCategoryId,
+        design_id: record?.design_id,
       });
 
       message.info(tOrders("messages.designDownloadStarted"));
@@ -65,7 +86,8 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
   const rowActionsRenderer = useCallback(
     ({ record, isParentRow }) => {
       if (isOthers) return null;
-      if (!isParentRow) return null;
+      if (!isParentRow && !record?.design_id) return null;
+      if (record?.status !== "processing") return null;
       const transferOrderId = String(record?.transfer_order_id || "").trim();
       if (!transferOrderId) return null;
 
@@ -81,6 +103,21 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
     [handleDownloadDesigns, isOthers, tOrders],
   );
 
+  const columnsBuilder = useCallback((baseColumns = []) => {
+    const columnByKey = new Map(
+      baseColumns.map((column) => {
+        const key = column.dataIndex || column.key;
+        if (key === "name") {
+          return [key, { ...column, title: tOrders("columns.name") }];
+        }
+        return [key, column];
+      }),
+    );
+    return WORKER_COMPLETED_COLUMN_ORDER
+      .map((key) => columnByKey.get(key))
+      .filter(Boolean);
+  }, [tOrders]);
+
   return (
     <TransferOrdersStatusListPage
       listApiFn={listApiFn}
@@ -88,7 +125,9 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
       requireRoles={["companyAdmin", "companyCompletedWorker"]}
       tableRefExternal={tableRef}
       rowActionsRenderer={rowActionsRenderer}
+      columnsBuilder={columnsBuilder}
       showTransferOrderIdCopy
+      showOwnerEntityToolbarSearch
     />
   );
 }

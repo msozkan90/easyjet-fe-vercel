@@ -340,12 +340,13 @@ export default function TransferOrderDetailPage() {
     "companyCompletedWorker",
     "companyShipmentWorker",
   ]);
+  const isCustomerAdmin = hasAnyRole(user, ["customerAdmin"]);
   const canViewAuditTimeline = hasAnyRole(user, ["companyAdmin"]);
   const canVoidTransferLabel =
-    isCompanyUser &&
+    (isCompanyUser || isCustomerAdmin) &&
     Boolean(transferLabelId) &&
     transferLabel?.source !== "self_label" &&
-    detail?.order_status !== "shipped";
+    detail?.order_status !== "shipped" 
   const itemTotalPrice = useMemo(() => {
     const items = Array.isArray(detail?.items) ? detail.items : [];
     return items.reduce((sum, item) => sum + Number(item?.price || 0), 0);
