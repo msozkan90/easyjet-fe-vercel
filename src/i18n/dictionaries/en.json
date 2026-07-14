@@ -2310,7 +2310,8 @@
         "options": {
           "localPickup": "Local Pickup",
           "hasLabel": "I Have Label",
-          "noLabel": "I Do Not Have Label"
+          "noLabel": "I Do Not Have Label",
+          "labelPurchase": "Label Purchase"
         },
         "actions": {
           "uploadLabel": "Upload image",
@@ -2865,6 +2866,16 @@
           "noRatesFound": "No rates found for this option.",
           "rateQuoteError": "Rates could not be quoted.",
           "labelCreated": "Label created successfully.",
+          "labelCreateError": "Label could not be created."
+        }
+      },
+      "transferProductionLabelModal": {
+        "title": "Purchase Label For Production",
+        "confirm": {
+          "createTitle": "Create label and send this transfer order to production?"
+        },
+        "messages": {
+          "labelCreated": "Label created and transfer order sent to production.",
           "labelCreateError": "Label could not be created."
         }
       },

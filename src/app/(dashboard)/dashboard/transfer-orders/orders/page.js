@@ -32,6 +32,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
+import TransferProductionLabelPurchaseModal from "@/components/modals/TransferProductionLabelPurchaseModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { isValidOrderNumber } from "@/utils/orderNumberValidation";
 import {
@@ -85,6 +86,10 @@ export default function TransferOrdersPage() {
   const [productionRecord, setProductionRecord] = useState(null);
   const [productionOption, setProductionOption] = useState("has_label");
   const [productionLabelFiles, setProductionLabelFiles] = useState([]);
+  const [productionLabelPurchaseOpen, setProductionLabelPurchaseOpen] =
+    useState(false);
+  const [productionLabelPurchaseOrder, setProductionLabelPurchaseOrder] =
+    useState(null);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [manualModalSubmitting, setManualModalSubmitting] = useState(false);
   const [manualAddressModalOpen, setManualAddressModalOpen] = useState(false);
@@ -588,6 +593,11 @@ export default function TransferOrdersPage() {
     setProductionLabelFiles([]);
   }, []);
 
+  const handleProductionLabelPurchaseClose = useCallback(() => {
+    setProductionLabelPurchaseOpen(false);
+    setProductionLabelPurchaseOrder(null);
+  }, []);
+
   const handleOpenManualModal = useCallback(async () => {
     if (!subCategoryId) {
       message.error(t("messages.subCategoryRequiredForManualOrder"));
@@ -759,6 +769,30 @@ export default function TransferOrdersPage() {
     const transferOrderId = productionRecord?.transfer_order_id;
     if (!transferOrderId) return;
 
+    if (productionOption === "label_purchase") {
+      setProductionSubmitting(true);
+      try {
+        await TransferOrdersAPI.validateProduction({
+          transfer_order_id: transferOrderId,
+          label_purchase_option: productionOption,
+        });
+        const detailResponse = await TransferOrdersAPI.detail(
+          productionRecord?.order_number,
+        );
+        setProductionLabelPurchaseOrder(detailResponse?.data || null);
+        setProductionModalOpen(false);
+        setProductionLabelPurchaseOpen(true);
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message ||
+            t("productionModal.messages.error"),
+        );
+      } finally {
+        setProductionSubmitting(false);
+      }
+      return;
+    }
+
     if (productionOption === "has_label" && productionLabelFiles.length === 0) {
       message.error(t("productionModal.validation.labelImageRequired"));
       return;
@@ -791,6 +825,18 @@ export default function TransferOrdersPage() {
     productionLabelFiles,
     productionOption,
     productionRecord,
+    t,
+  ]);
+
+  const handleProductionLabelCreated = useCallback(() => {
+    message.success(t("productionModal.messages.success"));
+    handleProductionLabelPurchaseClose();
+    handleProductionModalClose();
+    tableRef.current?.reload?.();
+  }, [
+    handleProductionLabelPurchaseClose,
+    handleProductionModalClose,
+    message,
     t,
   ]);
 
@@ -1016,6 +1062,9 @@ export default function TransferOrdersPage() {
               <Radio value="no_label">
                 {t("productionModal.options.noLabel")}
               </Radio>
+              <Radio value="label_purchase">
+                {t("productionModal.options.labelPurchase")}
+              </Radio>
               <Radio value="local_pickup">
                 {t("productionModal.options.localPickup")}
               </Radio>
@@ -1042,6 +1091,12 @@ export default function TransferOrdersPage() {
           </div>
         ) : null}
       </Modal>
+      <TransferProductionLabelPurchaseModal
+        open={productionLabelPurchaseOpen}
+        transferOrder={productionLabelPurchaseOrder}
+        onClose={handleProductionLabelPurchaseClose}
+        onLabelCreated={handleProductionLabelCreated}
+      />
       <Modal
         open={manualModalOpen}
         onCancel={handleCloseManualModal}

@@ -235,6 +235,14 @@ export const TransferOrdersAPI = {
     api.post("/transfer-orders/items/worker/shipped/label", payload),
   voidWorkerShipmentLabel: (payload) =>
     api.post("/transfer-orders/items/worker/shipped/label/void", payload),
+  validateProduction: (payload) =>
+    api.post("/transfer-orders/production/validate", payload),
+  productionShippingQuoteRates: (payload) =>
+    api.post("/transfer-orders/production/label/rates/quote", payload),
+  createProductionShipmentLabel: (payload) =>
+    api.post("/transfer-orders/production/label", payload),
+  updateProductionShippingAddress: (payload) =>
+    api.post("/transfer-orders/production/label/address", payload),
   markWorkerItemsPrinted: (payload) =>
     api.post("/transfer-orders/items/completed-worker/printed", payload),
   workerCompletedDownloadUrl: (params = {}) => {

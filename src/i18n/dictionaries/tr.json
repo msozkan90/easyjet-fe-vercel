@@ -2112,7 +2112,8 @@
         "options": {
           "localPickup": "Local Pickup",
           "hasLabel": "I Have Label",
-          "noLabel": "I Do Not Have Label"
+          "noLabel": "I Do Not Have Label",
+          "labelPurchase": "Label Purchase"
         },
         "actions": {
           "uploadLabel": "Görsel Yükle",
@@ -2667,6 +2668,16 @@
           "noRatesFound": "Bu seçenek için fiyat bulunamadı.",
           "rateQuoteError": "Fiyatlar alınamadı.",
           "labelCreated": "Label başarıyla oluşturuldu.",
+          "labelCreateError": "Label oluşturulamadı."
+        }
+      },
+      "transferProductionLabelModal": {
+        "title": "Üretim İçin Label Satın Al",
+        "confirm": {
+          "createTitle": "Label oluşturulup bu transfer siparişi üretime gönderilsin mi?"
+        },
+        "messages": {
+          "labelCreated": "Label oluşturuldu ve transfer siparişi üretime gönderildi.",
           "labelCreateError": "Label oluşturulamadı."
         }
       },
