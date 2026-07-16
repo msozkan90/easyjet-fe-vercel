@@ -168,6 +168,8 @@ export default function CancelTransferOrdersPage() {
                   type="default"
                   disabled={!orderNumber}
                   href={orderNumber ? `/dashboard/transfer-orders/orders/${orderNumber}` : ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 />
               </Popover>
               <Popover content={t("actions.editAddress")}>

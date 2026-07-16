@@ -473,7 +473,7 @@ export default function TransferOrdersPage() {
                   disabled={!canViewDetail}
                   onClick={() => {
                     if (!canViewDetail) return;
-                    router.push(detailHref);
+                    window.open(detailHref, "_blank", "noopener,noreferrer");
                   }}
                 />
               </Popover>

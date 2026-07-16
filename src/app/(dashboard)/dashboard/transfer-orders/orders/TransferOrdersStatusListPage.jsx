@@ -928,6 +928,8 @@ export default function TransferOrdersStatusListPage({
                       <Tooltip title={t("actions.viewDetail")}>
                         <Link
                           href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <Button icon={<FileSearchOutlined />} />
                         </Link>
