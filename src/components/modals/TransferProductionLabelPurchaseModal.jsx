@@ -115,6 +115,16 @@ export default function TransferProductionLabelPurchaseModal({
     Boolean(partnerInfo?.has_shipstation_shipping) &&
     Boolean(partnerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasSystemApi = Boolean(companyInfo?.permissions?.CAN_USE_NS_SHIPMENT);
+  const companyTabLabel =
+    companyInfo?.company_name ||
+    companyInfo?.name ||
+    companyInfo?.entity_name ||
+    tShipping("tabs.company");
+  const partnerTabLabel =
+    partnerInfo?.company_name ||
+    partnerInfo?.name ||
+    partnerInfo?.entity_name ||
+    tShipping("tabs.partner");
   const tabs = useMemo(() => {
     const items = [];
     if (hasSystemApi) {
@@ -123,22 +133,22 @@ export default function TransferProductionLabelPurchaseModal({
     if (hasCompanySSApi) {
       items.push({
         key: SERVICE_TABS.COMPANY,
-        label: companyInfo?.entity_name || tShipping("tabs.company"),
+        label: companyTabLabel,
       });
     }
     if (hasPartnerSSApi) {
       items.push({
         key: SERVICE_TABS.PARTNER,
-        label: partnerInfo?.entity_name || tShipping("tabs.partner"),
+        label: partnerTabLabel,
       });
     }
     return items;
   }, [
-    companyInfo?.entity_name,
+    companyTabLabel,
     hasCompanySSApi,
     hasPartnerSSApi,
     hasSystemApi,
-    partnerInfo?.entity_name,
+    partnerTabLabel,
     tShipping,
   ]);
 
@@ -603,6 +613,8 @@ export default function TransferProductionLabelPurchaseModal({
               ? new Date(transferOrder.order_date).toLocaleString()
               : "-"
           }
+          showRecipientFields
+          requireShipToPhone
           zIndex={1500}
         />
       </Modal>

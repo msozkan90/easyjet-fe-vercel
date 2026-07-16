@@ -8,6 +8,7 @@ import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
 const AUTO_REFRESH_DELAYS = [1_000, 5_000];
+const DOWNLOADABLE_STATUSES = ["processing", "downloaded", "printed"];
 
 const openDownloadInNewTab = (url) => {
   if (typeof window === "undefined") return;
@@ -87,7 +88,7 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
     ({ record, isParentRow }) => {
       if (isOthers) return null;
       if (!isParentRow && !record?.design_id) return null;
-      if (record?.status !== "processing") return null;
+      if (!DOWNLOADABLE_STATUSES.includes(String(record?.status || ""))) return null;
       const transferOrderId = String(record?.transfer_order_id || "").trim();
       if (!transferOrderId) return null;
 

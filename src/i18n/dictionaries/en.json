@@ -2311,7 +2311,7 @@
           "localPickup": "Local Pickup",
           "hasLabel": "I Have Label",
           "noLabel": "I Do Not Have Label",
-          "labelPurchase": "Label Purchase"
+          "labelPurchase": "Purchase Label For Production"
         },
         "actions": {
           "uploadLabel": "Upload image",
