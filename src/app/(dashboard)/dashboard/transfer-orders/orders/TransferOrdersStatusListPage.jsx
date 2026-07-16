@@ -40,8 +40,7 @@ import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import {
-  CustomersAPI,
-  PartnersAPI,
+  GenericListAPI,
   TransferOrdersAPI,
 } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
@@ -108,37 +107,17 @@ const toOwnerEntityOption = (item, type) => {
   };
 };
 
-const fetchAllEntityOptions = async (apiFn, type) => {
-  const options = [];
-  let page = 1;
-  let total = 0;
-  let loadedCount = 0;
-
-  do {
-    const response = await apiFn({
-      pagination: {
-        page,
-        pageSize: 100,
-        orderBy: [{ field: "name", direction: "asc" }],
-      },
-      filters: {
-        status: "active",
-      },
-    });
-    const normalized = normalizeListAndMeta(response);
-    if (!normalized.list.length) break;
-    loadedCount += normalized.list.length;
-
-    normalized.list.forEach((item) => {
-      const option = toOwnerEntityOption(item, type);
-      if (option) options.push(option);
-    });
-
-    total = normalized.total;
-    page += 1;
-  } while (loadedCount < total);
-
-  return options;
+const fetchAllEntityOptions = async (tableName, type) => {
+  const response = await GenericListAPI.list({
+    table_name: tableName,
+    filters: {
+      status: "active",
+    },
+  });
+  const normalized = normalizeListAndMeta(response);
+  return (normalized.list || [])
+    .map((item) => toOwnerEntityOption(item, type))
+    .filter(Boolean);
 };
 
 const formatAmount = (value, fallback) => {
@@ -422,8 +401,8 @@ export default function TransferOrdersStatusListPage({
     (async () => {
       try {
         const [partners, customers] = await Promise.allSettled([
-          fetchAllEntityOptions(PartnersAPI.list, "partner"),
-          fetchAllEntityOptions(CustomersAPI.list, "customer"),
+          fetchAllEntityOptions("partner", "partner"),
+          fetchAllEntityOptions("customer", "customer"),
         ]);
 
         if (!alive) return;
