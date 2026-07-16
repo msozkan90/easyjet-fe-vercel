@@ -670,6 +670,7 @@ export default function TransferOrdersStatusListPage({
         },
         render: (value, record) => {
           const transferOrderId = record?.transfer_order_id;
+          const pendingPoolItems = Number(record?.pool_completion_summary?.pending_items || 0);
           return (
             <Space size={4}>
               {showTransferOrderIdCopy && transferOrderId ? (
@@ -687,6 +688,11 @@ export default function TransferOrdersStatusListPage({
                 </Tooltip>
               ) : null}
               <span>{value || t("common.none")}</span>
+              {!record?.__isChild && pendingPoolItems > 0 ? (
+                <Tag color="orange">
+                  {t("pool.badges.pendingItems", { count: pendingPoolItems })}
+                </Tag>
+              ) : null}
             </Space>
           );
         },
@@ -768,11 +774,19 @@ export default function TransferOrdersStatusListPage({
                 width: 220,
               }
             : undefined,
-        render: (value) => {
+        render: (value, record) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
           const color = STATUS_COLORS[value] || "default";
-          return <Tag color={color}>{label}</Tag>;
+          const pendingPoolItems = Number(record?.pool_completion_summary?.pending_items || 0);
+          return (
+            <Space size={4} wrap>
+              <Tag color={color}>{label}</Tag>
+              {!record?.__isChild && pendingPoolItems > 0 ? (
+                <Tag color="volcano">{t("pool.badges.incomplete")}</Tag>
+              ) : null}
+            </Space>
+          );
         },
       },
       {
@@ -928,6 +942,8 @@ export default function TransferOrdersStatusListPage({
                       <Tooltip title={t("actions.viewDetail")}>
                         <Link
                           href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <Button icon={<FileSearchOutlined />} />
                         </Link>

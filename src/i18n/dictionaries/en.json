@@ -263,7 +263,9 @@
         "fundingAccount": "Funding Account",
         "status": "Status",
         "createdAt": "Created At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "poolStatus": "Pool Status",
+        "linkedTransferOrders": "Linked Transfer Orders"
       },
       "filters": {
         "status": "Select status",
@@ -1956,6 +1958,8 @@
         "product": "Product",
         "size": "Size",
         "color": "Color",
+        "poolStatus": "Pool Status",
+        "linkedTransferOrders": "Linked Transfer Orders",
         "actions": "Actions"
       },
       "filters": {
@@ -2004,6 +2008,11 @@
         "approveError": "Failed to approve order.",
         "cancelSuccess": "Order cancelled successfully.",
         "cancelError": "Failed to cancel order."
+      },
+      "badges": {
+        "pendingItems": "{count} pending items",
+        "complete": "Pool complete",
+        "progressBlocked": "Progress blocked"
       },
       "shipStationStatus": {
         "lastUpdated": "Last updated {date}",
@@ -2801,7 +2810,14 @@
           "designerNotesSaved": "Designer notes saved",
           "designerNotesSaveError": "Failed to save designer notes",
           "notFound": "Transfer order not found",
-          "noUploadedDesigns": "No uploaded designs"
+          "noUploadedDesigns": "No uploaded designs",
+          "poolIncomplete": "Pool incomplete: {count} items are still pending in the source pool order."
+        }
+      },
+      "pool": {
+        "badges": {
+          "pendingItems": "{count} pending pool items",
+          "incomplete": "Pool incomplete"
         }
       },
       "transferShippingModal": {
