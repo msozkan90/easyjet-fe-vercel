@@ -23,6 +23,10 @@ const antdToDir = (ord) =>
   ord === "ascend" ? "asc" : ord === "descend" ? "desc" : undefined;
 const dirToAntd = (dir) =>
   dir === "asc" ? "ascend" : dir === "desc" ? "descend" : null;
+const isActionsColumn = (column) => {
+  const key = String(column?.key || column?.dataIndex || "").trim().toLowerCase();
+  return key === "actions";
+};
 
 function TextFilterDropdown({
   placeholder,
@@ -290,6 +294,9 @@ const CrudTable = forwardRef(function CrudTable(
         // sortOrder mapping
         return {
           ...col,
+          ...(isActionsColumn(col) && col?.fixed === undefined
+            ? { fixed: "right" }
+            : {}),
           sortOrder:
             col.dataIndex && sortState.orderBy === col.dataIndex
               ? dirToAntd(sortState.orderDir)
@@ -388,6 +395,9 @@ const CrudTable = forwardRef(function CrudTable(
 
       return {
         ...col,
+        ...(isActionsColumn(col) && col?.fixed === undefined
+          ? { fixed: "right" }
+          : {}),
         filterDropdown,
         filterIcon: (filtered) => (
           <FilterFilled style={{ color: filtered ? "#1677ff" : undefined }} />

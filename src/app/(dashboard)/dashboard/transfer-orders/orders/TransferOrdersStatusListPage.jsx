@@ -4,6 +4,7 @@ import {
   Children,
   cloneElement,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -38,7 +39,11 @@ import { useSelector } from "react-redux";
 import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { TransferOrdersAPI } from "@/utils/api";
+import {
+  CustomersAPI,
+  PartnersAPI,
+  TransferOrdersAPI,
+} from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
@@ -69,6 +74,71 @@ const buildOwnerEntityFilterOptions = (items = []) => {
       sensitivity: "base",
     }),
   );
+};
+
+const mergeOwnerEntityFilterOptions = (...groups) => {
+  const optionMap = new Map();
+  groups
+    .flat()
+    .filter(Boolean)
+    .forEach((option) => {
+      const value = String(option?.value || "").trim();
+      if (!value) return;
+      optionMap.set(value, {
+        value,
+        label: String(option?.label || value).trim() || value,
+      });
+    });
+
+  return Array.from(optionMap.values()).sort((left, right) =>
+    String(left.label).localeCompare(String(right.label), undefined, {
+      sensitivity: "base",
+    }),
+  );
+};
+
+const toOwnerEntityOption = (item, type) => {
+  const name = String(
+    item?.entity_name || item?.name || item?.owner_entity?.name || "",
+  ).trim();
+  if (!name) return null;
+  return {
+    value: name,
+    label: type ? `${name} (${type})` : name,
+  };
+};
+
+const fetchAllEntityOptions = async (apiFn, type) => {
+  const options = [];
+  let page = 1;
+  let total = 0;
+  let loadedCount = 0;
+
+  do {
+    const response = await apiFn({
+      pagination: {
+        page,
+        pageSize: 100,
+        orderBy: [{ field: "name", direction: "asc" }],
+      },
+      filters: {
+        status: "active",
+      },
+    });
+    const normalized = normalizeListAndMeta(response);
+    if (!normalized.list.length) break;
+    loadedCount += normalized.list.length;
+
+    normalized.list.forEach((item) => {
+      const option = toOwnerEntityOption(item, type);
+      if (option) options.push(option);
+    });
+
+    total = normalized.total;
+    page += 1;
+  } while (loadedCount < total);
+
+  return options;
 };
 
 const formatAmount = (value, fallback) => {
@@ -334,13 +404,7 @@ export default function TransferOrdersStatusListPage({
       const annotatedList = annotateRows(result?.list || []);
       setOwnerEntityFilterOptions((prev) => {
         const next = buildOwnerEntityFilterOptions(annotatedList);
-        const merged = new Map(prev.map((option) => [option.value, option]));
-        next.forEach((option) => merged.set(option.value, option));
-        return Array.from(merged.values()).sort((left, right) =>
-          String(left.label).localeCompare(String(right.label), undefined, {
-            sensitivity: "base",
-          }),
-        );
+        return mergeOwnerEntityFilterOptions(prev, next);
       });
       return {
         ...result,
@@ -349,6 +413,38 @@ export default function TransferOrdersStatusListPage({
     },
     [annotateRows, baseRequest],
   );
+
+  useEffect(() => {
+    if (!showOwnerEntityToolbarSearch && !showOwnerEntityColumn) return;
+
+    let alive = true;
+
+    (async () => {
+      try {
+        const [partners, customers] = await Promise.allSettled([
+          fetchAllEntityOptions(PartnersAPI.list, "partner"),
+          fetchAllEntityOptions(CustomersAPI.list, "customer"),
+        ]);
+
+        if (!alive) return;
+
+        const loadedOptions = [
+          ...(partners.status === "fulfilled" ? partners.value : []),
+          ...(customers.status === "fulfilled" ? customers.value : []),
+        ];
+
+        setOwnerEntityFilterOptions((prev) =>
+          mergeOwnerEntityFilterOptions(prev, loadedOptions),
+        );
+      } catch {
+        // Ignore option prefetch errors; row-derived options still work.
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [showOwnerEntityColumn, showOwnerEntityToolbarSearch]);
 
   const applyFilterPatch = useCallback(
     (patch) => {
@@ -829,6 +925,7 @@ export default function TransferOrdersStatusListPage({
               title: t("columns.actions"),
               key: "actions",
               width: rowActionsRenderer ? 220 : 120,
+              fixed: "right",
               render: (_, record) => {
                 const isParentRow =
                   Boolean(record?.children?.length) && !record?.__isChild;
@@ -949,7 +1046,7 @@ export default function TransferOrdersStatusListPage({
               <Select
                 allowClear
                 placeholder={t("filters.searchOwnerEntity")}
-                value={quickFilters.owner_entity}
+                value={quickFilters.owner_entity || undefined}
                 onChange={handleOwnerEntityChange}
                 style={{ minWidth: 220 }}
                 options={ownerEntityFilterOptions}

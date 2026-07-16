@@ -57,6 +57,7 @@ const AddressEditorModal = ({
   zIndex = 1300,
   showRecipientFields = false,
   showBillToName = true,
+  requireShipToPhone = false,
 }) => {
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
@@ -178,6 +179,18 @@ const AddressEditorModal = ({
                     label={t("addressEditor.fields.shipToPhone")}
                     name="ship_to_phone"
                     style={{ flex: 1, minWidth: 180 }}
+                    rules={
+                      requireShipToPhone
+                        ? [
+                            {
+                              required: true,
+                              message: t("addressEditor.validation.required", {
+                                field: t("addressEditor.fields.shipToPhone"),
+                              }),
+                            },
+                          ]
+                        : undefined
+                    }
                   >
                     <Input
                       placeholder={t("addressEditor.placeholders.shipToPhone")}
