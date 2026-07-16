@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import {
+  Alert,
   App as AntdApp,
   Button,
   Card,
@@ -346,7 +347,8 @@ export default function TransferOrderDetailPage() {
     (isCompanyUser || isCustomerAdmin) &&
     Boolean(transferLabelId) &&
     transferLabel?.source !== "self_label" &&
-    detail?.order_status !== "shipped" 
+    detail?.order_status !== "shipped";
+  const pendingPoolItems = Number(detail?.pool_completion_summary?.pending_items || 0);
   const itemTotalPrice = useMemo(() => {
     const items = Array.isArray(detail?.items) ? detail.items : [];
     return items.reduce((sum, item) => sum + Number(item?.price || 0), 0);
@@ -378,6 +380,13 @@ export default function TransferOrderDetailPage() {
       label: tDetail("tabs.overview"),
       children: (
         <div className="space-y-6">
+          {pendingPoolItems > 0 ? (
+            <Alert
+              type="warning"
+              showIcon
+              message={tDetail("messages.poolIncomplete", { count: pendingPoolItems })}
+            />
+          ) : null}
           <Card title={tDetail("tabs.overview")}>
             <Descriptions
               column={{ xs: 1, sm: 2, md: 3 }}

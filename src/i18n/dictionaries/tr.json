@@ -263,7 +263,9 @@
         "fundingAccount": "Hesap",
         "status": "Durum",
         "createdAt": "Oluşturma Tarihi",
-        "actions": "İşlemler"
+        "actions": "İşlemler",
+        "poolStatus": "Pool Durumu",
+        "linkedTransferOrders": "Bağlı Transfer Siparişleri"
       },
       "filters": {
         "status": "Durum seçin",
@@ -1758,6 +1760,8 @@
         "product": "Ürün",
         "size": "Beden",
         "color": "Renk",
+        "poolStatus": "Pool Durumu",
+        "linkedTransferOrders": "Bağlı Transfer Siparişleri",
         "actions": "İşlemler"
       },
       "filters": {
@@ -1806,6 +1810,11 @@
         "approveError": "Sipariş onaylanamadı.",
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
         "cancelError": "Sipariş iptal edilemedi."
+      },
+      "badges": {
+        "pendingItems": "{count} bekleyen kalem",
+        "complete": "Pool tamam",
+        "progressBlocked": "İlerleme bloklu"
       },
       "shipStationStatus": {
         "lastUpdated": "Son güncelleme {date}",
@@ -2603,7 +2612,14 @@
           "designerNotesSaved": "Tasarımcı notları kaydedildi.",
           "designerNotesSaveError": "Tasarımcı notları kaydedilemedi.",
           "notFound": "Transfer siparişi bulunamadı.",
-          "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı."
+          "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı.",
+          "poolIncomplete": "Pool eksik: kaynak pool siparişinde hâlâ {count} bekleyen kalem var."
+        }
+      },
+      "pool": {
+        "badges": {
+          "pendingItems": "{count} bekleyen pool kalemi",
+          "incomplete": "Pool eksik"
         }
       },
       "transferShippingModal": {

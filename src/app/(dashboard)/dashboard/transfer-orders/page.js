@@ -8,6 +8,7 @@ import {
   Space,
   App as AntdApp,
   Select,
+  Tag,
   Tooltip,
   Popconfirm,
   Popover,
@@ -58,6 +59,7 @@ export default function OrdersPage() {
   const user = useSelector((state) => state.auth.user);
 
   const t = useTranslations("dashboard.preOrders");
+  const tOrders = useTranslations("dashboard.orders");
   const storeId = user?.entity?.store_id;
   const customerName =
     user?.entity?.entity_name || user?.displayName || user?.email || "";
@@ -549,6 +551,71 @@ export default function OrdersPage() {
         render: formatDateTime,
       },
       {
+        title: t("columns.poolStatus"),
+        key: "pool_status",
+        width: 220,
+        render: (_, record) => {
+          const pendingCount = Number(record?.pool_pending_item_count || 0);
+          const linkedOrders = Array.isArray(record?.linked_transfer_orders)
+            ? record.linked_transfer_orders
+            : [];
+          const hasLockedLinkedOrder = linkedOrders.some((order) =>
+            ["processing", "downloaded", "printed", "shipped"].includes(
+              String(order?.order_status || "")
+            )
+          );
+
+          return (
+            <Space size={[4, 4]} wrap>
+              <Tag color={pendingCount > 0 ? "orange" : "green"}>
+                {pendingCount > 0
+                  ? t("badges.pendingItems", { count: pendingCount })
+                  : t("badges.complete")}
+              </Tag>
+              {pendingCount > 0 && hasLockedLinkedOrder ? (
+                <Tag color="volcano">{t("badges.progressBlocked")}</Tag>
+              ) : null}
+            </Space>
+          );
+        },
+      },
+      {
+        title: t("columns.linkedTransferOrders"),
+        key: "linked_transfer_orders",
+        width: 260,
+        render: (_, record) => {
+          const linkedOrders = Array.isArray(record?.linked_transfer_orders)
+            ? record.linked_transfer_orders
+            : [];
+          if (!linkedOrders.length) return t("common.none");
+
+          return (
+            <Space size={[4, 4]} wrap>
+              {linkedOrders.map((order) => (
+                <Button
+                  key={order.id}
+                  size="small"
+                  type="link"
+                  href={
+                    order?.order_number
+                      ? `/dashboard/transfer-orders/orders/${encodeURIComponent(order.order_number)}`
+                      : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {order?.order_number || t("common.none")} (
+                  {order?.order_status
+                    ? tOrders(`status.values.${order.order_status}`) || order.order_status
+                    : t("common.none")}
+                  )
+                </Button>
+              ))}
+            </Space>
+          );
+        },
+      },
+      {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
@@ -612,6 +679,7 @@ export default function OrdersPage() {
     productsLoading,
     rowSelections,
     t,
+    tOrders,
     formatDateTime,
   ]);
 
