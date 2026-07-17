@@ -40,7 +40,8 @@
       "edit": "Düzenle",
       "delete": "Sil",
       "detail": "Detay",
-      "open": "Aç"
+      "open": "Aç",
+      "backToTop": "En üste çık"
     },
     "status": {
       "active": "Aktif",

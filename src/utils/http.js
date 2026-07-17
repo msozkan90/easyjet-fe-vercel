@@ -77,6 +77,16 @@ const getRequestPath = (config) => {
 const isAuthRefreshPath = (path) => path === "/auth/refresh" || path.endsWith("/auth/refresh");
 const isAuthLoginPath = (path) => path === "/auth/login" || path.endsWith("/auth/login");
 
+const redirectToLogin = () => {
+  if (!isBrowser) return;
+  window.dispatchEvent(new Event("auth:session-expired"));
+
+  const loginPath = "/auth/login";
+  if (window.location.pathname !== loginPath) {
+    window.location.replace(loginPath);
+  }
+};
+
 http.interceptors.response.use(
   (res) => res,
   async (error) => {
@@ -112,6 +122,7 @@ http.interceptors.response.use(
       } catch (e) {
         isRefreshing = false;
         onRefreshFailed(e);
+        redirectToLogin();
         return Promise.reject(e);
       }
     }
