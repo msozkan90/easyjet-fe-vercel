@@ -7,7 +7,8 @@ import { ConfigProvider, theme } from "antd";
 import "@ant-design/v5-patch-for-react-19";
 import { useEffect } from "react";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
-import { setUser } from "@/redux/features/authSlice";
+import { logoutLocal, setUser } from "@/redux/features/authSlice";
+import { resetBalance } from "@/redux/features/balanceSlice";
 import { TransferDesignUploadQueueProvider } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 import { OrdersPdfDesignUploadQueueProvider } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import {
@@ -21,6 +22,17 @@ import { RoleEnum } from "@/utils/consts";
 
 function AuthBootstrap() {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      dispatch(logoutLocal());
+      dispatch(resetBalance());
+      dispatch(resetCategories());
+    };
+
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => window.removeEventListener("auth:session-expired", handleSessionExpired);
+  }, [dispatch]);
 
   useEffect(() => {
     (async () => {
