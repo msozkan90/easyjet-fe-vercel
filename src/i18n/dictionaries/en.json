@@ -40,7 +40,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "detail": "Detail",
-      "open": "Open"
+      "open": "Open",
+      "backToTop": "Back to top"
     },
     "status": {
       "active": "Active",
