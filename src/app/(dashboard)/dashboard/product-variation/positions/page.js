@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
@@ -70,6 +70,21 @@ export default function ProductPositionsPage() {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
     normalizeListAndMeta,
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductPositionsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -209,18 +224,6 @@ export default function ProductPositionsPage() {
       console.log(error, "error");
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
-      );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await ProductPositionsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
