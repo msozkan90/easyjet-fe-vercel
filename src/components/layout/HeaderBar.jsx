@@ -19,6 +19,7 @@ import {
   LogoutOutlined,
   SettingOutlined,
   DollarCircleOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "@/redux/features/uiSlice";
@@ -193,16 +194,23 @@ export default function HeaderBar({ pathname }) {
       </div>
 
       <Space size={8} align="center">
-        <Input.Search
-          value={orderSearch}
-          onChange={(event) => setOrderSearch(event.target.value)}
-          onSearch={handleOrderSearch}
-          allowClear
-          loading={orderSearchLoading}
-          placeholder={tNavbar("orderSearchPlaceholder")}
-          aria-label={tNavbar("orderSearchAria")}
-          className="mt-2.5"
-        />
+        <Space.Compact className="mt-2.5">
+          <Input
+            value={orderSearch}
+            onChange={(event) => setOrderSearch(event.target.value)}
+            onPressEnter={() => handleOrderSearch(orderSearch)}
+            allowClear
+            disabled={orderSearchLoading}
+            placeholder={tNavbar("orderSearchPlaceholder")}
+            aria-label={tNavbar("orderSearchAria")}
+          />
+          <Button
+            icon={<SearchOutlined />}
+            loading={orderSearchLoading}
+            onClick={() => handleOrderSearch(orderSearch)}
+            aria-label={tNavbar("orderSearchAria")}
+          />
+        </Space.Compact>
         <Modal
           title={tNavbar("orderSearchMultipleTitle")}
           open={orderSearchModalOpen}
