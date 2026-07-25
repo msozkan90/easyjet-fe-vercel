@@ -17,7 +17,11 @@ import RequireRole from "@/components/common/Access/RequireRole";
 import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
 import CrudTable from "@/components/common/table/CrudTable";
 import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
-import { OrdersAPI, TransferOrdersAPI, TransferProductPricesAPI } from "@/utils/api";
+import {
+  OrdersAPI,
+  TransferOrdersAPI,
+  TransferProductPricesAPI,
+} from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
@@ -101,7 +105,7 @@ export default function OrdersPage() {
         if (active) {
           message.error(
             error?.response?.data?.error?.message ||
-              t("messages.loadVariationsError")
+              t("messages.loadVariationsError"),
           );
         }
       } finally {
@@ -124,7 +128,7 @@ export default function OrdersPage() {
           value: product.id,
           label: product.name,
         })),
-    [transferProducts]
+    [transferProducts],
   );
 
   const baseRequest = useMemo(
@@ -148,9 +152,9 @@ export default function OrdersPage() {
             return next;
           },
         },
-        normalizeListAndMeta
+        normalizeListAndMeta,
       ),
-    []
+    [],
   );
 
   const clearSelectionOverrides = useCallback(() => {
@@ -162,12 +166,12 @@ export default function OrdersPage() {
 
   const selectedRowKeys = useMemo(
     () => Object.keys(selectedRowMap),
-    [selectedRowMap]
+    [selectedRowMap],
   );
 
   const selectedRows = useMemo(
     () => Object.values(selectedRowMap),
-    [selectedRowMap]
+    [selectedRowMap],
   );
 
   const resetSelections = useCallback(() => {
@@ -194,7 +198,7 @@ export default function OrdersPage() {
       clearSelectionOverrides();
       return result;
     },
-    [baseRequest, clearSelectionOverrides]
+    [baseRequest, clearSelectionOverrides],
   );
 
   const setRowSelectionFields = useCallback((rowId, updates) => {
@@ -260,12 +264,12 @@ export default function OrdersPage() {
 
   const isCellLoading = useCallback(
     (rowId, field) => Boolean(cellLoading?.[`${rowId}-${field}`]),
-    [cellLoading]
+    [cellLoading],
   );
 
   const isRowActionLoading = useCallback(
     (rowId, action) => Boolean(rowActionLoading?.[`${rowId}-${action}`]),
-    [rowActionLoading]
+    [rowActionLoading],
   );
 
   const handlePreOrderUpdate = useCallback(
@@ -278,14 +282,14 @@ export default function OrdersPage() {
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.updateError")
+          error?.response?.data?.error?.message || t("messages.updateError"),
         );
         onError?.();
       } finally {
         setCellLoadingState(record.id, fieldKey, false);
       }
     },
-    [message, setCellLoadingState, t]
+    [message, setCellLoadingState, t],
   );
 
   const handleProductSelect = useCallback(
@@ -310,10 +314,10 @@ export default function OrdersPage() {
         () =>
           setRowSelectionFields(record.id, {
             productId: prevProduct,
-          })
+          }),
       );
     },
-    [handlePreOrderUpdate, rowSelections, setRowSelectionFields]
+    [handlePreOrderUpdate, rowSelections, setRowSelectionFields],
   );
 
   const approveOrders = useCallback(
@@ -344,7 +348,7 @@ export default function OrdersPage() {
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.approveError")
+          error?.response?.data?.error?.message || t("messages.approveError"),
         );
       } finally {
         ids.forEach((id) => setRowActionLoadingState(id, "approve", false));
@@ -359,7 +363,7 @@ export default function OrdersPage() {
       resetSelections,
       setRowActionLoadingState,
       t,
-    ]
+    ],
   );
 
   const handleSingleApprove = useCallback(
@@ -367,7 +371,7 @@ export default function OrdersPage() {
       if (!record) return;
       approveOrders([record], { bulk: false });
     },
-    [approveOrders]
+    [approveOrders],
   );
 
   const handleBulkApprove = useCallback(() => {
@@ -395,7 +399,7 @@ export default function OrdersPage() {
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.cancelError")
+          error?.response?.data?.error?.message || t("messages.cancelError"),
         );
       } finally {
         ids.forEach((id) => setRowActionLoadingState(id, "cancel", false));
@@ -410,7 +414,7 @@ export default function OrdersPage() {
       resetSelections,
       setRowActionLoadingState,
       t,
-    ]
+    ],
   );
 
   const handleCancelOrder = useCallback(
@@ -418,7 +422,7 @@ export default function OrdersPage() {
       if (!record) return;
       cancelOrders([record], { bulk: false });
     },
-    [cancelOrders]
+    [cancelOrders],
   );
 
   const handleBulkCancel = useCallback(() => {
@@ -437,7 +441,7 @@ export default function OrdersPage() {
       tableRef.current?.reload?.();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.fetchError")
+        error?.response?.data?.error?.message || t("messages.fetchError"),
       );
     } finally {
       setPulling(false);
@@ -446,7 +450,7 @@ export default function OrdersPage() {
 
   const formatDateTime = useCallback(
     (value) => (value ? moment(value).format("LLL") : t("common.none")),
-    [t]
+    [t],
   );
 
   const columns = useMemo(() => {
@@ -518,7 +522,8 @@ export default function OrdersPage() {
           const normalizedProductId = hasOwn.call(overrides || {}, "productId")
             ? overrides.productId
             : getNormalizedRecordValue(record, "product");
-          const loading = productsLoading || isCellLoading(record.id, "product");
+          const loading =
+            productsLoading || isCellLoading(record.id, "product");
           return (
             <Select
               showSearch
@@ -541,6 +546,12 @@ export default function OrdersPage() {
         sorter: true,
       },
       {
+        title: t("columns.notes"),
+        dataIndex: "notes",
+        width: 260,
+        render: (value) => value || t("common.none"),
+      },
+      {
         title: t("columns.orderByDate"),
         dataIndex: "order_date",
         sorter: true,
@@ -561,8 +572,8 @@ export default function OrdersPage() {
             : [];
           const hasLockedLinkedOrder = linkedOrders.some((order) =>
             ["processing", "downloaded", "printed", "shipped"].includes(
-              String(order?.order_status || "")
-            )
+              String(order?.order_status || ""),
+            ),
           );
 
           return (
@@ -606,7 +617,8 @@ export default function OrdersPage() {
                 >
                   {order?.order_number || t("common.none")} (
                   {order?.order_status
-                    ? tOrders(`status.values.${order.order_status}`) || order.order_status
+                    ? tOrders(`status.values.${order.order_status}`) ||
+                      order.order_status
                     : t("common.none")}
                   )
                 </Button>
@@ -624,10 +636,7 @@ export default function OrdersPage() {
           const approveLoading = isRowActionLoading(record.id, "approve");
           const cancelLoading = isRowActionLoading(record.id, "cancel");
           const disableActions =
-            bulkApproving ||
-            bulkCancelling ||
-            approveLoading ||
-            cancelLoading;
+            bulkApproving || bulkCancelling || approveLoading || cancelLoading;
           return (
             <Space>
               <Popover content={t("actions.approve")}>
@@ -686,8 +695,8 @@ export default function OrdersPage() {
   const fetchButtonLabel = pulling
     ? t("actions.fetching")
     : remainingSec > 0
-    ? t("actions.fetchCountdown", { seconds: remainingSec })
-    : t("actions.fetch");
+      ? t("actions.fetchCountdown", { seconds: remainingSec })
+      : t("actions.fetch");
 
   const rowSelectionConfig = useMemo(
     () => ({
@@ -719,26 +728,29 @@ export default function OrdersPage() {
         });
       },
     }),
-    [selectedRowKeys]
+    [selectedRowKeys],
   );
 
-  const getRowClassName = useCallback((record) => {
-    const overrides = rowSelections?.[record?.id];
-    const normalizedProductId = hasOwn.call(overrides || {}, "productId")
-      ? overrides.productId
-      : getNormalizedRecordValue(record, "product");
-    if (normalizedProductId === null || normalizedProductId === undefined) {
-      return "missing-price-row";
-    }
-    return "";
-  }, [rowSelections]);
+  const getRowClassName = useCallback(
+    (record) => {
+      const overrides = rowSelections?.[record?.id];
+      const normalizedProductId = hasOwn.call(overrides || {}, "productId")
+        ? overrides.productId
+        : getNormalizedRecordValue(record, "product");
+      if (normalizedProductId === null || normalizedProductId === undefined) {
+        return "missing-price-row";
+      }
+      return "";
+    },
+    [rowSelections],
+  );
 
   const tableProps = useMemo(
     () => ({
       rowSelection: rowSelectionConfig,
       rowClassName: getRowClassName,
     }),
-    [getRowClassName, rowSelectionConfig]
+    [getRowClassName, rowSelectionConfig],
   );
 
   return (

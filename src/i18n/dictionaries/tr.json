@@ -1759,6 +1759,7 @@
         "packageCode": "Paket Kodu",
         "confirmation": "Onay",
         "product": "Ürün",
+        "notes": "Notlar",
         "size": "Beden",
         "color": "Renk",
         "poolStatus": "Pool Durumu",
@@ -2261,11 +2262,11 @@
           "shippingAddress": "Teslimat Adresi",
           "totals": "Toplamlar",
           "package": "Paket",
-        "notes": "Notlar",
-        "labels": "Etiketler",
-        "items": "Sipariş Ürünleri",
-        "scrap": "Fire / Üretim Kayıpları"
-      },
+          "notes": "Notlar",
+          "labels": "Etiketler",
+          "items": "Sipariş Ürünleri",
+          "scrap": "Fire / Üretim Kayıpları"
+        },
         "fields": {
           "billToName": "Fatura Adı",
           "billToCompany": "Fatura Şirketi",
