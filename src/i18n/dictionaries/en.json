@@ -1957,6 +1957,7 @@
         "packageCode": "Package Code",
         "confirmation": "Confirmation",
         "product": "Product",
+        "notes": "Notes",
         "size": "Size",
         "color": "Color",
         "poolStatus": "Pool Status",
@@ -2459,11 +2460,11 @@
           "shippingAddress": "Shipping Address",
           "totals": "Totals",
           "package": "Package",
-        "notes": "Notes",
-        "labels": "Labels",
-        "items": "Order Items",
-        "scrap": "Fire / Production Losses"
-      },
+          "notes": "Notes",
+          "labels": "Labels",
+          "items": "Order Items",
+          "scrap": "Fire / Production Losses"
+        },
         "fields": {
           "billToName": "Bill To Name",
           "billToCompany": "Bill To Company",
