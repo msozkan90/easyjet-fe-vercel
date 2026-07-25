@@ -45,15 +45,85 @@ body,
 }
 
 .ant-table-row.orders-parent-row > td {
-  background-color: rgba(43, 156, 255, 0.200)   !important;
+  background-color: rgba(43, 156, 255, 0.2) !important;
 }
 
 .ant-table-row.orders-parent-row:hover > td {
-  background-color: rgba(43, 156, 255, 0.200)  !important;
+  background-color: rgba(43, 156, 255, 0.2) !important;
 }
 
 .ant-table-row.orders-child-row > td {
   background-color: rgba(24, 144, 255, 0.08);
+}
+
+.ant-table-row.transfer-status-row > td,
+.ant-table-row.transfer-status-row > td.ant-table-cell-fix-left,
+.ant-table-row.transfer-status-row > td.ant-table-cell-fix-right {
+  background-color: rgba(var(--transfer-status-rgb), 0.18) !important;
+}
+
+.ant-table-row.transfer-status-row:hover > td,
+.ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-left,
+.ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-right {
+  background-color: rgba(var(--transfer-status-rgb), 0.26) !important;
+}
+
+.ant-table-row.transfer-status-row.orders-child-row > td,
+.ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-left,
+.ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-right {
+  background-color: rgba(var(--transfer-status-rgb), 0.07) !important;
+}
+
+.ant-table-row.transfer-status-row.orders-child-row:hover > td,
+.ant-table-row.transfer-status-row.orders-child-row:hover
+  > td.ant-table-cell-fix-left,
+.ant-table-row.transfer-status-row.orders-child-row:hover
+  > td.ant-table-cell-fix-right {
+  background-color: rgba(var(--transfer-status-rgb), 0.13) !important;
+}
+
+.ant-table-row.transfer-status-newOrder {
+  --transfer-status-rgb: 22, 119, 255;
+}
+
+.ant-table-row.transfer-status-waitingForDesign {
+  --transfer-status-rgb: 250, 173, 20;
+}
+
+.ant-table-row.transfer-status-readyForProduction {
+  --transfer-status-rgb: 114, 46, 209;
+}
+
+.ant-table-row.transfer-status-processing {
+  --transfer-status-rgb: 47, 84, 235;
+}
+
+.ant-table-row.transfer-status-downloaded,
+.ant-table-row.transfer-status-pdf {
+  --transfer-status-rgb: 19, 194, 194;
+}
+
+.ant-table-row.transfer-status-printed,
+.ant-table-row.transfer-status-completed {
+  --transfer-status-rgb: 82, 196, 26;
+}
+
+.ant-table-row.transfer-status-shipped {
+  --transfer-status-rgb: 250, 84, 28;
+}
+
+.ant-table-row.transfer-status-cancel {
+  --transfer-status-rgb: 255, 77, 79;
+}
+
+.ant-table-row.transfer-status-refund {
+  --transfer-status-rgb: 235, 47, 150;
+}
+
+.ant-table-row.transfer-status-remake {
+  --transfer-status-rgb: 250, 140, 22;
 }
 
 .orders-cell-strong {
@@ -81,8 +151,11 @@ body,
   padding: 8px 12px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 999px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(248, 250, 252, 0.94)
+  );
   color: #0f172a;
   font-size: 12px;
   font-weight: 700;
@@ -123,8 +196,11 @@ body,
   padding: 7px 10px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 12px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(248, 250, 252, 0.92)
+  );
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
@@ -193,7 +269,11 @@ body,
   border-radius: 12px;
   overflow: hidden;
   padding: 2px 0;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .pac-item {
