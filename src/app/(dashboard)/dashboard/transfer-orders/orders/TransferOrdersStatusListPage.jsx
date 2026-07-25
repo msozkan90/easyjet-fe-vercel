@@ -39,10 +39,7 @@ import { useSelector } from "react-redux";
 import CrudTable from "@/components/common/table/CrudTable";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import {
-  GenericListAPI,
-  TransferOrdersAPI,
-} from "@/utils/api";
+import { GenericListAPI, TransferOrdersAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
@@ -62,7 +59,9 @@ const buildOwnerEntityFilterOptions = (items = []) => {
   const optionMap = new Map();
   (items || []).forEach((item) => {
     if (item?.__isChild) return;
-    const name = String(item?.entity_name || item?.owner_entity?.name || "").trim();
+    const name = String(
+      item?.entity_name || item?.owner_entity?.name || "",
+    ).trim();
     if (!name) return;
     const type = item?.entity_type || item?.owner_entity?.type;
     const label = type ? `${name} (${type})` : name;
@@ -209,11 +208,7 @@ const renderOptionInlineValue = (option, fallback) => {
     );
   }
 
-  return (
-    <span className="order-option-value">
-      {value || fallback}
-    </span>
-  );
+  return <span className="order-option-value">{value || fallback}</span>;
 };
 
 const renderOptionsSummary = (options, fallback) => (
@@ -235,12 +230,23 @@ const renderOptionsSummary = (options, fallback) => (
             <span>{option?.name || fallback}</span>
           </a>
         ) : (
-          <span className="order-option-value">{option?.value || fallback}</span>
+          <span className="order-option-value">
+            {option?.value || fallback}
+          </span>
         )}
       </div>
     ))}
   </div>
 );
+
+const toStatusRowClassName = (record) => {
+  const status = String(
+    record?.status || record?.order_status || record?.design_status || "",
+  ).trim();
+  if (!status) return "";
+  const normalizedStatus = status.replace(/[^a-zA-Z0-9_-]/g, "-");
+  return `transfer-status-row transfer-status-${normalizedStatus}`;
+};
 
 const extractBarcodeFilename = (url, fallbackName = "barcode.png") => {
   if (!url) return fallbackName;
@@ -577,7 +583,8 @@ export default function TransferOrdersStatusListPage({
 
   const columns = useMemo(() => {
     const showDetailAction =
-      typeof columnsBuilder !== "function" || typeof rowActionsRenderer === "function";
+      typeof columnsBuilder !== "function" ||
+      typeof rowActionsRenderer === "function";
     const isPendingList = listApiFn === TransferOrdersAPI.pendingItemsList;
     const showDeliveryMethodColumn = true;
     const showLocalPickupColumn = true;
@@ -670,7 +677,9 @@ export default function TransferOrdersStatusListPage({
         },
         render: (value, record) => {
           const transferOrderId = record?.transfer_order_id;
-          const pendingPoolItems = Number(record?.pool_completion_summary?.pending_items || 0);
+          const pendingPoolItems = Number(
+            record?.pool_completion_summary?.pending_items || 0,
+          );
           return (
             <Space size={4}>
               {showTransferOrderIdCopy && transferOrderId ? (
@@ -778,7 +787,9 @@ export default function TransferOrdersStatusListPage({
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
           const color = STATUS_COLORS[value] || "default";
-          const pendingPoolItems = Number(record?.pool_completion_summary?.pending_items || 0);
+          const pendingPoolItems = Number(
+            record?.pool_completion_summary?.pending_items || 0,
+          );
           return (
             <Space size={4} wrap>
               <Tag color={color}>{label}</Tag>
@@ -998,6 +1009,8 @@ export default function TransferOrdersStatusListPage({
     } else if (record?.__isChild || indent > 0) {
       baseClasses.push("orders-child-row");
     }
+    const statusClassName = toStatusRowClassName(record);
+    if (statusClassName) baseClasses.push(statusClassName);
     return baseClasses.join(" ");
   }, []);
 

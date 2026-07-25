@@ -7,9 +7,12 @@ import {
   App as AntdApp,
   Button,
   Card,
+  Checkbox,
   Descriptions,
+  Divider,
   Empty,
   Input,
+  Modal,
   Popconfirm,
   Space,
   Spin,
@@ -76,6 +79,21 @@ const normalizeOptions = (rawOptions) => {
     }));
   }
   return [];
+};
+
+const normalizeShippingChecklist = (rawChecklist) => ({
+  designs: Array.isArray(rawChecklist?.designs) ? rawChecklist.designs : [],
+  without_design_items: Array.isArray(rawChecklist?.without_design_items)
+    ? rawChecklist.without_design_items
+    : [],
+});
+
+const getChecklistOptionText = (entry) => {
+  const options = normalizeOptions(entry?.options);
+  if (!options.length) return "";
+  return options
+    .map((option) => `${option?.name || "Option"}: ${option?.value || "-"}`)
+    .join(", ");
 };
 
 const TransferOrderItemCard = ({
@@ -214,6 +232,14 @@ export default function TransferShippedPrinterSearchPage() {
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
   const [voidingLabelId, setVoidingLabelId] = useState(null);
+  const [checklistModalOpen, setChecklistModalOpen] = useState(false);
+  const [shippingChecklist, setShippingChecklist] = useState({
+    designs: [],
+    without_design_items: [],
+  });
+  const [checkedChecklistKeys, setCheckedChecklistKeys] = useState([]);
+  const [pendingChecklistOrderId, setPendingChecklistOrderId] = useState("");
+  const [confirmingChecklist, setConfirmingChecklist] = useState(false);
 
   const triggerLabelDownload = useCallback((labelUrl, selectedOrderNumber) => {
     if (!labelUrl) return;
@@ -227,6 +253,107 @@ export default function TransferShippedPrinterSearchPage() {
     anchor.click();
     document.body.removeChild(anchor);
   }, []);
+
+  const checklistRequiredKeys = useMemo(() => {
+    const designs = shippingChecklist.designs.map((design) => `design:${design?.id}`);
+    const withoutDesignItems = shippingChecklist.without_design_items.map(
+      (item) => `without-design-item:${item?.id}`,
+    );
+    return [...designs, ...withoutDesignItems].filter((key) => !key.endsWith(":undefined"));
+  }, [shippingChecklist]);
+
+  const allChecklistItemsChecked =
+    checklistRequiredKeys.length > 0 &&
+    checklistRequiredKeys.every((key) => checkedChecklistKeys.includes(key));
+
+  const applyShipmentPayload = useCallback(
+    ({
+      payload,
+      selectedTransferOrderId,
+      resetChecklist = false,
+      openChecklist = false,
+    }) => {
+      const transferOrder = payload?.transfer_order || null;
+      const scopedItems = Array.isArray(payload?.items) ? payload.items : [];
+      const requiresLabelCreation = payload?.requires_label_creation === true;
+      const latestLabel = payload?.transfer_label || null;
+      const nextChecklist = normalizeShippingChecklist(payload?.checklist);
+      const hasChecklistItems =
+        nextChecklist.designs.length > 0 ||
+        nextChecklist.without_design_items.length > 0;
+
+      setItems(scopedItems);
+      setTransferLabel(latestLabel);
+      setOrderNumber(transferOrder?.order_number || "");
+      setTransferOrderId(selectedTransferOrderId);
+      setOrderSummary(
+        transferOrder
+          ? {
+              id: transferOrder?.id || null,
+              order_number: transferOrder?.order_number || null,
+              bill_to_name: transferOrder?.bill_to_name || null,
+              status: transferOrder?.order_status || null,
+              currency: transferOrder?.currency || "USD",
+              barcode_url: transferOrder?.barcode_url || null,
+              order_date: transferOrder?.order_date || null,
+              delivery_method: transferOrder?.delivery_method || null,
+              fullfillment_location:
+                transferOrder?.fullfillment_location || null,
+              local_pickup: Boolean(transferOrder?.local_pickup),
+              shipping_address: transferOrder?.shipping_address || null,
+            }
+          : null,
+      );
+      setShippingChecklist(nextChecklist);
+      setPendingChecklistOrderId(selectedTransferOrderId);
+      if (resetChecklist) {
+        setCheckedChecklistKeys([]);
+      }
+
+      if (payload?.shipped === true && latestLabel?.label_url) {
+        const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
+        if (autoDownloadedLabelRef.current !== labelIdentity) {
+          autoDownloadedLabelRef.current = labelIdentity;
+          triggerLabelDownload(
+            latestLabel.label_url,
+            transferOrder?.order_number || selectedTransferOrderId,
+          );
+        }
+      }
+
+      if (openChecklist && hasChecklistItems && payload?.shipped !== true) {
+        setChecklistModalOpen(true);
+        setShippingModalRecord(null);
+        setShippingModalOpen(false);
+        return;
+      }
+
+      if (requiresLabelCreation && transferOrder?.id) {
+        const orderTotal =
+          scopedItems.reduce((sum, item) => {
+            const itemPrice = Number(item?.price);
+            if (!Number.isFinite(itemPrice)) return sum;
+            return sum + itemPrice;
+          }, 0) || 0;
+
+        setChecklistModalOpen(false);
+        setShippingModalRecord({
+          ...transferOrder,
+          order_total: orderTotal,
+          items: scopedItems,
+        });
+        setShippingModalOpen(true);
+        message.warning(tOrders("messages.transferLabelRequired"));
+      } else {
+        setShippingModalRecord(null);
+        setShippingModalOpen(false);
+        if (payload?.shipped === true) {
+          setChecklistModalOpen(false);
+        }
+      }
+    },
+    [message, tOrders, triggerLabelDownload],
+  );
 
   const handleSearch = useCallback(
     async (rawTransferOrderId) => {
@@ -246,70 +373,22 @@ export default function TransferShippedPrinterSearchPage() {
           transfer_order_id: nextTransferOrderId,
         });
         const payload = response?.data || {};
-        const transferOrder = payload?.transfer_order || null;
-        const scopedItems = Array.isArray(payload?.items) ? payload.items : [];
-        const requiresLabelCreation = payload?.requires_label_creation === true;
-        const latestLabel = payload?.transfer_label || null;
-
-        setItems(scopedItems);
-        setTransferLabel(latestLabel);
-        setOrderNumber(transferOrder?.order_number || "");
-        setTransferOrderId(nextTransferOrderId);
-        setOrderSummary(
-          transferOrder
-            ? {
-                id: transferOrder?.id || null,
-                order_number: transferOrder?.order_number || null,
-                bill_to_name: transferOrder?.bill_to_name || null,
-                status: transferOrder?.order_status || null,
-                currency: transferOrder?.currency || "USD",
-                barcode_url: transferOrder?.barcode_url || null,
-                order_date: transferOrder?.order_date || null,
-                delivery_method: transferOrder?.delivery_method || null,
-                fullfillment_location:
-                  transferOrder?.fullfillment_location || null,
-                local_pickup: Boolean(transferOrder?.local_pickup),
-                shipping_address: transferOrder?.shipping_address || null,
-              }
-            : null,
-        );
-
-        if (payload?.shipped === true && latestLabel?.label_url) {
-          const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
-          if (autoDownloadedLabelRef.current !== labelIdentity) {
-            autoDownloadedLabelRef.current = labelIdentity;
-            triggerLabelDownload(
-              latestLabel.label_url,
-              transferOrder?.order_number || nextTransferOrderId,
-            );
-          }
-        }
-
-        if (requiresLabelCreation && transferOrder?.id) {
-          const orderTotal =
-            scopedItems.reduce((sum, item) => {
-              const itemPrice = Number(item?.price);
-              if (!Number.isFinite(itemPrice)) return sum;
-              return sum + itemPrice;
-            }, 0) || 0;
-
-          setShippingModalRecord({
-            ...transferOrder,
-            order_total: orderTotal,
-            items: scopedItems,
-          });
-          setShippingModalOpen(true);
-          message.warning(tOrders("messages.transferLabelRequired"));
-        } else {
-          setShippingModalRecord(null);
-          setShippingModalOpen(false);
-        }
+        applyShipmentPayload({
+          payload,
+          selectedTransferOrderId: nextTransferOrderId,
+          resetChecklist: true,
+          openChecklist: payload?.requires_checklist === true,
+        });
       } catch (error) {
         setItems([]);
         setOrderSummary(null);
         setTransferLabel(null);
         setShippingModalRecord(null);
         setShippingModalOpen(false);
+        setChecklistModalOpen(false);
+        setShippingChecklist({ designs: [], without_design_items: [] });
+        setCheckedChecklistKeys([]);
+        setPendingChecklistOrderId("");
         message.error(
           error?.response?.data?.error?.message ||
             tOrders("messages.loadListError"),
@@ -318,7 +397,7 @@ export default function TransferShippedPrinterSearchPage() {
         setSearching(false);
       }
     },
-    [message, orderNumber, tOrders, transferOrderId, triggerLabelDownload],
+    [applyShipmentPayload, message, orderNumber, tOrders, transferOrderId],
   );
 
   const confirmShipSearch = useCallback(
@@ -342,7 +421,64 @@ export default function TransferShippedPrinterSearchPage() {
     }
     setShippingModalOpen(false);
     setShippingModalRecord(null);
-  }, []);
+    if (checklistRequiredKeys.length) {
+      setChecklistModalOpen(true);
+    }
+  }, [checklistRequiredKeys.length]);
+
+  const handleChecklistConfirm = useCallback(async () => {
+    const nextTransferOrderId = String(
+      pendingChecklistOrderId || transferOrderId || orderNumber,
+    ).trim();
+    if (!nextTransferOrderId) {
+      message.warning(tOrders("filters.searchOrderNumber"));
+      return;
+    }
+    if (!allChecklistItemsChecked) {
+      message.warning("Please complete the shipping checklist.");
+      return;
+    }
+
+    const checkedDesignIds = checkedChecklistKeys
+      .filter((key) => key.startsWith("design:"))
+      .map((key) => key.replace("design:", ""));
+    const checkedWithoutDesignItemIds = checkedChecklistKeys
+      .filter((key) => key.startsWith("without-design-item:"))
+      .map((key) => key.replace("without-design-item:", ""));
+
+    setConfirmingChecklist(true);
+    try {
+      const response = await TransferOrdersAPI.shipWorkerItems({
+        transfer_order_id: nextTransferOrderId,
+        confirm_checklist: true,
+        checked_design_ids: checkedDesignIds,
+        checked_without_design_item_ids: checkedWithoutDesignItemIds,
+      });
+      const payload = response?.data || {};
+      applyShipmentPayload({
+        payload,
+        selectedTransferOrderId: nextTransferOrderId,
+        resetChecklist: false,
+        openChecklist: false,
+      });
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          tOrders("messages.loadListError"),
+      );
+    } finally {
+      setConfirmingChecklist(false);
+    }
+  }, [
+    allChecklistItemsChecked,
+    applyShipmentPayload,
+    checkedChecklistKeys,
+    message,
+    orderNumber,
+    pendingChecklistOrderId,
+    tOrders,
+    transferOrderId,
+  ]);
 
   const handleVoidLabel = useCallback(async () => {
     const transferOrderId = orderSummary?.id || shippingModalRecord?.id;
@@ -588,6 +724,145 @@ export default function TransferShippedPrinterSearchPage() {
           <Empty description={tOrders("messages.noItems")} />
         ) : null}
       </div>
+      <Modal
+        open={checklistModalOpen}
+        title="Shipping checklist"
+        okText="Confirm shipment"
+        cancelText={tCommonActions("cancel")}
+        okButtonProps={{
+          disabled: !allChecklistItemsChecked,
+          loading: confirmingChecklist,
+        }}
+        onOk={handleChecklistConfirm}
+        onCancel={() => setChecklistModalOpen(false)}
+        width={760}
+        destroyOnClose={false}
+      >
+        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <Alert
+            type="info"
+            showIcon
+            message="Check every design and without-design item before shipping this transfer order."
+          />
+
+          <Checkbox.Group
+            value={checkedChecklistKeys}
+            onChange={(values) => setCheckedChecklistKeys(values)}
+            style={{ width: "100%" }}
+          >
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              <div>
+                <Typography.Title level={5} style={{ marginTop: 0 }}>
+                  Designs
+                </Typography.Title>
+                {shippingChecklist.designs.length ? (
+                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                    {shippingChecklist.designs.map((design) => {
+                      const designKey = `design:${design?.id}`;
+                      return (
+                        <div
+                          key={designKey}
+                          className="flex items-center gap-3 px-3 py-2"
+                        >
+                          <Checkbox value={designKey} />
+                          <div className="h-14 w-14 flex-none overflow-hidden rounded border border-slate-100 bg-slate-50">
+                            {design?.design_url ? (
+                              <GuardedPreviewImage
+                                src={design.design_url}
+                                alt={`shipping-checklist-design-${design?.id}`}
+                                width={56}
+                                openLabel={tCommonActions("open")}
+                                preparingText={tDetail("preview.preparing")}
+                                emptyText={tDetail("preview.empty")}
+                                preview
+                              />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <Typography.Text strong className="block truncate">
+                              {design?.name ||
+                                design?.sub_category_name ||
+                                "Design"}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" className="block">
+                              {design?.sub_category_name || "-"}
+                            </Typography.Text>
+                          </div>
+                          <div className="flex flex-none flex-wrap justify-end gap-2">
+                            <Tag color="blue">Qty: {design?.quantity ?? "-"}</Tag>
+                            <Tag>
+                              {formatAmount(design?.width)}" x{" "}
+                              {formatAmount(design?.height)}"
+                            </Tag>
+                            <Tag color={STATUS_COLORS[design?.status] || "default"}>
+                              {design?.status || "-"}
+                            </Tag>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No designs" />
+                )}
+              </div>
+
+              <Divider style={{ margin: 0 }} />
+
+              <div>
+                <Typography.Title level={5} style={{ marginTop: 0 }}>
+                  Without-design items
+                </Typography.Title>
+                {shippingChecklist.without_design_items.length ? (
+                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                    {shippingChecklist.without_design_items.map((item) => {
+                      const itemKey = `without-design-item:${item?.id}`;
+                      const optionText = getChecklistOptionText(item);
+                      return (
+                        <div
+                          key={itemKey}
+                          className="flex items-center gap-3 px-3 py-2"
+                        >
+                          <Checkbox value={itemKey} />
+                          <div className="min-w-0 flex-1">
+                            <Typography.Text strong className="block truncate">
+                              {item?.name ||
+                                item?.transfer_product?.name ||
+                                "Without-design item"}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" className="block">
+                              {item?.transfer_product?.name || "-"}
+                            </Typography.Text>
+                            {optionText ? (
+                              <Typography.Text type="secondary" className="block truncate">
+                                {optionText}
+                              </Typography.Text>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-none flex-wrap justify-end gap-2">
+                            <Tag color="blue">Qty: {item?.quantity ?? "-"}</Tag>
+                            <Tag color="green">
+                              {formatAmount(item?.price)}
+                            </Tag>
+                            <Tag color={STATUS_COLORS[item?.status] || "default"}>
+                              {item?.status || "-"}
+                            </Tag>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No without-design items"
+                  />
+                )}
+              </div>
+            </Space>
+          </Checkbox.Group>
+        </Space>
+      </Modal>
       <TransferShippingRatesModal
         open={shippingModalOpen}
         transferOrder={shippingModalRecord}
