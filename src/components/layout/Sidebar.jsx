@@ -858,6 +858,15 @@ export default function Sidebar({ collapsed }) {
                       ),
                     },
                     {
+                      key: "transfer-order-pool-cancelled",
+                      icon: <CloseCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/transfer-orders/pool/cancelled">
+                          {tSidebar("order.transferOrderPoolCancelled")}
+                        </Link>
+                      ),
+                    },
+                    {
                       key: "transfer-order-list",
                       icon: <ApartmentOutlined />,
                       label: tSidebar("order.transferOrdersList"),

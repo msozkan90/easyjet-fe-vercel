@@ -1764,6 +1764,8 @@
         "color": "Renk",
         "poolStatus": "Pool Durumu",
         "linkedTransferOrders": "Bağlı Transfer Siparişleri",
+        "cancelledAt": "İptal Tarihi",
+        "cancelledBy": "İptal Eden",
         "actions": "İşlemler"
       },
       "filters": {
@@ -3024,6 +3026,7 @@
         "preOrders": "Ön Siparişler",
         "transferOrders": "Transfer Siparişler",
         "transferOrderPool": "Transfer Sipariş Havuzu",
+        "transferOrderPoolCancelled": "İptal Edilen Havuz Kalemleri",
         "transferOrdersList": "Transfer Siparişler Listesi",
         "transferPrintedOrder": "Yazdırılmış Transfer Sipariş",
         "transferShippedOrder": "Kargolanmış Transfer Sipariş",
