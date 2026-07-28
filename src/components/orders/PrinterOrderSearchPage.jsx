@@ -197,7 +197,14 @@ const ItemDesignPreview = ({
   );
 };
 
-const OrderItemCard = ({ item, positionMap, tOrders, tDetail, fallbackText }) => {
+const OrderItemCard = ({
+  item,
+  positionMap,
+  tOrders,
+  tDetail,
+  tCommonActions,
+  fallbackText,
+}) => {
   const options = Array.isArray(item?.options) ? item.options : [];
   const designs = Array.isArray(item?.designs) ? item.designs : [];
   const statusKey = item?.status || "";
@@ -642,19 +649,23 @@ export default function PrinterOrderSearchPage({
 
         <Card className="rounded-2xl">
           <div className="space-y-4">
-            <Input.Search
-              allowClear
-              enterButton={
-                <Button type="primary" loading={isReportScrapeMode ? searching : completing}>
-                  {tCommonActions("search")}
-                </Button>
-              }
-              placeholder={tOrders("filters.searchOrderNumber")}
-              value={orderNumber}
-              onChange={(event) => setOrderNumber(event.target.value)}
-              onSearch={handleSearchSubmit}
-              onPaste={handlePaste}
-            />
+            <Space.Compact style={{ width: "100%" }}>
+              <Input
+                allowClear
+                placeholder={tOrders("filters.searchOrderNumber")}
+                value={orderNumber}
+                onChange={(event) => setOrderNumber(event.target.value)}
+                onPressEnter={() => handleSearchSubmit(orderNumber)}
+                onPaste={handlePaste}
+              />
+              <Button
+                type="primary"
+                loading={isReportScrapeMode ? searching : completing}
+                onClick={() => handleSearchSubmit(orderNumber)}
+              >
+                {tCommonActions("search")}
+              </Button>
+            </Space.Compact>
 
             {orderSummary?.order_number ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -718,6 +729,7 @@ export default function PrinterOrderSearchPage({
                   positionMap={positionMap}
                   tOrders={tOrders}
                   tDetail={tDetail}
+                  tCommonActions={tCommonActions}
                   fallbackText={fallbackText}
                 />
               );
