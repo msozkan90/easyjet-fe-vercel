@@ -8,6 +8,7 @@ import {
   Card,
   Empty,
   Input,
+  Space,
   Spin,
   Tag,
   Typography,
@@ -42,7 +43,7 @@ const formatAmount = (value, fallback = "-") => {
   });
 };
 
-const OrderItemCard = ({ item, tOrders }) => {
+const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
   const options = Array.isArray(item?.options) ? item.options : [];
   const statusKey = item?.status || "";
   const statusLabel = statusKey
@@ -213,19 +214,19 @@ export default function ShippedOrderPrinterSearchPage() {
         </Typography.Title>
 
         <Card className="rounded-2xl">
-          <Input.Search
-            allowClear
-            enterButton={
-              <Button type="primary" loading={searching}>
-                {tCommonActions("search")}
-              </Button>
-            }
-            placeholder={tOrders("filters.searchOrderNumber")}
-            value={orderNumber}
-            onChange={(event) => setOrderNumber(event.target.value)}
-            onSearch={handleSearch}
-            onPaste={handlePaste}
-          />
+          <Space.Compact style={{ width: "100%" }}>
+            <Input
+              allowClear
+              placeholder={tOrders("filters.searchOrderNumber")}
+              value={orderNumber}
+              onChange={(event) => setOrderNumber(event.target.value)}
+              onPressEnter={() => handleSearch(orderNumber)}
+              onPaste={handlePaste}
+            />
+            <Button type="primary" loading={searching} onClick={() => handleSearch(orderNumber)}>
+              {tCommonActions("search")}
+            </Button>
+          </Space.Compact>
         </Card>
 
         {downloadingLabel ? (
@@ -245,7 +246,12 @@ export default function ShippedOrderPrinterSearchPage() {
         {items.length ? (
           <div className="grid gap-6">
             {items.map((item) => (
-              <OrderItemCard key={item?.id} item={item} tOrders={tOrders} />
+              <OrderItemCard
+                key={item?.id}
+                item={item}
+                tOrders={tOrders}
+                tCommonActions={tCommonActions}
+              />
             ))}
           </div>
         ) : null}
