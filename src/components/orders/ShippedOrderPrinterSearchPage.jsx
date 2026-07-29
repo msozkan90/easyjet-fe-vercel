@@ -17,7 +17,7 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-import { downloadOrderLabel } from "@/utils/orderItemDesignDownloads";
+import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 
 const STATUS_COLORS = {
   newOrder: "geekblue",
@@ -51,7 +51,10 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
     : tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      bodyStyle={{ padding: 20 }}
+    >
       <div className="flex flex-col gap-4 lg:flex-row">
         <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
           <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
@@ -75,12 +78,16 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
             <Typography.Title level={5} style={{ margin: 0 }}>
               {item?.name || tOrders("columns.item")}
             </Typography.Title>
-            <Tag color="geekblue">SKU: {item?.sku || tOrders("common.none")}</Tag>
+            <Tag color="geekblue">
+              SKU: {item?.sku || tOrders("common.none")}
+            </Tag>
             <Tag color="gold">
-              {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
+              {tOrders("columns.quantity")}:{" "}
+              {item?.quantity ?? tOrders("common.none")}
             </Tag>
             <Tag color="green">
-              {tOrders("columns.price")}: {formatAmount(item?.price || item?.unit_price)}
+              {tOrders("columns.price")}:{" "}
+              {formatAmount(item?.price || item?.unit_price)}
             </Tag>
             <Tag color={STATUS_COLORS[statusKey] || "default"}>
               {tOrders("columns.status")}: {statusLabel}
@@ -89,21 +96,35 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.product")}</Typography.Text>
-              <div className="font-medium">{item?.product?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.product")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.product?.name || tOrders("common.none")}
+              </div>
             </div>
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.size")}</Typography.Text>
-              <div className="font-medium">{item?.size?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.size")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.size?.name || tOrders("common.none")}
+              </div>
             </div>
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.color")}</Typography.Text>
-              <div className="font-medium">{item?.color?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.color")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.color?.name || tOrders("common.none")}
+              </div>
             </div>
           </div>
 
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.options")}</Typography.Text>
+            <Typography.Text type="secondary">
+              {tOrders("columns.options")}
+            </Typography.Text>
             {options.length ? (
               <div className="mt-2 flex flex-wrap gap-2">
                 {options.map((option, index) => (
@@ -111,7 +132,8 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
                     key={`${option?.name || "option"}-${index}`}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
                   >
-                    {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
+                    {option?.name || tOrders("common.none")}:{" "}
+                    {option?.value || tOrders("common.none")}
                   </span>
                 ))}
               </div>
@@ -121,8 +143,12 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
           </div>
 
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.notes")}</Typography.Text>
-            <div className="mt-1 text-sm">{item?.notes || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.notes")}
+            </Typography.Text>
+            <div className="mt-1 text-sm">
+              {item?.notes || tOrders("common.none")}
+            </div>
           </div>
         </div>
       </div>
@@ -138,7 +164,7 @@ export default function ShippedOrderPrinterSearchPage() {
 
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
-  const [downloadingLabel, setDownloadingLabel] = useState(false);
+  const [printingLabel, setPrintingLabel] = useState(false);
   const [searched, setSearched] = useState(false);
   const [order, setOrder] = useState(null);
 
@@ -169,29 +195,34 @@ export default function ShippedOrderPrinterSearchPage() {
         setOrder(responseOrder);
 
         if (labelUrl) {
-          setDownloadingLabel(true);
+          setPrintingLabel(true);
           try {
-            const downloadResult = await downloadOrderLabel({
-              orderNumber: responseOrder?.order_number || nextOrderNumber,
+            const printResult = await printOrderLabel({
               labelUrl,
             });
-            if (downloadResult?.downloaded) {
-              message.success("Label downloaded.");
+            if (printResult?.printed) {
+              message.success(tOrders("scanner.messages.labelPrintOpened"));
             }
-          } catch (downloadError) {
-            message.error(downloadError?.message || "Label could not be downloaded.");
+          } catch (printError) {
+            message.error(
+              printError?.message ||
+                tOrders("scanner.messages.labelPrintError"),
+            );
           } finally {
-            setDownloadingLabel(false);
+            setPrintingLabel(false);
           }
         }
       } catch (error) {
         setOrder(null);
-        message.error(error?.response?.data?.error?.message || tDetail("messages.loadOrderError"));
+        message.error(
+          error?.response?.data?.error?.message ||
+            tDetail("messages.loadOrderError"),
+        );
       } finally {
         setSearching(false);
       }
     },
-    [message, orderNumber, tDetail, tOrders]
+    [message, orderNumber, tDetail, tOrders],
   );
 
   const handlePaste = useCallback(
@@ -203,7 +234,7 @@ export default function ShippedOrderPrinterSearchPage() {
       setOrderNumber(normalizedOrderNumber);
       handleSearch(normalizedOrderNumber);
     },
-    [handleSearch]
+    [handleSearch],
   );
 
   return (
@@ -223,17 +254,21 @@ export default function ShippedOrderPrinterSearchPage() {
               onPressEnter={() => handleSearch(orderNumber)}
               onPaste={handlePaste}
             />
-            <Button type="primary" loading={searching} onClick={() => handleSearch(orderNumber)}>
+            <Button
+              type="primary"
+              loading={searching}
+              onClick={() => handleSearch(orderNumber)}
+            >
               {tCommonActions("search")}
             </Button>
           </Space.Compact>
         </Card>
 
-        {downloadingLabel ? (
+        {printingLabel ? (
           <Alert
             type="info"
             showIcon
-            message="Shipping label is being prepared for download."
+            message={tOrders("scanner.messages.labelPrintPreparing")}
           />
         ) : null}
 

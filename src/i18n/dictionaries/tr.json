@@ -2509,7 +2509,10 @@
           "completeWithScrapSuccess": "Sipariş ürünleri tamamlandı ve fire kaydı oluşturuldu.",
           "designPreparing": "Tasarım dosyaları indirilmeye hazırlanıyor.",
           "designDownloadSuccess": "Tasarım dosyaları indirildi.",
-          "designDownloadError": "Tasarım dosyaları indirilemedi."
+          "designDownloadError": "Tasarım dosyaları indirilemedi.",
+          "labelPrintPreparing": "Kargo etiketi yazdırma için hazırlanıyor.",
+          "labelPrintOpened": "Kargo etiketi yazdırma penceresi açıldı.",
+          "labelPrintError": "Kargo etiketi yazdırılamadı."
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",
@@ -2748,18 +2751,23 @@
           "category": "Kategori",
           "subCategory": "Alt Kategori",
           "designs": "Tasarımlar",
+          "downloaded": "İndirildi",
           "status": "Durum",
           "createdAt": "Oluşturulma",
+          "downloadedAt": "İndirilme Tarihi",
           "actions": "İşlemler",
           "designName": "Tasarım Adı"
         },
         "actions": {
           "addDesign": "Tasarım Ekle",
-          "downloadPdf": "PDF İndir"
+          "downloadPdf": "PDF İndir",
+          "downloadDesigns": "Tasarımları İndir"
         },
         "status": {
           "active": "Aktif",
-          "inactive": "Pasif"
+          "inactive": "Pasif",
+          "uploaded": "Yüklendi",
+          "downloaded": "İndirildi"
         },
         "empty": {
           "pdfs": "İndirilen PDF bulunamadı.",
@@ -2784,6 +2792,9 @@
           "deleteFailed": "PDF kaydı silinemedi.",
           "designDeleted": "Tasarım silindi.",
           "designDeleteFailed": "Tasarım silinemedi.",
+          "designDownloaded": "Tasarım indirildi.",
+          "designsDownloaded": "Tasarımlar indirildi.",
+          "designDownloadFailed": "Tasarımlar indirilemedi.",
           "uploadQueued": "{count} tasarım yüklemesi sıraya alındı."
         },
         "uploadQueue": {

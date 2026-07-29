@@ -2707,7 +2707,10 @@
           "completeWithScrapSuccess": "Order items completed and scrap recorded.",
           "designPreparing": "Design files are being prepared for download.",
           "designDownloadSuccess": "Design files downloaded.",
-          "designDownloadError": "Design files could not be downloaded."
+          "designDownloadError": "Design files could not be downloaded.",
+          "labelPrintPreparing": "Shipping label is being prepared for printing.",
+          "labelPrintOpened": "Shipping label print dialog opened.",
+          "labelPrintError": "Shipping label could not be printed."
         },
         "scrap": {
           "title": "Record Fire / Scrap",
@@ -2946,18 +2949,23 @@
           "category": "Category",
           "subCategory": "Sub Category",
           "designs": "Designs",
+          "downloaded": "Downloaded",
           "status": "Status",
           "createdAt": "Created At",
+          "downloadedAt": "Downloaded At",
           "actions": "Actions",
           "designName": "Design Name"
         },
         "actions": {
           "addDesign": "Add Design",
-          "downloadPdf": "Download PDF"
+          "downloadPdf": "Download PDF",
+          "downloadDesigns": "Download Designs"
         },
         "status": {
           "active": "Active",
-          "inactive": "Inactive"
+          "inactive": "Inactive",
+          "uploaded": "Uploaded",
+          "downloaded": "Downloaded"
         },
         "empty": {
           "pdfs": "No downloaded PDFs found.",
@@ -2982,6 +2990,9 @@
           "deleteFailed": "PDF record could not be deleted.",
           "designDeleted": "Design deleted.",
           "designDeleteFailed": "Design could not be deleted.",
+          "designDownloaded": "Design downloaded.",
+          "designsDownloaded": "Designs downloaded.",
+          "designDownloadFailed": "Designs could not be downloaded.",
           "uploadQueued": "{count} design upload queued."
         },
         "uploadQueue": {

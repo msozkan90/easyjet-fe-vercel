@@ -88,16 +88,9 @@ const fetchLabelFile = async (url) => {
     return proxyResponse.blob();
   }
 
-  const response = await fetch(url, {
-    method: "GET",
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Label file could not be downloaded: ${response.status}`);
-  }
-
-  return response.blob();
+  throw new Error(
+    `Label file could not be downloaded: ${proxyResponse.status}`,
+  );
 };
 
 const normalizeDesignList = (designs) => {
@@ -125,7 +118,7 @@ export const downloadOrderItemDesigns = async ({ orderNumber, designs }) => {
       const filename = ensureUniqueFilename(rawName, seenNames);
       const blob = await fetchDesignFile(url);
       return { name: filename, blob };
-    })
+    }),
   );
 
   if (files.length === 1) {
@@ -139,7 +132,7 @@ export const downloadOrderItemDesigns = async ({ orderNumber, designs }) => {
 
   const zipBlob = await createStoredZipBlob(files);
   const zipName = `${sanitizeFilename(orderNumber) || "order"}-${dayjs().format(
-    "MM-DD-YYYY"
+    "MM-DD-YYYY",
   )}.zip`;
   saveBlobAsFile(zipBlob, zipName);
 
@@ -156,7 +149,7 @@ export const downloadOrderLabel = async ({ orderNumber, labelUrl }) => {
   }
 
   const fallbackName = `${sanitizeFilename(orderNumber) || "order"}-label-${dayjs().format(
-    "MM-DD-YYYY"
+    "MM-DD-YYYY",
   )}`;
   const rawName = extractLabelFilenameFromUrl(labelUrl, fallbackName);
   const filename = rawName.includes(".") ? rawName : `${rawName}.jpg`;
@@ -168,4 +161,100 @@ export const downloadOrderLabel = async ({ orderNumber, labelUrl }) => {
     downloaded: true,
     filename,
   };
+};
+
+const createHiddenPrintFrame = () => {
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "1px";
+  iframe.style.height = "1px";
+  iframe.style.border = "0";
+  iframe.style.opacity = "0";
+  iframe.style.pointerEvents = "none";
+  document.body.appendChild(iframe);
+  return iframe;
+};
+
+export const printOrderLabel = async ({ labelUrl }) => {
+  if (!labelUrl) {
+    return { printed: false };
+  }
+
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    throw new Error("Label can only be printed in the browser.");
+  }
+
+  const blob = await fetchLabelFile(labelUrl);
+  const objectUrl = URL.createObjectURL(blob);
+
+  await new Promise((resolve, reject) => {
+    const iframe = createHiddenPrintFrame();
+    let settled = false;
+    let cleanupStarted = false;
+
+    const cleanup = () => {
+      if (cleanupStarted) return;
+      cleanupStarted = true;
+      iframe.remove();
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    const resolveOnce = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+
+    const rejectOnce = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+
+    const loadTimeout = window.setTimeout(() => {
+      rejectOnce(new Error("Label file could not be prepared for printing."));
+    }, 20000);
+
+    iframe.onload = () => {
+      window.clearTimeout(loadTimeout);
+      window.setTimeout(() => {
+        try {
+          const frameWindow = iframe.contentWindow;
+          if (!frameWindow) {
+            throw new Error("Label print window could not be opened.");
+          }
+
+          const cleanupAfterPrint = () => {
+            frameWindow.removeEventListener?.("afterprint", cleanupAfterPrint);
+            window.setTimeout(cleanup, 1000);
+          };
+
+          frameWindow.addEventListener?.("afterprint", cleanupAfterPrint);
+          frameWindow.focus();
+          frameWindow.print();
+          resolveOnce();
+          window.setTimeout(cleanup, 60000);
+        } catch (error) {
+          rejectOnce(
+            error instanceof Error
+              ? error
+              : new Error("Label could not be printed."),
+          );
+        }
+      }, 250);
+    };
+
+    iframe.onerror = () => {
+      window.clearTimeout(loadTimeout);
+      rejectOnce(new Error("Label file could not be loaded for printing."));
+    };
+
+    iframe.src = objectUrl;
+  });
+
+  return { printed: true };
 };

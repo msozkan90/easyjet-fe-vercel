@@ -18,6 +18,7 @@ import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
+import OrderDesignModal from "@/components/modals/OrderDesignModal";
 import OrdersStatusListPage from "../OrdersStatusListPage";
 
 const PENDING_STATUSES = ["newOrder", "waitingForDesign"];
@@ -60,6 +61,8 @@ export default function PendingOrdersPage() {
   const [editingDetail, setEditingDetail] = useState(null);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
+  const [designModalOpen, setDesignModalOpen] = useState(false);
+  const [designModalRecord, setDesignModalRecord] = useState(null);
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
     if (!rowId || !action) return;
@@ -78,7 +81,7 @@ export default function PendingOrdersPage() {
 
   const isRowActionLoading = useCallback(
     (rowId, action) => Boolean(rowActionLoading?.[`${rowId}-${action}`]),
-    [rowActionLoading]
+    [rowActionLoading],
   );
 
   const hasDesignAsset = useCallback((record) => {
@@ -104,7 +107,7 @@ export default function PendingOrdersPage() {
       if (!relatedItems.length) return false;
       return relatedItems.every((item) => hasDesignAsset(item));
     },
-    [hasDesignAsset]
+    [hasDesignAsset],
   );
 
   const handleShippingModalClose = useCallback(() => {
@@ -123,6 +126,22 @@ export default function PendingOrdersPage() {
     setShippingModalOpen(true);
   }, []);
 
+  const handleOpenDesignModal = useCallback((record) => {
+    if (!record?.id) return;
+    setDesignModalRecord(record);
+    setDesignModalOpen(true);
+  }, []);
+
+  const handleDesignModalClose = useCallback(() => {
+    setDesignModalOpen(false);
+    setDesignModalRecord(null);
+  }, []);
+
+  const handleDesignSaved = useCallback(() => {
+    handleDesignModalClose();
+    tableRef.current?.reload?.();
+  }, [handleDesignModalClose]);
+
   const setAddressFormValues = useCallback(
     (orderData = {}) => {
       editForm.setFieldsValue({
@@ -136,7 +155,7 @@ export default function PendingOrdersPage() {
         ship_to_country: orderData?.ship_to_country || "",
       });
     },
-    [editForm]
+    [editForm],
   );
 
   const handleEditModalClose = useCallback(() => {
@@ -176,7 +195,7 @@ export default function PendingOrdersPage() {
         editForm.setFieldsValue(updates);
       }
     },
-    [editForm]
+    [editForm],
   );
 
   const handleOpenAddressEditor = useCallback(
@@ -201,14 +220,14 @@ export default function PendingOrdersPage() {
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message ||
-            t("messages.addressLoadError")
+            t("messages.addressLoadError"),
         );
         handleEditModalClose();
       } finally {
         setEditModalLoading(false);
       }
     },
-    [handleEditModalClose, message, setAddressFormValues, t]
+    [handleEditModalClose, message, setAddressFormValues, t],
   );
 
   const handleAddressSave = useCallback(async () => {
@@ -259,7 +278,7 @@ export default function PendingOrdersPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          t("messages.addressUpdateError")
+          t("messages.addressUpdateError"),
       );
     } finally {
       setEditModalSaving(false);
@@ -294,18 +313,18 @@ export default function PendingOrdersPage() {
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message ||
-            t("messages.statusUpdateError")
+            t("messages.statusUpdateError"),
         );
       } finally {
         setRowActionLoadingState(record.id, actionKey, false);
       }
     },
-    [message, setRowActionLoadingState, t]
+    [message, setRowActionLoadingState, t],
   );
 
   const editingOrder = useMemo(
     () => editingDetail?.order ?? editingRecord?.order ?? null,
-    [editingDetail, editingRecord]
+    [editingDetail, editingRecord],
   );
 
   const columnsBuilder = useCallback(
@@ -354,10 +373,6 @@ export default function PendingOrdersPage() {
             record?.hasImage ??
             record?.has_image ??
             Boolean(record?.designs?.length);
-          let designPageHref = "";
-          if (canShowDesignAction) {
-            designPageHref = `/dashboard/orders/design/${rowId}`;
-          }
           const detailHref = canViewDetail
             ? `/dashboard/order/detail/${orderNumber}`
             : "";
@@ -398,9 +413,7 @@ export default function PendingOrdersPage() {
                       color: "#fff",
                       borderColor: hasDesignImage ? "#808080" : "#1677ff",
                     }}
-                    href={designPageHref}
-                    target="_blank"
-                    rel="noreferrer"
+                    onClick={() => handleOpenDesignModal(record)}
                   />
                 </Popover>
               ) : null}
@@ -488,17 +501,18 @@ export default function PendingOrdersPage() {
     ],
     [
       handleOpenAddressEditor,
+      handleOpenDesignModal,
       handleOpenShippingModal,
       handleStatusUpdate,
       isRowActionLoading,
       shouldShowShippingRates,
       t,
-    ]
+    ],
   );
 
   const formatDateTime = useCallback(
     (value) => (value ? moment(value).format("LLL") : t("common.none")),
-    [t]
+    [t],
   );
 
   return (
@@ -528,6 +542,13 @@ export default function PendingOrdersPage() {
         editingOrder={editingOrder}
         onAddressSelect={handleAddressSelect}
         orderDateLabel={formatDateTime(editingOrder?.order_date)}
+        zIndex={1500}
+      />
+      <OrderDesignModal
+        open={designModalOpen}
+        orderItemId={designModalRecord?.id}
+        onCancel={handleDesignModalClose}
+        onSaved={handleDesignSaved}
         zIndex={1500}
       />
     </>

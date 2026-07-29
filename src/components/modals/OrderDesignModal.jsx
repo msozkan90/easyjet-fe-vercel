@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   App as AntdApp,
@@ -8,9 +8,9 @@ import {
   Card,
   Empty,
   Input,
+  Modal,
   Popconfirm,
   Select,
-  Space,
   Spin,
   Switch,
   Tag,
@@ -18,10 +18,9 @@ import {
   Upload,
 } from "antd";
 import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
-import { useParams } from "next/navigation";
-import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import {
@@ -73,13 +72,62 @@ const fileToDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
-export default function OrderDesignPage() {
+const normalizeDesignFilesForSnapshot = (designFiles = {}) =>
+  Object.keys(designFiles)
+    .sort()
+    .reduce((acc, positionId) => {
+      acc[positionId] = extractUploadFileList(designFiles[positionId]).map(
+        (file) => ({
+          name: file?.name || "",
+          size: file?.size ?? file?.originFileObj?.size ?? null,
+          type: file?.type ?? file?.originFileObj?.type ?? "",
+          url: file?.url || "",
+          hasNewFile: Boolean(file?.originFileObj),
+        }),
+      );
+      return acc;
+    }, {});
+
+const createDesignSnapshot = ({
+  note,
+  selectedPositionIds,
+  designFiles,
+  isSubCategory,
+}) =>
+  JSON.stringify({
+    note: note || "",
+    isSubCategory: Boolean(isSubCategory),
+    selectedPositionIds: [...(selectedPositionIds || [])].map(String).sort(),
+    designFiles: normalizeDesignFilesForSnapshot(designFiles),
+  });
+
+const markUploadFilesAsReady = (fileList = []) =>
+  fileList.map((file) => {
+    if (!file?.originFileObj) {
+      return file;
+    }
+    return {
+      ...file,
+      status: "done",
+      percent: 100,
+    };
+  });
+
+export default function OrderDesignModal({
+  open,
+  orderItemId,
+  onCancel,
+  onSaved,
+  zIndex = 1300,
+}) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders.design");
   const tOrders = useTranslations("dashboard.orders");
   const tCommon = useTranslations("common");
-  const params = useParams();
-  const itemId = params?.orderId;
+  const { confirmIfDirty, unsavedChangesModalContextHolder } =
+    useUnsavedChangesPrompt();
+  const itemId = orderItemId ? String(orderItemId) : "";
+  const initialSnapshotRef = useRef("");
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [orderLoading, setOrderLoading] = useState(false);
@@ -92,6 +140,23 @@ export default function OrderDesignPage() {
   const [saving, setSaving] = useState(false);
   const [shouldHydrateFromOrder, setShouldHydrateFromOrder] = useState(false);
   const [deletingDesignIds, setDeletingDesignIds] = useState({});
+  const [isDirty, setIsDirty] = useState(false);
+
+  const resetState = useCallback(() => {
+    setOrderDetail(null);
+    setOrderLoading(false);
+    setPositions([]);
+    setPositionsLoading(false);
+    setNote("");
+    setSelectedPositionIds([]);
+    setDesignFiles({});
+    setIsSubCategory(false);
+    setSaving(false);
+    setShouldHydrateFromOrder(false);
+    setDeletingDesignIds({});
+    setIsDirty(false);
+    initialSnapshotRef.current = "";
+  }, []);
 
   const loadOrderDetail = useCallback(
     async ({ hydrate = false, withLoading = true } = {}) => {
@@ -107,7 +172,7 @@ export default function OrderDesignPage() {
         }
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.loadOrderError")
+          error?.response?.data?.error?.message || t("messages.loadOrderError"),
         );
       } finally {
         if (withLoading) {
@@ -115,13 +180,17 @@ export default function OrderDesignPage() {
         }
       }
     },
-    [itemId, message, t]
+    [itemId, message, t],
   );
 
   useEffect(() => {
+    if (!open) {
+      resetState();
+      return;
+    }
     if (!itemId) return;
     loadOrderDetail({ hydrate: true });
-  }, [itemId, loadOrderDetail]);
+  }, [itemId, loadOrderDetail, open, resetState]);
 
   const existingDesigns = useMemo(() => {
     if (!Array.isArray(orderDetail?.designs)) return [];
@@ -141,12 +210,12 @@ export default function OrderDesignPage() {
       existingDesigns
         .filter((design) => Boolean(design?.design_url))
         .map((design) => String(design.product_position_id)),
-    [existingDesigns]
+    [existingDesigns],
   );
 
   const lockedPositionSet = useMemo(
     () => new Set(lockedPositionIds),
-    [lockedPositionIds]
+    [lockedPositionIds],
   );
 
   useEffect(() => {
@@ -159,14 +228,16 @@ export default function OrderDesignPage() {
       return;
     }
 
-    setNote(orderDetail?.notes || "");
-    setIsSubCategory(Boolean(orderDetail?.is_sub_category));
+    const nextNote = orderDetail?.notes || "";
+    const nextIsSubCategory = Boolean(orderDetail?.is_sub_category);
+    let nextSelectedPositionIds = [];
+    let nextDesignFiles = {};
+
     if (existingDesigns.length) {
-      const initialIds = existingDesigns.map((design) =>
-        String(design.product_position_id)
+      nextSelectedPositionIds = existingDesigns.map((design) =>
+        String(design.product_position_id),
       );
-      setSelectedPositionIds(initialIds);
-      const initialFiles = initialIds.reduce((acc, positionId) => {
+      nextDesignFiles = nextSelectedPositionIds.reduce((acc, positionId) => {
         const designInfo = existingDesignMap.get(positionId);
         const url = designInfo?.design_url;
         if (url) {
@@ -184,11 +255,19 @@ export default function OrderDesignPage() {
         }
         return acc;
       }, {});
-      setDesignFiles(initialFiles);
-    } else {
-      setSelectedPositionIds([]);
-      setDesignFiles({});
     }
+
+    setNote(nextNote);
+    setIsSubCategory(nextIsSubCategory);
+    setSelectedPositionIds(nextSelectedPositionIds);
+    setDesignFiles(nextDesignFiles);
+    initialSnapshotRef.current = createDesignSnapshot({
+      note: nextNote,
+      isSubCategory: nextIsSubCategory,
+      selectedPositionIds: nextSelectedPositionIds,
+      designFiles: nextDesignFiles,
+    });
+    setIsDirty(false);
     setShouldHydrateFromOrder(false);
   }, [
     existingDesignMap,
@@ -196,6 +275,26 @@ export default function OrderDesignPage() {
     orderDetail,
     shouldHydrateFromOrder,
     t,
+  ]);
+
+  useEffect(() => {
+    if (!open || !orderDetail || shouldHydrateFromOrder) return;
+    if (!initialSnapshotRef.current) return;
+    const currentSnapshot = createDesignSnapshot({
+      note,
+      isSubCategory,
+      selectedPositionIds,
+      designFiles,
+    });
+    setIsDirty(currentSnapshot !== initialSnapshotRef.current);
+  }, [
+    designFiles,
+    isSubCategory,
+    note,
+    open,
+    orderDetail,
+    selectedPositionIds,
+    shouldHydrateFromOrder,
   ]);
 
   const derivedProductId = useMemo(() => {
@@ -207,7 +306,7 @@ export default function OrderDesignPage() {
   }, [orderDetail]);
 
   useEffect(() => {
-    if (!derivedProductId) {
+    if (!open || !derivedProductId) {
       setPositions([]);
       return;
     }
@@ -226,7 +325,7 @@ export default function OrderDesignPage() {
         if (!active) return;
         message.error(
           error?.response?.data?.error?.message ||
-            t("messages.loadPositionsError")
+            t("messages.loadPositionsError"),
         );
       } finally {
         if (active) {
@@ -238,7 +337,7 @@ export default function OrderDesignPage() {
     return () => {
       active = false;
     };
-  }, [derivedProductId, message, t]);
+  }, [derivedProductId, message, open, t]);
 
   const positionMap = useMemo(() => {
     const map = new Map();
@@ -255,13 +354,13 @@ export default function OrderDesignPage() {
       selectedPositionIds
         .map((id) => positionMap.get(id))
         .filter((position) => Boolean(position)),
-    [positionMap, selectedPositionIds]
+    [positionMap, selectedPositionIds],
   );
 
   const handlePositionChange = useCallback(
     (values) => {
       const lockedRemoved = lockedPositionIds.filter(
-        (id) => !values.includes(id)
+        (id) => !values.includes(id),
       );
       if (lockedRemoved.length) {
         message.warning(t("positions.lockedSelectionWarning"));
@@ -278,7 +377,7 @@ export default function OrderDesignPage() {
         return next;
       });
     },
-    [lockedPositionIds, message, t]
+    [lockedPositionIds, message, t],
   );
 
   const renderPositionTag = useCallback(
@@ -296,7 +395,7 @@ export default function OrderDesignPage() {
         </Tag>
       );
     },
-    [lockedPositionSet]
+    [lockedPositionSet],
   );
 
   const enrichFileListWithPreview = useCallback(async (fileList = []) => {
@@ -314,21 +413,23 @@ export default function OrderDesignPage() {
         } catch {
           return file;
         }
-      })
+      }),
     );
     return mapped;
   }, []);
 
   const handleUploadChange = useCallback(
     (positionId, fileList) => {
-      enrichFileListWithPreview(fileList).then((processed) => {
-        setDesignFiles((prev) => ({
-          ...prev,
-          [positionId]: processed,
-        }));
-      });
+      enrichFileListWithPreview(markUploadFilesAsReady(fileList)).then(
+        (processed) => {
+          setDesignFiles((prev) => ({
+            ...prev,
+            [positionId]: processed,
+          }));
+        },
+      );
     },
-    [enrichFileListWithPreview]
+    [enrichFileListWithPreview],
   );
 
   const validateFile = useCallback(
@@ -345,13 +446,13 @@ export default function OrderDesignPage() {
       const sizeInMb = file.size / 1024 / 1024;
       if (sizeInMb > MAX_FILE_SIZE_MB) {
         message.error(
-          t("positions.invalidFileSize", { size: MAX_FILE_SIZE_MB })
+          t("positions.invalidFileSize", { size: MAX_FILE_SIZE_MB }),
         );
         return Upload.LIST_IGNORE;
       }
       return true;
     },
-    [message, t]
+    [message, t],
   );
 
   const canSave = Boolean(itemId && orderDetail?.id);
@@ -361,10 +462,6 @@ export default function OrderDesignPage() {
       message.error(t("messages.missingParams"));
       return;
     }
-    // if (selectedPositionIds.length === 0) {
-    //   message.error(t("positions.noSelectionError"));
-    //   return;
-    // }
     const hasMissingFile = selectedPositionIds.some((positionId) => {
       const fileList = extractUploadFileList(designFiles[positionId]);
       return fileList.length === 0;
@@ -379,25 +476,17 @@ export default function OrderDesignPage() {
       return fileList.some((file) => Boolean(file.originFileObj));
     });
 
-    // if (positionsToSubmit.length === 0) {
-    //   message.error(t("positions.noNewDesignError"));
-    //   return;
-    // }
-
     const formData = new FormData();
 
-    // bigint'e coerce edileceği için string göndermek daha temiz
     formData.append("order_item_id", String(orderDetail.id));
     formData.append("order_id", String(orderDetail.order_id));
     formData.append("note", note || "");
     formData.append("is_sub_category", String(Boolean(isSubCategory)));
 
-    // 1) JSON.stringify yerine HER position için ayrı field gönder:
     positionsToSubmit.forEach((positionId) => {
       formData.append("positions", String(positionId));
     });
 
-    // 2) Dosyalar aynı kalabilir
     positionsToSubmit.forEach((positionId) => {
       const fileList = extractUploadFileList(designFiles[positionId]);
       const fileItem = fileList.find((file) => Boolean(file.originFileObj));
@@ -411,23 +500,23 @@ export default function OrderDesignPage() {
     try {
       await OrdersAPI.saveDesign(formData);
       message.success(t("messages.saveSuccess"));
-      await loadOrderDetail({ hydrate: true, withLoading: false });
+      onSaved?.();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.saveError")
+        error?.response?.data?.error?.message || t("messages.saveError"),
       );
     } finally {
       setSaving(false);
     }
   }, [
     designFiles,
-    loadOrderDetail,
+    isSubCategory,
     message,
     note,
+    onSaved,
     orderDetail,
     selectedPositionIds,
     t,
-    isSubCategory,
   ]);
 
   const handleDeleteDesign = useCallback(
@@ -442,12 +531,12 @@ export default function OrderDesignPage() {
           [positionId]: [],
         }));
         setSelectedPositionIds((prev) =>
-          prev.filter((selectedId) => selectedId !== positionId)
+          prev.filter((selectedId) => selectedId !== positionId),
         );
-        await loadOrderDetail({ hydrate: false, withLoading: false });
+        await loadOrderDetail({ hydrate: !isDirty, withLoading: false });
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.deleteError")
+          error?.response?.data?.error?.message || t("messages.deleteError"),
         );
       } finally {
         setDeletingDesignIds((prev) => {
@@ -457,8 +546,15 @@ export default function OrderDesignPage() {
         });
       }
     },
-    [loadOrderDetail, message, t]
+    [isDirty, loadOrderDetail, message, t],
   );
+
+  const handleCancel = useCallback(() => {
+    confirmIfDirty({
+      isDirty,
+      onDiscard: onCancel,
+    });
+  }, [confirmIfDirty, isDirty, onCancel]);
 
   const renderOptions = (options) => {
     if (!Array.isArray(options) || !options.length) {
@@ -494,7 +590,7 @@ export default function OrderDesignPage() {
     const positionId = String(position.id);
     const existingDesign = existingDesignMap.get(positionId);
     const canDeleteDesign = Boolean(
-      existingDesign?.id && existingDesign?.design_url
+      existingDesign?.id && existingDesign?.design_url,
     );
     const deleteLoading = existingDesign?.id
       ? Boolean(deletingDesignIds[existingDesign.id])
@@ -502,8 +598,8 @@ export default function OrderDesignPage() {
     const images = Array.isArray(position?.images)
       ? position.images
       : position?.image
-      ? [position.image]
-      : [];
+        ? [position.image]
+        : [];
     const firstImage = images.find((img) => {
       if (typeof img === "string") return true;
       return Boolean(img?.image_url || img?.url);
@@ -514,7 +610,7 @@ export default function OrderDesignPage() {
         : firstImage?.image_url || firstImage?.url || "";
     const fileList = designFiles[positionId] || [];
     const designPreviewUrl = getDesignPreviewUrl(
-      extractUploadFileList(fileList)
+      extractUploadFileList(fileList),
     );
     const designArea = extractDesignAreaFromRecord(position);
     return (
@@ -618,33 +714,44 @@ export default function OrderDesignPage() {
     );
   };
 
-  const pageTitle = t("title");
   const subCategory = orderDetail?.product?.sub_category;
   const showSubCategorySwitch = Boolean(subCategory?.optional);
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
-      <div className="p-4 md:p-6 space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            {pageTitle}
-          </Typography.Title>
-          <Space>
-            <Popconfirm
-              title={t("actions.saveConfirmTitle")}
-              okText={t("actions.save")}
-              cancelText={tCommon("actions.cancel")}
-              okButtonProps={{ loading: saving }}
-              disabled={!canSave}
-              onConfirm={handleSave}
-            >
-              <Button type="primary" disabled={!canSave} loading={saving}>
-                {t("actions.save")}
-              </Button>
-            </Popconfirm>
-          </Space>
-        </div>
-
+    <>
+      {unsavedChangesModalContextHolder}
+      <Modal
+        open={open}
+        title={t("title")}
+        onCancel={handleCancel}
+        width="min(1200px, 95vw)"
+        zIndex={zIndex}
+        destroyOnClose={false}
+        styles={{
+          body: {
+            maxHeight: "calc(100vh - 220px)",
+            overflowY: "auto",
+          },
+        }}
+        footer={[
+          <Button key="cancel" onClick={handleCancel}>
+            {tCommon("actions.cancel")}
+          </Button>,
+          <Popconfirm
+            key="save"
+            title={t("actions.saveConfirmTitle")}
+            okText={t("actions.save")}
+            cancelText={tCommon("actions.cancel")}
+            okButtonProps={{ loading: saving }}
+            disabled={!canSave}
+            onConfirm={handleSave}
+          >
+            <Button type="primary" disabled={!canSave} loading={saving}>
+              {t("actions.save")}
+            </Button>
+          </Popconfirm>,
+        ]}
+      >
         {!itemId ? (
           <Alert type="error" message={t("messages.missingParams")} showIcon />
         ) : orderLoading ? (
@@ -654,7 +761,7 @@ export default function OrderDesignPage() {
         ) : !orderDetail ? (
           <Alert type="error" message={t("messages.noItemFound")} showIcon />
         ) : (
-          <>
+          <div className="space-y-4">
             <Card
               title={t("orderInfo.title")}
               bodyStyle={{ padding: 24 }}
@@ -662,7 +769,6 @@ export default function OrderDesignPage() {
             >
               <div className="mx-auto flex w-full flex-col gap-6">
                 <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-                  {/* Sol - Product Preview */}
                   <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                       <span>{t("orderInfo.preview")}</span>
@@ -691,13 +797,9 @@ export default function OrderDesignPage() {
                     </div>
                   </div>
 
-                  {/* Sağ - Info Section */}
                   <div className="rounded-3xl border border-gray-100 bg-white p-5  shadow-sm">
                     <div className="flex flex-col gap-3">
-                      {/* Üst başlık alanı */}
-
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {/* Order Number */}
                         <div className="flex flex-col gap-1">
                           <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             {tOrders("columns.orderNumber")}
@@ -709,7 +811,6 @@ export default function OrderDesignPage() {
                           </span>
                         </div>
 
-                        {/* SKU */}
                         <div className="flex flex-col gap-1">
                           <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             {tOrders("columns.sku")}
@@ -719,7 +820,6 @@ export default function OrderDesignPage() {
                           </span>
                         </div>
 
-                        {/* Price */}
                         <div className="flex flex-col gap-1">
                           <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             {tOrders("columns.price")}
@@ -730,11 +830,7 @@ export default function OrderDesignPage() {
                         </div>
                       </div>
 
-                      {/* Product Detail Blocks */}
-
                       <div className="grid gap-4 md:grid-cols-3">
-                        {/* Product */}
-
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           {tOrders("columns.product")}
                         </span>
@@ -742,16 +838,12 @@ export default function OrderDesignPage() {
                           {orderDetail?.product?.name || tOrders("common.none")}
                         </p>
 
-                        {/* Size */}
-
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           {tOrders("columns.size")}
                         </span>
                         <p className="mt-1 text-base font-semibold text-gray-900">
                           {orderDetail?.size?.name || tOrders("common.none")}
                         </p>
-
-                        {/* Color */}
 
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           {tOrders("columns.color")}
@@ -761,16 +853,12 @@ export default function OrderDesignPage() {
                         </p>
                       </div>
 
-                      {/* Options */}
-
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                         {tOrders("columns.options")}
                       </span>
                       <div className="mt-2 text-base font-semibold text-gray-900">
                         {renderOptions(orderDetail?.options)}
                       </div>
-
-                      {/* Notes (designer note görsün ama değiştirmesin istersen disabled yapılabilir) */}
 
                       <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wide">
                         <span>{t("fields.note")}</span>
@@ -822,7 +910,7 @@ export default function OrderDesignPage() {
                   {selectedPositions.length ? (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {selectedPositions.map((position) =>
-                        renderPositionCard(position)
+                        renderPositionCard(position),
                       )}
                     </div>
                   ) : (
@@ -837,9 +925,9 @@ export default function OrderDesignPage() {
                 />
               )}
             </Card>
-          </>
+          </div>
         )}
-      </div>
-    </RequireRole>
+      </Modal>
+    </>
   );
 }
