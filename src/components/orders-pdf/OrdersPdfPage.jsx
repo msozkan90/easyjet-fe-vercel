@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersPdfAPI } from "@/utils/api";
+import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvider";
@@ -53,7 +54,9 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [designs, setDesigns] = useState([]);
   const [designsLoading, setDesignsLoading] = useState(false);
-  const latestSuccessCountRef = useRef(0);
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+  const [downloadingDesignIds, setDownloadingDesignIds] = useState({});
+  const handledSuccessTaskIdsRef = useRef(new Set());
 
   const fixedFilters = useMemo(
     () => ({
@@ -124,14 +127,18 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   }, [loadRows]);
 
   useEffect(() => {
-    const successCount = tasks.filter(
-      (task) => task.status === "success",
-    ).length;
-    if (successCount > latestSuccessCountRef.current) {
-      latestSuccessCountRef.current = successCount;
+    const successfulTasks = tasks.filter((task) => task.status === "success");
+    const hasNewSuccessfulTask = successfulTasks.some(
+      (task) => !handledSuccessTaskIdsRef.current.has(task.id),
+    );
+    if (hasNewSuccessfulTask) {
+      successfulTasks.forEach((task) =>
+        handledSuccessTaskIdsRef.current.add(task.id),
+      );
+      void loadRows();
       if (selectedPdf) void loadDesigns(selectedPdf);
     }
-  }, [loadDesigns, selectedPdf, tasks]);
+  }, [loadDesigns, loadRows, selectedPdf, tasks]);
 
   const handleTableChange = (nextPagination) => {
     const next = {
@@ -167,6 +174,58 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     }
   };
 
+  const refreshAfterDesignDownload = useCallback(async () => {
+    await Promise.all([
+      selectedPdf ? loadDesigns(selectedPdf) : Promise.resolve(),
+      loadRows(),
+    ]);
+  }, [loadDesigns, loadRows, selectedPdf]);
+
+  const handleDownloadDesign = useCallback(
+    async (row) => {
+      if (!row?.id) return;
+      setDownloadingDesignIds((prev) => ({ ...prev, [row.id]: true }));
+      try {
+        const { blob, filename } = await OrdersPdfAPI.downloadDesign(row.id);
+        saveBlobAsFile(blob, filename);
+        message.success(t("messages.designDownloaded"));
+        await refreshAfterDesignDownload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message ||
+            t("messages.designDownloadFailed"),
+        );
+      } finally {
+        setDownloadingDesignIds((prev) => {
+          const next = { ...prev };
+          delete next[row.id];
+          return next;
+        });
+      }
+    },
+    [message, refreshAfterDesignDownload, t],
+  );
+
+  const handleDownloadAllDesigns = useCallback(async () => {
+    if (!selectedPdf?.id) return;
+    setBulkDownloading(true);
+    try {
+      const { blob, filename } = await OrdersPdfAPI.downloadDesigns(
+        selectedPdf.id,
+      );
+      saveBlobAsFile(blob, filename);
+      message.success(t("messages.designsDownloaded"));
+      await refreshAfterDesignDownload();
+    } catch (error) {
+      message.error(
+        error?.response?.data?.error?.message ||
+          t("messages.designDownloadFailed"),
+      );
+    } finally {
+      setBulkDownloading(false);
+    }
+  }, [message, refreshAfterDesignDownload, selectedPdf, t]);
+
   const handleUpload = (pdf, fileList) => {
     const files = fileList
       .map((item) => item.originFileObj || item)
@@ -191,17 +250,6 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       ),
     },
     {
-      title: t("fields.category"),
-      render: (_, row) => row?.category?.name || "-",
-      responsive: ["md"],
-    },
-    {
-      title: t("fields.subCategory"),
-      render: (_, row) =>
-        row?.subCategory?.name || row?.sub_category?.name || "-",
-      responsive: ["lg"],
-    },
-    {
       title: t("fields.designs"),
       render: (_, row) => (
         <Tag>{Array.isArray(row.designs) ? row.designs.length : 0}</Tag>
@@ -209,18 +257,14 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       width: 110,
     },
     {
-      title: t("fields.status"),
-      dataIndex: "status",
+      title: t("fields.downloaded"),
+      dataIndex: "is_downloaded",
       render: (value) => (
-        <Tag color={value === "active" ? "success" : "default"}>
-          {value === "active"
-            ? t("status.active")
-            : value === "inactive"
-              ? t("status.inactive")
-              : value || "-"}
+        <Tag color={value ? "success" : "default"}>
+          {value ? t("status.downloaded") : t("status.uploaded")}
         </Tag>
       ),
-      width: 120,
+      width: 140,
     },
     {
       title: t("fields.createdAt"),
@@ -281,17 +325,24 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     },
     {
       title: t("fields.status"),
-      dataIndex: "status",
-      render: (value) => (
-        <Tag color={value === "active" ? "success" : "default"}>
-          {value === "active"
-            ? t("status.active")
-            : value === "inactive"
-              ? t("status.inactive")
-              : value || "-"}
-        </Tag>
-      ),
+      render: (_, row) => {
+        const value = row?.design_status ?? row?.designStatus;
+        return (
+          <Tag color={value === "downloaded" ? "success" : "processing"}>
+            {value === "downloaded"
+              ? t("status.downloaded")
+              : value === "uploaded"
+                ? t("status.uploaded")
+                : value || "-"}
+          </Tag>
+        );
+      },
       width: 120,
+    },
+    {
+      title: t("fields.downloadedAt"),
+      render: (_, row) => formatDate(row?.downloaded_at ?? row?.downloadedAt),
+      responsive: ["md"],
     },
     {
       title: t("fields.createdAt"),
@@ -301,15 +352,22 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     },
     {
       title: t("fields.actions"),
-      width: 80,
+      width: 140,
       render: (_, row) => (
-        <Popconfirm
-          title={t("confirm.designDeleteTitle")}
-          description={t("confirm.designDeleteDescription")}
-          onConfirm={() => handleDeleteDesign(row)}
-        >
-          <Button danger icon={<DeleteOutlined />} />
-        </Popconfirm>
+        <Space>
+          <Button
+            icon={<DownloadOutlined />}
+            loading={Boolean(downloadingDesignIds[row.id])}
+            onClick={() => handleDownloadDesign(row)}
+          />
+          <Popconfirm
+            title={t("confirm.designDeleteTitle")}
+            description={t("confirm.designDeleteDescription")}
+            onConfirm={() => handleDeleteDesign(row)}
+          >
+            <Button danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -363,6 +421,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         onCancel={() => {
           setSelectedPdf(null);
           setDesigns([]);
+          void loadRows();
         }}
         footer={null}
         width={900}
@@ -376,6 +435,14 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
                 onClick={() => openUrl(selectedPdf.pdf_url)}
               >
                 {t("actions.downloadPdf")}
+              </Button>
+              <Button
+                icon={<DownloadOutlined />}
+                loading={bulkDownloading}
+                disabled={!designs.length}
+                onClick={handleDownloadAllDesigns}
+              >
+                {t("actions.downloadDesigns")}
               </Button>
               <Upload
                 multiple

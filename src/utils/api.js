@@ -182,17 +182,29 @@ export const OrdersPdfAPI = {
   list: (payload) => api.post("/orders-pdf/list", payload),
   get: (id) => api.get(`/orders-pdf/${encodeURIComponent(id)}`),
   create: (payload) => api.post("/orders-pdf", payload),
-  update: (id, payload) => api.put(`/orders-pdf/${encodeURIComponent(id)}`, payload),
+  update: (id, payload) =>
+    api.put(`/orders-pdf/${encodeURIComponent(id)}`, payload),
   remove: (id) => api.del(`/orders-pdf/${encodeURIComponent(id)}`),
   designsList: (id, payload) =>
     api.post(`/orders-pdf/${encodeURIComponent(id)}/designs/list`, payload),
+  downloadDesigns: (id, config = {}) =>
+    fetchBlobFile(`/orders-pdf/${encodeURIComponent(id)}/designs/download`, {
+      config,
+      fallbackFilename: "orders-pdf-designs.zip",
+    }),
   uploadDesigns: (payload, config = {}) =>
     api.postMultipart("/orders-pdf/designs", payload, config),
   uploadDesignProgress: (uploadId) =>
     api.get(`/orders-pdf/designs/progress/${encodeURIComponent(uploadId)}`),
   updateDesign: (id, payload) =>
     api.put(`/orders-pdf/designs/${encodeURIComponent(id)}`, payload),
-  deleteDesign: (id) => api.del(`/orders-pdf/designs/${encodeURIComponent(id)}`),
+  downloadDesign: (id, config = {}) =>
+    fetchBlobFile(`/orders-pdf/designs/${encodeURIComponent(id)}/download`, {
+      config,
+      fallbackFilename: "orders-pdf-design",
+    }),
+  deleteDesign: (id) =>
+    api.del(`/orders-pdf/designs/${encodeURIComponent(id)}`),
 };
 
 export const TransferOrdersAPI = {
@@ -329,7 +341,8 @@ export const AuditLogsAPI = {
       `/audit-logs/transfer-orders/${encodeURIComponent(orderNumber)}`,
       params,
     ),
-  userMetricsSummary: (params = {}) => api.get("/audit-logs/user-metrics", params),
+  userMetricsSummary: (params = {}) =>
+    api.get("/audit-logs/user-metrics", params),
   userMetricLogs: (userId, params = {}) =>
     api.get(`/audit-logs/user-metrics/${encodeURIComponent(userId)}`, params),
 };
@@ -551,7 +564,8 @@ export const ProductStockAPI = {
   create: (data) => api.post("/product-stocks", data),
   update: (id, data) => api.put(`/product-stocks/${id}`, data),
   addStock: (id, data) => api.post(`/product-stocks/${id}/add-stock`, data),
-  decreaseStock: (id, data) => api.post(`/product-stocks/${id}/decrease-stock`, data),
+  decreaseStock: (id, data) =>
+    api.post(`/product-stocks/${id}/decrease-stock`, data),
   remove: (id) => api.del(`/product-stocks/${id}`),
   downloadExists: (params = {}, config = {}) => {
     const payload = buildExportPayload(params);
