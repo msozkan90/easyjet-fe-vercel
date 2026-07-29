@@ -2707,7 +2707,10 @@
           "completeWithScrapSuccess": "Order items completed and scrap recorded.",
           "designPreparing": "Design files are being prepared for download.",
           "designDownloadSuccess": "Design files downloaded.",
-          "designDownloadError": "Design files could not be downloaded."
+          "designDownloadError": "Design files could not be downloaded.",
+          "labelPrintPreparing": "Shipping label is being prepared for printing.",
+          "labelPrintOpened": "Shipping label print dialog opened.",
+          "labelPrintError": "Shipping label could not be printed."
         },
         "scrap": {
           "title": "Record Fire / Scrap",

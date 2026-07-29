@@ -2509,7 +2509,10 @@
           "completeWithScrapSuccess": "Sipariş ürünleri tamamlandı ve fire kaydı oluşturuldu.",
           "designPreparing": "Tasarım dosyaları indirilmeye hazırlanıyor.",
           "designDownloadSuccess": "Tasarım dosyaları indirildi.",
-          "designDownloadError": "Tasarım dosyaları indirilemedi."
+          "designDownloadError": "Tasarım dosyaları indirilemedi.",
+          "labelPrintPreparing": "Kargo etiketi yazdırma için hazırlanıyor.",
+          "labelPrintOpened": "Kargo etiketi yazdırma penceresi açıldı.",
+          "labelPrintError": "Kargo etiketi yazdırılamadı."
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",
