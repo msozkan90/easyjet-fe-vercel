@@ -8,6 +8,14 @@ export const MAX_PREVIEW_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 const remotePreviewPolicyCache = new Map();
 
+const requiresServerSideMetadataCheck = (url) => {
+  try {
+    return new URL(url).hostname === "i.etsystatic.com";
+  } catch {
+    return false;
+  }
+};
+
 const resolveNumericDimension = (value) => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -74,7 +82,10 @@ const resolveRemotePreviewPolicy = async (url) => {
 
   const request = (async () => {
     try {
-      const response = await fetch(normalizedUrl, {
+      const metadataUrl = requiresServerSideMetadataCheck(normalizedUrl)
+        ? `/api/image-preview-metadata?url=${encodeURIComponent(normalizedUrl)}`
+        : normalizedUrl;
+      const response = await fetch(metadataUrl, {
         method: "HEAD",
         cache: "no-store",
         redirect: "follow",
