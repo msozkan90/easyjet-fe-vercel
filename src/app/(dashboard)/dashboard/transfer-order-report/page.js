@@ -172,7 +172,7 @@ export default function TransferOrderReportPage() {
   const [reportData, setReportData] = useState({
     summary: {
       total_orders: 0,
-      total_items: 0,
+      total_design_quantity: 0,
       total_length_inches: 0,
       total_revenue: 0,
       total_days: 0,
@@ -467,14 +467,17 @@ export default function TransferOrderReportPage() {
         ...getTextColumnSearchProps(t("table.orderCount"), (record) => record.order_count),
       },
       {
-        title: t("table.itemQuantity"),
-        dataIndex: "item_quantity",
-        key: "item_quantity",
+        title: t("table.designQuantity"),
+        dataIndex: "design_quantity",
+        key: "design_quantity",
         align: "right",
         sorter: (left, right) =>
-          Number(left.item_quantity || 0) - Number(right.item_quantity || 0),
+          Number(left.design_quantity || 0) - Number(right.design_quantity || 0),
         render: formatCount,
-        ...getTextColumnSearchProps(t("table.itemQuantity"), (record) => record.item_quantity),
+        ...getTextColumnSearchProps(
+          t("table.designQuantity"),
+          (record) => record.design_quantity,
+        ),
       },
       {
         title: t("table.lengthInches"),
@@ -526,14 +529,17 @@ export default function TransferOrderReportPage() {
         ...getTextColumnSearchProps(t("detailTable.product"), (record) => record.product_name),
       },
       {
-        title: t("detailTable.itemQuantity"),
-        dataIndex: "item_quantity",
-        key: "item_quantity",
+        title: t("detailTable.designQuantity"),
+        dataIndex: "design_quantity",
+        key: "design_quantity",
         align: "right",
         sorter: (left, right) =>
-          Number(left.item_quantity || 0) - Number(right.item_quantity || 0),
+          Number(left.design_quantity || 0) - Number(right.design_quantity || 0),
         render: formatCount,
-        ...getTextColumnSearchProps(t("detailTable.itemQuantity"), (record) => record.item_quantity),
+        ...getTextColumnSearchProps(
+          t("detailTable.designQuantity"),
+          (record) => record.design_quantity,
+        ),
       },
       {
         title: t("detailTable.lengthInches"),
@@ -567,9 +573,9 @@ export default function TransferOrderReportPage() {
         accent: "linear-gradient(135deg, #102a56 0%, #295fbf 100%)",
       },
       {
-        key: "total_items",
-        title: t("summary.totalItems"),
-        value: formatCount(reportData?.summary?.total_items),
+        key: "total_design_quantity",
+        title: t("summary.totalDesignQuantity"),
+        value: formatCount(reportData?.summary?.total_design_quantity),
         accent: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
       },
       {
@@ -777,8 +783,8 @@ export default function TransferOrderReportPage() {
               <Col xs={24} sm={12} lg={6}>
                 <Card loading={detailLoading} style={{ borderRadius: 18 }}>
                   <Statistic
-                    title={t("drawer.totalItems")}
-                    value={formatCount(detailData?.summary?.total_items)}
+                    title={t("drawer.totalDesignQuantity")}
+                    value={formatCount(detailData?.summary?.total_design_quantity)}
                   />
                 </Card>
               </Col>
