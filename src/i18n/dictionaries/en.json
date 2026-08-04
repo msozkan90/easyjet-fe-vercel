@@ -2141,6 +2141,7 @@
         "confirmNewOrderTitle": "Move this order back to New Order?",
         "confirmNewOrderOk": "Update",
         "download": "Download",
+        "printLabel": "Print Label",
         "manualOrder": "Manual Order"
       },
       "messages": {
