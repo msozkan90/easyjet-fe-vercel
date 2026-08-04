@@ -1943,6 +1943,7 @@
         "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
         "confirmNewOrderOk": "Güncelle",
         "download": "İndir",
+        "printLabel": "Label Yazdır",
         "manualOrder": "Manuel Order"
       },
       "messages": {

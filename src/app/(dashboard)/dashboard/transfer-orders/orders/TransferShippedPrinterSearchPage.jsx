@@ -19,12 +19,16 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { ExportOutlined } from "@ant-design/icons";
+import { PrinterOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
-import { GuardedPreviewImage, LazyGuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
+import {
+  GuardedPreviewImage,
+  LazyGuardedPreviewImage,
+} from "@/components/common/media/ImagePreviewGate";
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 
 const STATUS_COLORS = {
   newOrder: "geekblue",
@@ -109,7 +113,9 @@ const TransferOrderItemCard = ({
     ? tOrders(`status.values.${statusKey}`) || statusKey
     : tOrders("common.none");
   const productName =
-    item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
+    item?.transfer_product?.name ||
+    item?.product?.name ||
+    tOrders("common.none");
   const designs = Array.isArray(item?.designs) ? item.designs : [];
 
   return (
@@ -184,7 +190,11 @@ const TransferOrderItemCard = ({
                   size="small"
                   styles={{ body: { padding: 10 } }}
                 >
-                  <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                  <Space
+                    direction="vertical"
+                    size={8}
+                    style={{ width: "100%" }}
+                  >
                     <LazyGuardedPreviewImage
                       src={design?.design_url}
                       alt={`design-${design?.id}`}
@@ -193,21 +203,27 @@ const TransferOrderItemCard = ({
                       emptyText={tDetail("preview.empty")}
                     />
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {tDetail("designCard.size")}: {formatAmount(design?.width)}" x{" "}
+                      {tDetail("designCard.size")}:{" "}
+                      {formatAmount(design?.width)}" x{" "}
                       {formatAmount(design?.height)}"
                     </Typography.Text>
                     <Typography.Text strong>
-                      {tDetail("designCard.price")}: {formatCurrency(design?.price, currency || "USD")}
+                      {tDetail("designCard.price")}:{" "}
+                      {formatCurrency(design?.price, currency || "USD")}
                     </Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {design?.created_at ? moment(design.created_at).format("LLL") : "-"}
+                      {design?.created_at
+                        ? moment(design.created_at).format("LLL")
+                        : "-"}
                     </Typography.Text>
                   </Space>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="mt-2 text-sm">{tDetail("messages.noUploadedDesigns")}</div>
+            <div className="mt-2 text-sm">
+              {tDetail("messages.noUploadedDesigns")}
+            </div>
           )}
         </div>
       </div>
@@ -220,7 +236,7 @@ export default function TransferShippedPrinterSearchPage() {
   const tOrders = useTranslations("dashboard.orders");
   const tDetail = useTranslations("dashboard.orders.transferDetail");
   const tCommonActions = useTranslations("common.actions");
-  const autoDownloadedLabelRef = useRef("");
+  const autoPrintedLabelRef = useRef("");
 
   const [orderNumber, setOrderNumber] = useState("");
   const [transferOrderId, setTransferOrderId] = useState("");
@@ -237,29 +253,41 @@ export default function TransferShippedPrinterSearchPage() {
     designs: [],
     without_design_items: [],
   });
+  const [printingLabel, setPrintingLabel] = useState(false);
   const [checkedChecklistKeys, setCheckedChecklistKeys] = useState([]);
   const [pendingChecklistOrderId, setPendingChecklistOrderId] = useState("");
   const [confirmingChecklist, setConfirmingChecklist] = useState(false);
 
-  const triggerLabelDownload = useCallback((labelUrl, selectedOrderNumber) => {
-    if (!labelUrl) return;
-    if (typeof document === "undefined") return;
-    const anchor = document.createElement("a");
-    anchor.href = labelUrl;
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    anchor.download = `${selectedOrderNumber || "transfer-order"}-label.pdf`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-  }, []);
+  const triggerLabelPrint = useCallback(
+    async (labelUrl) => {
+      if (!labelUrl) return;
+      setPrintingLabel(true);
+      try {
+        const printResult = await printOrderLabel({ labelUrl });
+        if (printResult?.printed) {
+          message.success(tOrders("scanner.messages.labelPrintOpened"));
+        }
+      } catch (error) {
+        message.error(
+          error?.message || tOrders("scanner.messages.labelPrintError"),
+        );
+      } finally {
+        setPrintingLabel(false);
+      }
+    },
+    [message, tOrders],
+  );
 
   const checklistRequiredKeys = useMemo(() => {
-    const designs = shippingChecklist.designs.map((design) => `design:${design?.id}`);
+    const designs = shippingChecklist.designs.map(
+      (design) => `design:${design?.id}`,
+    );
     const withoutDesignItems = shippingChecklist.without_design_items.map(
       (item) => `without-design-item:${item?.id}`,
     );
-    return [...designs, ...withoutDesignItems].filter((key) => !key.endsWith(":undefined"));
+    return [...designs, ...withoutDesignItems].filter(
+      (key) => !key.endsWith(":undefined"),
+    );
   }, [shippingChecklist]);
 
   const allChecklistItemsChecked =
@@ -312,12 +340,9 @@ export default function TransferShippedPrinterSearchPage() {
 
       if (payload?.shipped === true && latestLabel?.label_url) {
         const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
-        if (autoDownloadedLabelRef.current !== labelIdentity) {
-          autoDownloadedLabelRef.current = labelIdentity;
-          triggerLabelDownload(
-            latestLabel.label_url,
-            transferOrder?.order_number || selectedTransferOrderId,
-          );
+        if (autoPrintedLabelRef.current !== labelIdentity) {
+          autoPrintedLabelRef.current = labelIdentity;
+          void triggerLabelPrint(latestLabel.label_url);
         }
       }
 
@@ -352,7 +377,7 @@ export default function TransferShippedPrinterSearchPage() {
         }
       }
     },
-    [message, tOrders, triggerLabelDownload],
+    [message, tOrders, triggerLabelPrint],
   );
 
   const handleSearch = useCallback(
@@ -414,17 +439,20 @@ export default function TransferShippedPrinterSearchPage() {
     [handleSearch, message, orderNumber, tOrders, transferOrderId],
   );
 
-  const handleCreateLabelSuccess = useCallback((payload) => {
-    const latestLabel = payload?.transfer_label || null;
-    if (latestLabel) {
-      setTransferLabel(latestLabel);
-    }
-    setShippingModalOpen(false);
-    setShippingModalRecord(null);
-    if (checklistRequiredKeys.length) {
-      setChecklistModalOpen(true);
-    }
-  }, [checklistRequiredKeys.length]);
+  const handleCreateLabelSuccess = useCallback(
+    (payload) => {
+      const latestLabel = payload?.transfer_label || null;
+      if (latestLabel) {
+        setTransferLabel(latestLabel);
+      }
+      setShippingModalOpen(false);
+      setShippingModalRecord(null);
+      if (checklistRequiredKeys.length) {
+        setChecklistModalOpen(true);
+      }
+    },
+    [checklistRequiredKeys.length],
+  );
 
   const handleChecklistConfirm = useCallback(async () => {
     const nextTransferOrderId = String(
@@ -496,7 +524,7 @@ export default function TransferShippedPrinterSearchPage() {
       });
       message.success(tOrders("detail.messages.voidLabelSuccess"));
       setTransferLabel(null);
-      autoDownloadedLabelRef.current = "";
+      autoPrintedLabelRef.current = "";
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
@@ -559,6 +587,14 @@ export default function TransferShippedPrinterSearchPage() {
           <div className="flex justify-center py-6">
             <Spin />
           </div>
+        ) : null}
+
+        {printingLabel ? (
+          <Alert
+            type="info"
+            showIcon
+            message={tOrders("scanner.messages.labelPrintPreparing")}
+          />
         ) : null}
 
         {orderSummary ? (
@@ -657,15 +693,13 @@ export default function TransferShippedPrinterSearchPage() {
                 <Space wrap>
                   {transferLabel?.label_url ? (
                     <Button
-                      icon={<ExportOutlined />}
+                      icon={<PrinterOutlined />}
+                      loading={printingLabel}
                       onClick={() =>
-                        triggerLabelDownload(
-                          transferLabel.label_url,
-                          orderSummary?.order_number || orderNumber,
-                        )
+                        void triggerLabelPrint(transferLabel.label_url)
                       }
                     >
-                      {tOrders("actions.download")}
+                      {tOrders("actions.printLabel")}
                     </Button>
                   ) : (
                     tOrders("common.none")
@@ -789,12 +823,16 @@ export default function TransferShippedPrinterSearchPage() {
                             </Typography.Text>
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
-                            <Tag color="blue">Qty: {design?.quantity ?? "-"}</Tag>
+                            <Tag color="blue">
+                              Qty: {design?.quantity ?? "-"}
+                            </Tag>
                             <Tag>
                               {formatAmount(design?.width)}" x{" "}
                               {formatAmount(design?.height)}"
                             </Tag>
-                            <Tag color={STATUS_COLORS[design?.status] || "default"}>
+                            <Tag
+                              color={STATUS_COLORS[design?.status] || "default"}
+                            >
                               {design?.status || "-"}
                             </Tag>
                           </div>
@@ -803,7 +841,10 @@ export default function TransferShippedPrinterSearchPage() {
                     })}
                   </div>
                 ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No designs" />
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No designs"
+                  />
                 )}
               </div>
 
@@ -834,17 +875,20 @@ export default function TransferShippedPrinterSearchPage() {
                               {item?.transfer_product?.name || "-"}
                             </Typography.Text>
                             {optionText ? (
-                              <Typography.Text type="secondary" className="block truncate">
+                              <Typography.Text
+                                type="secondary"
+                                className="block truncate"
+                              >
                                 {optionText}
                               </Typography.Text>
                             ) : null}
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
                             <Tag color="blue">Qty: {item?.quantity ?? "-"}</Tag>
-                            <Tag color="green">
-                              {formatAmount(item?.price)}
-                            </Tag>
-                            <Tag color={STATUS_COLORS[item?.status] || "default"}>
+                            <Tag color="green">{formatAmount(item?.price)}</Tag>
+                            <Tag
+                              color={STATUS_COLORS[item?.status] || "default"}
+                            >
                               {item?.status || "-"}
                             </Tag>
                           </div>
