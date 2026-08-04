@@ -413,8 +413,8 @@ export default function Sidebar({ collapsed }) {
                       icon: <BankOutlined />,
                       label: tSidebar("financial.report"),
                       children: [
-                        ...(isCompanyAdmin
-                             ? [
+                        ...(showCompanyOrdersMenu
+                          ? [
                               {
                                 key: "order-report",
                                 label: (
@@ -427,7 +427,7 @@ export default function Sidebar({ collapsed }) {
                               },
                             ]
                           : []),
-                        ...(isCompanyAdmin
+                        ...(showCompanyTransferOrdersMenu
                           ? [
                               {
                                 key: "transfer-order-report",
@@ -440,7 +440,7 @@ export default function Sidebar({ collapsed }) {
                                 ),
                               },
                             ]
-                          : [])
+                          : []),
                       ],
                     },
                     ...(isCompanyAdmin

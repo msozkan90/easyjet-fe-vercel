@@ -450,7 +450,7 @@
       "rangeLabel": "{from} - {to} aralığı gösteriliyor",
       "summary": {
         "totalOrders": "Toplam Sipariş",
-        "totalItems": "Toplam Ürün Adedi",
+        "totalDesignQuantity": "Toplam Tasarım Adedi",
         "totalLengthInches": "Toplam Length (inch)",
         "totalRevenue": "Toplam Ciro",
         "totalDays": "Filtrelenen Gün"
@@ -482,14 +482,14 @@
         "title": "Günlük Transfer Sipariş Özeti",
         "date": "Tarih",
         "orderCount": "Sipariş Sayısı",
-        "itemQuantity": "Ürün Adedi",
+        "designQuantity": "Tasarım Adedi",
         "lengthInches": "Length (inch)",
         "revenue": "Toplam Tutar",
         "actions": "İşlemler"
       },
       "detailTable": {
         "product": "Ürün",
-        "itemQuantity": "Toplam Adet",
+        "designQuantity": "Tasarım Adedi",
         "lengthInches": "Length (inch)",
         "revenue": "Toplam Tutar"
       },
@@ -497,7 +497,7 @@
         "title": "{date} Detayı",
         "fallbackTitle": "Gün Detayı",
         "totalOrders": "Sipariş Sayısı",
-        "totalItems": "Ürün Adedi",
+        "totalDesignQuantity": "Tasarım Adedi",
         "totalLengthInches": "Toplam Length (inch)",
         "totalRevenue": "Toplam Ciro"
       },

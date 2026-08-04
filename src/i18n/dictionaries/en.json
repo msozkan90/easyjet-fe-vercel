@@ -450,7 +450,7 @@
       "rangeLabel": "Showing range {from} - {to}",
       "summary": {
         "totalOrders": "Total Orders",
-        "totalItems": "Total Item Quantity",
+        "totalDesignQuantity": "Total Design Quantity",
         "totalLengthInches": "Total Length (inch)",
         "totalRevenue": "Total Revenue",
         "totalDays": "Filtered Days"
@@ -482,14 +482,14 @@
         "title": "Daily Transfer Order Summary",
         "date": "Date",
         "orderCount": "Order Count",
-        "itemQuantity": "Item Quantity",
+        "designQuantity": "Design Quantity",
         "lengthInches": "Length (inch)",
         "revenue": "Total Amount",
         "actions": "Actions"
       },
       "detailTable": {
         "product": "Product",
-        "itemQuantity": "Total Quantity",
+        "designQuantity": "Design Quantity",
         "lengthInches": "Length (inch)",
         "revenue": "Total Amount"
       },
@@ -497,7 +497,7 @@
         "title": "{date} Detail",
         "fallbackTitle": "Day Detail",
         "totalOrders": "Order Count",
-        "totalItems": "Item Quantity",
+        "totalDesignQuantity": "Design Quantity",
         "totalLengthInches": "Total Length (inch)",
         "totalRevenue": "Total Revenue"
       },
