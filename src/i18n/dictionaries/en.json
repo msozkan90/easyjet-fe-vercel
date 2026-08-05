@@ -783,7 +783,7 @@
     },
     "userMetrics": {
       "title": "User Metrics",
-      "subtitle": "Review completed, shipped, and failed audit logs by user and date range.",
+      "subtitle": "Review audit logs from the last 180 days by user and date range.",
       "stats": {
         "total": "Total Logs",
         "completed": "Completed Logs",

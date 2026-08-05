@@ -1,6 +1,13 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import moment from "moment";
 import {
   Alert,
@@ -24,7 +31,13 @@ import { RoleEnum } from "@/utils/consts";
 
 const { RangePicker } = DatePicker;
 
-const DEFAULT_RANGE = null;
+const AUDIT_RETENTION_DAYS = 180;
+const createDefaultRange = () => [
+  moment()
+    .subtract(AUDIT_RETENTION_DAYS - 1, "days")
+    .startOf("day"),
+  moment().endOf("day"),
+];
 
 const STATUS_COLORS = {
   active: "green",
@@ -44,8 +57,8 @@ const METRIC_TAG_COLORS = {
 const buildRangeParams = (range) => {
   const [from, to] = Array.isArray(range) ? range : [];
   return {
-    date_from: from?.startOf("day")?.toISOString(),
-    date_to: to?.endOf("day")?.toISOString(),
+    date_from: from?.clone()?.startOf("day")?.toISOString(),
+    date_to: to?.clone()?.endOf("day")?.toISOString(),
   };
 };
 
@@ -55,7 +68,10 @@ const normalizeSummaryList = (response) => {
 };
 
 const normalizeDetailPayload = (response) => response?.data ?? response ?? {};
-const normalizeText = (value) => String(value ?? "").trim().toLowerCase();
+const normalizeText = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase();
 
 const sortRows = (rows, sort = {}) => {
   const orderBy = sort?.orderBy;
@@ -64,14 +80,21 @@ const sortRows = (rows, sort = {}) => {
   if (!orderBy) return [...rows];
 
   return [...rows].sort((left, right) => {
-    const compareText = (a, b) => normalizeText(a).localeCompare(normalizeText(b));
-    const compareNumber = (a, b) => (Number(a || 0) - Number(b || 0));
+    const compareText = (a, b) =>
+      normalizeText(a).localeCompare(normalizeText(b));
+    const compareNumber = (a, b) => Number(a || 0) - Number(b || 0);
 
     switch (orderBy) {
       case "full_name":
         return direction * compareText(left?.full_name, right?.full_name);
       case "role_code":
-        return direction * compareText(left?.role_code || left?.role_name, right?.role_code || right?.role_name);
+        return (
+          direction *
+          compareText(
+            left?.role_code || left?.role_name,
+            right?.role_code || right?.role_name,
+          )
+        );
       case "status":
         return direction * compareText(left?.status, right?.status);
       case "total_count":
@@ -90,13 +113,21 @@ const sortRows = (rows, sort = {}) => {
 const filterSummaryRows = (rows, filters = {}) =>
   rows.filter((row) => {
     if (filters?.full_name) {
-      const haystack = normalizeText(`${row?.full_name || ""} ${row?.email || ""}`);
+      const haystack = normalizeText(
+        `${row?.full_name || ""} ${row?.email || ""}`,
+      );
       if (!haystack.includes(normalizeText(filters.full_name))) return false;
     }
-    if (filters?.role_code && normalizeText(row?.role_code) !== normalizeText(filters.role_code)) {
+    if (
+      filters?.role_code &&
+      normalizeText(row?.role_code) !== normalizeText(filters.role_code)
+    ) {
       return false;
     }
-    if (filters?.status && normalizeText(row?.status) !== normalizeText(filters.status)) {
+    if (
+      filters?.status &&
+      normalizeText(row?.status) !== normalizeText(filters.status)
+    ) {
       return false;
     }
     return true;
@@ -120,7 +151,7 @@ export default function CompanyUserMetricsPage() {
   const summaryTableRef = useRef(null);
   const detailTableRef = useRef(null);
 
-  const [dateRange, setDateRange] = useState(DEFAULT_RANGE);
+  const [dateRange, setDateRange] = useState(createDefaultRange);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -149,7 +180,9 @@ export default function CompanyUserMetricsPage() {
     setLoading(true);
     setError("");
     try {
-      const response = await AuditLogsAPI.userMetricsSummary(buildRangeParams(dateRange));
+      const response = await AuditLogsAPI.userMetricsSummary(
+        buildRangeParams(dateRange),
+      );
       startTransition(() => {
         setRows(normalizeSummaryList(response));
       });
@@ -199,7 +232,9 @@ export default function CompanyUserMetricsPage() {
         render: (_, record) => (
           <div className="flex flex-col">
             <Typography.Text strong>{record?.full_name || "-"}</Typography.Text>
-            <Typography.Text type="secondary">{record?.email || "-"}</Typography.Text>
+            <Typography.Text type="secondary">
+              {record?.email || "-"}
+            </Typography.Text>
           </div>
         ),
       },
@@ -211,10 +246,14 @@ export default function CompanyUserMetricsPage() {
         filter: {
           type: "select",
           placeholder: t("filters.selectRole"),
-          options: Object.entries(roleLabels).map(([value, label]) => ({ value, label })),
+          options: Object.entries(roleLabels).map(([value, label]) => ({
+            value,
+            label,
+          })),
           width: 240,
         },
-        render: (value, record) => roleLabels[value] || record?.role_name || "-",
+        render: (value, record) =>
+          roleLabels[value] || record?.role_name || "-",
       },
       {
         title: t("columns.status"),
@@ -321,14 +360,19 @@ export default function CompanyUserMetricsPage() {
         key: "title",
         sorter: true,
         filter: { type: "text", placeholder: t("detail.filters.searchTitle") },
-        render: (_, record) => <Typography.Text strong>{record?.title || "-"}</Typography.Text>,
+        render: (_, record) => (
+          <Typography.Text strong>{record?.title || "-"}</Typography.Text>
+        ),
       },
       {
         title: t("detail.columns.description"),
         dataIndex: "description",
         key: "description",
         sorter: true,
-        filter: { type: "text", placeholder: t("detail.filters.searchDescription") },
+        filter: {
+          type: "text",
+          placeholder: t("detail.filters.searchDescription"),
+        },
         render: (value) => (
           <Typography.Text type="secondary">{value || "-"}</Typography.Text>
         ),
@@ -339,11 +383,7 @@ export default function CompanyUserMetricsPage() {
         key: "status",
         width: 120,
         sorter: true,
-        render: () => (
-          <Tag color="green">
-            {t("detail.status.success")}
-          </Tag>
-        ),
+        render: () => <Tag color="green">{t("detail.status.success")}</Tag>,
       },
       {
         title: t("detail.columns.requestType"),
@@ -362,9 +402,7 @@ export default function CompanyUserMetricsPage() {
           ],
           width: 220,
         },
-        render: (value) => (
-          <Tag>{value ? tActions(value) : "-"}</Tag>
-        ),
+        render: (value) => <Tag>{value ? tActions(value) : "-"}</Tag>,
       },
       {
         title: t("detail.columns.route"),
@@ -402,18 +440,21 @@ export default function CompanyUserMetricsPage() {
 
       setDetailError("");
       try {
-        const response = await AuditLogsAPI.userMetricLogs(selectedUser.user_id, {
-          ...buildRangeParams(dateRange),
-          page,
-          limit: pageSize,
-          metric: detailMetric,
-          title: filters?.title || undefined,
-          description: filters?.description || undefined,
-          request_type: filters?.request_type || undefined,
-          route: filters?.route || undefined,
-          sort_by: sort?.orderBy || "occurred_at",
-          sort_dir: sort?.orderDir || "desc",
-        });
+        const response = await AuditLogsAPI.userMetricLogs(
+          selectedUser.user_id,
+          {
+            ...buildRangeParams(dateRange),
+            page,
+            limit: pageSize,
+            metric: detailMetric,
+            title: filters?.title || undefined,
+            description: filters?.description || undefined,
+            request_type: filters?.request_type || undefined,
+            route: filters?.route || undefined,
+            sort_by: sort?.orderBy || "occurred_at",
+            sort_dir: sort?.orderDir || "desc",
+          },
+        );
         const payload = normalizeDetailPayload(response);
         startTransition(() => {
           setDetailSummary(
@@ -433,7 +474,8 @@ export default function CompanyUserMetricsPage() {
         };
       } catch (requestError) {
         setDetailError(
-          requestError?.response?.data?.error?.message || t("messages.loadDetailError"),
+          requestError?.response?.data?.error?.message ||
+            t("messages.loadDetailError"),
         );
         return { list: [], total: 0 };
       }
@@ -450,14 +492,34 @@ export default function CompanyUserMetricsPage() {
               <Typography.Title level={4} style={{ margin: 0 }}>
                 {t("title")}
               </Typography.Title>
-              <Typography.Text type="secondary">{t("subtitle")}</Typography.Text>
+              <Typography.Text type="secondary">
+                {t("subtitle")}
+              </Typography.Text>
             </div>
             <Space wrap>
               <RangePicker
                 value={dateRange}
-                onChange={(value) => setDateRange(value || DEFAULT_RANGE)}
+                allowClear={false}
+                disabledDate={(current) =>
+                  Boolean(
+                    current &&
+                      (current.isBefore(
+                        moment()
+                          .subtract(AUDIT_RETENTION_DAYS - 1, "days")
+                          .startOf("day"),
+                        "day",
+                      ) ||
+                        current.isAfter(moment().endOf("day"), "day")),
+                  )
+                }
+                onChange={(value) =>
+                  setDateRange(value || createDefaultRange())
+                }
               />
-              <Button icon={<ReloadOutlined />} onClick={() => void loadSummary()}>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => void loadSummary()}
+              >
                 {tActions("refresh")}
               </Button>
             </Space>
@@ -486,7 +548,9 @@ export default function CompanyUserMetricsPage() {
         </div>
 
         <Card className="rounded-2xl">
-          {error ? <Alert type="error" showIcon message={error} className="mb-4" /> : null}
+          {error ? (
+            <Alert type="error" showIcon message={error} className="mb-4" />
+          ) : null}
 
           {loading ? null : !rows.length ? (
             <Empty description={t("messages.empty")} />
@@ -572,8 +636,12 @@ export default function CompanyUserMetricsPage() {
 
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1">
-                  <Typography.Text strong>{selectedUser.full_name || "-"}</Typography.Text>
-                  <div className="text-sm text-slate-500">{selectedUser.email || "-"}</div>
+                  <Typography.Text strong>
+                    {selectedUser.full_name || "-"}
+                  </Typography.Text>
+                  <div className="text-sm text-slate-500">
+                    {selectedUser.email || "-"}
+                  </div>
                 </div>
                 <Space wrap>
                   <Select
@@ -582,7 +650,10 @@ export default function CompanyUserMetricsPage() {
                       setDetailMetric(value);
                     }}
                     options={[
-                      { value: "completed", label: t("metricLabels.completed") },
+                      {
+                        value: "completed",
+                        label: t("metricLabels.completed"),
+                      },
                       { value: "shipped", label: t("metricLabels.shipped") },
                       { value: "scrap", label: t("metricLabels.scrap") },
                       { value: "remake", label: t("metricLabels.remake") },
@@ -590,13 +661,18 @@ export default function CompanyUserMetricsPage() {
                     ]}
                     style={{ minWidth: 180 }}
                   />
-                  <Button icon={<ReloadOutlined />} onClick={() => detailTableRef.current?.reload?.()}>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={() => detailTableRef.current?.reload?.()}
+                  >
                     {tActions("refresh")}
                   </Button>
                 </Space>
               </div>
 
-              {detailError ? <Alert type="error" showIcon message={detailError} /> : null}
+              {detailError ? (
+                <Alert type="error" showIcon message={detailError} />
+              ) : null}
 
               <CrudTable
                 ref={detailTableRef}

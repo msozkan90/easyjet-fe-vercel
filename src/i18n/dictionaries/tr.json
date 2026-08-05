@@ -783,7 +783,7 @@
     },
     "userMetrics": {
       "title": "Kullanıcı Metrikleri",
-      "subtitle": "Kullanıcı bazında başarılı audit loglarını tarih aralığına göre inceleyin.",
+      "subtitle": "Kullanıcı bazında son 180 günlük audit loglarını tarih aralığına göre inceleyin.",
       "stats": {
         "total": "Toplam Log",
         "completed": "Tamamlanan Logları",
