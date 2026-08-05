@@ -141,7 +141,7 @@ const AddressBlock = ({ title, rows }) => (
   <Card
     title={title}
     className="rounded-2xl border border-slate-100 shadow-sm"
-    bodyStyle={{ padding: 16 }}
+    styles={{ body: { padding: 16 } }}
     size="small"
   >
     <div className="grid gap-3 sm:grid-cols-2">
@@ -184,7 +184,7 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
   return (
     <Card
       className="rounded-2xl border border-slate-100 shadow-sm"
-      bodyStyle={{ padding: 16 }}
+      styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
@@ -262,7 +262,10 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
     .join(" / ");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 16 }}>
+    <Card
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      styles={{ body: { padding: 16 } }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -348,12 +351,14 @@ const ItemDesignPreview = ({
             key={design?.id || positionId}
             title={positionName}
             className="rounded-2xl border border-slate-100 shadow-sm"
-            bodyStyle={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              flex: 1,
-              padding: 16,
+            styles={{
+              body: {
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                flex: 1,
+                padding: 16,
+              },
             }}
           >
             <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
@@ -430,6 +435,7 @@ const OrderItemCard = ({
   positionMap,
   tOrders,
   tDesign,
+  tCommonActions,
   fallbackText,
 }) => {
   const options = Array.isArray(item?.options) ? item.options : [];
@@ -439,7 +445,7 @@ const OrderItemCard = ({
     <Card
       key={item?.id}
       className="rounded-3xl border border-slate-100 shadow-sm"
-      bodyStyle={{ padding: 20 }}
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="w-full max-w-[260px] rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -868,7 +874,7 @@ export default function OrderDetailPage() {
           <div className="grid gap-4 lg:grid-cols-3">
             <Card
               className="rounded-2xl border border-slate-100 shadow-sm"
-              bodyStyle={{ padding: 16 }}
+              styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.customer")} />
               <div className="mt-4 grid gap-3">
@@ -890,7 +896,7 @@ export default function OrderDetailPage() {
             </Card>
             <Card
               className="rounded-2xl border border-slate-100 shadow-sm"
-              bodyStyle={{ padding: 16 }}
+              styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.shipping")} />
               <div className="mt-4 grid gap-3">
@@ -912,7 +918,7 @@ export default function OrderDetailPage() {
             </Card>
             <Card
               className="rounded-2xl border border-slate-100 shadow-sm"
-              bodyStyle={{ padding: 16 }}
+              styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.package")} />
               <div className="mt-4 grid gap-3">
@@ -966,7 +972,7 @@ export default function OrderDetailPage() {
           </div>
           <Card
             className="rounded-2xl border border-slate-100 shadow-sm"
-            bodyStyle={{ padding: 16 }}
+            styles={{ body: { padding: 16 } }}
           >
             <SectionHeader title={tDesign("sections.notes")} />
             <div className="mt-4 grid gap-3">
@@ -1013,6 +1019,7 @@ export default function OrderDetailPage() {
                     positionMap={positionMap}
                     tOrders={tOrders}
                     tDesign={tDesign}
+                    tCommonActions={tCommonActions}
                     fallbackText={fallbackText}
                   />
                 );
