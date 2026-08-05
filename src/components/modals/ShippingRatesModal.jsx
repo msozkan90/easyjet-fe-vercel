@@ -15,8 +15,13 @@ import {
   Tabs,
   Tag,
   Typography,
+  Upload,
 } from "antd";
-import { EditOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  ReloadOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import {
   NestShipperAPI,
@@ -179,6 +184,19 @@ const SERVICE_TABS = {
   PARTNER: "partner",
 };
 
+const LABEL_MODES = {
+  PURCHASE: "purchase_label",
+  UPLOAD: "upload_label",
+};
+
+const LABEL_FILE_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]);
+const MAX_LABEL_FILE_SIZE = 20 * 1024 * 1024;
+
 const createServiceEntry = () => ({
   rates: [],
   loading: false,
@@ -216,6 +234,10 @@ const ShippingRatesModal = ({
   const [activeServiceTab, setActiveServiceTab] = useState(
     SERVICE_TABS.EASYJET,
   );
+  const [activeLabelMode, setActiveLabelMode] = useState(
+    LABEL_MODES.PURCHASE,
+  );
+  const [labelFiles, setLabelFiles] = useState([]);
   const [sendingProduction, setSendingProduction] = useState(false);
 
   const orderId = record?.order?.id ?? record?.order_id;
@@ -285,11 +307,15 @@ const ShippingRatesModal = ({
 
   useEffect(() => {
     resetServiceState();
+    setActiveLabelMode(LABEL_MODES.PURCHASE);
+    setLabelFiles([]);
   }, [orderId, resetServiceState]);
 
   useEffect(() => {
     if (!open) {
       resetServiceState();
+      setActiveLabelMode(LABEL_MODES.PURCHASE);
+      setLabelFiles([]);
     }
   }, [open, resetServiceState]);
 
@@ -452,15 +478,45 @@ const ShippingRatesModal = ({
     return Number.isFinite(amount) ? amount : 0;
   }, [selectedRate]);
 
-  const grandTotal = orderItemsTotal + selectedRateAmount;
+  const selectedLabelFile =
+    labelFiles[0]?.originFileObj ||
+    (typeof File !== "undefined" && labelFiles[0] instanceof File
+      ? labelFiles[0]
+      : null);
+  const isUploadMode = activeLabelMode === LABEL_MODES.UPLOAD;
+  const grandTotal =
+    orderItemsTotal + (isUploadMode ? 0 : selectedRateAmount);
   const canSendToProduction =
-    Boolean(selectedRate) &&
-    selectedRateAmount > 0 &&
-    activeServiceData.isQuoteFresh;
+    Boolean(orderId) &&
+    (isUploadMode
+      ? Boolean(selectedLabelFile)
+      : Boolean(selectedRate) &&
+        selectedRateAmount > 0 &&
+        activeServiceData.isQuoteFresh);
+
+  const validateLabelFile = useCallback(
+    (file) => {
+      if (!LABEL_FILE_TYPES.has(file?.type)) {
+        message.error(tShipping("upload.invalidType"));
+        return Upload.LIST_IGNORE;
+      }
+      if (Number(file?.size || 0) > MAX_LABEL_FILE_SIZE) {
+        message.error(tShipping("upload.invalidSize"));
+        return Upload.LIST_IGNORE;
+      }
+      return false;
+    },
+    [message, tShipping],
+  );
 
   const handleSendToProduction = useCallback(async () => {
-    if (!orderId || !selectedRate) return;
-    if (!activeServiceData.isQuoteFresh) {
+    if (!orderId) return;
+    if (isUploadMode && !selectedLabelFile) {
+      message.warning(tShipping("upload.required"));
+      return;
+    }
+    if (!isUploadMode && !selectedRate) return;
+    if (!isUploadMode && !activeServiceData.isQuoteFresh) {
       message.warning(tShipping("errors.mustRefreshRates"));
       return;
     }
@@ -469,34 +525,42 @@ const ShippingRatesModal = ({
     const weightValue =
       oz !== null && oz > 0 ? oz : lb !== null && lb > 0 ? lb * 16 : 0;
 
-    const payload = {
-      carrier_service: selectedRate,
-      order_id: orderId,
-      shipping_price: selectedRateAmount,
-      order_price: orderItemsTotal,
-      weight: {
-        units: "ounces",
-        value: weightValue,
-        WeightUnits: 1,
-      },
-      dimensions: {
-        units: "inches",
-        width: normalizeNumber(quoteValues.widthIn) ?? 0,
-        height: normalizeNumber(quoteValues.heightIn) ?? 0,
-        length: normalizeNumber(quoteValues.lengthIn) ?? 0,
-      },
-      source: (() => {
-        if (activeServiceTab === SERVICE_TABS.EASYJET) return "easyjet";
-        if (activeServiceTab === SERVICE_TABS.COMPANY)
-          return "shipStationCompany";
-        if (activeServiceTab === SERVICE_TABS.PARTNER)
-          return "shipStationPartner";
-      })(),
-    };
-
     setSendingProduction(true);
     try {
-      await OrdersAPI.sendToProduction(payload);
+      if (isUploadMode) {
+        const payload = new FormData();
+        payload.append("order_id", String(orderId));
+        payload.append("order_price", String(orderItemsTotal));
+        payload.append("source", "self_label");
+        payload.append("label_file", selectedLabelFile);
+        await OrdersAPI.sendToProductionWithLabel(payload);
+      } else {
+        const payload = {
+          carrier_service: selectedRate,
+          order_id: orderId,
+          shipping_price: selectedRateAmount,
+          order_price: orderItemsTotal,
+          weight: {
+            units: "ounces",
+            value: weightValue,
+            WeightUnits: 1,
+          },
+          dimensions: {
+            units: "inches",
+            width: normalizeNumber(quoteValues.widthIn) ?? 0,
+            height: normalizeNumber(quoteValues.heightIn) ?? 0,
+            length: normalizeNumber(quoteValues.lengthIn) ?? 0,
+          },
+          source: (() => {
+            if (activeServiceTab === SERVICE_TABS.EASYJET) return "easyjet";
+            if (activeServiceTab === SERVICE_TABS.COMPANY)
+              return "shipStationCompany";
+            if (activeServiceTab === SERVICE_TABS.PARTNER)
+              return "shipStationPartner";
+          })(),
+        };
+        await OrdersAPI.sendToProduction(payload);
+      }
       message.success(tShipping("actions.sendSuccess"));
       try {
         const walletResp = await WalletAPI.getBalance();
@@ -520,6 +584,7 @@ const ShippingRatesModal = ({
     orderId,
     orderItemsTotal,
     activeServiceData.isQuoteFresh,
+    isUploadMode,
     activeServiceTab,
     quoteValues.heightIn,
     quoteValues.lengthIn,
@@ -528,6 +593,7 @@ const ShippingRatesModal = ({
     quoteValues.widthIn,
     selectedRate,
     selectedRateAmount,
+    selectedLabelFile,
     dispatch,
     onClose,
     onSendSuccess,
@@ -569,8 +635,16 @@ const ShippingRatesModal = ({
       footer={[
         <Popconfirm
           key="send"
-          title={tShipping("actions.confirmSendTitle")}
-          description={tShipping("actions.confirmSendDescription")}
+          title={tShipping(
+            isUploadMode
+              ? "actions.confirmUploadTitle"
+              : "actions.confirmSendTitle",
+          )}
+          description={tShipping(
+            isUploadMode
+              ? "actions.confirmUploadDescription"
+              : "actions.confirmSendDescription",
+          )}
           okText={tShipping("actions.confirmSendOk")}
           cancelText={tCommonActions("cancel")}
           onConfirm={handleSendToProduction}
@@ -731,7 +805,15 @@ const ShippingRatesModal = ({
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <Tabs
+            activeKey={activeLabelMode}
+            onChange={setActiveLabelMode}
+            items={[
+              {
+                key: LABEL_MODES.PURCHASE,
+                label: tShipping("modes.purchase"),
+                children: (
+                  <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
@@ -918,7 +1000,38 @@ const ShippingRatesModal = ({
                 />
               ) : null}
             </div>
-          </div>
+                  </div>
+                ),
+              },
+              {
+                key: LABEL_MODES.UPLOAD,
+                label: tShipping("modes.upload"),
+                children: (
+                  <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+                    <Typography.Title level={4} style={{ marginTop: 0 }}>
+                      {tShipping("upload.title")}
+                    </Typography.Title>
+                    <Typography.Paragraph type="secondary">
+                      {tShipping("upload.help")}
+                    </Typography.Paragraph>
+                    <Upload
+                      accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+                      maxCount={1}
+                      fileList={labelFiles}
+                      beforeUpload={validateLabelFile}
+                      onChange={({ fileList }) =>
+                        setLabelFiles(fileList.slice(-1))
+                      }
+                    >
+                      <Button icon={<UploadOutlined />}>
+                        {tShipping("upload.action")}
+                      </Button>
+                    </Upload>
+                  </div>
+                ),
+              },
+            ]}
+          />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
@@ -954,7 +1067,11 @@ const ShippingRatesModal = ({
                   {tShipping("summary.shipping")}
                 </span>
                 <span className="text-base font-semibold text-gray-900">
-                  $ {safeFormatAmount(selectedRateAmount, tCommon("none"))}
+                  ${" "}
+                  {safeFormatAmount(
+                    isUploadMode ? 0 : selectedRateAmount,
+                    tCommon("none"),
+                  )}
                 </span>
               </div>
               <Divider style={{ margin: "8px 0" }} />

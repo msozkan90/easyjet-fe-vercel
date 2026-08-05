@@ -2627,6 +2627,18 @@
       "shippingModal": {
         "title": "Shipping Rates",
         "empty": "No order item selected.",
+        "modes": {
+          "purchase": "Purchase Label",
+          "upload": "Upload Label"
+        },
+        "upload": {
+          "title": "Upload Label",
+          "help": "Upload one PDF, PNG, JPG, JPEG or WEBP label file up to 20 MB.",
+          "action": "Select Label File",
+          "required": "Please select a label file before sending to production.",
+          "invalidType": "Label must be a PDF, PNG, JPG, JPEG or WEBP file.",
+          "invalidSize": "Label file must not exceed 20 MB."
+        },
         "items": {
           "title": "Order Items",
           "subtitle": "Child items are listed together.",
@@ -2684,6 +2696,8 @@
           "sendError": "Order could not be sent to production.",
           "confirmSendTitle": "Send to production and buy label?",
           "confirmSendDescription": "We will purchase the selected shipping label and send this order to production. Continue?",
+          "confirmUploadTitle": "Send to production with uploaded label?",
+          "confirmUploadDescription": "The uploaded label will be saved as a self label and this order will be sent to production. Continue?",
           "confirmSendOk": "Yes, send"
         },
         "errors": {

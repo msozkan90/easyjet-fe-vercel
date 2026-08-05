@@ -166,6 +166,8 @@ export const OrdersAPI = {
   saveDesign: (formData) => api.putMultipart("/orders/items", formData),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
+  sendToProductionWithLabel: (formData, config = {}) =>
+    api.postMultipart("/orders/production", formData, config),
 
   DownloadPdf: (payload, config = {}) =>
     fetchBlobFilePost("/orders/download/pdf", {
