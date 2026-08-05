@@ -783,7 +783,7 @@
     },
     "userMetrics": {
       "title": "Kullanıcı Metrikleri",
-      "subtitle": "Kullanıcı bazında başarılı audit loglarını tarih aralığına göre inceleyin.",
+      "subtitle": "Kullanıcı bazında son 180 günlük audit loglarını tarih aralığına göre inceleyin.",
       "stats": {
         "total": "Toplam Log",
         "completed": "Tamamlanan Logları",
@@ -2429,6 +2429,18 @@
       "shippingModal": {
         "title": "Kargo Fiyatları",
         "empty": "Seçili sipariş satırı bulunamadı.",
+        "modes": {
+          "purchase": "Label Satın Al",
+          "upload": "Label Yükle"
+        },
+        "upload": {
+          "title": "Label Yükle",
+          "help": "En fazla 20 MB boyutunda bir PDF, PNG, JPG, JPEG veya WEBP label dosyası yükleyin.",
+          "action": "Label Dosyası Seç",
+          "required": "Üretime göndermeden önce bir label dosyası seçin.",
+          "invalidType": "Label dosyası PDF, PNG, JPG, JPEG veya WEBP olmalıdır.",
+          "invalidSize": "Label dosyası 20 MB boyutunu aşamaz."
+        },
         "items": {
           "title": "Sipariş Kalemleri",
           "subtitle": "Bağlı kalemler tek listede gösterilir.",
@@ -2486,6 +2498,8 @@
           "sendError": "Sipariş üretime gönderilemedi.",
           "confirmSendTitle": "Üretime gönderip etiketi satın al?",
           "confirmSendDescription": "Seçili kargo etiketi satın alınacak ve sipariş üretime gönderilecek. Devam edilsin mi?",
+          "confirmUploadTitle": "Yüklenen label ile üretime gönderilsin mi?",
+          "confirmUploadDescription": "Yüklenen dosya self label olarak kaydedilecek ve sipariş üretime gönderilecek. Devam edilsin mi?",
           "confirmSendOk": "Evet, gönder"
         },
         "errors": {
