@@ -131,6 +131,7 @@ export default function Sidebar({ collapsed }) {
         .filter((subCategory) => subCategory?.id)
         .map((subCategory) => ({
           key: `transfer-order-list-sub-${category.id}-${subCategory.id}`,
+          className: "sidebar-subcategory-item",
           icon: <TagsOutlined />,
           label: (
             <Link
@@ -147,6 +148,7 @@ export default function Sidebar({ collapsed }) {
         ...subCategoryMenuItems,
         {
           key: `transfer-order-list-others-${category.id}`,
+          className: "sidebar-subcategory-item sidebar-subcategory-item--other",
           icon: <TagsOutlined />,
           label: (
             <Link href="/dashboard/transfer-orders/orders?withoutSubCategory=1">
@@ -201,6 +203,7 @@ export default function Sidebar({ collapsed }) {
 
       const subCategoryItems = subCategories.map((subCategory) => ({
         key: `subcategory-${category.id}-${subCategory.id}`,
+        className: "sidebar-subcategory-item",
         icon: <TagsOutlined />,
         label: subCategory.name || tSidebar("common.subCategory"),
         children: [
@@ -249,6 +252,7 @@ export default function Sidebar({ collapsed }) {
 
       return {
         key: `category-${category.id}`,
+        className: "sidebar-category-item",
         icon: <AppstoreOutlined />,
         label: category.name || tSidebar("common.category"),
         children: [...categoryItems, ...subCategoryItems],
@@ -265,6 +269,7 @@ export default function Sidebar({ collapsed }) {
         .filter((subCategory) => subCategory?.id)
         .map((subCategory) => ({
           key: `transfer-subcategory-${category.id}-${subCategory.id}`,
+          className: "sidebar-subcategory-item",
           icon: <TagsOutlined />,
           label: subCategory.name || tSidebar("common.subCategory"),
           children: [
@@ -293,12 +298,15 @@ export default function Sidebar({ collapsed }) {
 
       return {
         key: `transfer-category-${category.id}`,
+        className: "sidebar-category-item",
         icon: <AppstoreOutlined />,
         label: category.name || tSidebar("common.transfer"),
         children: [
           ...subCategoryItems,
           {
             key: `transfer-subcategory-${category.id}-others`,
+            className:
+              "sidebar-subcategory-item sidebar-subcategory-item--other",
             icon: <TagsOutlined />,
             label: tSidebar("order.others"),
             children: [
@@ -419,9 +427,7 @@ export default function Sidebar({ collapsed }) {
                                 key: "order-report",
                                 label: (
                                   <Link href="/dashboard/order-report">
-                                    {tSidebar(
-                                      "financial.orderReport",
-                                    )}
+                                    {tSidebar("financial.orderReport")}
                                   </Link>
                                 ),
                               },
@@ -433,9 +439,7 @@ export default function Sidebar({ collapsed }) {
                                 key: "transfer-order-report",
                                 label: (
                                   <Link href="/dashboard/transfer-order-report">
-                                    {tSidebar(
-                                      "financial.transferOrderReport",
-                                    )}
+                                    {tSidebar("financial.transferOrderReport")}
                                   </Link>
                                 ),
                               },
@@ -1247,6 +1251,7 @@ export default function Sidebar({ collapsed }) {
       </div>
 
       <Menu
+        className="sidebar-navigation"
         mode="inline"
         items={items}
         style={{
