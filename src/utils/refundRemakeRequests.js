@@ -47,14 +47,16 @@ export const buildRefundRemakeListPayload = ({
     : [
         {
           field: normalizeSortField(sort?.orderBy),
-          dir: normalizeSortDirection(sort?.orderDir),
+          direction: normalizeSortDirection(sort?.orderDir),
         },
       ];
 
   const normalizedOrderBy = orderBy
     .map((item) => ({
       field: normalizeSortField(item?.field || item?.orderBy),
-      dir: normalizeSortDirection(item?.dir || item?.orderDir),
+      direction: normalizeSortDirection(
+        item?.direction || item?.dir || item?.orderDir
+      ),
     }))
     .filter((item) => item.field);
 
@@ -69,7 +71,7 @@ export const buildRefundRemakeListPayload = ({
       pageSize: toPositiveInteger(pageSize, 10),
       orderBy: normalizedOrderBy.length
         ? normalizedOrderBy
-        : [{ field: "created_at", dir: "desc" }],
+        : [{ field: "created_at", direction: "desc" }],
     },
   };
 };

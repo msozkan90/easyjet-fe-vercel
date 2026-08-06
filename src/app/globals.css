@@ -56,6 +56,86 @@ body,
   background-color: rgba(24, 144, 255, 0.08);
 }
 
+/* Sidebar taxonomy hierarchy: categories are primary groups, subcategories are secondary. */
+.sidebar-category-item > .ant-menu-submenu-title,
+.sidebar-subcategory-item > .ant-menu-submenu-title,
+.sidebar-subcategory-item.ant-menu-item {
+  position: relative;
+  overflow: hidden;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.sidebar-category-item > .ant-menu-submenu-title {
+  margin-block: 4px 2px;
+  background: #f3f7fd;
+  color: #31577d;
+  font-weight: 650;
+}
+
+.sidebar-category-item > .ant-menu-submenu-title::before,
+.sidebar-subcategory-item > .ant-menu-submenu-title::before,
+.sidebar-subcategory-item.ant-menu-item::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 0 999px 999px 0;
+}
+
+.sidebar-category-item > .ant-menu-submenu-title::before {
+  background: #6b8db0;
+}
+
+.sidebar-category-item > .ant-menu-submenu-title:hover,
+.sidebar-category-item.ant-menu-submenu-open > .ant-menu-submenu-title {
+  background: #eaf1f9 !important;
+  color: #274968 !important;
+}
+
+.sidebar-subcategory-item > .ant-menu-submenu-title,
+.sidebar-subcategory-item.ant-menu-item {
+  background: transparent;
+  color: #4b716e;
+  font-weight: 550;
+}
+
+.sidebar-subcategory-item > .ant-menu-submenu-title::before,
+.sidebar-subcategory-item.ant-menu-item::before {
+  background: #8aaba7;
+}
+
+.sidebar-subcategory-item > .ant-menu-submenu-title .ant-menu-item-icon,
+.sidebar-subcategory-item.ant-menu-item .ant-menu-item-icon {
+  color: #688985;
+}
+
+.sidebar-subcategory-item > .ant-menu-submenu-title:hover,
+.sidebar-subcategory-item.ant-menu-submenu-open > .ant-menu-submenu-title,
+.sidebar-subcategory-item.ant-menu-item:hover,
+.sidebar-subcategory-item.ant-menu-item-selected {
+  background: #f1f7f6 !important;
+  color: #365e5a !important;
+}
+
+.sidebar-subcategory-item--other > .ant-menu-submenu-title,
+.sidebar-subcategory-item--other.ant-menu-item {
+  background: transparent;
+  color: #526174;
+}
+
+.sidebar-subcategory-item--other > .ant-menu-submenu-title::before,
+.sidebar-subcategory-item--other.ant-menu-item::before {
+  background: #94a3b8;
+}
+
+.sidebar-subcategory-item--other > .ant-menu-submenu-title .ant-menu-item-icon,
+.sidebar-subcategory-item--other.ant-menu-item .ant-menu-item-icon {
+  color: #64748b;
+}
+
 .ant-table-row.transfer-status-row > td,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-right {

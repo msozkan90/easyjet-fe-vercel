@@ -2961,6 +2961,7 @@
         },
         "fields": {
           "pdfName": "PDF Name",
+          "pdfStatus": "PDF Status",
           "category": "Category",
           "subCategory": "Sub Category",
           "designs": "Designs",
@@ -2980,7 +2981,9 @@
           "active": "Active",
           "inactive": "Inactive",
           "uploaded": "Uploaded",
-          "downloaded": "Downloaded"
+          "downloaded": "Downloaded",
+          "pdfReady": "PDF Ready",
+          "pdfDownloaded": "PDF Downloaded"
         },
         "empty": {
           "pdfs": "No downloaded PDFs found.",
@@ -3008,6 +3011,8 @@
           "designDownloaded": "Design downloaded.",
           "designsDownloaded": "Designs downloaded.",
           "designDownloadFailed": "Designs could not be downloaded.",
+          "pdfDownloaded": "PDF downloaded.",
+          "pdfDownloadFailed": "PDF could not be downloaded.",
           "uploadQueued": "{count} design upload queued."
         },
         "uploadQueue": {
@@ -3058,7 +3063,7 @@
         "actions": "Actions"
       },
       "filters": {
-        "orderId": "Order ID",
+        "orderId": "Order # / Order ID",
         "requestType": "Request type",
         "status": "Status"
       },

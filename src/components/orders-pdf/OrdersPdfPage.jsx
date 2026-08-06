@@ -54,6 +54,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [designs, setDesigns] = useState([]);
   const [designsLoading, setDesignsLoading] = useState(false);
+  const [downloadingPdfIds, setDownloadingPdfIds] = useState({});
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [downloadingDesignIds, setDownloadingDesignIds] = useState({});
   const handledSuccessTaskIdsRef = useRef(new Set());
@@ -206,6 +207,36 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     [message, refreshAfterDesignDownload, t],
   );
 
+  const handleDownloadPdf = useCallback(
+    async (pdf) => {
+      if (!pdf?.id) return;
+      setDownloadingPdfIds((prev) => ({ ...prev, [pdf.id]: true }));
+      try {
+        const { blob, filename } = await OrdersPdfAPI.downloadPdf(pdf.id);
+        saveBlobAsFile(blob, filename);
+        setSelectedPdf((current) =>
+          current?.id === pdf.id
+            ? { ...current, pdf_status: "pdf_downloaded" }
+            : current,
+        );
+        await loadRows();
+        message.success(t("messages.pdfDownloaded"));
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message ||
+            t("messages.pdfDownloadFailed"),
+        );
+      } finally {
+        setDownloadingPdfIds((prev) => {
+          const next = { ...prev };
+          delete next[pdf.id];
+          return next;
+        });
+      }
+    },
+    [loadRows, message, t],
+  );
+
   const handleDownloadAllDesigns = useCallback(async () => {
     if (!selectedPdf?.id) return;
     setBulkDownloading(true);
@@ -243,11 +274,24 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         <Button
           type="link"
           icon={<DownloadOutlined />}
-          onClick={() => openUrl(row.pdf_url)}
+          loading={Boolean(downloadingPdfIds[row.id])}
+          onClick={() => handleDownloadPdf(row)}
         >
           {value || t("empty.unnamedPdf")}
         </Button>
       ),
+    },
+    {
+      title: t("fields.pdfStatus"),
+      dataIndex: "pdf_status",
+      render: (value) => (
+        <Tag color={value === "pdf_downloaded" ? "success" : "processing"}>
+          {value === "pdf_downloaded"
+            ? t("status.pdfDownloaded")
+            : t("status.pdfReady")}
+        </Tag>
+      ),
+      width: 150,
     },
     {
       title: t("fields.designs"),
@@ -432,7 +476,8 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
             <Space wrap>
               <Button
                 icon={<DownloadOutlined />}
-                onClick={() => openUrl(selectedPdf.pdf_url)}
+                loading={Boolean(downloadingPdfIds[selectedPdf.id])}
+                onClick={() => handleDownloadPdf(selectedPdf)}
               >
                 {t("actions.downloadPdf")}
               </Button>

@@ -183,6 +183,11 @@ export const OrdersAPI = {
 export const OrdersPdfAPI = {
   list: (payload) => api.post("/orders-pdf/list", payload),
   get: (id) => api.get(`/orders-pdf/${encodeURIComponent(id)}`),
+  downloadPdf: (id, config = {}) =>
+    fetchBlobFile(`/orders-pdf/${encodeURIComponent(id)}/download`, {
+      config,
+      fallbackFilename: "orders.pdf",
+    }),
   create: (payload) => api.post("/orders-pdf", payload),
   update: (id, payload) =>
     api.put(`/orders-pdf/${encodeURIComponent(id)}`, payload),
