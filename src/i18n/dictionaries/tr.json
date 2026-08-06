@@ -2763,6 +2763,7 @@
         },
         "fields": {
           "pdfName": "PDF Adı",
+          "pdfStatus": "PDF Durumu",
           "category": "Kategori",
           "subCategory": "Alt Kategori",
           "designs": "Tasarımlar",
@@ -2782,7 +2783,9 @@
           "active": "Aktif",
           "inactive": "Pasif",
           "uploaded": "Yüklendi",
-          "downloaded": "İndirildi"
+          "downloaded": "İndirildi",
+          "pdfReady": "PDF Hazır",
+          "pdfDownloaded": "PDF İndirildi"
         },
         "empty": {
           "pdfs": "İndirilen PDF bulunamadı.",
@@ -2810,6 +2813,8 @@
           "designDownloaded": "Tasarım indirildi.",
           "designsDownloaded": "Tasarımlar indirildi.",
           "designDownloadFailed": "Tasarımlar indirilemedi.",
+          "pdfDownloaded": "PDF indirildi.",
+          "pdfDownloadFailed": "PDF indirilemedi.",
           "uploadQueued": "{count} tasarım yüklemesi sıraya alındı."
         },
         "uploadQueue": {
