@@ -19,6 +19,8 @@ const createDefaultFilters = () => ({
   status: undefined,
 });
 
+const EMPTY_FIXED_FILTERS = Object.freeze({});
+
 const cleanFilters = (filters = {}) =>
   Object.fromEntries(
     Object.entries(filters).filter(([, value]) => {
@@ -36,7 +38,7 @@ const STATUS_COLORS = {
 
 export default function RefundRemakeRequestsListPage({
   requireRoles = ["customerAdmin"],
-  fixedFilters = {},
+  fixedFilters = EMPTY_FIXED_FILTERS,
   basePath = "/dashboard/orders/refund-remake",
   hideStatusFilter = false,
   listApi = RefundRemakeRequestsAPI,
@@ -143,6 +145,11 @@ export default function RefundRemakeRequestsListPage({
         title: t("columns.requestType"),
         dataIndex: "request_type",
         sorter: true,
+        filter: {
+          type: "select",
+          options: requestTypeOptions,
+          placeholder: t("filters.requestType"),
+        },
         render: (value) =>
           value === "remake" ? t("requestType.remake") : t("requestType.refund"),
       },
@@ -150,6 +157,11 @@ export default function RefundRemakeRequestsListPage({
         title: t("columns.status"),
         dataIndex: "status",
         sorter: true,
+        filter: {
+          type: "select",
+          options: statusOptions,
+          placeholder: t("filters.status"),
+        },
         render: (value) => (
           <Tag color={STATUS_COLORS[value] || "default"}>
             {t(`status.${value || "pending"}`)}
@@ -158,7 +170,8 @@ export default function RefundRemakeRequestsListPage({
       },
       {
         title: t("columns.order"),
-        dataIndex: "order_id",
+        dataIndex: orderFilterKey,
+        filter: { type: "text", placeholder: t("filters.orderId") },
         render: (_, record) =>
           record?.[orderResponseKey]?.order_number ||
           record?.transfer_order?.order_number ||
@@ -205,7 +218,15 @@ export default function RefundRemakeRequestsListPage({
     }
 
     return baseColumns;
-  }, [basePath, orderFilterKey, orderResponseKey, showResponsibleEntityColumn, t]);
+  }, [
+    basePath,
+    orderFilterKey,
+    orderResponseKey,
+    requestTypeOptions,
+    showResponsibleEntityColumn,
+    statusOptions,
+    t,
+  ]);
 
   return (
     <RequireRole anyOfRoles={requireRoles}>

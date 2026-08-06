@@ -3058,7 +3058,7 @@
         "actions": "Actions"
       },
       "filters": {
-        "orderId": "Order ID",
+        "orderId": "Order # / Order ID",
         "requestType": "Request type",
         "status": "Status"
       },

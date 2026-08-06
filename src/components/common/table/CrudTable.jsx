@@ -4,6 +4,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   useImperativeHandle,
   forwardRef,
@@ -230,6 +231,11 @@ const CrudTable = forwardRef(function CrudTable(
   });
   const [sortState, setSortState] = useState(initialSort);
   const [filters, setFilters] = useState(initialFilters);
+  const onFiltersChangeRef = useRef(onFiltersChange);
+
+  useEffect(() => {
+    onFiltersChangeRef.current = onFiltersChange;
+  }, [onFiltersChange]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -279,8 +285,8 @@ const CrudTable = forwardRef(function CrudTable(
   ]);
 
   useEffect(() => {
-    onFiltersChange?.(filters);
-  }, [filters, onFiltersChange]);
+    onFiltersChangeRef.current?.(filters);
+  }, [filters]);
 
   // Column filterDropdown/filteredValue wiring
   const effectiveColumns = useMemo(() => {
