@@ -2216,7 +2216,11 @@
           "notePlaceholder": "Tasarım ekibine not bırakın",
           "positions": "Tasarım Pozisyonları",
           "positionsPlaceholder": "Ürün pozisyonlarını seçin",
-          "positionsEmpty": "Bu ürün için tanımlı pozisyon bulunmuyor."
+          "positionsEmpty": "Bu ürün için tanımlı pozisyon bulunmuyor.",
+          "printRouting": "Print'e yönlendir",
+          "printRoutingPlaceholder": "Print alt kategorisi seçin",
+          "printRoutingEmpty": "Aktif Print alt kategorisi bulunamadı.",
+          "printRoutingHelp": "İsteğe bağlıdır. Ürün Engraving olarak kalır; yalnızca bu sipariş satırı seçilen Print üretim akışını izler."
         },
         "positions": {
           "designUploadLabel": "Tasarım Yükle",
