@@ -2414,7 +2414,11 @@
           "notePlaceholder": "Add a note for the design team",
           "positions": "Design Positions",
           "positionsPlaceholder": "Select product positions",
-          "positionsEmpty": "No positions are configured for this product."
+          "positionsEmpty": "No positions are configured for this product.",
+          "printRouting": "Route to Print",
+          "printRoutingPlaceholder": "Select a Print subcategory",
+          "printRoutingEmpty": "No active Print subcategories found.",
+          "printRoutingHelp": "Optional. The product stays Engraving, while this order item follows the selected Print production flow."
         },
         "positions": {
           "designUploadLabel": "Upload Design",

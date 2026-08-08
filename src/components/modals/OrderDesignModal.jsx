@@ -18,6 +18,7 @@ import {
   Upload,
 } from "antd";
 import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
@@ -93,10 +94,14 @@ const createDesignSnapshot = ({
   selectedPositionIds,
   designFiles,
   isSubCategory,
+  routingSubCategoryId,
 }) =>
   JSON.stringify({
     note: note || "",
     isSubCategory: Boolean(isSubCategory),
+    routingSubCategoryId: routingSubCategoryId
+      ? String(routingSubCategoryId)
+      : null,
     selectedPositionIds: [...(selectedPositionIds || [])].map(String).sort(),
     designFiles: normalizeDesignFilesForSnapshot(designFiles),
   });
@@ -128,6 +133,10 @@ export default function OrderDesignModal({
     useUnsavedChangesPrompt();
   const itemId = orderItemId ? String(orderItemId) : "";
   const initialSnapshotRef = useRef("");
+  const user = useSelector((state) => state.auth.user);
+  const categoriesData = useSelector(
+    (state) => state.categories?.listWithSubCategories,
+  );
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [orderLoading, setOrderLoading] = useState(false);
@@ -137,6 +146,7 @@ export default function OrderDesignModal({
   const [selectedPositionIds, setSelectedPositionIds] = useState([]);
   const [designFiles, setDesignFiles] = useState({});
   const [isSubCategory, setIsSubCategory] = useState(false);
+  const [routingSubCategoryId, setRoutingSubCategoryId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [shouldHydrateFromOrder, setShouldHydrateFromOrder] = useState(false);
   const [deletingDesignIds, setDeletingDesignIds] = useState({});
@@ -151,6 +161,7 @@ export default function OrderDesignModal({
     setSelectedPositionIds([]);
     setDesignFiles({});
     setIsSubCategory(false);
+    setRoutingSubCategoryId(null);
     setSaving(false);
     setShouldHydrateFromOrder(false);
     setDeletingDesignIds({});
@@ -222,6 +233,7 @@ export default function OrderDesignModal({
     if (!shouldHydrateFromOrder) return;
     if (!orderDetail) {
       setNote("");
+      setRoutingSubCategoryId(null);
       setSelectedPositionIds([]);
       setDesignFiles({});
       setShouldHydrateFromOrder(false);
@@ -230,6 +242,10 @@ export default function OrderDesignModal({
 
     const nextNote = orderDetail?.notes || "";
     const nextIsSubCategory = Boolean(orderDetail?.is_sub_category);
+    const nextRoutingSubCategoryId =
+      orderDetail?.routing_sub_category_id ??
+      orderDetail?.routing_sub_category?.id ??
+      null;
     let nextSelectedPositionIds = [];
     let nextDesignFiles = {};
 
@@ -259,11 +275,13 @@ export default function OrderDesignModal({
 
     setNote(nextNote);
     setIsSubCategory(nextIsSubCategory);
+    setRoutingSubCategoryId(nextRoutingSubCategoryId);
     setSelectedPositionIds(nextSelectedPositionIds);
     setDesignFiles(nextDesignFiles);
     initialSnapshotRef.current = createDesignSnapshot({
       note: nextNote,
       isSubCategory: nextIsSubCategory,
+      routingSubCategoryId: nextRoutingSubCategoryId,
       selectedPositionIds: nextSelectedPositionIds,
       designFiles: nextDesignFiles,
     });
@@ -283,6 +301,7 @@ export default function OrderDesignModal({
     const currentSnapshot = createDesignSnapshot({
       note,
       isSubCategory,
+      routingSubCategoryId,
       selectedPositionIds,
       designFiles,
     });
@@ -293,6 +312,7 @@ export default function OrderDesignModal({
     note,
     open,
     orderDetail,
+    routingSubCategoryId,
     selectedPositionIds,
     shouldHydrateFromOrder,
   ]);
@@ -304,6 +324,37 @@ export default function OrderDesignModal({
     }
     return candidate;
   }, [orderDetail]);
+
+  const canRouteToPrint =
+    (user?.roles || []).includes("customeradmin") &&
+    String(orderDetail?.product?.category?.name || "")
+      .trim()
+      .toLowerCase() === "engraving";
+  const printSubCategoryOptions = useMemo(() => {
+    const categories = Array.isArray(categoriesData)
+      ? categoriesData
+      : Array.isArray(categoriesData?.items)
+        ? categoriesData.items
+        : Array.isArray(categoriesData?.data)
+          ? categoriesData.data
+          : [];
+    const printCategory = categories.find(
+      (category) =>
+        String(category?.name || "")
+          .trim()
+          .toLowerCase() === "print" &&
+        (!category?.status || category.status === "active"),
+    );
+    const subCategories = Array.isArray(printCategory?.sub_categories)
+      ? printCategory.sub_categories
+      : [];
+    return subCategories
+      .filter((item) => item?.id && (!item?.status || item.status === "active"))
+      .map((item) => ({
+        value: String(item.id),
+        label: item.name || `#${item.id}`,
+      }));
+  }, [categoriesData]);
 
   useEffect(() => {
     if (!open || !derivedProductId) {
@@ -482,6 +533,12 @@ export default function OrderDesignModal({
     formData.append("order_id", String(orderDetail.order_id));
     formData.append("note", note || "");
     formData.append("is_sub_category", String(Boolean(isSubCategory)));
+    if (canRouteToPrint) {
+      formData.append(
+        "routing_sub_category_id",
+        routingSubCategoryId ? String(routingSubCategoryId) : "",
+      );
+    }
 
     positionsToSubmit.forEach((positionId) => {
       formData.append("positions", String(positionId));
@@ -509,12 +566,14 @@ export default function OrderDesignModal({
       setSaving(false);
     }
   }, [
+    canRouteToPrint,
     designFiles,
     isSubCategory,
     message,
     note,
     onSaved,
     orderDetail,
+    routingSubCategoryId,
     selectedPositionIds,
     t,
   ]);
@@ -877,6 +936,27 @@ export default function OrderDesignModal({
             </Card>
 
             <Card title={t("fields.positions")}>
+              {canRouteToPrint ? (
+                <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                  <Typography.Text strong>
+                    {t("fields.printRouting")}
+                  </Typography.Text>
+                  <Select
+                    allowClear
+                    className="mt-2 w-full"
+                    value={routingSubCategoryId || undefined}
+                    onChange={(value) => setRoutingSubCategoryId(value || null)}
+                    options={printSubCategoryOptions}
+                    placeholder={t("fields.printRoutingPlaceholder")}
+                    optionFilterProp="label"
+                    showSearch
+                    notFoundContent={t("fields.printRoutingEmpty")}
+                  />
+                  <Typography.Text type="secondary" className="mt-2 block">
+                    {t("fields.printRoutingHelp")}
+                  </Typography.Text>
+                </div>
+              ) : null}
               {positionsLoading ? (
                 <Spin />
               ) : positions.length ? (
@@ -903,6 +983,7 @@ export default function OrderDesignModal({
                         <Switch
                           checked={isSubCategory}
                           onChange={setIsSubCategory}
+                          disabled={Boolean(routingSubCategoryId)}
                         />
                       </div>
                     ) : null}
