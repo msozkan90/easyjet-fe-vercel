@@ -1890,9 +1890,15 @@
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
         "hasDesign": "Tasarım",
+        "designChecklist": "Tasarım Kontrolü",
         "actions": "İşlemler",
         "notes": "Notlar",
         "designerNotes": "Tasarımcı Notları"
+      },
+      "designChecklist": {
+        "ready": "Hazır",
+        "notReady": "Hazır Değil",
+        "progress": "{completed}/{total} hazır"
       },
       "filters": {
         "searchOrderNumber": "Sipariş numarası ara",

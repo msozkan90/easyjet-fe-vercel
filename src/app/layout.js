@@ -14,7 +14,7 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata = {
-  title: "OrderTrack",
+  title: "Easyjet Connect",
   description: "Sipariş takip sistemi",
 };
 

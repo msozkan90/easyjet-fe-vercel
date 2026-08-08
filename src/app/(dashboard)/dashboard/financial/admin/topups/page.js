@@ -54,7 +54,10 @@ export default function WalletTopupsAdminListPage() {
       makeListRequest(
         WalletTopupsAPI.list,
         {
-          defaultSort: [{ field: "created_at", direction: "desc" }],
+          defaultSort: [
+            { field: "status", direction: "asc" },
+            { field: "created_at", direction: "desc" },
+          ],
         },
         normalizeListAndMeta
       ),

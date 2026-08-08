@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout, Menu, theme } from "antd";
+import { Avatar, Layout, Menu, theme, Tooltip } from "antd";
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
@@ -21,6 +21,7 @@ import {
   DollarCircleOutlined,
   TagsOutlined,
   BarChartOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 import Link from "next/link";
@@ -74,6 +75,27 @@ export default function Sidebar({ collapsed }) {
   });
   const { token } = theme.useToken();
   const tSidebar = useTranslations("dashboard.sidebar");
+  const tProfileRoles = useTranslations("dashboard.profile.roles");
+
+  const userDisplayName =
+    user?.displayName ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
+    user?.email ||
+    "—";
+  const primaryRole = String(roles[0] || "")
+    .trim()
+    .toLowerCase();
+  const translatedRole = tProfileRoles(primaryRole || "fallback");
+  const userRoleLabel = translatedRole.startsWith("dashboard.profile.roles.")
+    ? user?.role?.name || primaryRole || tProfileRoles("fallback")
+    : translatedRole;
+  const userInitials =
+    [user?.first_name, user?.last_name]
+      .filter(Boolean)
+      .map((part) => String(part).trim().charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || userDisplayName.charAt(0).toUpperCase();
 
   const userCategoryIds = new Set(
     (user?.user_categories || [])
@@ -460,63 +482,71 @@ export default function Sidebar({ collapsed }) {
                           },
                         ]
                       : []),
-                    {
-                      key: "transfer-payment-management",
-                      icon: <BankOutlined />,
-                      label: tSidebar("financial.transferPaymentManagement"),
-                      children: [
-                        ...(isCompanyAdmin || isCustomerAdmin
-                          ? [
+                    ...(hasTransferOrderCategory
+                      ? [
+                          {
+                            key: "transfer-payment-management",
+                            icon: <BankOutlined />,
+                            label: tSidebar(
+                              "financial.transferPaymentManagement",
+                            ),
+                            children: [
+                              ...(isCompanyAdmin || isCustomerAdmin
+                                ? [
+                                    {
+                                      key: "transfer-payment-management-pending",
+                                      label: (
+                                        <Link
+                                          href={
+                                            isCompanyAdmin
+                                              ? "/dashboard/payment-management"
+                                              : "/dashboard/transfer-payments/processing"
+                                          }
+                                        >
+                                          {tSidebar(
+                                            isCompanyAdmin
+                                              ? "financial.paymentStatuses.pending"
+                                              : "financial.paymentStatuses.processing",
+                                          )}
+                                        </Link>
+                                      ),
+                                    },
+                                  ]
+                                : []),
+                              ...(isCompanyAdmin || isPartnerAdmin
+                                ? [
+                                    {
+                                      key: "transfer-payment-management-processing",
+                                      label: (
+                                        <Link href="/dashboard/payment-management/processing">
+                                          {tSidebar(
+                                            "financial.paymentStatuses.processing",
+                                          )}
+                                        </Link>
+                                      ),
+                                    },
+                                  ]
+                                : []),
                               {
-                                key: "transfer-payment-management-pending",
+                                key: "transfer-payment-management-completed",
                                 label: (
                                   <Link
                                     href={
-                                      isCompanyAdmin
-                                        ? "/dashboard/payment-management"
-                                        : "/dashboard/transfer-payments/processing"
+                                      isCustomerAdmin
+                                        ? "/dashboard/transfer-payments/completed"
+                                        : "/dashboard/payment-management/completed"
                                     }
                                   >
                                     {tSidebar(
-                                      isCompanyAdmin
-                                        ? "financial.paymentStatuses.pending"
-                                        : "financial.paymentStatuses.processing",
+                                      "financial.paymentStatuses.completed",
                                     )}
                                   </Link>
                                 ),
                               },
-                            ]
-                          : []),
-                        ...(isCompanyAdmin || isPartnerAdmin
-                          ? [
-                              {
-                                key: "transfer-payment-management-processing",
-                                label: (
-                                  <Link href="/dashboard/payment-management/processing">
-                                    {tSidebar(
-                                      "financial.paymentStatuses.processing",
-                                    )}
-                                  </Link>
-                                ),
-                              },
-                            ]
-                          : []),
-                        {
-                          key: "transfer-payment-management-completed",
-                          label: (
-                            <Link
-                              href={
-                                isCustomerAdmin
-                                  ? "/dashboard/transfer-payments/completed"
-                                  : "/dashboard/payment-management/completed"
-                              }
-                            >
-                              {tSidebar("financial.paymentStatuses.completed")}
-                            </Link>
-                          ),
-                        },
-                      ],
-                    },
+                            ],
+                          },
+                        ]
+                      : []),
                   ]
                 : []),
             ],
@@ -1211,6 +1241,66 @@ export default function Sidebar({ collapsed }) {
       : []),
   ];
 
+  const userSummary = (
+    <Link
+      href="/dashboard/profile"
+      aria-label={`${userDisplayName} - ${userRoleLabel}`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: collapsed ? "center" : "flex-start",
+        gap: 10,
+        minWidth: 0,
+        color: "inherit",
+        textDecoration: "none",
+      }}
+    >
+      <Avatar
+        size={36}
+        src={user?.avatar_url || undefined}
+        icon={!userInitials ? <UserOutlined /> : undefined}
+        style={{
+          flexShrink: 0,
+          background: "#ff7a1a",
+          color: "#ffffff",
+          fontWeight: 700,
+        }}
+      >
+        {!user?.avatar_url ? userInitials : null}
+      </Avatar>
+      {!collapsed ? (
+        <div style={{ minWidth: 0, lineHeight: 1.25 }}>
+          <div
+            title={userDisplayName}
+            style={{
+              overflow: "hidden",
+              color: "#0f172a",
+              fontSize: 14,
+              fontWeight: 650,
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {userDisplayName}
+          </div>
+          <div
+            title={userRoleLabel}
+            style={{
+              marginTop: 3,
+              overflow: "hidden",
+              color: "#64748b",
+              fontSize: 12,
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {userRoleLabel}
+          </div>
+        </div>
+      ) : null}
+    </Link>
+  );
+
   return (
     <Sider
       collapsible
@@ -1230,36 +1320,78 @@ export default function Sidebar({ collapsed }) {
     >
       <div
         style={{
-          height: token.Layout?.headerHeight || 56,
+          height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderBottom: `1px solid ${token.colorSplit}`,
-          fontWeight: 600,
+          flexDirection: "column",
         }}
       >
-        {collapsed ? (
-          <Image src="/logo.png" alt="Logo small" width={32} height={32} />
-        ) : (
-          <Image
-            src="/white_text_logo.png"
-            alt="Logo"
-            height={35}
-            width={150}
-          />
-        )}
-      </div>
+        <div
+          style={{
+            height: token.Layout?.headerHeight || 56,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderBottom: `1px solid ${token.colorSplit}`,
+            fontWeight: 600,
+            flexShrink: 0,
+          }}
+        >
+          <Link
+            href="/dashboard"
+            aria-label={tSidebar("dashboard")}
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            {collapsed ? (
+              <Image src="/logo.png" alt="Logo small" width={32} height={32} />
+            ) : (
+              <Image
+                src="/white_text_logo.png"
+                alt="Logo"
+                height={35}
+                width={150}
+              />
+            )}
+          </Link>
+        </div>
 
-      <Menu
-        className="sidebar-navigation"
-        mode="inline"
-        items={items}
-        style={{
-          height: `calc(100% - ${token.Layout?.headerHeight || 56}px)`,
-          overflow: "auto",
-          padding: 8,
-        }}
-      />
+        <Menu
+          className="sidebar-navigation"
+          mode="inline"
+          items={items}
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflow: "auto",
+            padding: 8,
+          }}
+        />
+        <div
+          style={{
+            flexShrink: 0,
+            padding: collapsed ? "10px 8px" : "12px 14px",
+            borderTop: `1px solid ${token.colorSplit}`,
+            background: "#ffffff",
+          }}
+        >
+          {collapsed ? (
+            <Tooltip
+              placement="right"
+              title={
+                <div>
+                  <div style={{ fontWeight: 600 }}>{userDisplayName}</div>
+                  <div style={{ opacity: 0.75, fontSize: 12 }}>
+                    {userRoleLabel}
+                  </div>
+                </div>
+              }
+            >
+              {userSummary}
+            </Tooltip>
+          ) : (
+            userSummary
+          )}
+        </div>
+      </div>
     </Sider>
   );
 }

@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import {
   App as AntdApp,
   Button,
+  Checkbox,
   DatePicker,
   Descriptions,
   Form,
@@ -28,7 +29,7 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
@@ -63,7 +64,6 @@ const createDesignUploadEntry = () => ({
 export default function TransferOrdersPage() {
   const { message, modal } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
-  const router = useRouter();
   const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
   const searchParams = useSearchParams();
   const tableRef = useRef(null);
@@ -95,7 +95,24 @@ export default function TransferOrdersPage() {
   const [manualAddressModalOpen, setManualAddressModalOpen] = useState(false);
   const [manualProductsLoading, setManualProductsLoading] = useState(false);
   const [manualProducts, setManualProducts] = useState([]);
+  const [preparedDesignItemIds, setPreparedDesignItemIds] = useState(
+    () => new Set(),
+  );
   const handledSuccessUploadIdsRef = useRef(new Set());
+
+  const handlePreparedDesignChange = useCallback((itemId, checked) => {
+    if (!itemId) return;
+    const key = String(itemId);
+    setPreparedDesignItemIds((previous) => {
+      const next = new Set(previous);
+      if (checked) {
+        next.add(key);
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
+  }, []);
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
     if (!rowId || !action) return;
@@ -433,7 +450,68 @@ export default function TransferOrdersPage() {
 
   const columnsBuilder = useCallback(
     (baseColumns) => [
-      ...baseColumns,
+      ...baseColumns.slice(0, 1),
+      {
+        title: t("columns.designChecklist"),
+        key: "designChecklist",
+        width: 160,
+        align: "center",
+        render: (_, record) => {
+          const isParentRow =
+            Boolean(record?.__hasChildren) && !record?.__isChild;
+
+          if (isParentRow) {
+            const itemIds = (record?.children || [])
+              .map((item) => item?.id)
+              .filter(Boolean)
+              .map(String);
+            const completedCount = itemIds.filter((itemId) =>
+              preparedDesignItemIds.has(itemId),
+            ).length;
+            const allPrepared =
+              itemIds.length > 0 && completedCount === itemIds.length;
+
+            return (
+              <span
+                style={{
+                  color: allPrepared ? "#16a34a" : "#64748b",
+                  fontWeight: 600,
+                }}
+              >
+                {t("designChecklist.progress", {
+                  completed: completedCount,
+                  total: itemIds.length,
+                })}
+              </span>
+            );
+          }
+
+          if (!record?.__isChild || !record?.id) return null;
+
+          const itemId = String(record.id);
+          const isPrepared = preparedDesignItemIds.has(itemId);
+          return (
+            <span onClick={(event) => event.stopPropagation()}>
+              <Checkbox
+                checked={isPrepared}
+                aria-label={`${t("columns.designChecklist")} - ${
+                  record?.name || record?.order_number || itemId
+                }`}
+                onChange={(event) =>
+                  handlePreparedDesignChange(itemId, event.target.checked)
+                }
+              >
+                {t(
+                  isPrepared
+                    ? "designChecklist.ready"
+                    : "designChecklist.notReady",
+                )}
+              </Checkbox>
+            </span>
+          );
+        },
+      },
+      ...baseColumns.slice(1),
       {
         title: t("columns.actions"),
         key: "actions",
@@ -576,9 +654,10 @@ export default function TransferOrdersPage() {
     [
       handleOpenDesignUpload,
       handleOpenAddressEditor,
+      handlePreparedDesignChange,
       handleStatusUpdate,
       isRowActionLoading,
-      router,
+      preparedDesignItemIds,
       subCategoryId,
       withoutSubCategory,
       t,
