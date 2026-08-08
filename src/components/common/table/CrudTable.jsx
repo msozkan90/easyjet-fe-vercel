@@ -96,6 +96,8 @@ function SelectFilterDropdown({
     <div style={{ padding: 8, width }} onKeyDown={(e) => e.stopPropagation()}>
       <Select
         allowClear
+        showSearch
+        autoFocus
         mode={mode}
         placeholder={placeholder}
         optionFilterProp="label"

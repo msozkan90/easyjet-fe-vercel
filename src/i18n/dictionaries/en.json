@@ -2088,9 +2088,15 @@
         "localPickup": "Local Pickup",
         "orderDate": "Order Date",
         "hasDesign": "Design",
+        "designChecklist": "Design Check",
         "actions": "Actions",
         "notes": "Notes",
         "designerNotes": "Designer Notes"
+      },
+      "designChecklist": {
+        "ready": "Ready",
+        "notReady": "Not Ready",
+        "progress": "{completed}/{total} ready"
       },
       "filters": {
         "searchOrderNumber": "Search order number",

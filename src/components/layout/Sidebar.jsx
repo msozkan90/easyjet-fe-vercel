@@ -460,63 +460,71 @@ export default function Sidebar({ collapsed }) {
                           },
                         ]
                       : []),
-                    {
-                      key: "transfer-payment-management",
-                      icon: <BankOutlined />,
-                      label: tSidebar("financial.transferPaymentManagement"),
-                      children: [
-                        ...(isCompanyAdmin || isCustomerAdmin
-                          ? [
+                    ...(hasTransferOrderCategory
+                      ? [
+                          {
+                            key: "transfer-payment-management",
+                            icon: <BankOutlined />,
+                            label: tSidebar(
+                              "financial.transferPaymentManagement",
+                            ),
+                            children: [
+                              ...(isCompanyAdmin || isCustomerAdmin
+                                ? [
+                                    {
+                                      key: "transfer-payment-management-pending",
+                                      label: (
+                                        <Link
+                                          href={
+                                            isCompanyAdmin
+                                              ? "/dashboard/payment-management"
+                                              : "/dashboard/transfer-payments/processing"
+                                          }
+                                        >
+                                          {tSidebar(
+                                            isCompanyAdmin
+                                              ? "financial.paymentStatuses.pending"
+                                              : "financial.paymentStatuses.processing",
+                                          )}
+                                        </Link>
+                                      ),
+                                    },
+                                  ]
+                                : []),
+                              ...(isCompanyAdmin || isPartnerAdmin
+                                ? [
+                                    {
+                                      key: "transfer-payment-management-processing",
+                                      label: (
+                                        <Link href="/dashboard/payment-management/processing">
+                                          {tSidebar(
+                                            "financial.paymentStatuses.processing",
+                                          )}
+                                        </Link>
+                                      ),
+                                    },
+                                  ]
+                                : []),
                               {
-                                key: "transfer-payment-management-pending",
+                                key: "transfer-payment-management-completed",
                                 label: (
                                   <Link
                                     href={
-                                      isCompanyAdmin
-                                        ? "/dashboard/payment-management"
-                                        : "/dashboard/transfer-payments/processing"
+                                      isCustomerAdmin
+                                        ? "/dashboard/transfer-payments/completed"
+                                        : "/dashboard/payment-management/completed"
                                     }
                                   >
                                     {tSidebar(
-                                      isCompanyAdmin
-                                        ? "financial.paymentStatuses.pending"
-                                        : "financial.paymentStatuses.processing",
+                                      "financial.paymentStatuses.completed",
                                     )}
                                   </Link>
                                 ),
                               },
-                            ]
-                          : []),
-                        ...(isCompanyAdmin || isPartnerAdmin
-                          ? [
-                              {
-                                key: "transfer-payment-management-processing",
-                                label: (
-                                  <Link href="/dashboard/payment-management/processing">
-                                    {tSidebar(
-                                      "financial.paymentStatuses.processing",
-                                    )}
-                                  </Link>
-                                ),
-                              },
-                            ]
-                          : []),
-                        {
-                          key: "transfer-payment-management-completed",
-                          label: (
-                            <Link
-                              href={
-                                isCustomerAdmin
-                                  ? "/dashboard/transfer-payments/completed"
-                                  : "/dashboard/payment-management/completed"
-                              }
-                            >
-                              {tSidebar("financial.paymentStatuses.completed")}
-                            </Link>
-                          ),
-                        },
-                      ],
-                    },
+                            ],
+                          },
+                        ]
+                      : []),
                   ]
                 : []),
             ],
