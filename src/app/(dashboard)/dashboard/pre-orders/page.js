@@ -45,6 +45,7 @@ const hasOwn = Object.prototype.hasOwnProperty;
 export default function OrdersPage() {
   const { message } = AntdApp.useApp();
   const tableRef = useRef(null);
+  const variantUpdateLocksRef = useRef(new Set());
   const [pulling, setPulling] = useState(false);
   const [cooldownEnd, setCooldownEnd] = useState(null);
   const [remainingSec, setRemainingSec] = useState(0);
@@ -183,10 +184,43 @@ export default function OrdersPage() {
     []
   );
 
-  const clearSelectionOverrides = useCallback(() => {
+  const reconcileSelectionOverrides = useCallback((records = []) => {
+    const recordMap = new Map(
+      (Array.isArray(records) ? records : [])
+        .filter((record) => record?.id)
+        .map((record) => [String(record.id), record])
+    );
     setRowSelections((prev) => {
       if (!prev || !Object.keys(prev).length) return prev;
-      return {};
+      const next = { ...prev };
+      let changed = false;
+
+      Object.entries(prev).forEach(([rowId, overrides]) => {
+        const record = recordMap.get(String(rowId));
+        if (!record || !overrides) return;
+        const remaining = { ...overrides };
+        const fields = [
+          ["productId", "product"],
+          ["sizeId", "size"],
+          ["colorId", "color"],
+        ];
+        fields.forEach(([key, field]) => {
+          if (
+            hasOwn.call(remaining, key) &&
+            remaining[key] === getNormalizedRecordValue(record, field)
+          ) {
+            delete remaining[key];
+            changed = true;
+          }
+        });
+        if (Object.keys(remaining).length) {
+          next[rowId] = remaining;
+        } else {
+          delete next[rowId];
+        }
+      });
+
+      return changed ? next : prev;
     });
   }, []);
 
@@ -221,10 +255,10 @@ export default function OrdersPage() {
   const request = useCallback(
     async (params) => {
       const result = await baseRequest(params);
-      clearSelectionOverrides();
+      reconcileSelectionOverrides(result?.list);
       return result;
     },
-    [baseRequest, clearSelectionOverrides]
+    [baseRequest, reconcileSelectionOverrides]
   );
 
   const setRowSelectionFields = useCallback((rowId, updates) => {
@@ -346,8 +380,11 @@ export default function OrdersPage() {
     });
   }, []);
 
-  const isCellLoading = useCallback(
-    (rowId, field) => Boolean(cellLoading?.[`${rowId}-${field}`]),
+  const isVariantUpdateLoading = useCallback(
+    (rowId) =>
+      ["product", "size", "color"].some((field) =>
+        Boolean(cellLoading?.[`${rowId}-${field}`])
+      ),
     [cellLoading]
   );
 
@@ -359,17 +396,32 @@ export default function OrdersPage() {
   const handlePreOrderUpdate = useCallback(
     async (record, payload, fieldKey, onError) => {
       if (!record?.id) return;
+      const isVariantUpdate = ["product", "size", "color"].includes(fieldKey);
+      if (isVariantUpdate && variantUpdateLocksRef.current.has(record.id)) {
+        return;
+      }
+      if (isVariantUpdate) {
+        variantUpdateLocksRef.current.add(record.id);
+      }
       setCellLoadingState(record.id, fieldKey, true);
       try {
         await OrdersAPI.preUpdate(record.id, payload);
         message.success(t("messages.updateSuccess"));
-        tableRef.current?.reload?.();
+        try {
+          await tableRef.current?.reload?.();
+        } catch {
+          // The variant update is already saved; keep the optimistic values
+          // until a later table refresh can reconcile them.
+        }
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message || t("messages.updateError")
         );
         onError?.();
       } finally {
+        if (isVariantUpdate) {
+          variantUpdateLocksRef.current.delete(record.id);
+        }
         setCellLoadingState(record.id, fieldKey, false);
       }
     },
@@ -379,6 +431,7 @@ export default function OrdersPage() {
   const handleProductSelect = useCallback(
     (record, nextValue) => {
       if (!record?.id) return;
+      if (variantUpdateLocksRef.current.has(record.id)) return;
       const overrides = rowSelections?.[record.id];
       const nextNormalized = normalizeId(nextValue);
       const prevProduct = hasOwn.call(overrides || {}, "productId")
@@ -421,6 +474,7 @@ export default function OrdersPage() {
   const handleSizeSelect = useCallback(
     (record, nextValue) => {
       if (!record?.id) return;
+      if (variantUpdateLocksRef.current.has(record.id)) return;
       const overrides = rowSelections?.[record.id];
       const nextNormalized = normalizeId(nextValue);
       const prevSize = hasOwn.call(overrides || {}, "sizeId")
@@ -461,6 +515,7 @@ export default function OrdersPage() {
   const handleColorSelect = useCallback(
     (record, nextValue) => {
       if (!record?.id) return;
+      if (variantUpdateLocksRef.current.has(record.id)) return;
       const overrides = rowSelections?.[record.id];
       const nextNormalized = normalizeId(nextValue);
       const prevColor = hasOwn.call(overrides || {}, "colorId")
@@ -752,7 +807,7 @@ export default function OrdersPage() {
             : getNormalizedRecordValue(record, "product");
           const selectValue = toSelectValue(normalizedProductId);
           const loading =
-            variationsLoading || isCellLoading(record.id, "product");
+            variationsLoading || isVariantUpdateLoading(record.id);
           return (
             <Select
               showSearch
@@ -780,13 +835,11 @@ export default function OrdersPage() {
           const normalizedSizeId = hasOwn.call(overrides || {}, "sizeId")
             ? overrides.sizeId
             : getNormalizedRecordValue(record, "size");
-          const productLoading = isCellLoading(record.id, "product");
-          const sizeLoading = isCellLoading(record.id, "size");
+          const variantLoading = isVariantUpdateLoading(record.id);
           const disabled =
             normalizedProductId === null ||
             variationsLoading ||
-            productLoading ||
-            sizeLoading;
+            variantLoading;
           return (
             <Select
               showSearch
@@ -796,7 +849,7 @@ export default function OrdersPage() {
               options={getSizeOptions(normalizedProductId)}
               value={toSelectValue(normalizedSizeId)}
               disabled={disabled}
-              loading={variationsLoading || sizeLoading}
+              loading={variationsLoading || variantLoading}
               onChange={(value) => handleSizeSelect(record, value)}
               style={{ minWidth: 120 }}
             />
@@ -814,13 +867,11 @@ export default function OrdersPage() {
           const normalizedColorId = hasOwn.call(overrides || {}, "colorId")
             ? overrides.colorId
             : getNormalizedRecordValue(record, "color");
-          const productLoading = isCellLoading(record.id, "product");
-          const colorLoading = isCellLoading(record.id, "color");
+          const variantLoading = isVariantUpdateLoading(record.id);
           const disabled =
             normalizedProductId === null ||
             variationsLoading ||
-            productLoading ||
-            colorLoading;
+            variantLoading;
           return (
             <Select
               showSearch
@@ -830,7 +881,7 @@ export default function OrdersPage() {
               options={getColorOptions(normalizedProductId)}
               value={toSelectValue(normalizedColorId)}
               disabled={disabled}
-              loading={variationsLoading || colorLoading}
+              loading={variationsLoading || variantLoading}
               onChange={(value) => handleColorSelect(record, value)}
               style={{ minWidth: 120 }}
             />
@@ -919,7 +970,7 @@ export default function OrdersPage() {
     handleProductSelect,
     handleSingleApprove,
     handleSizeSelect,
-    isCellLoading,
+    isVariantUpdateLoading,
     isRowActionLoading,
     productOptions,
     rowSelections,
