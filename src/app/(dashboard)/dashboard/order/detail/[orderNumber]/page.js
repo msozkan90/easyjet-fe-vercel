@@ -740,7 +740,7 @@ export default function OrderDetailPage() {
       try {
         const results = await Promise.all(
           uniqueProductIds.map(async (productId) => {
-            const response = await ProductPositionsAPI.list({
+            const response = await ProductPositionsAPI.flatList({
               pagination: { page: 1, pageSize: 100 },
               filters: { product_id: productId, status: "active" },
             });
