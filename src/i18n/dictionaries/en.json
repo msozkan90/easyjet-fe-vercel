@@ -2428,8 +2428,8 @@
         },
         "positions": {
           "designUploadLabel": "Upload Design",
-          "designUploadHelp": "Supported files: PDF, PNG, JPG, JPEG or WEBP up to 25 MB.",
-          "invalidFileType": "Unsupported file type. Please upload PDF or image files.",
+          "designUploadHelp": "Supported files: PDF, PNG, JPG, JPEG, WEBP or DST up to 25 MB.",
+          "invalidFileType": "Unsupported file type. Please upload PDF, DST or image files.",
           "invalidFileSize": "File size must be smaller than {{size}} MB.",
           "missingFile": "Please upload a design file for each selected position.",
           "noPreview": "No reference image",
@@ -2447,6 +2447,7 @@
           "loadOrderError": "Unable to load order details.",
           "loadPositionsError": "Unable to load product positions.",
           "saveSuccess": "Design information saved.",
+          "uploadQueued": "{count} design file queued for upload.",
           "saveError": "Failed to save design information.",
           "deleteSuccess": "Design deleted.",
           "deleteError": "Unable to delete design.",
@@ -2455,6 +2456,38 @@
         "actions": {
           "save": "Save",
           "saveConfirmTitle": "Do you want to save these design changes?"
+        },
+        "uploadQueue": {
+          "title": "Order Design Uploads",
+          "subtitle": "Uploads continue while you navigate inside the app.",
+          "status": {
+            "queued": "Queued",
+            "uploading": "Uploading",
+            "preparing": "Preparing",
+            "saving": "Saving",
+            "success": "Completed",
+            "failed": "Failed",
+            "canceled": "Canceled"
+          },
+          "badges": {
+            "uploading": "Uploading: {count}",
+            "queued": "Queued: {count}"
+          },
+          "fields": {
+            "order": "Order",
+            "fileCount": "{count} files",
+            "multipleFiles": "{name} +{count} files"
+          },
+          "actions": {
+            "clearFinished": "Clear Finished",
+            "retry": "Retry",
+            "cancel": "Cancel",
+            "remove": "Remove"
+          },
+          "messages": {
+            "uploadFailed": "Upload failed",
+            "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
+          }
         }
       },
       "detail": {

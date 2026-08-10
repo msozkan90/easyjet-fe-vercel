@@ -163,7 +163,10 @@ export const OrdersAPI = {
   orderDetail: (orderNumber) => api.get(`/orders/${orderNumber}`),
   report: (payload) => api.post("/orders/report", payload),
   reportDayDetail: (payload) => api.post("/orders/report/day-detail", payload),
-  saveDesign: (formData) => api.putMultipart("/orders/items", formData),
+  saveDesign: (formData, config = {}) =>
+    api.putMultipart("/orders/items", formData, config),
+  designUploadProgress: (uploadId) =>
+    api.get(`/orders/items/designs/progress/${encodeURIComponent(uploadId)}`),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
   sendToProductionWithLabel: (formData, config = {}) =>
