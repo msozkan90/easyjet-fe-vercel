@@ -2428,8 +2428,8 @@
         },
         "positions": {
           "designUploadLabel": "Upload Design",
-          "designUploadHelp": "Supported files: PDF, PNG, JPG, JPEG or WEBP up to 25 MB.",
-          "invalidFileType": "Unsupported file type. Please upload PDF or image files.",
+          "designUploadHelp": "Supported files: PDF, PNG, JPG, JPEG, WEBP or DST up to 25 MB.",
+          "invalidFileType": "Unsupported file type. Please upload PDF, DST or image files.",
           "invalidFileSize": "File size must be smaller than {{size}} MB.",
           "missingFile": "Please upload a design file for each selected position.",
           "noPreview": "No reference image",

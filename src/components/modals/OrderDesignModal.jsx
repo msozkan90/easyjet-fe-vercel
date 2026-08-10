@@ -51,8 +51,14 @@ const ACCEPTED_FILE_TYPES = [
   "image/webp",
   "application/pdf",
 ];
-const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.pdf";
+const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.pdf,.dst";
 const MAX_FILE_SIZE_MB = 2000;
+
+const hasFileExtension = (file, extension) =>
+  String(file?.name || "")
+    .trim()
+    .toLowerCase()
+    .endsWith(extension);
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -489,9 +495,8 @@ export default function OrderDesignModal({
     (file) => {
       const isAllowedType =
         ACCEPTED_FILE_TYPES.includes(file.type) ||
-        (file.name &&
-          file.name.toLowerCase().endsWith(".pdf") &&
-          file.type === "");
+        hasFileExtension(file, ".dst") ||
+        (hasFileExtension(file, ".pdf") && file.type === "");
       if (!isAllowedType) {
         message.error(t("positions.invalidFileType"));
         return Upload.LIST_IGNORE;

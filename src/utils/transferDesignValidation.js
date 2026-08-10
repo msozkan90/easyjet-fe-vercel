@@ -2,6 +2,8 @@ export const TRANSFER_DESIGN_DPI = 300;
 export const MAX_TRANSFER_DESIGN_WIDTH_INCHES = 29.9;
 
 const HEADER_BYTES = 1024 * 1024;
+const DST_HEADER_BYTES = 512;
+const DST_UNITS_PER_INCH = 254;
 
 const readAscii = (view, offset, length) => {
   if (offset < 0 || offset + length > view.byteLength) return "";
@@ -123,6 +125,43 @@ const parseTiffDimensions = (view) => {
   return null;
 };
 
+const parseDstDimensionsInches = (view) => {
+  if (view.byteLength < DST_HEADER_BYTES) return null;
+  const header = readAscii(view, 0, DST_HEADER_BYTES);
+  if (!header.startsWith("LA:")) return null;
+
+  const readExtent = (label) => {
+    const match = header.match(
+      new RegExp(`(?:^|\\r)${label}:\\s*(\\d{1,5})`, "m"),
+    );
+    if (!match) return null;
+    const value = Number.parseInt(match[1], 10);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const positiveX = readExtent("\\+X");
+  const negativeX = readExtent("-X");
+  const positiveY = readExtent("\\+Y");
+  const negativeY = readExtent("-Y");
+  if (
+    positiveX === null ||
+    negativeX === null ||
+    positiveY === null ||
+    negativeY === null
+  ) {
+    return null;
+  }
+
+  const widthInches = (positiveX + negativeX) / DST_UNITS_PER_INCH;
+  const heightInches = (positiveY + negativeY) / DST_UNITS_PER_INCH;
+  if (widthInches <= 0 || heightInches <= 0) return null;
+
+  return {
+    widthInches: Number(widthInches.toFixed(4)),
+    heightInches: Number(heightInches.toFixed(4)),
+  };
+};
+
 const parseDimensions = (buffer) => {
   const view = new DataView(buffer);
   return (
@@ -136,6 +175,8 @@ const parseDimensions = (buffer) => {
 
 export const readTransferDesignDimensionsInches = async (file) => {
   const buffer = await file.slice(0, HEADER_BYTES).arrayBuffer();
+  const dstDimensions = parseDstDimensionsInches(new DataView(buffer));
+  if (dstDimensions) return dstDimensions;
   const dimensions = parseDimensions(buffer);
   if (!dimensions) return null;
   return {

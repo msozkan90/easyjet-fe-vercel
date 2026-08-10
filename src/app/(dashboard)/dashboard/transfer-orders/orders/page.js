@@ -1045,7 +1045,7 @@ export default function TransferOrdersPage() {
                     </Button>
                   </div>
                   <Upload
-                    accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif"
+                    accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif,.dst"
                     beforeUpload={() => false}
                     maxCount={1}
                     fileList={entry.fileList}

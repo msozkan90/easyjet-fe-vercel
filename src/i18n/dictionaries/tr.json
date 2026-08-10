@@ -2230,8 +2230,8 @@
         },
         "positions": {
           "designUploadLabel": "Tasarım Yükle",
-          "designUploadHelp": "Desteklenen dosyalar: PDF, PNG, JPG, JPEG veya WEBP (en fazla 25 MB).",
-          "invalidFileType": "Desteklenmeyen dosya türü. Lütfen PDF ya da görsel yükleyin.",
+          "designUploadHelp": "Desteklenen dosyalar: PDF, PNG, JPG, JPEG, WEBP veya DST (en fazla 25 MB).",
+          "invalidFileType": "Desteklenmeyen dosya türü. Lütfen PDF, DST ya da görsel yükleyin.",
           "invalidFileSize": "Dosya boyutu {{size}} MB'den küçük olmalıdır.",
           "missingFile": "Seçilen her pozisyon için tasarım dosyası yükleyin.",
           "noPreview": "Ön izleme yok",
