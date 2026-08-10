@@ -11,6 +11,7 @@ import { logoutLocal, setUser } from "@/redux/features/authSlice";
 import { resetBalance } from "@/redux/features/balanceSlice";
 import { TransferDesignUploadQueueProvider } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 import { OrdersPdfDesignUploadQueueProvider } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
+import { OrderDesignUploadQueueProvider } from "@/components/orders/OrderDesignUploadQueueProvider";
 import {
   resetCategories,
   setCategoriesError,
@@ -77,10 +78,12 @@ export function Providers({ children }) {
         }}
       >
         <TransferDesignUploadQueueProvider>
-          <OrdersPdfDesignUploadQueueProvider>
-            <AuthBootstrap />
-            {children}
-          </OrdersPdfDesignUploadQueueProvider>
+          <OrderDesignUploadQueueProvider>
+            <OrdersPdfDesignUploadQueueProvider>
+              <AuthBootstrap />
+              {children}
+            </OrdersPdfDesignUploadQueueProvider>
+          </OrderDesignUploadQueueProvider>
         </TransferDesignUploadQueueProvider>
       </ConfigProvider>
     </Provider>

@@ -2249,6 +2249,7 @@
           "loadOrderError": "Sipariş detayı yüklenemedi.",
           "loadPositionsError": "Ürün pozisyonları alınamadı.",
           "saveSuccess": "Tasarım bilgileri kaydedildi.",
+          "uploadQueued": "{count} tasarım dosyası yükleme sırasına alındı.",
           "saveError": "Tasarım bilgileri kaydedilemedi.",
           "deleteSuccess": "Tasarım silindi.",
           "deleteError": "Tasarım silinemedi.",
@@ -2257,6 +2258,38 @@
         "actions": {
           "save": "Kaydet",
           "saveConfirmTitle": "Bu tasarım değişiklikleri kaydedilsin mi?"
+        },
+        "uploadQueue": {
+          "title": "Sipariş Tasarım Yüklemeleri",
+          "subtitle": "Uygulama içinde gezinirken yüklemeler devam eder.",
+          "status": {
+            "queued": "Sırada",
+            "uploading": "Yükleniyor",
+            "preparing": "Hazırlanıyor",
+            "saving": "Kaydediliyor",
+            "success": "Tamamlandı",
+            "failed": "Başarısız",
+            "canceled": "İptal Edildi"
+          },
+          "badges": {
+            "uploading": "Yükleniyor: {count}",
+            "queued": "Sırada: {count}"
+          },
+          "fields": {
+            "order": "Sipariş",
+            "fileCount": "{count} dosya",
+            "multipleFiles": "{name} +{count} dosya"
+          },
+          "actions": {
+            "clearFinished": "Tamamlananları Temizle",
+            "retry": "Tekrar Dene",
+            "cancel": "İptal",
+            "remove": "Kaldır"
+          },
+          "messages": {
+            "uploadFailed": "Yükleme başarısız",
+            "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
+          }
         }
       },
       "detail": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
 import {
@@ -20,6 +20,7 @@ import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import OrderDesignModal from "@/components/modals/OrderDesignModal";
 import OrdersStatusListPage from "../OrdersStatusListPage";
+import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
 
 const PENDING_STATUSES = ["newOrder", "waitingForDesign"];
 
@@ -50,6 +51,7 @@ const toNullableString = (value) => {
 
 export default function PendingOrdersPage() {
   const { message } = AntdApp.useApp();
+  const { tasks: designUploadTasks } = useOrderDesignUploadQueue();
   const t = useTranslations("dashboard.orders");
   const tableRef = useRef(null);
   const [editForm] = Form.useForm();
@@ -63,6 +65,20 @@ export default function PendingOrdersPage() {
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
   const [designModalOpen, setDesignModalOpen] = useState(false);
   const [designModalRecord, setDesignModalRecord] = useState(null);
+  const handledDesignUploadIdsRef = useRef(new Set());
+
+  useEffect(() => {
+    let hasNewSuccess = false;
+    for (const task of designUploadTasks || []) {
+      if (task?.status !== "success") continue;
+      if (handledDesignUploadIdsRef.current.has(task.id)) continue;
+      handledDesignUploadIdsRef.current.add(task.id);
+      hasNewSuccess = true;
+    }
+    if (hasNewSuccess) {
+      tableRef.current?.reload?.();
+    }
+  }, [designUploadTasks]);
 
   const setRowActionLoadingState = useCallback((rowId, action, nextState) => {
     if (!rowId || !action) return;
@@ -137,10 +153,15 @@ export default function PendingOrdersPage() {
     setDesignModalRecord(null);
   }, []);
 
-  const handleDesignSaved = useCallback(() => {
-    handleDesignModalClose();
-    tableRef.current?.reload?.();
-  }, [handleDesignModalClose]);
+  const handleDesignSaved = useCallback(
+    (result) => {
+      handleDesignModalClose();
+      if (!result?.queued) {
+        tableRef.current?.reload?.();
+      }
+    },
+    [handleDesignModalClose],
+  );
 
   const setAddressFormValues = useCallback(
     (orderData = {}) => {

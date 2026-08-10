@@ -28,6 +28,7 @@ import {
   GuardedPreviewImage,
   isFilePreviewAllowed,
 } from "@/components/common/media/ImagePreviewGate";
+import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -126,6 +127,7 @@ export default function OrderDesignModal({
   zIndex = 1300,
 }) {
   const { message } = AntdApp.useApp();
+  const { enqueueUpload } = useOrderDesignUploadQueue();
   const t = useTranslations("dashboard.orders.design");
   const tOrders = useTranslations("dashboard.orders");
   const tCommon = useTranslations("common");
@@ -527,8 +529,40 @@ export default function OrderDesignModal({
       return fileList.some((file) => Boolean(file.originFileObj));
     });
 
-    const formData = new FormData();
+    if (positionsToSubmit.length) {
+      const files = positionsToSubmit.map((positionId) => {
+        const fileList = extractUploadFileList(designFiles[positionId]);
+        const fileItem = fileList.find((file) => Boolean(file.originFileObj));
+        return {
+          positionId,
+          positionName:
+            positionMap.get(String(positionId))?.name || `#${positionId}`,
+          file: fileItem?.originFileObj,
+        };
+      });
+      const taskId = enqueueUpload({
+        orderItemId: orderDetail.id,
+        orderId: orderDetail.order_id,
+        orderNumber:
+          orderDetail?.order?.order_number || orderDetail?.order_number || "-",
+        note,
+        isSubCategory,
+        includeRoutingSubCategory: canRouteToPrint,
+        routingSubCategoryId,
+        files,
+      });
+      if (!taskId) {
+        message.error(t("messages.saveError"));
+        return;
+      }
+      message.success(
+        t("messages.uploadQueued", { count: positionsToSubmit.length }),
+      );
+      onSaved?.({ queued: true, taskId });
+      return;
+    }
 
+    const formData = new FormData();
     formData.append("order_item_id", String(orderDetail.id));
     formData.append("order_id", String(orderDetail.order_id));
     formData.append("note", note || "");
@@ -539,19 +573,6 @@ export default function OrderDesignModal({
         routingSubCategoryId ? String(routingSubCategoryId) : "",
       );
     }
-
-    positionsToSubmit.forEach((positionId) => {
-      formData.append("positions", String(positionId));
-    });
-
-    positionsToSubmit.forEach((positionId) => {
-      const fileList = extractUploadFileList(designFiles[positionId]);
-      const fileItem = fileList.find((file) => Boolean(file.originFileObj));
-
-      if (fileItem?.originFileObj) {
-        formData.append(`design_files[${positionId}]`, fileItem.originFileObj);
-      }
-    });
 
     setSaving(true);
     try {
@@ -568,11 +589,13 @@ export default function OrderDesignModal({
   }, [
     canRouteToPrint,
     designFiles,
+    enqueueUpload,
     isSubCategory,
     message,
     note,
     onSaved,
     orderDetail,
+    positionMap,
     routingSubCategoryId,
     selectedPositionIds,
     t,
