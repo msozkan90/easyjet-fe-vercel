@@ -524,6 +524,7 @@ export const ProductColorsAPI = {
 
 export const ProductPositionsAPI = {
   list: (query) => api.post("/product-positions/list", query),
+  flatList: (query) => api.post("/product-positions/flat-list", query),
   create: (data, config) => api.post("/product-positions", data, config),
   update: (id, data, config) =>
     api.put(`/product-positions/${id}`, data, config),

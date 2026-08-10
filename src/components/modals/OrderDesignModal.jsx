@@ -365,7 +365,7 @@ export default function OrderDesignModal({
     setPositionsLoading(true);
     const loadPositions = async () => {
       try {
-        const response = await ProductPositionsAPI.list({
+        const response = await ProductPositionsAPI.flatList({
           pagination: { page: 1, pageSize: 100 },
           filters: { product_id: derivedProductId, status: "active" },
         });
