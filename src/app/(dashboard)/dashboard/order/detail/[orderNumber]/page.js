@@ -29,6 +29,7 @@ import { STATUS_COLORS } from "@/app/(dashboard)/dashboard/orders/statusConstant
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
+import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -72,7 +73,10 @@ const SCRAP_REASON_OPTIONS = [
 ];
 
 const formatUserName = (user, fallback) => {
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
+  const fullName = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   return fullName || user?.email || fallback;
 };
 
@@ -253,7 +257,8 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
 
 const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
   const reasonKey =
-    SCRAP_REASON_DETAIL_KEY_MAP[movement?.reason_detail] || movement?.reason_detail;
+    SCRAP_REASON_DETAIL_KEY_MAP[movement?.reason_detail] ||
+    movement?.reason_detail;
   const sourceKey =
     SCRAP_SOURCE_KEY_MAP[movement?.source_screen] || movement?.source_screen;
   const variantLabel = [
@@ -279,7 +284,9 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
           </Typography.Title>
         </div>
         <Tag color="volcano" className="rounded-full px-4 py-1 text-sm">
-          {tDesign("scrap.quantityBadge", { quantity: movement?.quantity ?? 0 })}
+          {tDesign("scrap.quantityBadge", {
+            quantity: movement?.quantity ?? 0,
+          })}
         </Tag>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -313,7 +320,9 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
         />
       </div>
       <div className="mt-4">
-        <Typography.Text type="secondary">{tDesign("scrap.fields.note")}</Typography.Text>
+        <Typography.Text type="secondary">
+          {tDesign("scrap.fields.note")}
+        </Typography.Text>
         <div className="mt-1 text-sm text-slate-700">
           {movement?.note || tOrders("common.none")}
         </div>
@@ -327,6 +336,7 @@ const ItemDesignPreview = ({
   designs,
   positionMap,
   tDesign,
+  tOrders,
   fallbackText,
 }) => {
   if (!designs.length) {
@@ -353,6 +363,13 @@ const ItemDesignPreview = ({
           <Card
             key={design?.id || positionId}
             title={positionName}
+            extra={
+              Number(design?.display_quantity || 1) > 1 ? (
+                <Tag color="blue">
+                  {tOrders("columns.quantity")}: {design.display_quantity}
+                </Tag>
+              ) : null
+            }
             className="rounded-2xl border border-slate-100 shadow-sm"
             styles={{
               body: {
@@ -442,7 +459,35 @@ const OrderItemCard = ({
   fallbackText,
 }) => {
   const options = Array.isArray(item?.options) ? item.options : [];
-  const designs = Array.isArray(item?.designs) ? item.designs : [];
+  const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
+  const hasPersonalization = options.some((option) => {
+    const name = String(option?.name || "")
+      .trim()
+      .toLowerCase();
+    return (
+      (name === "personalization" || name === "personalisation") &&
+      String(option?.value ?? "").trim()
+    );
+  });
+  const usesPersonalizedDesignGroups =
+    hasPersonalization && Number(item?.quantity || 1) > 1;
+  const groupedDesigns = new Map();
+  rawDesigns.forEach((design) => {
+    const key = design?.design_group_id
+      ? `group-${design.design_group_id}-${design.product_position_id}`
+      : `legacy-${design?.id}`;
+    const current = groupedDesigns.get(key) || [];
+    current.push(design);
+    groupedDesigns.set(key, current);
+  });
+  const designs = Array.from(groupedDesigns.values()).map((group) => ({
+    ...group[0],
+    display_quantity: group[0]?.design_group_id
+      ? group.length
+      : hasPersonalization && Number(item?.quantity || 1) > 1
+        ? Number(item.quantity)
+        : 1,
+  }));
 
   return (
     <Card
@@ -534,13 +579,24 @@ const OrderItemCard = ({
       <div className="mt-6">
         <SectionHeader title={tDesign("designs.title")} />
         <div className="mt-4">
-          <ItemDesignPreview
-            item={item}
-            designs={designs}
-            positionMap={positionMap}
-            tDesign={tDesign}
-            fallbackText={fallbackText}
-          />
+          {usesPersonalizedDesignGroups ? (
+            <GroupedOrderItemDesignPreview
+              item={item}
+              positionMap={positionMap}
+              tDetail={tDesign}
+              tOrders={tOrders}
+              fallbackText={fallbackText}
+            />
+          ) : (
+            <ItemDesignPreview
+              item={item}
+              designs={designs}
+              positionMap={positionMap}
+              tDesign={tDesign}
+              tOrders={tOrders}
+              fallbackText={fallbackText}
+            />
+          )}
         </div>
       </div>
     </Card>
@@ -673,8 +729,14 @@ export default function OrderDetailPage() {
       setRecordingScrap(true);
       const values = await scrapForm.validateFields();
       const entries = (values?.entries || []).map((entry) => {
-        const selected = itemOptions.find((option) => option.value === entry.order_item_id)?.item;
-        if (!selected?.product_id || !selected?.size_id || !selected?.color_id) {
+        const selected = itemOptions.find(
+          (option) => option.value === entry.order_item_id,
+        )?.item;
+        if (
+          !selected?.product_id ||
+          !selected?.size_id ||
+          !selected?.color_id
+        ) {
           throw new Error(tDesign("scrap.messages.invalidItem"));
         }
         return {
@@ -967,7 +1029,10 @@ export default function OrderDetailPage() {
             </Card>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <AddressBlock title={tDesign("sections.billing")} rows={billingRows} />
+            <AddressBlock
+              title={tDesign("sections.billing")}
+              rows={billingRows}
+            />
             <AddressBlock
               title={tDesign("sections.shippingAddress")}
               rows={shippingRows}
@@ -1237,7 +1302,11 @@ export default function OrderDetailPage() {
                           {tDesign("scrap.entryTitle", { index: index + 1 })}
                         </Typography.Text>
                         {fields.length > 1 ? (
-                          <Button danger type="text" onClick={() => remove(field.name)}>
+                          <Button
+                            danger
+                            type="text"
+                            onClick={() => remove(field.name)}
+                          >
                             {tCommonActions("remove")}
                           </Button>
                         ) : null}
@@ -1246,7 +1315,12 @@ export default function OrderDetailPage() {
                         <Form.Item
                           name={[field.name, "order_item_id"]}
                           label={tDesign("scrap.fields.item")}
-                          rules={[{ required: true, message: tDesign("scrap.validation.item") }]}
+                          rules={[
+                            {
+                              required: true,
+                              message: tDesign("scrap.validation.item"),
+                            },
+                          ]}
                         >
                           <Select
                             showSearch
@@ -1258,14 +1332,28 @@ export default function OrderDetailPage() {
                         <Form.Item
                           name={[field.name, "quantity"]}
                           label={tDesign("scrap.fields.quantity")}
-                          rules={[{ required: true, message: tDesign("scrap.validation.quantity") }]}
+                          rules={[
+                            {
+                              required: true,
+                              message: tDesign("scrap.validation.quantity"),
+                            },
+                          ]}
                         >
-                          <InputNumber min={1} precision={0} className="w-full" />
+                          <InputNumber
+                            min={1}
+                            precision={0}
+                            className="w-full"
+                          />
                         </Form.Item>
                         <Form.Item
                           name={[field.name, "reason_detail"]}
                           label={tDesign("scrap.fields.reason")}
-                          rules={[{ required: true, message: tDesign("scrap.validation.reason") }]}
+                          rules={[
+                            {
+                              required: true,
+                              message: tDesign("scrap.validation.reason"),
+                            },
+                          ]}
                         >
                           <Select
                             options={reasonOptions}
@@ -1284,7 +1372,11 @@ export default function OrderDetailPage() {
                       </div>
                     </Card>
                   ))}
-                  <Button type="dashed" block onClick={() => add({ quantity: 1 })}>
+                  <Button
+                    type="dashed"
+                    block
+                    onClick={() => add({ quantity: 1 })}
+                  >
                     {tDesign("scrap.actions.addEntry")}
                   </Button>
                 </div>
