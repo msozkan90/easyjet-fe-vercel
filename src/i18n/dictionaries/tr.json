@@ -2234,6 +2234,21 @@
           "invalidFileType": "Desteklenmeyen dosya türü. Lütfen PDF, DST ya da görsel yükleyin.",
           "invalidFileSize": "Dosya boyutu {{size}} MB'den küçük olmalıdır.",
           "missingFile": "Seçilen her pozisyon için tasarım dosyası yükleyin.",
+          "incompleteQuantity": "Tasarım gruplarına atanan toplam adet sipariş adedine eşit olmalıdır.",
+          "quantityIncompleteSummary": "Kaydetmeden önce tasarım grubu adet dağılımını tamamlayın.",
+          "quantityCompleteSummary": "Tasarım grubu adet dağılımı tamamlandı.",
+          "groupQuantitySummary": "Atanan grup adedi: {assigned}/{total}",
+          "groupTitle": "Tasarım Grubu #{number}",
+          "groupPositionsLabel": "Bu gruptaki pozisyonlar",
+          "addNewGroup": "Yeni Tasarım Grubu Ekle",
+          "removeGroup": "Tasarım grubunu kaldır",
+          "deleteGroupConfirmTitle": "Bu tasarım grubunu silmek istediğinize emin misiniz?",
+          "designCardTitle": "Tasarım #{number}",
+          "positionLabel": "Pozisyon",
+          "quantityLabel": "Baskı adedi",
+          "addNewDesign": "Yeni Tasarım Ekle",
+          "removeDesign": "Tasarımı kaldır",
+          "legacyQuantityHelp": "Bu eski tasarım grubu sipariş adedinin tamamını kapsar.",
           "noPreview": "Ön izleme yok",
           "designAreaPlaceholder": "Tasarım bu alanda gösterilecek",
           "noSelection": "Yükleme yapmak için en az bir pozisyon seçin.",
@@ -2278,6 +2293,7 @@
           "fields": {
             "order": "Sipariş",
             "fileCount": "{count} dosya",
+            "unitCount": "{count} baskı dosyası",
             "multipleFiles": "{name} +{count} dosya"
           },
           "actions": {
@@ -2359,6 +2375,8 @@
         },
         "designs": {
           "title": "Tasarımlar",
+          "groupTitle": "Tasarım Grubu #{number}",
+          "groupQuantity": "Adet: {quantity}",
           "empty": "Tasarım bulunamadı",
           "unknownPosition": "Bilinmeyen konum",
           "noPreview": "Önizleme görseli yok",

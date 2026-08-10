@@ -23,6 +23,7 @@ import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { downloadOrderItemDesigns } from "@/utils/orderItemDesignDownloads";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
+import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 
 const STATUS_COLORS = {
   newOrder: "geekblue",
@@ -98,6 +99,7 @@ const ItemDesignPreview = ({
   positionMap,
   tDetail,
   fallbackText,
+  tOrders,
 }) => {
   if (!designs.length) {
     return <Empty description={tDetail("designs.empty")} />;
@@ -108,17 +110,28 @@ const ItemDesignPreview = ({
       {designs.map((design) => {
         const positionId = String(design?.product_position_id || "");
         const position = positionMap.get(positionId);
-        const designArea = position ? extractDesignAreaFromRecord(position) : null;
+        const designArea = position
+          ? extractDesignAreaFromRecord(position)
+          : null;
         const positionImageUrl = position?.images?.[0]?.image_url;
         const previewImageUrl = positionImageUrl || item?.image_url;
         const designPreviewUrl = design?.design_url;
         const positionName =
-          position?.name || design?.product_position?.name || tDetail("designs.unknownPosition");
+          position?.name ||
+          design?.product_position?.name ||
+          tDetail("designs.unknownPosition");
 
         return (
           <Card
             key={design?.id || positionId}
             title={positionName}
+            extra={
+              Number(design?.display_quantity || 1) > 1 ? (
+                <Tag color="blue">
+                  {tOrders("columns.quantity")}: {design.display_quantity}
+                </Tag>
+              ) : null
+            }
             className="rounded-2xl border border-slate-100 shadow-sm"
             bodyStyle={{
               display: "flex",
@@ -206,14 +219,45 @@ const OrderItemCard = ({
   fallbackText,
 }) => {
   const options = Array.isArray(item?.options) ? item.options : [];
-  const designs = Array.isArray(item?.designs) ? item.designs : [];
+  const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
+  const hasPersonalization = options.some((option) => {
+    const name = String(option?.name || "")
+      .trim()
+      .toLowerCase();
+    return (
+      (name === "personalization" || name === "personalisation") &&
+      String(option?.value ?? "").trim()
+    );
+  });
+  const usesPersonalizedDesignGroups =
+    hasPersonalization && Number(item?.quantity || 1) > 1;
+  const groupedDesigns = new Map();
+  rawDesigns.forEach((design) => {
+    const key = design?.design_group_id
+      ? `group-${design.design_group_id}-${design.product_position_id}`
+      : `legacy-${design?.id}`;
+    const current = groupedDesigns.get(key) || [];
+    current.push(design);
+    groupedDesigns.set(key, current);
+  });
+  const designs = Array.from(groupedDesigns.values()).map((group) => ({
+    ...group[0],
+    display_quantity: group[0]?.design_group_id
+      ? group.length
+      : hasPersonalization && Number(item?.quantity || 1) > 1
+        ? Number(item.quantity)
+        : 1,
+  }));
   const statusKey = item?.status || "";
   const statusLabel = statusKey
     ? tOrders(`status.values.${statusKey}`) || statusKey
     : tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      bodyStyle={{ padding: 20 }}
+    >
       <div className="flex flex-col gap-4 lg:flex-row">
         <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
           <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
@@ -237,12 +281,16 @@ const OrderItemCard = ({
             <Typography.Title level={5} style={{ margin: 0 }}>
               {item?.name || tOrders("columns.item")}
             </Typography.Title>
-            <Tag color="geekblue">SKU: {item?.sku || tOrders("common.none")}</Tag>
+            <Tag color="geekblue">
+              SKU: {item?.sku || tOrders("common.none")}
+            </Tag>
             <Tag color="gold">
-              {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
+              {tOrders("columns.quantity")}:{" "}
+              {item?.quantity ?? tOrders("common.none")}
             </Tag>
             <Tag color="green">
-              {tOrders("columns.price")}: {formatAmount(item?.price || item?.unit_price)}
+              {tOrders("columns.price")}:{" "}
+              {formatAmount(item?.price || item?.unit_price)}
             </Tag>
             <Tag color={STATUS_COLORS[statusKey] || "default"}>
               {tOrders("columns.status")}: {statusLabel}
@@ -251,21 +299,35 @@ const OrderItemCard = ({
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.product")}</Typography.Text>
-              <div className="font-medium">{item?.product?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.product")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.product?.name || tOrders("common.none")}
+              </div>
             </div>
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.size")}</Typography.Text>
-              <div className="font-medium">{item?.size?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.size")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.size?.name || tOrders("common.none")}
+              </div>
             </div>
             <div>
-              <Typography.Text type="secondary">{tOrders("columns.color")}</Typography.Text>
-              <div className="font-medium">{item?.color?.name || tOrders("common.none")}</div>
+              <Typography.Text type="secondary">
+                {tOrders("columns.color")}
+              </Typography.Text>
+              <div className="font-medium">
+                {item?.color?.name || tOrders("common.none")}
+              </div>
             </div>
           </div>
 
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.options")}</Typography.Text>
+            <Typography.Text type="secondary">
+              {tOrders("columns.options")}
+            </Typography.Text>
             {options.length ? (
               <div className="mt-2 flex flex-wrap gap-2">
                 {options.map((option, index) => (
@@ -273,7 +335,8 @@ const OrderItemCard = ({
                     key={`${option?.name || "option"}-${index}`}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
                   >
-                    {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
+                    {option?.name || tOrders("common.none")}:{" "}
+                    {option?.value || tOrders("common.none")}
                   </span>
                 ))}
               </div>
@@ -283,20 +346,37 @@ const OrderItemCard = ({
           </div>
 
           <div>
-            <Typography.Text type="secondary">{tOrders("columns.notes")}</Typography.Text>
-            <div className="mt-1 text-sm">{item?.notes || tOrders("common.none")}</div>
+            <Typography.Text type="secondary">
+              {tOrders("columns.notes")}
+            </Typography.Text>
+            <div className="mt-1 text-sm">
+              {item?.notes || tOrders("common.none")}
+            </div>
           </div>
 
           <div>
-            <Typography.Text type="secondary">{tDetail("designs.title")}</Typography.Text>
+            <Typography.Text type="secondary">
+              {tDetail("designs.title")}
+            </Typography.Text>
             <div className="mt-2">
-              <ItemDesignPreview
-                item={item}
-                designs={designs}
-                positionMap={positionMap}
-                tDetail={tDetail}
-                fallbackText={fallbackText}
-              />
+              {usesPersonalizedDesignGroups ? (
+                <GroupedOrderItemDesignPreview
+                  item={item}
+                  positionMap={positionMap}
+                  tDetail={tDetail}
+                  fallbackText={fallbackText}
+                  tOrders={tOrders}
+                />
+              ) : (
+                <ItemDesignPreview
+                  item={item}
+                  designs={designs}
+                  positionMap={positionMap}
+                  tDetail={tDetail}
+                  fallbackText={fallbackText}
+                  tOrders={tOrders}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -341,8 +421,8 @@ export default function PrinterOrderSearchPage({
         items
           .map((item) => item?.product_id || item?.product?.id)
           .filter(Boolean)
-          .map((id) => String(id))
-      )
+          .map((id) => String(id)),
+      ),
     );
 
     if (!uniqueProductIds.length) {
@@ -362,7 +442,7 @@ export default function PrinterOrderSearchPage({
               filters: { product_id: productId, status: "active" },
             });
             return [productId, extractPositionList(response)];
-          })
+          }),
         );
 
         if (!active) return;
@@ -376,7 +456,8 @@ export default function PrinterOrderSearchPage({
       } catch (error) {
         if (!active) return;
         message.error(
-          error?.response?.data?.error?.message || tDetail("messages.loadPositionsError")
+          error?.response?.data?.error?.message ||
+            tDetail("messages.loadPositionsError"),
         );
       } finally {
         if (active) {
@@ -398,7 +479,7 @@ export default function PrinterOrderSearchPage({
         label: buildVariantLabel(item, tOrders),
         item,
       })),
-    [items, tOrders]
+    [items, tOrders],
   );
 
   const reasonOptions = useMemo(
@@ -407,7 +488,7 @@ export default function PrinterOrderSearchPage({
         value: option.value,
         label: tOrders(`scanner.scrap.reasonOptions.${option.labelKey}`),
       })),
-    [tOrders]
+    [tOrders],
   );
 
   const loadPreview = useCallback(
@@ -444,28 +525,35 @@ export default function PrinterOrderSearchPage({
                   nextItems.find((item) => item?.order_id)?.order_id ||
                   null,
                 order_number:
-                  firstGroup?.order?.order_number || firstGroup?.order_number || nextOrderNumber,
+                  firstGroup?.order?.order_number ||
+                  firstGroup?.order_number ||
+                  nextOrderNumber,
                 customer_name:
-                  firstGroup?.order?.customer?.name || firstGroup?.customer?.name || null,
+                  firstGroup?.order?.customer?.name ||
+                  firstGroup?.customer?.name ||
+                  null,
               }
-            : null
+            : null,
         );
         setItems(nextItems);
       } catch (error) {
         setOrderSummary(null);
         setItems([]);
-        message.error(error?.response?.data?.error?.message || tDetail("messages.loadOrderError"));
+        message.error(
+          error?.response?.data?.error?.message ||
+            tDetail("messages.loadOrderError"),
+        );
       } finally {
         setSearching(false);
       }
     },
-    [categoryId, message, orderNumber, subCategoryId, tDetail, tOrders]
+    [categoryId, message, orderNumber, subCategoryId, tDetail, tOrders],
   );
 
   const finalizeCompletion = useCallback(
     async ({ rawOrderNumber, scrapPayload } = {}) => {
       const nextOrderNumber = String(
-        rawOrderNumber || orderSummary?.order_number || orderNumber
+        rawOrderNumber || orderSummary?.order_number || orderNumber,
       ).trim();
       if (!nextOrderNumber) {
         message.warning(tOrders("filters.searchOrderNumber"));
@@ -491,11 +579,16 @@ export default function PrinterOrderSearchPage({
                 id: responseOrder?.id || orderSummary?.id || null,
                 order_number: responseOrder?.order_number || nextOrderNumber,
               }
-            : { id: orderSummary?.id || null, order_number: nextOrderNumber }
+            : { id: orderSummary?.id || null, order_number: nextOrderNumber },
         );
-        setItems(Array.isArray(responseOrder?.items) ? responseOrder.items : []);
+        setItems(
+          Array.isArray(responseOrder?.items) ? responseOrder.items : [],
+        );
 
-        if (designDownload?.should_download && Array.isArray(designDownload?.designs)) {
+        if (
+          designDownload?.should_download &&
+          Array.isArray(designDownload?.designs)
+        ) {
           setDownloadingDesign(true);
           try {
             const downloadResult = await downloadOrderItemDesigns({
@@ -503,11 +596,14 @@ export default function PrinterOrderSearchPage({
               designs: designDownload.designs,
             });
             if (downloadResult?.downloaded) {
-              message.success(tOrders("scanner.messages.designDownloadSuccess"));
+              message.success(
+                tOrders("scanner.messages.designDownloadSuccess"),
+              );
             }
           } catch (downloadError) {
             message.error(
-              downloadError?.message || tOrders("scanner.messages.designDownloadError")
+              downloadError?.message ||
+                tOrders("scanner.messages.designDownloadError"),
             );
           } finally {
             setDownloadingDesign(false);
@@ -517,15 +613,26 @@ export default function PrinterOrderSearchPage({
         message.success(
           scrapPayload?.has_scrap
             ? tOrders("scanner.messages.completeWithScrapSuccess")
-            : tOrders("scanner.messages.completeSuccess")
+            : tOrders("scanner.messages.completeSuccess"),
         );
       } catch (error) {
-        message.error(error?.response?.data?.error?.message || tDetail("messages.loadOrderError"));
+        message.error(
+          error?.response?.data?.error?.message ||
+            tDetail("messages.loadOrderError"),
+        );
       } finally {
         setCompleting(false);
       }
     },
-    [categoryId, message, orderNumber, orderSummary, subCategoryId, tDetail, tOrders]
+    [
+      categoryId,
+      message,
+      orderNumber,
+      orderSummary,
+      subCategoryId,
+      tDetail,
+      tOrders,
+    ],
   );
 
   const handleComplete = useCallback(async () => {
@@ -551,7 +658,7 @@ export default function PrinterOrderSearchPage({
         },
       });
     },
-    [finalizeCompletion, isReportScrapeMode, loadPreview]
+    [finalizeCompletion, isReportScrapeMode, loadPreview],
   );
 
   const handlePaste = useCallback(
@@ -573,7 +680,7 @@ export default function PrinterOrderSearchPage({
         },
       });
     },
-    [finalizeCompletion, isReportScrapeMode, loadPreview]
+    [finalizeCompletion, isReportScrapeMode, loadPreview],
   );
 
   const openScrapModal = useCallback(() => {
@@ -593,7 +700,8 @@ export default function PrinterOrderSearchPage({
   }, [items.length, message, scrapForm, tOrders]);
 
   const handleSubmitScrap = useCallback(async () => {
-    const orderId = orderSummary?.id || items.find((item) => item?.order_id)?.order_id;
+    const orderId =
+      orderSummary?.id || items.find((item) => item?.order_id)?.order_id;
     if (!orderId) {
       message.error(tOrders("reportScrape.messages.orderIdMissing"));
       return;
@@ -603,8 +711,14 @@ export default function PrinterOrderSearchPage({
       setSubmittingScrap(true);
       const values = await scrapForm.validateFields();
       const entries = (values?.entries || []).map((entry) => {
-        const selected = itemOptions.find((option) => option.value === entry.order_item_id)?.item;
-        if (!selected?.product_id || !selected?.size_id || !selected?.color_id) {
+        const selected = itemOptions.find(
+          (option) => option.value === entry.order_item_id,
+        )?.item;
+        if (
+          !selected?.product_id ||
+          !selected?.size_id ||
+          !selected?.color_id
+        ) {
           throw new Error(tOrders("scanner.messages.invalidScrapItem"));
         }
         return {
@@ -638,13 +752,24 @@ export default function PrinterOrderSearchPage({
     } finally {
       setSubmittingScrap(false);
     }
-  }, [items, itemOptions, loadPreview, message, orderNumber, orderSummary, scrapForm, tOrders]);
+  }, [
+    items,
+    itemOptions,
+    loadPreview,
+    message,
+    orderNumber,
+    orderSummary,
+    scrapForm,
+    tOrders,
+  ]);
 
   return (
     <RequireRole anyOfRoles={["companyCompletedWorker", "companyadmin"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
-          {isReportScrapeMode ? tOrders("reportScrape.title") : tOrders("scanner.title")}
+          {isReportScrapeMode
+            ? tOrders("reportScrape.title")
+            : tOrders("scanner.title")}
         </Typography.Title>
 
         <Card className="rounded-2xl">
@@ -716,10 +841,12 @@ export default function PrinterOrderSearchPage({
         {items.length ? (
           <div className="grid gap-6">
             {items.map((item) => {
-              const productId = String(item?.product_id || item?.product?.id || "");
+              const productId = String(
+                item?.product_id || item?.product?.id || "",
+              );
               const positions = positionsByProductId[productId] || [];
               const positionMap = new Map(
-                positions.map((position) => [String(position?.id), position])
+                positions.map((position) => [String(position?.id), position]),
               );
 
               return (
@@ -767,10 +894,16 @@ export default function PrinterOrderSearchPage({
                       >
                         <div className="mb-3 flex items-center justify-between gap-3">
                           <Typography.Text strong>
-                            {tOrders("scanner.scrap.entryTitle", { index: index + 1 })}
+                            {tOrders("scanner.scrap.entryTitle", {
+                              index: index + 1,
+                            })}
                           </Typography.Text>
                           {fields.length > 1 ? (
-                            <Button danger type="text" onClick={() => remove(field.name)}>
+                            <Button
+                              danger
+                              type="text"
+                              onClick={() => remove(field.name)}
+                            >
                               {tCommonActions("remove")}
                             </Button>
                           ) : null}
@@ -780,14 +913,21 @@ export default function PrinterOrderSearchPage({
                             name={[field.name, "order_item_id"]}
                             label={tOrders("scanner.scrap.fields.item")}
                             rules={[
-                              { required: true, message: tOrders("scanner.scrap.validation.item") },
+                              {
+                                required: true,
+                                message: tOrders(
+                                  "scanner.scrap.validation.item",
+                                ),
+                              },
                             ]}
                           >
                             <Select
                               showSearch
                               optionFilterProp="label"
                               options={itemOptions}
-                              placeholder={tOrders("scanner.scrap.placeholders.item")}
+                              placeholder={tOrders(
+                                "scanner.scrap.placeholders.item",
+                              )}
                             />
                           </Form.Item>
                           <Form.Item
@@ -796,11 +936,17 @@ export default function PrinterOrderSearchPage({
                             rules={[
                               {
                                 required: true,
-                                message: tOrders("scanner.scrap.validation.quantity"),
+                                message: tOrders(
+                                  "scanner.scrap.validation.quantity",
+                                ),
                               },
                             ]}
                           >
-                            <InputNumber min={1} precision={0} className="w-full" />
+                            <InputNumber
+                              min={1}
+                              precision={0}
+                              className="w-full"
+                            />
                           </Form.Item>
                           <Form.Item
                             name={[field.name, "reason_detail"]}
@@ -808,13 +954,17 @@ export default function PrinterOrderSearchPage({
                             rules={[
                               {
                                 required: true,
-                                message: tOrders("scanner.scrap.validation.reason"),
+                                message: tOrders(
+                                  "scanner.scrap.validation.reason",
+                                ),
                               },
                             ]}
                           >
                             <Select
                               options={reasonOptions}
-                              placeholder={tOrders("scanner.scrap.placeholders.reason")}
+                              placeholder={tOrders(
+                                "scanner.scrap.placeholders.reason",
+                              )}
                             />
                           </Form.Item>
                           <Form.Item
@@ -823,14 +973,20 @@ export default function PrinterOrderSearchPage({
                           >
                             <Input.TextArea
                               autoSize={{ minRows: 2, maxRows: 4 }}
-                              placeholder={tOrders("scanner.scrap.placeholders.note")}
+                              placeholder={tOrders(
+                                "scanner.scrap.placeholders.note",
+                              )}
                             />
                           </Form.Item>
                         </div>
                       </Card>
                     ))}
 
-                    <Button type="dashed" block onClick={() => add({ quantity: 1 })}>
+                    <Button
+                      type="dashed"
+                      block
+                      onClick={() => add({ quantity: 1 })}
+                    >
                       {tOrders("scanner.scrap.actions.addEntry")}
                     </Button>
                   </div>

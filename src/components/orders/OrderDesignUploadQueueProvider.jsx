@@ -104,11 +104,24 @@ export function OrderDesignUploadQueueProvider({ children }) {
             currentTask.routingSubCategoryId || "",
           );
         }
-        currentTask.files.forEach(({ positionId }) => {
+        currentTask.positions.forEach((positionId) => {
           formData.append("positions", positionId);
         });
-        currentTask.files.forEach(({ positionId, file }) => {
-          formData.append(`design_files[${positionId}]`, file);
+        formData.append(
+          "design_entries",
+          JSON.stringify(
+            currentTask.files.map(
+              ({ clientId, groupId, positionId, quantity }) => ({
+                client_id: clientId,
+                group_id: groupId,
+                position_id: positionId,
+                quantity,
+              }),
+            ),
+          ),
+        );
+        currentTask.files.forEach(({ clientId, file }) => {
+          formData.append(`design_files[${clientId}]`, file);
         });
 
         const pollProgress = async () => {
@@ -250,15 +263,27 @@ export function OrderDesignUploadQueueProvider({ children }) {
       isSubCategory,
       includeRoutingSubCategory,
       routingSubCategoryId,
+      positions,
       files,
     }) => {
       const normalizedFiles = Array.from(files || [])
         .map((entry) => ({
+          clientId: String(entry?.clientId || entry?.positionId || ""),
+          groupId: String(
+            entry?.groupId || entry?.clientId || entry?.positionId || "",
+          ),
           positionId: String(entry?.positionId || ""),
           positionName: entry?.positionName || "-",
+          quantity: Math.max(1, Number.parseInt(entry?.quantity || 1, 10) || 1),
           file: entry?.file instanceof File ? entry.file : null,
         }))
-        .filter((entry) => entry.positionId && entry.file instanceof File);
+        .filter(
+          (entry) =>
+            entry.clientId &&
+            entry.groupId &&
+            entry.positionId &&
+            entry.file instanceof File,
+        );
       if (!normalizedFiles.length) return null;
 
       const task = {
@@ -272,8 +297,21 @@ export function OrderDesignUploadQueueProvider({ children }) {
         routingSubCategoryId: routingSubCategoryId
           ? String(routingSubCategoryId)
           : null,
+        positions: Array.from(
+          new Set(
+            Array.from(
+              Array.isArray(positions) && positions.length
+                ? positions
+                : normalizedFiles.map((entry) => entry.positionId),
+            ).map(String),
+          ),
+        ),
         files: normalizedFiles,
         fileCount: normalizedFiles.length,
+        unitCount: normalizedFiles.reduce(
+          (sum, entry) => sum + entry.quantity,
+          0,
+        ),
         totalSize: normalizedFiles.reduce(
           (sum, entry) => sum + Number(entry.file?.size || 0),
           0,
@@ -511,6 +549,9 @@ export function OrderDesignUploadQueueProvider({ children }) {
                       >
                         {tQueue("fields.order")}: {task.orderNumber} •{" "}
                         {tQueue("fields.fileCount", { count: task.fileCount })}{" "}
+                        {task.unitCount !== task.fileCount
+                          ? `• ${tQueue("fields.unitCount", { count: task.unitCount })} `
+                          : ""}
                         • {formatBytes(task.totalSize)}
                       </Typography.Text>
                       <Progress

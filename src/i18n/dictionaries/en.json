@@ -2432,6 +2432,21 @@
           "invalidFileType": "Unsupported file type. Please upload PDF, DST or image files.",
           "invalidFileSize": "File size must be smaller than {{size}} MB.",
           "missingFile": "Please upload a design file for each selected position.",
+          "incompleteQuantity": "The total quantity assigned to design groups must equal the ordered quantity.",
+          "quantityIncompleteSummary": "Complete the design group quantity distribution before saving.",
+          "quantityCompleteSummary": "Design group quantity distribution is complete.",
+          "groupQuantitySummary": "Assigned group quantity: {assigned}/{total}",
+          "groupTitle": "Design Group #{number}",
+          "groupPositionsLabel": "Positions in this group",
+          "addNewGroup": "Add New Design Group",
+          "removeGroup": "Remove design group",
+          "deleteGroupConfirmTitle": "Are you sure you want to delete this design group?",
+          "designCardTitle": "Design #{number}",
+          "positionLabel": "Position",
+          "quantityLabel": "Print quantity",
+          "addNewDesign": "Add New Design",
+          "removeDesign": "Remove design",
+          "legacyQuantityHelp": "This legacy design group covers the full ordered quantity.",
           "noPreview": "No reference image",
           "designAreaPlaceholder": "Design preview appears here",
           "noSelection": "Select at least one position to begin uploading.",
@@ -2476,6 +2491,7 @@
           "fields": {
             "order": "Order",
             "fileCount": "{count} files",
+            "unitCount": "{count} print files",
             "multipleFiles": "{name} +{count} files"
           },
           "actions": {
@@ -2557,6 +2573,8 @@
         },
         "designs": {
           "title": "Designs",
+          "groupTitle": "Design Group #{number}",
+          "groupQuantity": "Quantity: {quantity}",
           "empty": "No designs found",
           "unknownPosition": "Unknown position",
           "noPreview": "No preview image",

@@ -1,0 +1,236 @@
+"use client";
+
+import { Card, Empty, Tag, Typography } from "antd";
+import { extractDesignAreaFromRecord } from "@/utils/designArea";
+
+const hasFilledPersonalization = (item) =>
+  Number(item?.quantity || 1) > 1 &&
+  (Array.isArray(item?.options) ? item.options : []).some((option) => {
+    const name = String(option?.name || "")
+      .trim()
+      .toLowerCase();
+    return (
+      (name === "personalization" || name === "personalisation") &&
+      String(option?.value ?? "").trim()
+    );
+  });
+
+const buildPersonalizedDesignGroups = (item) => {
+  const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
+  const groups = new Map();
+
+  rawDesigns.forEach((design) => {
+    const key = design?.design_group_id
+      ? `group-${design.design_group_id}`
+      : "legacy";
+    const current = groups.get(key) || [];
+    current.push(design);
+    groups.set(key, current);
+  });
+
+  return Array.from(groups.entries()).map(([key, groupDesigns]) => {
+    const designsByPosition = new Map();
+    groupDesigns.forEach((design) => {
+      const positionId = String(design?.product_position_id || "");
+      const current = designsByPosition.get(positionId) || [];
+      current.push(design);
+      designsByPosition.set(positionId, current);
+    });
+
+    const legacy = key === "legacy";
+    const quantity = legacy
+      ? Number(item?.quantity || 1)
+      : Math.max(
+          1,
+          ...Array.from(designsByPosition.values()).map(
+            (positionDesigns) => positionDesigns.length,
+          ),
+        );
+
+    return {
+      id: key,
+      legacy,
+      quantity,
+      designs: Array.from(designsByPosition.values()).map(
+        (positionDesigns) => ({
+          ...positionDesigns[0],
+          display_quantity: legacy ? quantity : positionDesigns.length,
+        }),
+      ),
+    };
+  });
+};
+
+const PositionDesignCard = ({
+  item,
+  design,
+  positionMap,
+  tDetail,
+  tOrders,
+  fallbackText,
+  showQuantity = true,
+}) => {
+  const positionId = String(design?.product_position_id || "");
+  const position = positionMap.get(positionId);
+  const designArea = position ? extractDesignAreaFromRecord(position) : null;
+  const positionImageUrl = position?.images?.[0]?.image_url;
+  const previewImageUrl = positionImageUrl || item?.image_url;
+  const designPreviewUrl = design?.design_url;
+  const positionName =
+    position?.name ||
+    design?.product_position?.name ||
+    tDetail("designs.unknownPosition");
+
+  return (
+    <Card
+      title={positionName}
+      extra={
+        showQuantity && Number(design?.display_quantity || 1) > 1 ? (
+          <Tag color="blue">
+            {tOrders("columns.quantity")}: {design.display_quantity}
+          </Tag>
+        ) : null
+      }
+      className="rounded-2xl border border-slate-100 shadow-sm"
+      styles={{
+        body: {
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          flex: 1,
+          padding: 16,
+        },
+      }}
+    >
+      <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+        {previewImageUrl ? (
+          <div className="relative w-full">
+            <img
+              src={previewImageUrl}
+              alt={positionName}
+              className="block w-full rounded-2xl object-contain"
+            />
+            <div className="absolute inset-0">
+              {designArea ? (
+                <div
+                  className="absolute rounded-xl border-2 border-blue-500/70 bg-blue-500/10 shadow-inner"
+                  style={{
+                    left: `${designArea.x * 100}%`,
+                    top: `${designArea.y * 100}%`,
+                    width: `${designArea.width * 100}%`,
+                    height: `${designArea.height * 100}%`,
+                  }}
+                >
+                  {designPreviewUrl ? (
+                    <img
+                      src={designPreviewUrl}
+                      alt="design preview"
+                      className="h-full w-full rounded-lg object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                      {fallbackText}
+                    </div>
+                  )}
+                </div>
+              ) : designPreviewUrl ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src={designPreviewUrl}
+                    alt="design preview"
+                    className="h-24 w-24 rounded-lg object-contain"
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : designPreviewUrl ? (
+          <div className="flex aspect-[4/5] items-center justify-center p-6">
+            <img
+              src={designPreviewUrl}
+              alt="design preview"
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-[4/5] items-center justify-center p-6">
+            <Empty description={tDetail("designs.noPreview")} />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-1">
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          {tDetail("designs.positionLabel")}
+        </Typography.Text>
+        <Typography.Text>{positionName}</Typography.Text>
+      </div>
+    </Card>
+  );
+};
+
+export default function OrderItemDesignPreview({
+  item,
+  positionMap,
+  tDetail,
+  tOrders,
+  fallbackText,
+}) {
+  const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
+  if (!rawDesigns.length) {
+    return <Empty description={tDetail("designs.empty")} />;
+  }
+
+  if (!hasFilledPersonalization(item)) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {rawDesigns.map((design) => (
+          <PositionDesignCard
+            key={design?.id || design?.design_url}
+            item={item}
+            design={design}
+            positionMap={positionMap}
+            tDetail={tDetail}
+            tOrders={tOrders}
+            fallbackText={fallbackText}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const groups = buildPersonalizedDesignGroups(item);
+  return (
+    <div className="space-y-4">
+      {groups.map((group, groupIndex) => (
+        <Card
+          key={group.id}
+          title={tDetail("designs.groupTitle", { number: groupIndex + 1 })}
+          extra={
+            <Tag color="blue">
+              {tDetail("designs.groupQuantity", {
+                quantity: group.quantity,
+              })}
+            </Tag>
+          }
+          className="rounded-2xl border border-slate-200 bg-slate-50/40"
+          styles={{ body: { padding: 16 } }}
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+            {group.designs.map((design) => (
+              <PositionDesignCard
+                key={`${group.id}-${design?.product_position_id}`}
+                item={item}
+                design={design}
+                positionMap={positionMap}
+                tDetail={tDetail}
+                tOrders={tOrders}
+                fallbackText={fallbackText}
+                showQuantity={false}
+              />
+            ))}
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}

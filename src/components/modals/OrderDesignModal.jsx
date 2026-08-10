@@ -8,6 +8,7 @@ import {
   Card,
   Empty,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Select,
@@ -17,7 +18,11 @@ import {
   Typography,
   Upload,
 } from "antd";
-import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
@@ -96,12 +101,55 @@ const normalizeDesignFilesForSnapshot = (designFiles = {}) =>
       return acc;
     }, {});
 
+const createEntryId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const createPersonalizedPositionDesign = (positionId = "") => ({
+  id: createEntryId(),
+  positionId: String(positionId || ""),
+  fileList: [],
+  existingDesignId: null,
+});
+
+const createPersonalizedDesignGroup = () => ({
+  id: createEntryId(),
+  quantity: 1,
+  designs: [],
+  locked: false,
+  legacy: false,
+});
+
+const extractPersonalizationValue = (options) => {
+  if (!Array.isArray(options)) return "";
+  const row = options.find((option) => {
+    const name = String(option?.name || "")
+      .trim()
+      .toLowerCase();
+    return name === "personalization" || name === "personalisation";
+  });
+  return String(row?.value ?? "").trim();
+};
+
+const normalizePersonalizedEntriesForSnapshot = (groups = []) =>
+  groups.map((group) => ({
+    quantity: Number(group?.quantity || 0),
+    locked: Boolean(group?.locked),
+    designs: (group?.designs || []).map((design) => ({
+      positionId: String(design?.positionId || ""),
+      files: normalizeDesignFilesForSnapshot({ entry: design?.fileList || [] })
+        .entry,
+    })),
+  }));
+
 const createDesignSnapshot = ({
   note,
   selectedPositionIds,
   designFiles,
   isSubCategory,
   routingSubCategoryId,
+  personalizedDesignEntries,
 }) =>
   JSON.stringify({
     note: note || "",
@@ -111,6 +159,9 @@ const createDesignSnapshot = ({
       : null,
     selectedPositionIds: [...(selectedPositionIds || [])].map(String).sort(),
     designFiles: normalizeDesignFilesForSnapshot(designFiles),
+    personalizedDesignEntries: normalizePersonalizedEntriesForSnapshot(
+      personalizedDesignEntries,
+    ),
   });
 
 const markUploadFilesAsReady = (fileList = []) =>
@@ -153,6 +204,9 @@ export default function OrderDesignModal({
   const [note, setNote] = useState("");
   const [selectedPositionIds, setSelectedPositionIds] = useState([]);
   const [designFiles, setDesignFiles] = useState({});
+  const [personalizedDesignEntries, setPersonalizedDesignEntries] = useState(
+    [],
+  );
   const [isSubCategory, setIsSubCategory] = useState(false);
   const [routingSubCategoryId, setRoutingSubCategoryId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -168,6 +222,7 @@ export default function OrderDesignModal({
     setNote("");
     setSelectedPositionIds([]);
     setDesignFiles({});
+    setPersonalizedDesignEntries([]);
     setIsSubCategory(false);
     setRoutingSubCategoryId(null);
     setSaving(false);
@@ -216,6 +271,14 @@ export default function OrderDesignModal({
     return orderDetail.designs.filter((design) => design?.product_position_id);
   }, [orderDetail]);
 
+  const itemQuantity = Math.max(1, Number(orderDetail?.quantity || 1));
+  const personalizationValue = extractPersonalizationValue(
+    orderDetail?.options,
+  );
+  const isPersonalizedQuantityMode = Boolean(
+    personalizationValue && itemQuantity > 1,
+  );
+
   const existingDesignMap = useMemo(() => {
     const map = new Map();
     existingDesigns.forEach((design) => {
@@ -226,9 +289,13 @@ export default function OrderDesignModal({
 
   const lockedPositionIds = useMemo(
     () =>
-      existingDesigns
-        .filter((design) => Boolean(design?.design_url))
-        .map((design) => String(design.product_position_id)),
+      Array.from(
+        new Set(
+          existingDesigns
+            .filter((design) => Boolean(design?.design_url))
+            .map((design) => String(design.product_position_id)),
+        ),
+      ),
     [existingDesigns],
   );
 
@@ -244,6 +311,7 @@ export default function OrderDesignModal({
       setRoutingSubCategoryId(null);
       setSelectedPositionIds([]);
       setDesignFiles({});
+      setPersonalizedDesignEntries([]);
       setShouldHydrateFromOrder(false);
       return;
     }
@@ -256,10 +324,83 @@ export default function OrderDesignModal({
       null;
     let nextSelectedPositionIds = [];
     let nextDesignFiles = {};
+    let nextPersonalizedEntries = [];
 
-    if (existingDesigns.length) {
-      nextSelectedPositionIds = existingDesigns.map((design) =>
-        String(design.product_position_id),
+    if (existingDesigns.length && isPersonalizedQuantityMode) {
+      const groups = new Map();
+      existingDesigns.forEach((design) => {
+        const key = design?.design_group_id
+          ? `group-${design.design_group_id}`
+          : "legacy";
+        const current = groups.get(key) || [];
+        current.push(design);
+        groups.set(key, current);
+      });
+      nextPersonalizedEntries = Array.from(groups.entries()).map(
+        ([key, group]) => {
+          const legacy = key === "legacy";
+          const designsByPosition = new Map();
+          group.forEach((design) => {
+            const positionId = String(design.product_position_id);
+            const current = designsByPosition.get(positionId) || [];
+            current.push(design);
+            designsByPosition.set(positionId, current);
+          });
+          const quantity = legacy
+            ? itemQuantity
+            : Math.max(
+                1,
+                ...Array.from(designsByPosition.values()).map(
+                  (positionDesigns) => positionDesigns.length,
+                ),
+              );
+          return {
+            id: key,
+            quantity,
+            designs: Array.from(designsByPosition.entries()).map(
+              ([positionId, positionDesigns]) => {
+                const design = positionDesigns[0];
+                const url = design?.design_url;
+                return {
+                  id: `${key}-${positionId}`,
+                  positionId,
+                  fileList: url
+                    ? [
+                        {
+                          uid: `existing-${design.id}`,
+                          name:
+                            design?.file_name ||
+                            url.split("/").pop() ||
+                            t("positions.designUploadLabel"),
+                          status: "done",
+                          url,
+                        },
+                      ]
+                    : [],
+                  existingDesignId: design.id,
+                };
+              },
+            ),
+            existingDesignIds: group.map((design) => design.id),
+            locked: true,
+            legacy,
+          };
+        },
+      );
+      nextSelectedPositionIds = Array.from(
+        new Set(
+          nextPersonalizedEntries.flatMap((entry) =>
+            entry.designs.map((design) => design.positionId),
+          ),
+        ),
+      );
+    } else if (isPersonalizedQuantityMode) {
+      nextPersonalizedEntries = [createPersonalizedDesignGroup()];
+    } else if (existingDesigns.length) {
+      nextSelectedPositionIds = Array.from(
+        new Set(
+          existingDesigns.map((design) => String(design.product_position_id)),
+        ),
       );
       nextDesignFiles = nextSelectedPositionIds.reduce((acc, positionId) => {
         const designInfo = existingDesignMap.get(positionId);
@@ -286,18 +427,22 @@ export default function OrderDesignModal({
     setRoutingSubCategoryId(nextRoutingSubCategoryId);
     setSelectedPositionIds(nextSelectedPositionIds);
     setDesignFiles(nextDesignFiles);
+    setPersonalizedDesignEntries(nextPersonalizedEntries);
     initialSnapshotRef.current = createDesignSnapshot({
       note: nextNote,
       isSubCategory: nextIsSubCategory,
       routingSubCategoryId: nextRoutingSubCategoryId,
       selectedPositionIds: nextSelectedPositionIds,
       designFiles: nextDesignFiles,
+      personalizedDesignEntries: nextPersonalizedEntries,
     });
     setIsDirty(false);
     setShouldHydrateFromOrder(false);
   }, [
     existingDesignMap,
     existingDesigns,
+    isPersonalizedQuantityMode,
+    itemQuantity,
     orderDetail,
     shouldHydrateFromOrder,
     t,
@@ -312,6 +457,7 @@ export default function OrderDesignModal({
       routingSubCategoryId,
       selectedPositionIds,
       designFiles,
+      personalizedDesignEntries,
     });
     setIsDirty(currentSnapshot !== initialSnapshotRef.current);
   }, [
@@ -320,6 +466,7 @@ export default function OrderDesignModal({
     note,
     open,
     orderDetail,
+    personalizedDesignEntries,
     routingSubCategoryId,
     selectedPositionIds,
     shouldHydrateFromOrder,
@@ -416,6 +563,17 @@ export default function OrderDesignModal({
     [positionMap, selectedPositionIds],
   );
 
+  const personalizedTotalQuantity = useMemo(() => {
+    return personalizedDesignEntries.reduce(
+      (sum, group) => sum + Number(group?.quantity || 0),
+      0,
+    );
+  }, [personalizedDesignEntries]);
+
+  const personalizedQuantityIncomplete = Boolean(
+    isPersonalizedQuantityMode && personalizedTotalQuantity !== itemQuantity,
+  );
+
   const handlePositionChange = useCallback(
     (values) => {
       const lockedRemoved = lockedPositionIds.filter(
@@ -491,6 +649,87 @@ export default function OrderDesignModal({
     [enrichFileListWithPreview],
   );
 
+  const handlePersonalizedUploadChange = useCallback(
+    (groupId, designId, fileList) => {
+      enrichFileListWithPreview(markUploadFilesAsReady(fileList)).then(
+        (processed) => {
+          setPersonalizedDesignEntries((prev) =>
+            prev.map((group) =>
+              group.id === groupId
+                ? {
+                    ...group,
+                    designs: group.designs.map((design) =>
+                      design.id === designId
+                        ? { ...design, fileList: processed }
+                        : design,
+                    ),
+                  }
+                : group,
+            ),
+          );
+        },
+      );
+    },
+    [enrichFileListWithPreview],
+  );
+
+  const handlePersonalizedQuantityChange = useCallback(
+    (groupId, value) => {
+      setPersonalizedDesignEntries((prev) => {
+        const current = prev.find((group) => group.id === groupId);
+        if (!current || current.locked) return prev;
+        const usedByOthers = prev.reduce(
+          (sum, group) =>
+            group.id !== groupId ? sum + Number(group.quantity || 0) : sum,
+          0,
+        );
+        const max = Math.max(1, itemQuantity - usedByOthers);
+        const nextQuantity = Math.min(
+          max,
+          Math.max(1, Number.parseInt(value || 1, 10) || 1),
+        );
+        return prev.map((group) =>
+          group.id === groupId ? { ...group, quantity: nextQuantity } : group,
+        );
+      });
+    },
+    [itemQuantity],
+  );
+
+  const handlePersonalizedGroupPositionsChange = useCallback(
+    (groupId, values) => {
+      setPersonalizedDesignEntries((prev) =>
+        prev.map((group) => {
+          if (group.id !== groupId || group.locked) return group;
+          const designs = group.designs.filter((design) =>
+            values.includes(design.positionId),
+          );
+          values.forEach((positionId) => {
+            if (!designs.some((design) => design.positionId === positionId)) {
+              designs.push(createPersonalizedPositionDesign(positionId));
+            }
+          });
+          return { ...group, designs };
+        }),
+      );
+    },
+    [],
+  );
+
+  const handleAddPersonalizedDesign = useCallback(() => {
+    if (personalizedTotalQuantity >= itemQuantity) return;
+    setPersonalizedDesignEntries((prev) => [
+      ...prev,
+      createPersonalizedDesignGroup(),
+    ]);
+  }, [itemQuantity, personalizedTotalQuantity]);
+
+  const handleRemovePersonalizedDesign = useCallback((groupId) => {
+    setPersonalizedDesignEntries((prev) =>
+      prev.filter((group) => group.id !== groupId || group.locked),
+    );
+  }, []);
+
   const validateFile = useCallback(
     (file) => {
       const isAllowedType =
@@ -520,51 +759,128 @@ export default function OrderDesignModal({
       message.error(t("messages.missingParams"));
       return;
     }
-    const hasMissingFile = selectedPositionIds.some((positionId) => {
-      const fileList = extractUploadFileList(designFiles[positionId]);
-      return fileList.length === 0;
-    });
-    if (hasMissingFile) {
-      message.error(t("positions.missingFile"));
-      return;
-    }
-
-    const positionsToSubmit = selectedPositionIds.filter((positionId) => {
-      const fileList = extractUploadFileList(designFiles[positionId]);
-      return fileList.some((file) => Boolean(file.originFileObj));
-    });
-
-    if (positionsToSubmit.length) {
-      const files = positionsToSubmit.map((positionId) => {
-        const fileList = extractUploadFileList(designFiles[positionId]);
-        const fileItem = fileList.find((file) => Boolean(file.originFileObj));
-        return {
-          positionId,
-          positionName:
-            positionMap.get(String(positionId))?.name || `#${positionId}`,
-          file: fileItem?.originFileObj,
-        };
-      });
-      const taskId = enqueueUpload({
-        orderItemId: orderDetail.id,
-        orderId: orderDetail.order_id,
-        orderNumber:
-          orderDetail?.order?.order_number || orderDetail?.order_number || "-",
-        note,
-        isSubCategory,
-        includeRoutingSubCategory: canRouteToPrint,
-        routingSubCategoryId,
-        files,
-      });
-      if (!taskId) {
-        message.error(t("messages.saveError"));
+    if (isPersonalizedQuantityMode) {
+      if (!personalizedDesignEntries.length) {
+        message.error(t("positions.noSelectionError"));
         return;
       }
-      message.success(
-        t("messages.uploadQueued", { count: positionsToSubmit.length }),
+      const hasGroupWithoutPosition = personalizedDesignEntries.some(
+        (group) => !group.designs.length,
       );
-      onSaved?.({ queued: true, taskId });
-      return;
+      if (hasGroupWithoutPosition) {
+        message.error(t("positions.noSelectionError"));
+        return;
+      }
+      const hasMissingPersonalizedFile = personalizedDesignEntries.some(
+        (group) =>
+          group.designs.some(
+            (design) => extractUploadFileList(design.fileList).length === 0,
+          ),
+      );
+      if (hasMissingPersonalizedFile) {
+        message.error(t("positions.missingFile"));
+        return;
+      }
+      if (personalizedQuantityIncomplete) {
+        message.error(t("positions.incompleteQuantity"));
+        return;
+      }
+
+      const files = personalizedDesignEntries.flatMap((group) =>
+        group.locked
+          ? []
+          : group.designs.map((design) => {
+              const fileItem = extractUploadFileList(design.fileList).find(
+                (file) => Boolean(file.originFileObj),
+              );
+              return {
+                clientId: design.id,
+                groupId: group.id,
+                positionId: design.positionId,
+                positionName:
+                  positionMap.get(design.positionId)?.name ||
+                  `#${design.positionId}`,
+                quantity: Number(group.quantity || 1),
+                file: fileItem?.originFileObj,
+              };
+            }),
+      );
+
+      if (files.length) {
+        const taskId = enqueueUpload({
+          orderItemId: orderDetail.id,
+          orderId: orderDetail.order_id,
+          orderNumber:
+            orderDetail?.order?.order_number ||
+            orderDetail?.order_number ||
+            "-",
+          note,
+          isSubCategory,
+          includeRoutingSubCategory: canRouteToPrint,
+          routingSubCategoryId,
+          positions: Array.from(new Set(files.map((file) => file.positionId))),
+          files,
+        });
+        if (!taskId) {
+          message.error(t("messages.saveError"));
+          return;
+        }
+        message.success(t("messages.uploadQueued", { count: files.length }));
+        onSaved?.({ queued: true, taskId });
+        return;
+      }
+    }
+
+    if (!isPersonalizedQuantityMode) {
+      const hasMissingFile = selectedPositionIds.some((positionId) => {
+        const fileList = extractUploadFileList(designFiles[positionId]);
+        return fileList.length === 0;
+      });
+      if (hasMissingFile) {
+        message.error(t("positions.missingFile"));
+        return;
+      }
+
+      const positionsToSubmit = selectedPositionIds.filter((positionId) => {
+        const fileList = extractUploadFileList(designFiles[positionId]);
+        return fileList.some((file) => Boolean(file.originFileObj));
+      });
+
+      if (positionsToSubmit.length) {
+        const files = positionsToSubmit.map((positionId) => {
+          const fileList = extractUploadFileList(designFiles[positionId]);
+          const fileItem = fileList.find((file) => Boolean(file.originFileObj));
+          return {
+            positionId,
+            positionName:
+              positionMap.get(String(positionId))?.name || `#${positionId}`,
+            file: fileItem?.originFileObj,
+          };
+        });
+        const taskId = enqueueUpload({
+          orderItemId: orderDetail.id,
+          orderId: orderDetail.order_id,
+          orderNumber:
+            orderDetail?.order?.order_number ||
+            orderDetail?.order_number ||
+            "-",
+          note,
+          isSubCategory,
+          includeRoutingSubCategory: canRouteToPrint,
+          routingSubCategoryId,
+          positions: positionsToSubmit,
+          files,
+        });
+        if (!taskId) {
+          message.error(t("messages.saveError"));
+          return;
+        }
+        message.success(
+          t("messages.uploadQueued", { count: positionsToSubmit.length }),
+        );
+        onSaved?.({ queued: true, taskId });
+        return;
+      }
     }
 
     const formData = new FormData();
@@ -596,10 +912,13 @@ export default function OrderDesignModal({
     designFiles,
     enqueueUpload,
     isSubCategory,
+    isPersonalizedQuantityMode,
     message,
     note,
     onSaved,
     orderDetail,
+    personalizedDesignEntries,
+    personalizedQuantityIncomplete,
     positionMap,
     routingSubCategoryId,
     selectedPositionIds,
@@ -634,6 +953,34 @@ export default function OrderDesignModal({
       }
     },
     [isDirty, loadOrderDetail, message, t],
+  );
+
+  const handleDeletePersonalizedGroup = useCallback(
+    async (group) => {
+      const designIds = Array.from(new Set(group?.existingDesignIds || []));
+      if (!designIds.length) return;
+      const loadingId = designIds[0];
+      setDeletingDesignIds((prev) => ({ ...prev, [loadingId]: true }));
+      try {
+        await OrdersAPI.deleteDesign(loadingId);
+        message.success(t("messages.deleteSuccess"));
+        setPersonalizedDesignEntries((prev) =>
+          prev.filter((entry) => entry.id !== group.id),
+        );
+        await loadOrderDetail({ hydrate: false, withLoading: false });
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      } finally {
+        setDeletingDesignIds((prev) => {
+          const next = { ...prev };
+          delete next[loadingId];
+          return next;
+        });
+      }
+    },
+    [loadOrderDetail, message, t],
   );
 
   const handleCancel = useCallback(() => {
@@ -796,6 +1143,195 @@ export default function OrderDesignModal({
           >
             {t("positions.designUploadHelp")}
           </Typography.Paragraph>
+        </div>
+      </Card>
+    );
+  };
+
+  const renderPersonalizedPositionCard = (group, design) => {
+    const position = positionMap.get(design.positionId);
+    const fileList = design.fileList || [];
+    const designPreviewUrl = getDesignPreviewUrl(
+      extractUploadFileList(fileList),
+    );
+    const designArea = position ? extractDesignAreaFromRecord(position) : null;
+    const positionImageUrl =
+      position?.images?.[0]?.image_url || orderDetail?.image_url;
+    return (
+      <Card key={design.id} title={position?.name || t("positions.untitled")}>
+        <div className="flex flex-col gap-4">
+          <div className="relative flex min-h-36 w-full items-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+            {positionImageUrl ? (
+              <div className="relative w-full">
+                <img
+                  src={positionImageUrl}
+                  alt={position?.name || "position"}
+                  className="block w-full rounded-lg object-contain"
+                  style={{ backgroundColor: orderDetail?.color?.hex_code }}
+                />
+                <div className="absolute inset-0">
+                  {designArea ? (
+                    <div
+                      className="absolute rounded-xl border-2 border-blue-500/70 bg-blue-500/10 shadow-inner"
+                      style={{
+                        left: `${designArea.x * 100}%`,
+                        top: `${designArea.y * 100}%`,
+                        width: `${designArea.width * 100}%`,
+                        height: `${designArea.height * 100}%`,
+                      }}
+                    >
+                      {designPreviewUrl ? (
+                        <img
+                          src={designPreviewUrl}
+                          alt="design preview"
+                          className="h-full w-full rounded-lg object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                          {t("positions.designAreaPlaceholder")}
+                        </div>
+                      )}
+                    </div>
+                  ) : designPreviewUrl ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={designPreviewUrl}
+                        alt="design preview"
+                        className="h-24 w-24 rounded-lg object-contain"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : designPreviewUrl ? (
+              <img
+                src={designPreviewUrl}
+                alt="design preview"
+                className="h-36 w-full object-contain"
+              />
+            ) : (
+              <Empty description={t("positions.noPreview")} />
+            )}
+          </div>
+
+          <Upload
+            accept={ACCEPT_ATTR}
+            maxCount={1}
+            disabled={group.locked}
+            fileList={fileList}
+            customRequest={({ onSuccess }) => onSuccess?.("ok")}
+            onChange={({ fileList: nextList }) =>
+              handlePersonalizedUploadChange(group.id, design.id, nextList)
+            }
+            beforeUpload={validateFile}
+          >
+            <Button block icon={<UploadOutlined />} disabled={group.locked}>
+              {t("positions.designUploadLabel")}
+            </Button>
+          </Upload>
+        </div>
+      </Card>
+    );
+  };
+
+  const renderPersonalizedDesignGroup = (group, index) => {
+    const usedByOthers = Math.max(
+      0,
+      personalizedTotalQuantity - Number(group.quantity || 0),
+    );
+    const maxQuantity = Math.max(1, itemQuantity - usedByOthers);
+    const loadingId = group.existingDesignIds?.[0];
+    const deleteLoading = loadingId
+      ? Boolean(deletingDesignIds[loadingId])
+      : false;
+
+    return (
+      <Card
+        key={group.id}
+        title={t("positions.groupTitle", { number: index + 1 })}
+        extra={
+          group.locked ? (
+            <Popconfirm
+              title={t("positions.deleteGroupConfirmTitle")}
+              okText={tCommon("actions.delete")}
+              cancelText={tCommon("actions.cancel")}
+              okButtonProps={{ loading: deleteLoading }}
+              onConfirm={() => handleDeletePersonalizedGroup(group)}
+            >
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                loading={deleteLoading}
+                aria-label={t("positions.deleteLabel")}
+              />
+            </Popconfirm>
+          ) : (
+            <Button
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleRemovePersonalizedDesign(group.id)}
+              aria-label={t("positions.removeGroup")}
+            />
+          )
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Typography.Text strong>
+                {t("positions.quantityLabel")}
+              </Typography.Text>
+              <InputNumber
+                className="mt-2 w-full"
+                min={1}
+                max={maxQuantity}
+                precision={0}
+                disabled={group.locked}
+                value={group.quantity}
+                onChange={(value) =>
+                  handlePersonalizedQuantityChange(group.id, value)
+                }
+              />
+            </div>
+            <div>
+              <Typography.Text strong>
+                {t("positions.groupPositionsLabel")}
+              </Typography.Text>
+              <Select
+                mode="multiple"
+                className="mt-2 w-full"
+                value={group.designs.map((design) => design.positionId)}
+                disabled={group.locked}
+                onChange={(values) =>
+                  handlePersonalizedGroupPositionsChange(group.id, values)
+                }
+                options={positions.map((position) => ({
+                  value: String(position.id),
+                  label: position?.name || `#${position.id}`,
+                }))}
+                placeholder={t("fields.positionsPlaceholder")}
+                optionFilterProp="label"
+              />
+            </div>
+          </div>
+
+          {group.designs.length ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.designs.map((design) =>
+                renderPersonalizedPositionCard(group, design),
+              )}
+            </div>
+          ) : (
+            <Empty description={t("positions.noSelection")} />
+          )}
+
+          {group.legacy ? (
+            <Typography.Text type="secondary">
+              {t("positions.legacyQuantityHelp")}
+            </Typography.Text>
+          ) : null}
         </div>
       </Card>
     );
@@ -988,23 +1524,10 @@ export default function OrderDesignModal({
               {positionsLoading ? (
                 <Spin />
               ) : positions.length ? (
-                <>
-                  <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-                    <Select
-                      mode="multiple"
-                      value={selectedPositionIds}
-                      onChange={handlePositionChange}
-                      placeholder={t("fields.positionsPlaceholder")}
-                      options={positions.map((position) => ({
-                        value: String(position.id),
-                        label: position?.name || `#${position.id}`,
-                      }))}
-                      style={{ width: "100%" }}
-                      optionFilterProp="label"
-                      tagRender={renderPositionTag}
-                    />
+                isPersonalizedQuantityMode ? (
+                  <div className="space-y-4">
                     {showSubCategorySwitch ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         <Typography.Text>
                           {subCategory?.name || "-"}
                         </Typography.Text>
@@ -1015,17 +1538,75 @@ export default function OrderDesignModal({
                         />
                       </div>
                     ) : null}
+                    <Alert
+                      type={
+                        personalizedQuantityIncomplete ? "warning" : "success"
+                      }
+                      showIcon
+                      message={
+                        personalizedQuantityIncomplete
+                          ? t("positions.quantityIncompleteSummary")
+                          : t("positions.quantityCompleteSummary")
+                      }
+                      description={t("positions.groupQuantitySummary", {
+                        assigned: personalizedTotalQuantity,
+                        total: itemQuantity,
+                      })}
+                    />
+                    {personalizedDesignEntries.map((group, index) =>
+                      renderPersonalizedDesignGroup(group, index),
+                    )}
+                    {personalizedTotalQuantity < itemQuantity ? (
+                      <Button
+                        type="dashed"
+                        block
+                        icon={<PlusOutlined />}
+                        onClick={handleAddPersonalizedDesign}
+                      >
+                        {t("positions.addNewGroup")}
+                      </Button>
+                    ) : null}
                   </div>
-                  {selectedPositions.length ? (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {selectedPositions.map((position) =>
-                        renderPositionCard(position),
-                      )}
+                ) : (
+                  <>
+                    <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                      <Select
+                        mode="multiple"
+                        value={selectedPositionIds}
+                        onChange={handlePositionChange}
+                        placeholder={t("fields.positionsPlaceholder")}
+                        options={positions.map((position) => ({
+                          value: String(position.id),
+                          label: position?.name || `#${position.id}`,
+                        }))}
+                        style={{ width: "100%" }}
+                        optionFilterProp="label"
+                        tagRender={renderPositionTag}
+                      />
+                      {showSubCategorySwitch ? (
+                        <div className="flex items-center gap-2">
+                          <Typography.Text>
+                            {subCategory?.name || "-"}
+                          </Typography.Text>
+                          <Switch
+                            checked={isSubCategory}
+                            onChange={setIsSubCategory}
+                            disabled={Boolean(routingSubCategoryId)}
+                          />
+                        </div>
+                      ) : null}
                     </div>
-                  ) : (
-                    <Empty description={t("positions.noSelection")} />
-                  )}
-                </>
+                    {selectedPositions.length ? (
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {selectedPositions.map((position) =>
+                          renderPositionCard(position),
+                        )}
+                      </div>
+                    ) : (
+                      <Empty description={t("positions.noSelection")} />
+                    )}
+                  </>
+                )
               ) : (
                 <Alert
                   type="info"
