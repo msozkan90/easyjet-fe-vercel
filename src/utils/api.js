@@ -181,6 +181,8 @@ export const OrdersAPI = {
 
   // Label
   voidLabel: (data) => api.post("/orders/labels/void", data),
+  retryProductionLabelRecovery: (id) =>
+    api.post(`/orders/production-label-recoveries/${id}/retry`),
 };
 
 export const OrdersPdfAPI = {

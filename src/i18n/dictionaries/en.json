@@ -2525,6 +2525,7 @@
           "notes": "Notes",
           "labels": "Labels",
           "labelVoids": "Voided Labels",
+          "labelRecovery": "Label Recovery",
           "items": "Order Items",
           "scrap": "Fire / Production Losses"
         },
@@ -2623,6 +2624,32 @@
           "values": {
             "yes": "Yes",
             "no": "No"
+          }
+        },
+        "labelRecovery": {
+          "statuses": {
+            "purchase_pending": "Label purchase pending",
+            "purchased": "Label purchased",
+            "purchase_unknown": "Purchase result unknown",
+            "void_pending": "Void pending",
+            "void_retry": "Void will be retried",
+            "manual_review": "Manual review required",
+            "sync_pending": "Shipment sync pending",
+            "sync_retry": "Shipment sync will be retried",
+            "sync_manual_review": "Shipment sync requires review"
+          },
+          "fields": {
+            "createdAt": "Started At",
+            "retryCount": "Retry Count",
+            "nextRetryAt": "Next Retry",
+            "lastError": "Last Error"
+          },
+          "actions": {
+            "retry": "Retry label void"
+          },
+          "messages": {
+            "retrySuccess": "Label void retry started.",
+            "retryError": "Unable to retry label void."
           }
         },
         "scrap": {

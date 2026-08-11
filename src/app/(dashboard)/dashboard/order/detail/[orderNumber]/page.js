@@ -427,6 +427,85 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
   );
 };
 
+const ProductionRecoveryCard = ({
+  recovery,
+  tDesign,
+  tOrders,
+  canRetry,
+  retrying,
+  onRetry,
+}) => {
+  const isSyncRecovery =
+    recovery?.status === "committed" &&
+    !["not_required", "completed"].includes(recovery?.sync_status);
+  const displayStatus = isSyncRecovery
+    ? `sync_${recovery?.sync_status}`
+    : recovery?.status;
+  const errorDetail = isSyncRecovery
+    ? recovery?.sync_last_error
+    : recovery?.last_error;
+  const retryCount = isSyncRecovery
+    ? recovery?.sync_retry_count
+    : recovery?.retry_count;
+  const nextRetryAt = isSyncRecovery
+    ? recovery?.sync_next_retry_at
+    : recovery?.next_retry_at;
+  const canRetryVoid =
+    canRetry && recovery?.status === "manual_review" && !isSyncRecovery;
+
+  return (
+    <Card
+      className="rounded-2xl border border-amber-200 bg-amber-50/40 shadow-sm"
+      styles={{ body: { padding: 16 } }}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-1">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {tDesign("fields.labelSource")}
+          </Typography.Text>
+          <Typography.Title level={5} style={{ margin: 0 }}>
+            {recovery?.source || tOrders("common.none")}
+          </Typography.Title>
+        </div>
+        <Tag
+          color={displayStatus === "voided" ? "green" : "orange"}
+          className="rounded-full px-4 py-1 text-sm"
+        >
+          {tDesign(`labelRecovery.statuses.${displayStatus}`)}
+        </Tag>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <InfoField
+          label={tDesign("labelRecovery.fields.createdAt")}
+          value={formatDateTime(recovery?.created_at, tOrders("common.none"))}
+        />
+        <InfoField
+          label={tDesign("labelRecovery.fields.retryCount")}
+          value={retryCount ?? 0}
+        />
+        <InfoField
+          label={tDesign("labelRecovery.fields.nextRetryAt")}
+          value={formatDateTime(nextRetryAt, tOrders("common.none"))}
+        />
+        {errorDetail?.message ? (
+          <InfoField
+            label={tDesign("labelRecovery.fields.lastError")}
+            value={errorDetail.message}
+            valueClassName="break-words"
+          />
+        ) : null}
+      </div>
+      {canRetryVoid ? (
+        <div className="mt-4">
+          <Button danger loading={retrying} onClick={() => onRetry?.(recovery)}>
+            {tDesign("labelRecovery.actions.retry")}
+          </Button>
+        </div>
+      ) : null}
+    </Card>
+  );
+};
+
 const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
   const reasonKey =
     SCRAP_REASON_DETAIL_KEY_MAP[movement?.reason_detail] ||
@@ -785,13 +864,21 @@ export default function OrderDetailPage() {
   const params = useParams();
   const orderNumber = params?.orderNumber;
   const canRecordScrap = hasAnyRole(user, ["companyadmin"]);
-  const canViewAuditTimeline = hasAnyRole(user, ["companyadmin"]);
+  const canViewAuditTimeline = hasAnyRole(user, [
+    "companyadmin",
+    "systemadmin",
+  ]);
+  const canRetryLabelRecovery = hasAnyRole(user, [
+    "companyadmin",
+    "systemadmin",
+  ]);
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [positionsByProductId, setPositionsByProductId] = useState({});
   const [positionsLoading, setPositionsLoading] = useState(false);
   const [voidingLabelId, setVoidingLabelId] = useState(null);
+  const [retryingRecoveryId, setRetryingRecoveryId] = useState(null);
   const [scrapModalOpen, setScrapModalOpen] = useState(false);
   const [recordingScrap, setRecordingScrap] = useState(false);
 
@@ -806,6 +893,13 @@ export default function OrderDetailPage() {
   const labelVoids = useMemo(
     () =>
       Array.isArray(orderDetail?.label_voids) ? orderDetail.label_voids : [],
+    [orderDetail],
+  );
+  const labelRecoveries = useMemo(
+    () =>
+      Array.isArray(orderDetail?.production_attempts)
+        ? orderDetail.production_attempts
+        : [],
     [orderDetail],
   );
   const scrapMovements = useMemo(
@@ -859,6 +953,26 @@ export default function OrderDetailPage() {
       }
     },
     [loadOrderDetail, message, orderDetail, tDesign],
+  );
+
+  const handleRetryLabelRecovery = useCallback(
+    async (recovery) => {
+      if (!recovery?.id) return;
+      setRetryingRecoveryId(String(recovery.id));
+      try {
+        await OrdersAPI.retryProductionLabelRecovery(recovery.id);
+        message.success(tDesign("labelRecovery.messages.retrySuccess"));
+        await loadOrderDetail();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message ||
+            tDesign("labelRecovery.messages.retryError"),
+        );
+      } finally {
+        setRetryingRecoveryId(null);
+      }
+    },
+    [loadOrderDetail, message, tDesign],
   );
 
   const itemOptions = useMemo(
@@ -1305,6 +1419,24 @@ export default function OrderDetailPage() {
               <Empty description={tDesign("messages.noLabels")} />
             )}
           </div>
+          {labelRecoveries.length ? (
+            <div className="space-y-4">
+              <SectionHeader title={tDesign("sections.labelRecovery")} />
+              <div className="grid gap-4 lg:grid-cols-2">
+                {labelRecoveries.map((recovery) => (
+                  <ProductionRecoveryCard
+                    key={recovery?.id}
+                    recovery={recovery}
+                    tDesign={tDesign}
+                    tOrders={tOrders}
+                    canRetry={canRetryLabelRecovery}
+                    retrying={retryingRecoveryId === String(recovery?.id || "")}
+                    onRetry={handleRetryLabelRecovery}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="space-y-4">
             <SectionHeader title={tDesign("sections.labelVoids")} />
             {labelVoids.length ? (
@@ -1369,6 +1501,7 @@ export default function OrderDetailPage() {
   return (
     <RequireRole
       anyOfRoles={[
+        "systemAdmin",
         "companyAdmin",
         "customerAdmin",
         "companyCompletedWorker",

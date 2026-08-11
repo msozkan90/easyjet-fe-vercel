@@ -2327,6 +2327,7 @@
           "notes": "Notlar",
           "labels": "Etiketler",
           "labelVoids": "İptal Edilen Etiketler",
+          "labelRecovery": "Etiket Kurtarma",
           "items": "Sipariş Ürünleri",
           "scrap": "Fire / Üretim Kayıpları"
         },
@@ -2425,6 +2426,32 @@
           "values": {
             "yes": "Evet",
             "no": "Hayır"
+          }
+        },
+        "labelRecovery": {
+          "statuses": {
+            "purchase_pending": "Etiket alımı bekleniyor",
+            "purchased": "Etiket alındı",
+            "purchase_unknown": "Etiket alım sonucu belirsiz",
+            "void_pending": "İptal bekleniyor",
+            "void_retry": "İptal yeniden denenecek",
+            "manual_review": "Manuel inceleme gerekli",
+            "sync_pending": "Gönderi senkronizasyonu bekleniyor",
+            "sync_retry": "Gönderi senkronizasyonu yeniden denenecek",
+            "sync_manual_review": "Gönderi senkronizasyonu inceleme bekliyor"
+          },
+          "fields": {
+            "createdAt": "Başlangıç Tarihi",
+            "retryCount": "Deneme Sayısı",
+            "nextRetryAt": "Sonraki Deneme",
+            "lastError": "Son Hata"
+          },
+          "actions": {
+            "retry": "Etiket iptalini yeniden dene"
+          },
+          "messages": {
+            "retrySuccess": "Etiket iptali yeniden başlatıldı.",
+            "retryError": "Etiket iptali yeniden başlatılamadı."
           }
         },
         "scrap": {
