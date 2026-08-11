@@ -639,6 +639,9 @@ const ItemDesignPreview = ({
                     src={previewImageUrl}
                     alt={positionName}
                     className="block w-full rounded-2xl object-contain"
+                    style={{
+                      backgroundColor: item?.color?.hex_code || undefined,
+                    }}
                   />
                   <div className="absolute inset-0">
                     {designArea ? (

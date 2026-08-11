@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   App as AntdApp,
@@ -15,9 +15,10 @@ import {
 } from "antd";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import RequireRole from "@/components/common/Access/RequireRole";
-import { OrdersAPI } from "@/utils/api";
+import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
+import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 
 const STATUS_COLORS = {
   newOrder: "geekblue",
@@ -43,7 +44,26 @@ const formatAmount = (value, fallback = "-") => {
   });
 };
 
-const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
+const extractPositionList = (response) => {
+  if (!response) return [];
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.list)) return response.list;
+  if (Array.isArray(response?.items)) return response.items;
+  const nested = response?.data;
+  if (Array.isArray(nested?.data)) return nested.data;
+  if (Array.isArray(nested)) return nested;
+  return [];
+};
+
+const OrderItemCard = ({
+  item,
+  positionMap,
+  tOrders,
+  tDetail,
+  tCommonActions,
+  fallbackText,
+}) => {
   const options = Array.isArray(item?.options) ? item.options : [];
   const statusKey = item?.status || "";
   const statusLabel = statusKey
@@ -150,6 +170,21 @@ const OrderItemCard = ({ item, tOrders, tCommonActions }) => {
               {item?.notes || tOrders("common.none")}
             </div>
           </div>
+
+          <div>
+            <Typography.Text type="secondary">
+              {tDetail("designs.title")}
+            </Typography.Text>
+            <div className="mt-2">
+              <OrderItemDesignPreview
+                item={item}
+                positionMap={positionMap}
+                tDetail={tDetail}
+                tOrders={tOrders}
+                fallbackText={fallbackText}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -161,17 +196,80 @@ export default function ShippedOrderPrinterSearchPage() {
   const tOrders = useTranslations("dashboard.orders");
   const tDetail = useTranslations("dashboard.orders.detail");
   const tCommonActions = useTranslations("common.actions");
+  const fallbackText = tDetail("designs.designAreaPlaceholder");
 
+  const orderNumberInputRef = useRef(null);
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [printingLabel, setPrintingLabel] = useState(false);
   const [searched, setSearched] = useState(false);
   const [order, setOrder] = useState(null);
+  const [positionsByProductId, setPositionsByProductId] = useState({});
+  const [positionsLoading, setPositionsLoading] = useState(false);
 
   const items = useMemo(() => {
     if (!Array.isArray(order?.items)) return [];
     return order.items;
   }, [order]);
+
+  useEffect(() => {
+    if (!items.length) {
+      setPositionsByProductId({});
+      return;
+    }
+
+    const uniqueProductIds = Array.from(
+      new Set(
+        items
+          .map((item) => item?.product_id || item?.product?.id)
+          .filter(Boolean)
+          .map((id) => String(id)),
+      ),
+    );
+
+    if (!uniqueProductIds.length) {
+      setPositionsByProductId({});
+      return;
+    }
+
+    let active = true;
+    setPositionsLoading(true);
+
+    const loadPositions = async () => {
+      try {
+        const results = await Promise.all(
+          uniqueProductIds.map(async (productId) => {
+            const response = await ProductPositionsAPI.flatList({
+              pagination: { page: 1, pageSize: 100 },
+              filters: { product_id: productId, status: "active" },
+            });
+            return [productId, extractPositionList(response)];
+          }),
+        );
+
+        if (!active) return;
+        setPositionsByProductId(
+          results.reduce((acc, [productId, positions]) => {
+            acc[productId] = Array.isArray(positions) ? positions : [];
+            return acc;
+          }, {}),
+        );
+      } catch (error) {
+        if (!active) return;
+        message.error(
+          error?.response?.data?.error?.message ||
+            tDetail("messages.loadPositionsError"),
+        );
+      } finally {
+        if (active) setPositionsLoading(false);
+      }
+    };
+
+    loadPositions();
+    return () => {
+      active = false;
+    };
+  }, [items, message, tDetail]);
 
   const handleSearch = useCallback(
     async (rawOrderNumber) => {
@@ -212,6 +310,11 @@ export default function ShippedOrderPrinterSearchPage() {
             setPrintingLabel(false);
           }
         }
+
+        setOrderNumber("");
+        window.requestAnimationFrame(() => {
+          orderNumberInputRef.current?.focus();
+        });
       } catch (error) {
         setOrder(null);
         message.error(
@@ -247,6 +350,7 @@ export default function ShippedOrderPrinterSearchPage() {
         <Card className="rounded-2xl">
           <Space.Compact style={{ width: "100%" }}>
             <Input
+              ref={orderNumberInputRef}
               allowClear
               placeholder={tOrders("filters.searchOrderNumber")}
               value={orderNumber}
@@ -278,16 +382,35 @@ export default function ShippedOrderPrinterSearchPage() {
           </div>
         ) : null}
 
+        {positionsLoading ? (
+          <Typography.Text type="secondary">
+            {tDetail("messages.positionsLoading")}
+          </Typography.Text>
+        ) : null}
+
         {items.length ? (
           <div className="grid gap-6">
-            {items.map((item) => (
-              <OrderItemCard
-                key={item?.id}
-                item={item}
-                tOrders={tOrders}
-                tCommonActions={tCommonActions}
-              />
-            ))}
+            {items.map((item) => {
+              const productId = String(
+                item?.product_id || item?.product?.id || "",
+              );
+              const positions = positionsByProductId[productId] || [];
+              const positionMap = new Map(
+                positions.map((position) => [String(position?.id), position]),
+              );
+
+              return (
+                <OrderItemCard
+                  key={item?.id}
+                  item={item}
+                  positionMap={positionMap}
+                  tOrders={tOrders}
+                  tDetail={tDetail}
+                  tCommonActions={tCommonActions}
+                  fallbackText={fallbackText}
+                />
+              );
+            })}
           </div>
         ) : null}
 

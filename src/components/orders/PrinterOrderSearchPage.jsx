@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   App as AntdApp,
@@ -148,6 +148,9 @@ const ItemDesignPreview = ({
                     src={previewImageUrl}
                     alt={positionName}
                     className="block w-full rounded-2xl object-contain"
+                    style={{
+                      backgroundColor: item?.color?.hex_code || undefined,
+                    }}
                   />
                   <div className="absolute inset-0">
                     {designArea ? (
@@ -398,6 +401,7 @@ export default function PrinterOrderSearchPage({
   const fallbackText = tDetail("designs.designAreaPlaceholder");
   const isReportScrapeMode = mode === "reportScrape";
 
+  const orderNumberInputRef = useRef(null);
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -615,6 +619,13 @@ export default function PrinterOrderSearchPage({
             ? tOrders("scanner.messages.completeWithScrapSuccess")
             : tOrders("scanner.messages.completeSuccess"),
         );
+
+        if (!isReportScrapeMode) {
+          setOrderNumber("");
+          window.requestAnimationFrame(() => {
+            orderNumberInputRef.current?.focus();
+          });
+        }
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message ||
@@ -626,6 +637,7 @@ export default function PrinterOrderSearchPage({
     },
     [
       categoryId,
+      isReportScrapeMode,
       message,
       orderNumber,
       orderSummary,
@@ -776,6 +788,7 @@ export default function PrinterOrderSearchPage({
           <div className="space-y-4">
             <Space.Compact style={{ width: "100%" }}>
               <Input
+                ref={orderNumberInputRef}
                 allowClear
                 placeholder={tOrders("filters.searchOrderNumber")}
                 value={orderNumber}
