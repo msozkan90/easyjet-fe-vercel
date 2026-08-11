@@ -2524,6 +2524,8 @@
           "package": "Package",
           "notes": "Notes",
           "labels": "Labels",
+          "labelVoids": "Voided Labels",
+          "labelRecovery": "Label Recovery",
           "items": "Order Items",
           "scrap": "Fire / Production Losses"
         },
@@ -2598,6 +2600,57 @@
           "voidLabel": "Void label",
           "voidLabelConfirmTitle": "Void this label?",
           "voidLabelConfirmOk": "Yes, void"
+        },
+        "labelVoid": {
+          "empty": "No voided labels found.",
+          "detailNumber": "Void detail #{number}",
+          "statuses": {
+            "autovoid": "Automatically voided",
+            "errorvoid": "Void failed",
+            "voided": "Voided"
+          },
+          "fields": {
+            "recordedAt": "Recorded At",
+            "refundId": "Refund ID",
+            "detailStatus": "Provider Status",
+            "externalOrderId": "External Order ID",
+            "shipmentId": "Shipment ID",
+            "requestedAt": "Requested At",
+            "processedAt": "Processed At",
+            "refundAmount": "Refund Amount",
+            "approved": "Approved",
+            "resultMessage": "Result / Message"
+          },
+          "values": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        "labelRecovery": {
+          "statuses": {
+            "purchase_pending": "Label purchase pending",
+            "purchased": "Label purchased",
+            "purchase_unknown": "Purchase result unknown",
+            "void_pending": "Void pending",
+            "void_retry": "Void will be retried",
+            "manual_review": "Manual review required",
+            "sync_pending": "Shipment sync pending",
+            "sync_retry": "Shipment sync will be retried",
+            "sync_manual_review": "Shipment sync requires review"
+          },
+          "fields": {
+            "createdAt": "Started At",
+            "retryCount": "Retry Count",
+            "nextRetryAt": "Next Retry",
+            "lastError": "Last Error"
+          },
+          "actions": {
+            "retry": "Retry label void"
+          },
+          "messages": {
+            "retrySuccess": "Label void retry started.",
+            "retryError": "Unable to retry label void."
+          }
         },
         "scrap": {
           "title": "Record Scrap",

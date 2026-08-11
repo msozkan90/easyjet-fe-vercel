@@ -2326,6 +2326,8 @@
           "package": "Paket",
           "notes": "Notlar",
           "labels": "Etiketler",
+          "labelVoids": "İptal Edilen Etiketler",
+          "labelRecovery": "Etiket Kurtarma",
           "items": "Sipariş Ürünleri",
           "scrap": "Fire / Üretim Kayıpları"
         },
@@ -2400,6 +2402,57 @@
           "voidLabel": "Etiketi İptal Et",
           "voidLabelConfirmTitle": "Bu etiketi iptal etmek istiyor musunuz?",
           "voidLabelConfirmOk": "Evet, iptal et"
+        },
+        "labelVoid": {
+          "empty": "İptal edilmiş etiket bulunamadı.",
+          "detailNumber": "İptal detayı #{number}",
+          "statuses": {
+            "autovoid": "Otomatik iptal edildi",
+            "errorvoid": "İptal başarısız",
+            "voided": "İptal edildi"
+          },
+          "fields": {
+            "recordedAt": "Kayıt Tarihi",
+            "refundId": "İade ID",
+            "detailStatus": "Sağlayıcı Durumu",
+            "externalOrderId": "Harici Sipariş ID",
+            "shipmentId": "Gönderi ID",
+            "requestedAt": "Talep Tarihi",
+            "processedAt": "İşlenme Tarihi",
+            "refundAmount": "İade Tutarı",
+            "approved": "Onaylandı",
+            "resultMessage": "Sonuç / Mesaj"
+          },
+          "values": {
+            "yes": "Evet",
+            "no": "Hayır"
+          }
+        },
+        "labelRecovery": {
+          "statuses": {
+            "purchase_pending": "Etiket alımı bekleniyor",
+            "purchased": "Etiket alındı",
+            "purchase_unknown": "Etiket alım sonucu belirsiz",
+            "void_pending": "İptal bekleniyor",
+            "void_retry": "İptal yeniden denenecek",
+            "manual_review": "Manuel inceleme gerekli",
+            "sync_pending": "Gönderi senkronizasyonu bekleniyor",
+            "sync_retry": "Gönderi senkronizasyonu yeniden denenecek",
+            "sync_manual_review": "Gönderi senkronizasyonu inceleme bekliyor"
+          },
+          "fields": {
+            "createdAt": "Başlangıç Tarihi",
+            "retryCount": "Deneme Sayısı",
+            "nextRetryAt": "Sonraki Deneme",
+            "lastError": "Son Hata"
+          },
+          "actions": {
+            "retry": "Etiket iptalini yeniden dene"
+          },
+          "messages": {
+            "retrySuccess": "Etiket iptali yeniden başlatıldı.",
+            "retryError": "Etiket iptali yeniden başlatılamadı."
+          }
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",
