@@ -329,14 +329,13 @@ const ShippingRatesModal = ({
 
   const orderItems = useMemo(() => flattenOrderItems(record), [record]);
 
-  const orderItemsTotal = useMemo(
-    () =>
-      orderItems.reduce((total, item) => {
-        const price = Number(item?.price);
-        return total + (Number.isFinite(price) ? price : 0);
-      }, 0),
-    [orderItems],
-  );
+  const orderItemsTotal = useMemo(() => {
+    const total = orderItems.reduce((sum, item) => {
+      const price = Number(item?.price);
+      return sum + (Number.isFinite(price) ? price : 0);
+    }, 0);
+    return Number(total.toFixed(4));
+  }, [orderItems]);
 
   const fetchRates = useCallback(
     async (serviceKey, values) => {
