@@ -2326,6 +2326,7 @@
           "package": "Paket",
           "notes": "Notlar",
           "labels": "Etiketler",
+          "labelVoids": "İptal Edilen Etiketler",
           "items": "Sipariş Ürünleri",
           "scrap": "Fire / Üretim Kayıpları"
         },
@@ -2400,6 +2401,31 @@
           "voidLabel": "Etiketi İptal Et",
           "voidLabelConfirmTitle": "Bu etiketi iptal etmek istiyor musunuz?",
           "voidLabelConfirmOk": "Evet, iptal et"
+        },
+        "labelVoid": {
+          "empty": "İptal edilmiş etiket bulunamadı.",
+          "detailNumber": "İptal detayı #{number}",
+          "statuses": {
+            "autovoid": "Otomatik iptal edildi",
+            "errorvoid": "İptal başarısız",
+            "voided": "İptal edildi"
+          },
+          "fields": {
+            "recordedAt": "Kayıt Tarihi",
+            "refundId": "İade ID",
+            "detailStatus": "Sağlayıcı Durumu",
+            "externalOrderId": "Harici Sipariş ID",
+            "shipmentId": "Gönderi ID",
+            "requestedAt": "Talep Tarihi",
+            "processedAt": "İşlenme Tarihi",
+            "refundAmount": "İade Tutarı",
+            "approved": "Onaylandı",
+            "resultMessage": "Sonuç / Mesaj"
+          },
+          "values": {
+            "yes": "Evet",
+            "no": "Hayır"
+          }
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",
