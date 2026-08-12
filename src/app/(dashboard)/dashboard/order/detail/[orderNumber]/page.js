@@ -1209,6 +1209,9 @@ export default function OrderDetailPage() {
   );
 
   const fallbackText = tDesign("designs.designAreaPlaceholder");
+  const pendingPoolItems = Number(
+    orderDetail?.pool_completion_summary?.pending_items || 0,
+  );
   const orderTotal = formatAmount(orderDetail?.order_total);
   const amountPaid = formatAmount(orderDetail?.amount_paid);
   const orderDate = formatDateTime(
@@ -1230,6 +1233,15 @@ export default function OrderDetailPage() {
       label: tDesign("tabs.overview"),
       children: (
         <div className="space-y-6">
+          {pendingPoolItems > 0 ? (
+            <Alert
+              type="warning"
+              showIcon
+              message={tDesign("messages.poolIncomplete", {
+                count: pendingPoolItems,
+              })}
+            />
+          ) : null}
           <div className="grid gap-4 lg:grid-cols-3">
             <Card
               className="rounded-2xl border border-slate-100 shadow-sm"

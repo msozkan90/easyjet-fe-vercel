@@ -8,6 +8,7 @@ import {
   Space,
   App as AntdApp,
   Select,
+  Tag,
   Tooltip,
   Popconfirm,
   Popover,
@@ -907,6 +908,58 @@ export default function OrdersPage() {
           placeholder: t("filters.orderDateRange"),
         },
         render: formatDateTime,
+      },
+      {
+        title: t("columns.poolStatus"),
+        key: "pool_status",
+        width: 220,
+        render: (_, record) => {
+          const pendingCount = Number(record?.pool_pending_item_count || 0);
+          const linkedOrders = Array.isArray(record?.linked_orders)
+            ? record.linked_orders
+            : [];
+          return (
+            <Space size={[4, 4]} wrap>
+              <Tag color={pendingCount > 0 ? "orange" : "green"}>
+                {pendingCount > 0
+                  ? t("badges.pendingItems", { count: pendingCount })
+                  : t("badges.complete")}
+              </Tag>
+              {pendingCount > 0 && linkedOrders.length > 0 ? (
+                <Tag color="volcano">{t("badges.progressBlocked")}</Tag>
+              ) : null}
+            </Space>
+          );
+        },
+      },
+      {
+        title: t("columns.linkedOrders"),
+        key: "linked_orders",
+        width: 240,
+        render: (_, record) => {
+          const linkedOrders = Array.isArray(record?.linked_orders)
+            ? record.linked_orders
+            : [];
+          if (!linkedOrders.length) return t("common.none");
+          return (
+            <Space size={[4, 4]} wrap>
+              {linkedOrders.map((order) => (
+                <Button
+                  key={order.id}
+                  size="small"
+                  type="link"
+                  href={
+                    order?.order_number
+                      ? `/dashboard/order/detail/${encodeURIComponent(order.order_number)}`
+                      : undefined
+                  }
+                >
+                  {order.order_number || order.id}
+                </Button>
+              ))}
+            </Space>
+          );
+        },
       },
       {
         title: t("columns.actions"),
