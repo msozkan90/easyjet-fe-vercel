@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
-import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
+import {
+  App as AntdApp,
+  Button,
+  Form,
+  Popconfirm,
+  Popover,
+  Space,
+  Tag,
+} from "antd";
 import {
   CheckCircleFilled,
   CloseCircleOutlined,
@@ -136,11 +144,23 @@ export default function PendingOrdersPage() {
     tableRef.current?.reload?.();
   }, [handleShippingModalClose, tableRef]);
 
-  const handleOpenShippingModal = useCallback((record) => {
-    if (!record) return;
-    setShippingModalRecord(record);
-    setShippingModalOpen(true);
-  }, []);
+  const handleOpenShippingModal = useCallback(
+    (record) => {
+      if (!record) return;
+      const pendingPoolItems = Number(
+        record?.pool_completion_summary?.pending_items || 0,
+      );
+      if (pendingPoolItems > 0) {
+        message.warning(
+          t("messages.poolIncomplete", { count: pendingPoolItems }),
+        );
+        return;
+      }
+      setShippingModalRecord(record);
+      setShippingModalOpen(true);
+    },
+    [message, t],
+  );
 
   const handleOpenDesignModal = useCallback((record) => {
     if (!record?.id) return;
@@ -352,6 +372,24 @@ export default function PendingOrdersPage() {
     (baseColumns) => [
       ...baseColumns,
       {
+        title: t("columns.poolStatus"),
+        key: "pool_status",
+        width: 190,
+        render: (_, record) => {
+          if (record?.__isChild) return null;
+          const pendingPoolItems = Number(
+            record?.pool_completion_summary?.pending_items || 0,
+          );
+          return pendingPoolItems > 0 ? (
+            <Tag color="volcano">
+              {t("pool.pendingItems", { count: pendingPoolItems })}
+            </Tag>
+          ) : (
+            <Tag color="green">{t("pool.complete")}</Tag>
+          );
+        },
+      },
+      {
         title: t("columns.hasDesign"),
         dataIndex: "hasImage",
         render: (value) =>
@@ -399,6 +437,10 @@ export default function PendingOrdersPage() {
             : "";
           const showShippingRatesAction =
             record?.status === "newOrder" && shouldShowShippingRates(record);
+          const pendingPoolItems = Number(
+            record?.pool_completion_summary?.pending_items || 0,
+          );
+          const productionBlocked = pendingPoolItems > 0;
           return (
             <Space wrap>
               <Popover content={t("actions.viewDetail")}>
@@ -439,12 +481,23 @@ export default function PendingOrdersPage() {
                 </Popover>
               ) : null}
               {showShippingRatesAction ? (
-                <Popover content={t("actions.shippingRates")}>
-                  <Button
-                    icon={<DollarOutlined />}
-                    type="default"
-                    onClick={() => handleOpenShippingModal(record)}
-                  />
+                <Popover
+                  content={
+                    productionBlocked
+                      ? t("messages.poolIncomplete", {
+                          count: pendingPoolItems,
+                        })
+                      : t("actions.shippingRates")
+                  }
+                >
+                  <span>
+                    <Button
+                      icon={<DollarOutlined />}
+                      type="default"
+                      disabled={productionBlocked}
+                      onClick={() => handleOpenShippingModal(record)}
+                    />
+                  </span>
                 </Popover>
               ) : null}
               <Popover content={t("actions.cancel")}>

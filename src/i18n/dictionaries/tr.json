@@ -1763,6 +1763,7 @@
         "size": "Beden",
         "color": "Renk",
         "poolStatus": "Pool Durumu",
+        "linkedOrders": "Bağlı Siparişler",
         "linkedTransferOrders": "Bağlı Transfer Siparişleri",
         "cancelledAt": "İptal Tarihi",
         "cancelledBy": "İptal Eden",
@@ -1890,6 +1891,7 @@
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
         "hasDesign": "Tasarım",
+        "poolStatus": "Pre-order Durumu",
         "designChecklist": "Tasarım Kontrolü",
         "actions": "İşlemler",
         "notes": "Notlar",
@@ -1967,6 +1969,7 @@
         "subCategoryRequiredForDesignUpload": "Tasarım yüklemek için alt kategori zorunludur.",
         "subCategoryRequiredForManualOrder": "Manuel transfer order için alt kategori zorunludur.",
         "uploadQueued": "{count} tasarım yüklemesi sıraya alındı.",
+        "poolIncomplete": "Bu siparişin pre-order kaynağında hâlâ {count} bekleyen kalem var. Tüm kalemler aktarılmadan üretime geçilemez.",
         "noItems": "Kayıt bulunamadı.",
         "loadListError": "Liste yüklenemedi."
       },
@@ -2394,6 +2397,7 @@
           "noItems": "Sipariş ürünü bulunamadı.",
           "positionsLoading": "Tasarım pozisyonları yükleniyor...",
           "noLabels": "Etiket bulunamadı.",
+          "poolIncomplete": "Pre-order eksik: kaynak siparişte hâlâ {count} bekleyen kalem var.",
           "voidLabelSuccess": "Etiket başarıyla iptal edildi.",
           "voidLabelError": "Etiket iptal edilemedi."
         },
@@ -2753,6 +2757,8 @@
         }
       },
       "pool": {
+        "pendingItems": "{count} bekleyen pre-order kalemi",
+        "complete": "Pre-order tamam",
         "badges": {
           "pendingItems": "{count} bekleyen pool kalemi",
           "incomplete": "Pool eksik"

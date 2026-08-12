@@ -1961,6 +1961,7 @@
         "size": "Size",
         "color": "Color",
         "poolStatus": "Pool Status",
+        "linkedOrders": "Linked Orders",
         "linkedTransferOrders": "Linked Transfer Orders",
         "cancelledAt": "Cancelled At",
         "cancelledBy": "Cancelled By",
@@ -2088,6 +2089,7 @@
         "localPickup": "Local Pickup",
         "orderDate": "Order Date",
         "hasDesign": "Design",
+        "poolStatus": "Pre-order Status",
         "designChecklist": "Design Check",
         "actions": "Actions",
         "notes": "Notes",
@@ -2165,6 +2167,7 @@
         "subCategoryRequiredForDesignUpload": "Sub category is required for design upload.",
         "subCategoryRequiredForManualOrder": "Sub category is required for manual transfer order.",
         "uploadQueued": "{count} design upload queued.",
+        "poolIncomplete": "This order still has {count} pending items in its source pre-order. It cannot move to production until all items are transferred.",
         "noItems": "No items found.",
         "loadListError": "Failed to load the list."
       },
@@ -2592,6 +2595,7 @@
           "noItems": "No order items found.",
           "positionsLoading": "Loading design positions...",
           "noLabels": "No labels found.",
+          "poolIncomplete": "Pre-order incomplete: {count} items are still pending in the source order.",
           "voidLabelSuccess": "Label voided successfully.",
           "voidLabelError": "Unable to void label."
         },
@@ -2951,6 +2955,8 @@
         }
       },
       "pool": {
+        "pendingItems": "{count} pending pre-order items",
+        "complete": "Pre-order complete",
         "badges": {
           "pendingItems": "{count} pending pool items",
           "incomplete": "Pool incomplete"
