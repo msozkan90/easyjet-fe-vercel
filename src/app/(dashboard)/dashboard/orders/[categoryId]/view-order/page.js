@@ -63,7 +63,11 @@ export default function CategoryViewOrderPage({ params }) {
     <OrdersStatusListPage
       listApiFn={listApiFn}
       tableRefExternal={tableRef}
-      allowedStatuses={["completed","processing", "pdf"]}
+      allowedStatuses={["processing", "pdf", "completed"]}
+      defaultSort={[
+        { field: "status", direction: "asc" },
+        { field: "order_date", direction: "asc" },
+      ]}
       requireRoles={["companyCompletedWorker"]}
       productListFetcher={() => fetchGenericList("product")}
       affilated

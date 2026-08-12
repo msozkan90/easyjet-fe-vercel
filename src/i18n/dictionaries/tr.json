@@ -517,6 +517,7 @@
         "categories": "Kategoriler",
         "shipmentMultiplier": "Kargo Kar Oranı (%)",
         "productMultiplier": "Ürün Kar Oranı (%)",
+        "isMine": "Bana Ait",
         "createdAt": "Oluşturulma",
         "status": "Durum",
         "actions": "İşlemler"
@@ -556,7 +557,9 @@
         "submitUpdate": "Güncelle"
       },
       "common": {
-        "none": "-"
+        "none": "-",
+        "yes": "Evet",
+        "no": "Hayır"
       }
     },
     "customerPermissions": {
@@ -2575,6 +2578,7 @@
           "taxAmount": "Vergi tutarı",
           "amountPaid": "Toplam tutar",
           "orderNumber": "Sipariş numarası",
+          "requestedShippingService": "Talep Edilen Kargo Servisi",
           "productName": "Ürün",
           "quantity": "Miktar",
           "size": "Beden",
@@ -3722,7 +3726,8 @@
         "shipmentMultiplier": "Kargo Kar Oranı (%)",
         "status": "Durum",
         "store": "Mağaza",
-        "productMultiplier": "Ürün Kar Oranı (%)"
+        "productMultiplier": "Ürün Kar Oranı (%)",
+        "isMine": "Bana Ait"
       },
       "placeholders": {
         "name": "örn. ACME Inc.",
@@ -3733,7 +3738,8 @@
       },
       "tooltips": {
         "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz.",
-        "productMultiplier": "Ürün fiyatlarına eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
+        "productMultiplier": "Ürün fiyatlarına eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz.",
+        "isMine": "EasyJet kargo fiyatlarında şirket kargo katsayısından muaf tutar."
       },
       "info": {
         "categoryRestriction": "Transfer kategorisi; Apparel, Engraving veya Print kategorileriyle birlikte seçilemez."

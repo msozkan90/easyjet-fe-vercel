@@ -27,6 +27,12 @@ export default function CustomersPage() {
   const user = useSelector((s) => s.auth.user);
   const isPartnerEntity = user?.entity?.entity_type === "partner";
   const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
+  const controllingCompany = isPartnerEntity
+    ? user?.parent_entity?.company
+    : user?.entity;
+  const isMineControlEnabled = Boolean(
+    controllingCompany?.permissions?.IS_MINE_CONTROL,
+  );
 
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
@@ -140,6 +146,19 @@ export default function CustomersPage() {
           }
         : {},
 
+      isMineControlEnabled
+        ? {
+            title: t("columns.isMine"),
+            dataIndex: "is_mine",
+            width: 130,
+            render: (value) => (
+              <Tag color={value ? "green" : "default"}>
+                {value ? t("common.yes") : t("common.no")}
+              </Tag>
+            ),
+          }
+        : {},
+
       {
         title: t("columns.createdAt"),
         dataIndex: "created_at",
@@ -197,7 +216,7 @@ export default function CustomersPage() {
         ),
       },
     ],
-    [categories, t, isPartnerEntity, isShippingOwner],
+    [categories, t, isPartnerEntity, isShippingOwner, isMineControlEnabled],
   );
 
   const buildPayload = (values) => {
@@ -229,6 +248,12 @@ export default function CustomersPage() {
     } else {
       delete payload.shipment_multiplier;
       delete payload.shipment_multipliers;
+    }
+
+    if (isMineControlEnabled) {
+      payload.is_mine = Boolean(values?.is_mine);
+    } else {
+      delete payload.is_mine;
     }
 
     return payload;
@@ -342,6 +367,9 @@ export default function CustomersPage() {
                     ),
                     status: editingRow?.status,
                     store_id: editingRow?.store_id,
+                    ...(isMineControlEnabled
+                      ? { is_mine: Boolean(editingRow?.is_mine) }
+                      : {}),
                     ...(isPartnerEntity
                       ? {
                           product_multiplier: multiplierToPercent(
@@ -361,10 +389,12 @@ export default function CustomersPage() {
                     status: "active",
                     ...(isPartnerEntity ? { product_multiplier: 0 } : {}),
                     ...(isShippingOwner ? { shipment_multiplier: 0 } : {}),
+                    ...(isMineControlEnabled ? { is_mine: false } : {}),
                   }
             }
             showProductMultiplier={isPartnerEntity}
             showShipmentMultiplier={isShippingOwner}
+            showIsMine={isMineControlEnabled}
           />
         </div>
       </Modal>

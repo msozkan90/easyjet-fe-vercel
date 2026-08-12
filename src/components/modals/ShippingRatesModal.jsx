@@ -178,6 +178,26 @@ const getVariationName = (item, key) => {
 const getProductName = (item) =>
   item?.product?.name || item?.product_name || item?.productName || null;
 
+const getRequestedShippingService = (record) => {
+  const rawOrder = record?.order?.raw_order ?? record?.raw_order;
+  if (!rawOrder) return null;
+
+  let parsedRawOrder = rawOrder;
+  if (typeof rawOrder === "string") {
+    try {
+      parsedRawOrder = JSON.parse(rawOrder);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!parsedRawOrder || typeof parsedRawOrder !== "object") return null;
+  const value = parsedRawOrder.requestedShippingService;
+  if (typeof value === "string") return value.trim() || null;
+  if (typeof value === "number") return String(value);
+  return null;
+};
+
 const SERVICE_TABS = {
   EASYJET: "easyjet",
   COMPANY: "company",
@@ -242,6 +262,10 @@ const ShippingRatesModal = ({
 
   const orderId = record?.order?.id ?? record?.order_id;
   const quoteDefaults = useMemo(() => createQuoteDefaults(record), [record]);
+  const requestedShippingService = useMemo(
+    () => getRequestedShippingService(record),
+    [record],
+  );
 
   const parentEntity = user?.parent_entity || {};
   const companyInfo = parentEntity?.company;
@@ -667,6 +691,23 @@ const ShippingRatesModal = ({
       ) : (
         <div className="space-y-6">
           <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+            {requestedShippingService ? (
+              <div className="mb-4">
+                <Tag
+                  color="cyan"
+                  className="rounded-full font-semibold shadow-sm"
+                  style={{
+                    margin: 0,
+                    padding: "7px 16px",
+                    fontSize: 16,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {tShipping("items.requestedShippingService")}: {" "}
+                  {requestedShippingService}
+                </Tag>
+              </div>
+            ) : null}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-start gap-1">
                 <div>
