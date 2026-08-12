@@ -1997,7 +1997,10 @@
         "confirmApproveOk": "Approve",
         "confirmCancelTitle": "Cancel this order?",
         "confirmCancelSelectedTitle": "Cancel selected orders?",
-        "confirmCancelOk": "Cancel"
+        "confirmCancelOk": "Cancel",
+        "restore": "Restore to Pool",
+        "confirmRestoreTitle": "Restore this item to the pool?",
+        "confirmRestoreOk": "Restore"
       },
       "messages": {
         "fetchSuccess": "ShipStation orders fetched.",
@@ -2012,7 +2015,9 @@
         "orderNumberWhitespaceError": "Order number cannot contain spaces.",
         "approveError": "Failed to approve order.",
         "cancelSuccess": "Order cancelled successfully.",
-        "cancelError": "Failed to cancel order."
+        "cancelError": "Failed to cancel order.",
+        "restoreSuccess": "Item restored to the pool.",
+        "restoreError": "Failed to restore item to the pool."
       },
       "badges": {
         "pendingItems": "{count} pending items",
@@ -3373,6 +3378,7 @@
       "order": {
         "title": "Order",
         "preOrders": "Pre Orders",
+        "orderPoolCancelled": "Cancelled Pool Items",
         "transferOrders": "Transfer Orders",
         "transferOrderPool": "Transfer Order Pool",
         "transferOrderPoolCancelled": "Cancelled Pool Items",

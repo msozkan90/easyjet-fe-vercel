@@ -26,7 +26,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, UndoOutlined } from "@ant-design/icons";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -443,6 +443,25 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
     cancelOrders(selectedRows, { bulk: true });
   }, [cancelOrders, selectedRows]);
 
+  const restoreOrder = useCallback(
+    async (record) => {
+      if (!record?.id) return;
+      setRowActionLoadingState(record.id, "restore", true);
+      try {
+        await OrdersAPI.transferPreRestore(record.id);
+        message.success(t("messages.restoreSuccess"));
+        tableRef.current?.reload?.();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.restoreError"),
+        );
+      } finally {
+        setRowActionLoadingState(record.id, "restore", false);
+      }
+    },
+    [message, setRowActionLoadingState, t],
+  );
+
   const onManualFetch = async () => {
     if (pulling || remainingSec > 0) return;
     try {
@@ -670,6 +689,27 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
         fixed: "right",
         width: 120,
         render: (_, record) => {
+          if (isCancelledView) {
+            const restoreLoading = isRowActionLoading(record.id, "restore");
+            return (
+              <Popover content={t("actions.restore")}>
+                <Popconfirm
+                  title={t("actions.confirmRestoreTitle")}
+                  okText={t("actions.confirmRestoreOk")}
+                  okButtonProps={{ loading: restoreLoading, type: "primary" }}
+                  disabled={restoreLoading}
+                  onConfirm={() => restoreOrder(record)}
+                >
+                  <Button
+                    icon={<UndoOutlined />}
+                    type="primary"
+                    loading={restoreLoading}
+                    disabled={restoreLoading}
+                  />
+                </Popconfirm>
+              </Popover>
+            );
+          }
           const approveLoading = isRowActionLoading(record.id, "approve");
           const cancelLoading = isRowActionLoading(record.id, "cancel");
           const disableActions =
@@ -715,9 +755,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
     ].filter((column) => {
       const columnKey = column.key || column.dataIndex;
       if (isCancelledView) {
-        return !["pool_status", "linked_transfer_orders", "actions"].includes(
-          columnKey,
-        );
+        return !["pool_status", "linked_transfer_orders"].includes(columnKey);
       }
       return !["deactivated_at", "deactivated_by"].includes(columnKey);
     });
@@ -731,6 +769,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
     isRowActionLoading,
     productOptions,
     productsLoading,
+    restoreOrder,
     rowSelections,
     t,
     tOrders,

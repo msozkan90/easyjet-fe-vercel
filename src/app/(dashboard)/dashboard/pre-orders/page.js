@@ -23,7 +23,12 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
-import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  UndoOutlined,
+} from "@ant-design/icons";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -43,7 +48,7 @@ const getNormalizedRecordValue = (record, field) =>
   normalizeId(getRecordFieldValue(record, field));
 const hasOwn = Object.prototype.hasOwnProperty;
 
-export default function OrdersPage() {
+export default function OrdersPage({ mode = "pending" }) {
   const { message } = AntdApp.useApp();
   const tableRef = useRef(null);
   const variantUpdateLocksRef = useRef(new Set());
@@ -59,6 +64,7 @@ export default function OrdersPage() {
   const [bulkCancelling, setBulkCancelling] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
   const user = useSelector((state) => state.auth.user);
+  const isCancelledView = mode === "cancelled";
 
   const t = useTranslations("dashboard.preOrders");
   const tCommonActions = useTranslations("common.actions");
@@ -82,6 +88,12 @@ export default function OrdersPage() {
   }, [cooldownEnd]);
 
   useEffect(() => {
+    if (isCancelledView) {
+      setProductVariations([]);
+      setVariationsLoading(false);
+      return;
+    }
+
     let active = true;
     const loadProductVariations = async () => {
       setVariationsLoading(true);
@@ -94,7 +106,7 @@ export default function OrdersPage() {
         if (active) {
           message.error(
             error?.response?.data?.error?.message ||
-              t("messages.loadVariationsError")
+              t("messages.loadVariationsError"),
           );
         }
       } finally {
@@ -107,7 +119,7 @@ export default function OrdersPage() {
     return () => {
       active = false;
     };
-  }, [message, t]);
+  }, [isCancelledView, message, t]);
 
   const productOptions = useMemo(
     () =>
@@ -117,7 +129,7 @@ export default function OrdersPage() {
           value: product.id,
           label: product.name,
         })),
-    [productVariations]
+    [productVariations],
   );
 
   const productMap = useMemo(() => {
@@ -142,7 +154,7 @@ export default function OrdersPage() {
           label: size.name,
         }));
     },
-    [productMap]
+    [productMap],
   );
 
   const getColorOptions = useCallback(
@@ -156,7 +168,7 @@ export default function OrdersPage() {
           label: color.name,
         }));
     },
-    [productMap]
+    [productMap],
   );
 
   const baseRequest = useMemo(
@@ -164,11 +176,17 @@ export default function OrdersPage() {
       makeListRequest(
         OrdersAPI.preList,
         {
-          defaultSort: [{ field: "order_date", direction: "asc" }],
+          defaultSort: [
+            {
+              field: isCancelledView ? "deactivated_at" : "order_date",
+              direction: isCancelledView ? "desc" : "asc",
+            },
+          ],
           filterMap: {},
           numericArrayKeys: [""],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
+            next.item_state = isCancelledView ? "cancelled" : "pending";
             const orderDate = next.order_date;
             if (orderDate?.gte || orderDate?.lte) {
               next.date_from = orderDate?.gte;
@@ -180,16 +198,16 @@ export default function OrdersPage() {
             return next;
           },
         },
-        normalizeListAndMeta
+        normalizeListAndMeta,
       ),
-    []
+    [isCancelledView],
   );
 
   const reconcileSelectionOverrides = useCallback((records = []) => {
     const recordMap = new Map(
       (Array.isArray(records) ? records : [])
         .filter((record) => record?.id)
-        .map((record) => [String(record.id), record])
+        .map((record) => [String(record.id), record]),
     );
     setRowSelections((prev) => {
       if (!prev || !Object.keys(prev).length) return prev;
@@ -227,12 +245,12 @@ export default function OrdersPage() {
 
   const selectedRowKeys = useMemo(
     () => Object.keys(selectedRowMap),
-    [selectedRowMap]
+    [selectedRowMap],
   );
 
   const selectedRows = useMemo(
     () => Object.values(selectedRowMap),
-    [selectedRowMap]
+    [selectedRowMap],
   );
 
   const resetSelections = useCallback(() => {
@@ -259,7 +277,7 @@ export default function OrdersPage() {
       reconcileSelectionOverrides(result?.list);
       return result;
     },
-    [baseRequest, reconcileSelectionOverrides]
+    [baseRequest, reconcileSelectionOverrides],
   );
 
   const setRowSelectionFields = useCallback((rowId, updates) => {
@@ -314,7 +332,7 @@ export default function OrdersPage() {
         colorId: readValue("colorId", "color"),
       };
     },
-    [rowSelections]
+    [rowSelections],
   );
 
   const findProductPrice = useCallback(
@@ -339,7 +357,7 @@ export default function OrdersPage() {
       const match = (product?.prices || []).find(
         (entry) =>
           normalize(entry?.size_id) === targetSize &&
-          normalize(entry?.color_id) === targetColor
+          normalize(entry?.color_id) === targetColor,
       );
       if (!match) return undefined;
       const value = match?.price;
@@ -348,7 +366,7 @@ export default function OrdersPage() {
       }
       return value;
     },
-    [productMap]
+    [productMap],
   );
 
   const setCellLoadingState = useCallback((rowId, field, nextState) => {
@@ -384,14 +402,14 @@ export default function OrdersPage() {
   const isVariantUpdateLoading = useCallback(
     (rowId) =>
       ["product", "size", "color"].some((field) =>
-        Boolean(cellLoading?.[`${rowId}-${field}`])
+        Boolean(cellLoading?.[`${rowId}-${field}`]),
       ),
-    [cellLoading]
+    [cellLoading],
   );
 
   const isRowActionLoading = useCallback(
     (rowId, action) => Boolean(rowActionLoading?.[`${rowId}-${action}`]),
-    [rowActionLoading]
+    [rowActionLoading],
   );
 
   const handlePreOrderUpdate = useCallback(
@@ -416,7 +434,7 @@ export default function OrdersPage() {
         }
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.updateError")
+          error?.response?.data?.error?.message || t("messages.updateError"),
         );
         onError?.();
       } finally {
@@ -426,7 +444,7 @@ export default function OrdersPage() {
         setCellLoadingState(record.id, fieldKey, false);
       }
     },
-    [message, setCellLoadingState, t]
+    [message, setCellLoadingState, t],
   );
 
   const handleProductSelect = useCallback(
@@ -466,10 +484,10 @@ export default function OrdersPage() {
             productId: prevProduct,
             sizeId: prevSize,
             colorId: prevColor,
-          })
+          }),
       );
     },
-    [handlePreOrderUpdate, rowSelections, setRowSelectionFields]
+    [handlePreOrderUpdate, rowSelections, setRowSelectionFields],
   );
 
   const handleSizeSelect = useCallback(
@@ -491,17 +509,21 @@ export default function OrdersPage() {
       const resolvedPrice = findProductPrice(
         snapshot.productId,
         snapshot.sizeId,
-        snapshot.colorId
+        snapshot.colorId,
       );
-      const payload = {  product_id: snapshot.productId, size_id: nextNormalized, color_id: snapshot.colorId };
+      const payload = {
+        product_id: snapshot.productId,
+        size_id: nextNormalized,
+        color_id: snapshot.colorId,
+      };
       if (resolvedPrice !== undefined) {
         payload.price = resolvedPrice;
       }
 
       handlePreOrderUpdate(record, payload, "size", () =>
         setRowSelectionFields(record.id, {
-          sizeId: prevSize
-        })
+          sizeId: prevSize,
+        }),
       );
     },
     [
@@ -510,7 +532,7 @@ export default function OrdersPage() {
       handlePreOrderUpdate,
       rowSelections,
       setRowSelectionFields,
-    ]
+    ],
   );
 
   const handleColorSelect = useCallback(
@@ -532,9 +554,13 @@ export default function OrdersPage() {
       const resolvedPrice = findProductPrice(
         snapshot.productId,
         snapshot.sizeId,
-        snapshot.colorId
+        snapshot.colorId,
       );
-      const payload = {  product_id: snapshot.productId, size_id: snapshot.sizeId, color_id: nextNormalized};
+      const payload = {
+        product_id: snapshot.productId,
+        size_id: snapshot.sizeId,
+        color_id: nextNormalized,
+      };
       if (resolvedPrice !== undefined) {
         payload.price = resolvedPrice;
       }
@@ -542,7 +568,7 @@ export default function OrdersPage() {
       handlePreOrderUpdate(record, payload, "color", () =>
         setRowSelectionFields(record.id, {
           colorId: prevColor,
-        })
+        }),
       );
     },
     [
@@ -551,7 +577,7 @@ export default function OrdersPage() {
       handlePreOrderUpdate,
       rowSelections,
       setRowSelectionFields,
-    ]
+    ],
   );
 
   const approveOrders = useCallback(
@@ -582,7 +608,7 @@ export default function OrdersPage() {
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.approveError")
+          error?.response?.data?.error?.message || t("messages.approveError"),
         );
       } finally {
         ids.forEach((id) => setRowActionLoadingState(id, "approve", false));
@@ -597,7 +623,7 @@ export default function OrdersPage() {
       resetSelections,
       setRowActionLoadingState,
       t,
-    ]
+    ],
   );
 
   const handleSingleApprove = useCallback(
@@ -605,7 +631,7 @@ export default function OrdersPage() {
       if (!record) return;
       approveOrders([record], { bulk: false });
     },
-    [approveOrders]
+    [approveOrders],
   );
 
   const handleBulkApprove = useCallback(() => {
@@ -633,7 +659,7 @@ export default function OrdersPage() {
         tableRef.current?.reload?.();
       } catch (error) {
         message.error(
-          error?.response?.data?.error?.message || t("messages.cancelError")
+          error?.response?.data?.error?.message || t("messages.cancelError"),
         );
       } finally {
         ids.forEach((id) => setRowActionLoadingState(id, "cancel", false));
@@ -648,7 +674,7 @@ export default function OrdersPage() {
       resetSelections,
       setRowActionLoadingState,
       t,
-    ]
+    ],
   );
 
   const handleCancelOrder = useCallback(
@@ -656,13 +682,32 @@ export default function OrdersPage() {
       if (!record) return;
       cancelOrders([record], { bulk: false });
     },
-    [cancelOrders]
+    [cancelOrders],
   );
 
   const handleBulkCancel = useCallback(() => {
     if (!selectedRows?.length) return;
     cancelOrders(selectedRows, { bulk: true });
   }, [cancelOrders, selectedRows]);
+
+  const restoreOrder = useCallback(
+    async (record) => {
+      if (!record?.id) return;
+      setRowActionLoadingState(record.id, "restore", true);
+      try {
+        await OrdersAPI.preRestore(record.id);
+        message.success(t("messages.restoreSuccess"));
+        tableRef.current?.reload?.();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.restoreError"),
+        );
+      } finally {
+        setRowActionLoadingState(record.id, "restore", false);
+      }
+    },
+    [message, setRowActionLoadingState, t],
+  );
 
   const onManualFetch = async () => {
     if (pulling || remainingSec > 0) return;
@@ -680,7 +725,7 @@ export default function OrdersPage() {
       tableRef.current?.reload?.();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.fetchError")
+        error?.response?.data?.error?.message || t("messages.fetchError"),
       );
     } finally {
       setPulling(false);
@@ -689,7 +734,7 @@ export default function OrdersPage() {
 
   const formatDateTime = useCallback(
     (value) => (value ? moment(value).format("LLL") : t("common.none")),
-    [t]
+    [t],
   );
 
   const formatAmount = (value) => {
@@ -802,6 +847,9 @@ export default function OrdersPage() {
         title: t("columns.product"),
         dataIndex: "product",
         render: (_, record) => {
+          if (isCancelledView) {
+            return record?.product?.name || t("common.none");
+          }
           const overrides = rowSelections?.[record.id];
           const normalizedProductId = hasOwn.call(overrides || {}, "productId")
             ? overrides.productId
@@ -829,6 +877,9 @@ export default function OrdersPage() {
         title: t("columns.size"),
         dataIndex: "size",
         render: (_, record) => {
+          if (isCancelledView) {
+            return record?.size?.name || t("common.none");
+          }
           const overrides = rowSelections?.[record.id];
           const normalizedProductId = hasOwn.call(overrides || {}, "productId")
             ? overrides.productId
@@ -838,9 +889,7 @@ export default function OrdersPage() {
             : getNormalizedRecordValue(record, "size");
           const variantLoading = isVariantUpdateLoading(record.id);
           const disabled =
-            normalizedProductId === null ||
-            variationsLoading ||
-            variantLoading;
+            normalizedProductId === null || variationsLoading || variantLoading;
           return (
             <Select
               showSearch
@@ -861,6 +910,9 @@ export default function OrdersPage() {
         title: t("columns.color"),
         dataIndex: "color",
         render: (_, record) => {
+          if (isCancelledView) {
+            return record?.color?.name || t("common.none");
+          }
           const overrides = rowSelections?.[record.id];
           const normalizedProductId = hasOwn.call(overrides || {}, "productId")
             ? overrides.productId
@@ -870,9 +922,7 @@ export default function OrdersPage() {
             : getNormalizedRecordValue(record, "color");
           const variantLoading = isVariantUpdateLoading(record.id);
           const disabled =
-            normalizedProductId === null ||
-            variationsLoading ||
-            variantLoading;
+            normalizedProductId === null || variationsLoading || variantLoading;
           return (
             <Select
               showSearch
@@ -908,6 +958,26 @@ export default function OrdersPage() {
           placeholder: t("filters.orderDateRange"),
         },
         render: formatDateTime,
+      },
+      {
+        title: t("columns.cancelledAt"),
+        dataIndex: "deactivated_at",
+        key: "deactivated_at",
+        sorter: true,
+        render: formatDateTime,
+      },
+      {
+        title: t("columns.cancelledBy"),
+        dataIndex: "deactivated_by",
+        key: "deactivated_by",
+        render: (userInfo) => {
+          if (!userInfo) return t("common.none");
+          const fullName = [userInfo.first_name, userInfo.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+          return fullName || userInfo.email || t("common.none");
+        },
       },
       {
         title: t("columns.poolStatus"),
@@ -967,13 +1037,31 @@ export default function OrdersPage() {
         fixed: "right",
         width: 120,
         render: (_, record) => {
+          if (isCancelledView) {
+            const restoreLoading = isRowActionLoading(record.id, "restore");
+            return (
+              <Popover content={t("actions.restore")}>
+                <Popconfirm
+                  title={t("actions.confirmRestoreTitle")}
+                  okText={t("actions.confirmRestoreOk")}
+                  okButtonProps={{ loading: restoreLoading, type: "primary" }}
+                  disabled={restoreLoading}
+                  onConfirm={() => restoreOrder(record)}
+                >
+                  <Button
+                    icon={<UndoOutlined />}
+                    type="primary"
+                    loading={restoreLoading}
+                    disabled={restoreLoading}
+                  />
+                </Popconfirm>
+              </Popover>
+            );
+          }
           const approveLoading = isRowActionLoading(record.id, "approve");
           const cancelLoading = isRowActionLoading(record.id, "cancel");
           const disableActions =
-            bulkApproving ||
-            bulkCancelling ||
-            approveLoading ||
-            cancelLoading;
+            bulkApproving || bulkCancelling || approveLoading || cancelLoading;
           return (
             <Space>
               <Popover content={t("actions.approve")}>
@@ -1012,7 +1100,13 @@ export default function OrdersPage() {
           );
         },
       },
-    ];
+    ].filter((column) => {
+      const columnKey = column.key || column.dataIndex;
+      if (isCancelledView) {
+        return !["pool_status", "linked_orders"].includes(columnKey);
+      }
+      return !["deactivated_at", "deactivated_by"].includes(columnKey);
+    });
   }, [
     bulkApproving,
     bulkCancelling,
@@ -1026,18 +1120,20 @@ export default function OrdersPage() {
     isVariantUpdateLoading,
     isRowActionLoading,
     productOptions,
+    restoreOrder,
     rowSelections,
     t,
     tCommonActions,
     formatDateTime,
     variationsLoading,
+    isCancelledView,
   ]);
 
   const fetchButtonLabel = pulling
     ? t("actions.fetching")
     : remainingSec > 0
-    ? t("actions.fetchCountdown", { seconds: remainingSec })
-    : t("actions.fetch");
+      ? t("actions.fetchCountdown", { seconds: remainingSec })
+      : t("actions.fetch");
 
   const rowSelectionConfig = useMemo(
     () => ({
@@ -1069,23 +1165,30 @@ export default function OrdersPage() {
         });
       },
     }),
-    [selectedRowKeys]
+    [selectedRowKeys],
   );
 
-  const getRowClassName = useCallback((record) => {
-    const price = record?.price;
-    if (price === null || price === undefined || price === "") {
-      return "missing-price-row";
-    }
-    return "";
-  }, []);
+  const getRowClassName = useCallback(
+    (record) => {
+      if (isCancelledView) return "";
+      const price = record?.price;
+      if (price === null || price === undefined || price === "") {
+        return "missing-price-row";
+      }
+      return "";
+    },
+    [isCancelledView],
+  );
 
   const tableProps = useMemo(
-    () => ({
-      rowSelection: rowSelectionConfig,
-      rowClassName: getRowClassName,
-    }),
-    [getRowClassName, rowSelectionConfig]
+    () =>
+      isCancelledView
+        ? {}
+        : {
+            rowSelection: rowSelectionConfig,
+            rowClassName: getRowClassName,
+          },
+    [getRowClassName, isCancelledView, rowSelectionConfig],
   );
 
   return (
@@ -1102,7 +1205,7 @@ export default function OrdersPage() {
           order_date: undefined,
         }}
         toolbarLeft={
-          storeId ? (
+          !isCancelledView && storeId ? (
             <ShipStationStoreStatusCard
               storeId={storeId}
               customerName={customerName}
@@ -1111,20 +1214,22 @@ export default function OrdersPage() {
           ) : null
         }
         toolbarRight={
-          <Space>
-            <Button
-              type="primary"
-              loading={pulling}
-              disabled={pulling || remainingSec > 0}
-              onClick={onManualFetch}
-            >
-              {fetchButtonLabel}
-            </Button>
-          </Space>
+          !isCancelledView ? (
+            <Space>
+              <Button
+                type="primary"
+                loading={pulling}
+                disabled={pulling || remainingSec > 0}
+                onClick={onManualFetch}
+              >
+                {fetchButtonLabel}
+              </Button>
+            </Space>
+          ) : null
         }
         tableProps={tableProps}
       />
-      {selectedRowKeys.length ? (
+      {!isCancelledView && selectedRowKeys.length ? (
         <SelectionFloatActions
           count={selectedRowKeys.length}
           selectedLabel={t("actions.selectedCount", {

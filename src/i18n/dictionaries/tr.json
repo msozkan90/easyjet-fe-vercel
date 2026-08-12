@@ -1799,7 +1799,10 @@
         "confirmApproveOk": "Onayla",
         "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
         "confirmCancelSelectedTitle": "Seçili siparişleri iptal etmek istiyor musunuz?",
-        "confirmCancelOk": "İptal et"
+        "confirmCancelOk": "İptal et",
+        "restore": "Havuza Geri Al",
+        "confirmRestoreTitle": "Bu kalemi havuza geri almak istiyor musunuz?",
+        "confirmRestoreOk": "Geri Al"
       },
       "messages": {
         "fetchSuccess": "ShipStation siparişleri alındı.",
@@ -1814,7 +1817,9 @@
         "orderNumberWhitespaceError": "Order number boşluk içeremez.",
         "approveError": "Sipariş onaylanamadı.",
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
-        "cancelError": "Sipariş iptal edilemedi."
+        "cancelError": "Sipariş iptal edilemedi.",
+        "restoreSuccess": "Kalem havuza geri alındı.",
+        "restoreError": "Kalem havuza geri alınamadı."
       },
       "badges": {
         "pendingItems": "{count} bekleyen kalem",
@@ -3175,6 +3180,7 @@
       "order": {
         "title": "Sipariş",
         "preOrders": "Ön Siparişler",
+        "orderPoolCancelled": "İptal Edilen Havuz Kalemleri",
         "transferOrders": "Transfer Siparişler",
         "transferOrderPool": "Transfer Sipariş Havuzu",
         "transferOrderPoolCancelled": "İptal Edilen Havuz Kalemleri",
