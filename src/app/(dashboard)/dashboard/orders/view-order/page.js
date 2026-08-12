@@ -9,6 +9,10 @@ export default function OrdersViewOrderPage() {
     <OrdersStatusListPage
       listApiFn={OrdersAPI.workerShippedItemsList}
       allowedStatuses={["completed", "shipped"]}
+      defaultSort={[
+        { field: "status", direction: "asc" },
+        { field: "order_date", direction: "asc" },
+      ]}
       requireRoles={["companyShipmentWorker"]}
       productListFetcher={() => fetchGenericList("product")}
     />

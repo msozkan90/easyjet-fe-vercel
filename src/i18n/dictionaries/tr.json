@@ -2578,6 +2578,7 @@
           "taxAmount": "Vergi tutarı",
           "amountPaid": "Toplam tutar",
           "orderNumber": "Sipariş numarası",
+          "requestedShippingService": "Talep Edilen Kargo Servisi",
           "productName": "Ürün",
           "quantity": "Miktar",
           "size": "Beden",

@@ -2776,6 +2776,7 @@
           "taxAmount": "Tax amount",
           "amountPaid": "Total amount",
           "orderNumber": "Order number",
+          "requestedShippingService": "Requested Shipping Service",
           "productName": "Product",
           "quantity": "Quantity",
           "size": "Size",

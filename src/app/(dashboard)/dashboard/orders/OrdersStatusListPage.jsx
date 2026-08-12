@@ -70,6 +70,7 @@ export default function OrdersStatusListPage({
   productListFetcher,
   affilated,
   toolbarRight,
+  defaultSort = [{ field: "order_date", direction: "asc" }],
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
@@ -217,7 +218,7 @@ export default function OrdersStatusListPage({
       makeListRequest(
         listApiFn,
         {
-          defaultSort: [{ field: "order_date", direction: "asc" }],
+          defaultSort,
           filterTransform: (filters = {}) => {
             const next = { ...filters };
             if (allowedStatuses?.length) {
@@ -248,7 +249,7 @@ export default function OrdersStatusListPage({
         },
         normalizeListAndMeta,
       ),
-    [affilated, allowedStatuses, listApiFn],
+    [affilated, allowedStatuses, defaultSort, listApiFn],
   );
 
   const annotateRows = useCallback(function markRows(
