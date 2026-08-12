@@ -2,7 +2,15 @@
 "use client";
 
 import { ShipStationAPI } from "@/utils/api";
-import { Form, Input, Select, App as AntdApp, InputNumber, Alert } from "antd";
+import {
+  Form,
+  Input,
+  Select,
+  App as AntdApp,
+  InputNumber,
+  Alert,
+  Switch,
+} from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslations } from "@/i18n/use-translations";
@@ -30,6 +38,7 @@ export default function CustomerForm({
   categories = [],
   showProductMultiplier = false,
   showShipmentMultiplier = false,
+  showIsMine = false,
   onDirtyChange,
 }) {
   const { message } = AntdApp.useApp();
@@ -287,6 +296,17 @@ export default function CustomerForm({
             step={0.1}
             placeholder={tForm("placeholders.productMultiplier")}
           />
+        </Form.Item>
+      )}
+
+      {showIsMine && (
+        <Form.Item
+          name="is_mine"
+          label={tForm("labels.isMine")}
+          tooltip={tForm("tooltips.isMine")}
+          valuePropName="checked"
+        >
+          <Switch />
         </Form.Item>
       )}
 

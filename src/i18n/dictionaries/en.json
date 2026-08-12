@@ -517,6 +517,7 @@
         "categories": "Categories",
         "shipmentMultiplier": "Shipment Markup (%)",
         "productMultiplier": "Product Markup (%)",
+        "isMine": "Is Mine",
         "createdAt": "Created At",
         "status": "Status",
         "actions": "Actions"
@@ -556,7 +557,9 @@
         "submitUpdate": "Update"
       },
       "common": {
-        "none": "-"
+        "none": "-",
+        "yes": "Yes",
+        "no": "No"
       }
     },
     "customerPermissions": {
@@ -3722,7 +3725,8 @@
         "shipmentMultiplier": "Shipment Markup (%)",
         "status": "Status",
         "store": "Store",
-        "productMultiplier": "Product Markup (%)"
+        "productMultiplier": "Product Markup (%)",
+        "isMine": "Is Mine"
       },
       "placeholders": {
         "name": "e.g. ACME Inc.",
@@ -3733,7 +3737,8 @@
       },
       "tooltips": {
         "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none).",
-        "productMultiplier": "Percentage profit added on top of product prices (leave blank for none)."
+        "productMultiplier": "Percentage profit added on top of product prices (leave blank for none).",
+        "isMine": "Exempts the customer from the company EasyJet shipment multiplier."
       },
       "info": {
         "categoryRestriction": "Transfer cannot be selected together with Apparel, Engraving, or Print."
