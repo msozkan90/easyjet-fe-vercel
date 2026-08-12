@@ -818,6 +818,15 @@ export default function Sidebar({ collapsed }) {
                       ),
                     },
                     {
+                      key: "order-pool-cancelled",
+                      icon: <CloseCircleOutlined />,
+                      label: (
+                        <Link href="/dashboard/pre-orders/cancelled">
+                          {tSidebar("order.orderPoolCancelled")}
+                        </Link>
+                      ),
+                    },
+                    {
                       key: "pending-orders",
                       icon: <ApartmentOutlined />,
                       label: (

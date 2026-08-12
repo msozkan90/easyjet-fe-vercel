@@ -126,9 +126,11 @@ export const OrdersAPI = {
   preList: (query) => api.post("/order-pools/list", query),
   preUpdate: (id, data) => api.put(`/order-pools/${id}`, data),
   preCancel: (id) => api.del(`/order-pools/${id}`),
+  preRestore: (id) => api.post(`/order-pools/${id}/restore`),
   transferPreList: (query) => api.post("/transfer-order-pools/list", query),
   transferPreUpdate: (id, data) => api.put(`/transfer-order-pools/${id}`, data),
   transferPreCancel: (id) => api.del(`/transfer-order-pools/${id}`),
+  transferPreRestore: (id) => api.post(`/transfer-order-pools/${id}/restore`),
   transferManualFetch: (data = {}) =>
     api.post("/transfer-order-pools/orders/manual", data),
 

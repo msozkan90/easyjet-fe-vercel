@@ -56,10 +56,10 @@ const ensureUniqueFilename = (filename, seenNames) => {
   const ext = hasExtension ? filename.slice(dotIndex) : "";
 
   let suffix = 1;
-  let candidate = `${base}-${suffix}${ext}`;
+  let candidate = `${base}_${suffix}${ext}`;
   while (seenNames.has(candidate)) {
     suffix += 1;
-    candidate = `${base}-${suffix}${ext}`;
+    candidate = `${base}_${suffix}${ext}`;
   }
   seenNames.add(candidate);
   return candidate;
@@ -113,7 +113,7 @@ export const downloadOrderItemDesigns = async ({ orderNumber, designs }) => {
   const seenNames = new Set();
   const files = await Promise.all(
     designList.map(async ({ url }, index) => {
-      const fallbackName = `design-${index + 1}`;
+      const fallbackName = `design_${index + 1}`;
       const rawName = extractFilenameFromUrl(url, fallbackName);
       const filename = ensureUniqueFilename(rawName, seenNames);
       const blob = await fetchDesignFile(url);
