@@ -2114,6 +2114,7 @@
         "searchItem": "Search item",
         "searchOwnerEntity": "Search owner entity",
         "selectOwnerEntity": "Select owner entity",
+        "selectCustomer": "Select customer",
         "selectStatus": "Select status",
         "selectProduct": "Select product",
         "selectSize": "Select size",
@@ -2162,6 +2163,7 @@
       },
       "messages": {
         "loadVariationsError": "Failed to load product variations.",
+        "loadCustomersError": "Failed to load customers.",
         "statusUpdateSuccess": "Order status updated.",
         "statusUpdateError": "Failed to update order status.",
         "addressLoadError": "Unable to load order details.",

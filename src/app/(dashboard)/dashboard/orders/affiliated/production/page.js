@@ -8,6 +8,10 @@ export default function AffiliatedProductionOrdersPage() {
     <AffiliatedOrdersStatusListPage
       listApiFn={OrdersAPI.affiliatedProductionItemsList}
       allowedStatuses={["processing", "pdf"]}
+      defaultSort={[
+        { field: "status", direction: "asc" },
+        { field: "order_date", direction: "asc" },
+      ]}
     />
   );
 }

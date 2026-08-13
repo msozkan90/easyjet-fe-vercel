@@ -27,6 +27,8 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { STATUS_COLORS } from "./statusConstants";
+import { useSelector } from "react-redux";
+import { fetchGenericList } from "@/utils/fetchGenericList";
 
 const { RangePicker } = DatePicker;
 
@@ -69,16 +71,27 @@ export default function OrdersStatusListPage({
   requireRoles = ["companyAdmin", "customerAdmin"],
   productListFetcher,
   affilated,
+  showCustomerColumn = false,
   toolbarRight,
   defaultSort = [{ field: "order_date", direction: "asc" }],
 }) {
   const { message } = AntdApp.useApp();
+  const currentUser = useSelector((state) => state.auth.user);
   const t = useTranslations("dashboard.orders");
   const tCommonActions = useTranslations("common.actions");
   const skuFilterKey = affilated ? "affilated_sku" : "sku";
   const internalTableRef = useRef(null);
   const tableRef = tableRefExternal || internalTableRef;
   const [productVariations, setProductVariations] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const isCompanyUser = (currentUser?.roles || []).some((role) =>
+    [
+      "companyadmin",
+      "companycompletedworker",
+      "companyshipmentworker",
+    ].includes(String(role).toLowerCase()),
+  );
+  const shouldShowCustomerColumn = showCustomerColumn || isCompanyUser;
   const [quickFilters, setQuickFilters] = useState(() => {
     if (!initialFiltersProp) {
       return createDefaultToolbarFilters();
@@ -173,6 +186,32 @@ export default function OrdersStatusListPage({
     t,
   ]);
 
+  useEffect(() => {
+    if (!shouldShowCustomerColumn) {
+      setCustomers([]);
+      return;
+    }
+
+    let active = true;
+    const loadCustomers = async () => {
+      try {
+        const list = await fetchGenericList("customer");
+        if (active) setCustomers(list);
+      } catch (error) {
+        if (!active) return;
+        setCustomers([]);
+        message.error(
+          error?.response?.data?.error?.message ||
+            t("messages.loadCustomersError"),
+        );
+      }
+    };
+    void loadCustomers();
+    return () => {
+      active = false;
+    };
+  }, [message, shouldShowCustomerColumn, t]);
+
   const productOptions = useMemo(() => {
     const map = new Map();
     (productVariations || []).forEach((product) => {
@@ -212,6 +251,18 @@ export default function OrdersStatusListPage({
     });
     return Array.from(map.values());
   }, [productVariations]);
+
+  const customerOptions = useMemo(
+    () =>
+      customers
+        .filter((customer) => customer?.id)
+        .map((customer) => ({
+          value: String(customer.id),
+          label: customer.name || String(customer.id),
+        }))
+        .sort((left, right) => left.label.localeCompare(right.label)),
+    [customers],
+  );
 
   const baseRequest = useMemo(
     () =>
@@ -586,6 +637,24 @@ export default function OrdersStatusListPage({
         sorter: true,
         render: (value) => formatAmount(value, t("common.none")),
       },
+      ...(shouldShowCustomerColumn
+        ? [
+            {
+              title: t("columns.customer"),
+              dataIndex: "customer_id",
+              filter: {
+                type: "select",
+                placeholder: t("filters.selectCustomer"),
+                options: customerOptions,
+                width: 240,
+              },
+              render: (_, record) =>
+                record?.order?.customer?.name ||
+                record?.customer?.name ||
+                t("common.none"),
+            },
+          ]
+        : []),
       {
         title: t("columns.customerName"),
         dataIndex: "bill_to_name",
@@ -642,6 +711,7 @@ export default function OrdersStatusListPage({
     ];
   }, [
     colorOptions,
+    customerOptions,
     formatDateTime,
     columnsBuilder,
     productOptions,
@@ -649,6 +719,7 @@ export default function OrdersStatusListPage({
     statusLabels,
     statusOptions,
     skuFilterKey,
+    shouldShowCustomerColumn,
     t,
     tCommonActions,
   ]);
@@ -695,6 +766,7 @@ export default function OrdersStatusListPage({
           product_id: undefined,
           size_id: undefined,
           color_id: undefined,
+          customer_id: undefined,
           order_date: undefined,
         }}
         toolbarLeft={

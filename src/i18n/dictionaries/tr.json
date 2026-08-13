@@ -1916,6 +1916,7 @@
         "searchItem": "Ürün ara",
         "searchOwnerEntity": "Owner entity ara",
         "selectOwnerEntity": "Owner entity seç",
+        "selectCustomer": "Müşteri seçin",
         "selectStatus": "Durum seçin",
         "selectProduct": "Ürün seçin",
         "selectSize": "Beden seçin",
@@ -1964,6 +1965,7 @@
       },
       "messages": {
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
+        "loadCustomersError": "Müşteriler yüklenemedi.",
         "statusUpdateSuccess": "Sipariş durumu güncellendi.",
         "statusUpdateError": "Sipariş durumu güncellenemedi.",
         "addressLoadError": "Sipariş detayları yüklenemedi.",
