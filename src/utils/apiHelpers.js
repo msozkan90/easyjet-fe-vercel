@@ -26,7 +26,7 @@ export const getFilenameFromDisposition = (disposition = "") => {
 
 export const normalizeBlobResponse = (
   response,
-  fallbackFilename = "download"
+  fallbackFilename = "download",
 ) => {
   const blob =
     response?.data instanceof Blob
@@ -50,9 +50,29 @@ export const saveBlobAsFile = (blob, filename = "download") => {
   window.URL.revokeObjectURL(url);
 };
 
+export const getBlobErrorMessage = async (error, fallbackMessage = "") => {
+  const data = error?.response?.data;
+  let payload = data;
+
+  if (typeof Blob !== "undefined" && data instanceof Blob) {
+    try {
+      payload = JSON.parse(await data.text());
+    } catch {
+      payload = null;
+    }
+  }
+
+  return (
+    payload?.error?.message ||
+    payload?.message ||
+    error?.message ||
+    fallbackMessage
+  );
+};
+
 export const fetchBlobFile = async (
   url,
-  { params = {}, config = {}, fallbackFilename = "download" } = {}
+  { params = {}, config = {}, fallbackFilename = "download" } = {},
 ) => {
   const response = await http.get(url, {
     params,
@@ -65,7 +85,7 @@ export const fetchBlobFile = async (
 
 export const fetchBlobFilePost = async (
   url,
-  { data = {}, config = {}, fallbackFilename = "download" } = {}
+  { data = {}, config = {}, fallbackFilename = "download" } = {},
 ) => {
   const response = await http.post(url, data, {
     responseType: "blob",

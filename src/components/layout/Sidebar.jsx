@@ -89,6 +89,7 @@ export default function Sidebar({ collapsed }) {
   const userRoleLabel = translatedRole.startsWith("dashboard.profile.roles.")
     ? user?.role?.name || primaryRole || tProfileRoles("fallback")
     : translatedRole;
+  const userEntityName = String(user?.entity?.entity_name || "").trim();
   const userInitials =
     [user?.first_name, user?.last_name]
       .filter(Boolean)
@@ -1253,7 +1254,9 @@ export default function Sidebar({ collapsed }) {
   const userSummary = (
     <Link
       href="/dashboard/profile"
-      aria-label={`${userDisplayName} - ${userRoleLabel}`}
+      aria-label={[userDisplayName, userEntityName, userRoleLabel]
+        .filter(Boolean)
+        .join(" - ")}
       style={{
         display: "flex",
         alignItems: "center",
@@ -1292,6 +1295,22 @@ export default function Sidebar({ collapsed }) {
           >
             {userDisplayName}
           </div>
+          {userEntityName ? (
+            <div
+              title={userEntityName}
+              style={{
+                marginTop: 3,
+                overflow: "hidden",
+                color: "#334155",
+                fontSize: 12,
+                fontWeight: 600,
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {userEntityName}
+            </div>
+          ) : null}
           <div
             title={userRoleLabel}
             style={{
@@ -1388,6 +1407,11 @@ export default function Sidebar({ collapsed }) {
               title={
                 <div>
                   <div style={{ fontWeight: 600 }}>{userDisplayName}</div>
+                  {userEntityName ? (
+                    <div style={{ opacity: 0.75, fontSize: 12 }}>
+                      {userEntityName}
+                    </div>
+                  ) : null}
                   <div style={{ opacity: 0.75, fontSize: 12 }}>
                     {userRoleLabel}
                   </div>

@@ -22,7 +22,7 @@ import {
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersPdfAPI } from "@/utils/api";
-import { saveBlobAsFile } from "@/utils/apiHelpers";
+import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvider";
@@ -55,6 +55,8 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   const [designs, setDesigns] = useState([]);
   const [designsLoading, setDesignsLoading] = useState(false);
   const [downloadingPdfIds, setDownloadingPdfIds] = useState({});
+  const [downloadingOrderItemDesignIds, setDownloadingOrderItemDesignIds] =
+    useState({});
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [downloadingDesignIds, setDownloadingDesignIds] = useState({});
   const handledSuccessTaskIdsRef = useRef(new Set());
@@ -237,6 +239,38 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     [loadRows, message, t],
   );
 
+  const handleDownloadOrderItemDesigns = useCallback(
+    async (pdf) => {
+      if (!pdf?.id || !Array.isArray(pdf.design_ids) || !pdf.design_ids.length)
+        return;
+      setDownloadingOrderItemDesignIds((prev) => ({
+        ...prev,
+        [pdf.id]: true,
+      }));
+      try {
+        const { blob, filename } = await OrdersPdfAPI.downloadOrderItemDesigns(
+          pdf.id,
+        );
+        saveBlobAsFile(blob, filename);
+        message.success(t("messages.orderItemDesignsDownloaded"));
+      } catch (error) {
+        message.error(
+          await getBlobErrorMessage(
+            error,
+            t("messages.orderItemDesignDownloadFailed"),
+          ),
+        );
+      } finally {
+        setDownloadingOrderItemDesignIds((prev) => {
+          const next = { ...prev };
+          delete next[pdf.id];
+          return next;
+        });
+      }
+    },
+    [message, t],
+  );
+
   const handleDownloadAllDesigns = useCallback(async () => {
     if (!selectedPdf?.id) return;
     setBulkDownloading(true);
@@ -319,7 +353,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
     {
       title: t("fields.actions"),
       key: "actions",
-      width: 240,
+      width: 440,
       render: (_, row) => (
         <Space wrap>
           <Button
@@ -330,6 +364,14 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
             }}
           >
             {tActions("detail")}
+          </Button>
+          <Button
+            icon={<DownloadOutlined />}
+            loading={Boolean(downloadingOrderItemDesignIds[row.id])}
+            disabled={!Array.isArray(row.design_ids) || !row.design_ids.length}
+            onClick={() => handleDownloadOrderItemDesigns(row)}
+          >
+            {t("actions.downloadOrderItemDesigns")}
           </Button>
           <Upload
             multiple

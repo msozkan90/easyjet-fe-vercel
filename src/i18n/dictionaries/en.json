@@ -394,11 +394,13 @@
         "title": "Filters",
         "entities": "Partner / Customer",
         "category": "Category",
+        "subCategory": "Sub Category",
         "orderStatus": "Order Status",
         "orderDate": "Order Date",
         "entitiesPlaceholder": "Select partners and customers",
         "selectAllEntities": "Select All",
         "categoryPlaceholder": "Select category",
+        "subCategoryPlaceholder": "Select sub category",
         "orderStatusPlaceholder": "Select status",
         "searchInColumn": "Search {column}",
         "search": "Search",
@@ -813,7 +815,14 @@
       "filters": {
         "searchUser": "Search user or email",
         "selectRole": "Select role",
-        "selectStatus": "Select status"
+        "selectStatus": "Select status",
+        "presets": {
+          "today": "Today",
+          "thisWeek": "This Week",
+          "lastWeek": "Last Week",
+          "thisMonth": "This Month",
+          "lastMonth": "Last Month"
+        }
       },
       "metricLabels": {
         "completed": "Completed",
@@ -2114,6 +2123,7 @@
         "searchItem": "Search item",
         "searchOwnerEntity": "Search owner entity",
         "selectOwnerEntity": "Select owner entity",
+        "selectCustomer": "Select customer",
         "selectStatus": "Select status",
         "selectProduct": "Select product",
         "selectSize": "Select size",
@@ -2162,6 +2172,7 @@
       },
       "messages": {
         "loadVariationsError": "Failed to load product variations.",
+        "loadCustomersError": "Failed to load customers.",
         "statusUpdateSuccess": "Order status updated.",
         "statusUpdateError": "Failed to update order status.",
         "addressLoadError": "Unable to load order details.",
@@ -3104,7 +3115,8 @@
         "actions": {
           "addDesign": "Add Design",
           "downloadPdf": "Download PDF",
-          "downloadDesigns": "Download Designs"
+          "downloadDesigns": "Download Designs",
+          "downloadOrderItemDesigns": "Download PDF Designs"
         },
         "status": {
           "active": "Active",
@@ -3140,8 +3152,11 @@
           "designDownloaded": "Design downloaded.",
           "designsDownloaded": "Designs downloaded.",
           "designDownloadFailed": "Designs could not be downloaded.",
+          "orderItemDesignsDownloaded": "PDF designs downloaded.",
+          "orderItemDesignDownloadFailed": "PDF designs could not be downloaded.",
           "pdfDownloaded": "PDF downloaded.",
           "pdfDownloadFailed": "PDF could not be downloaded.",
+          "noEligibleOrderItems": "No eligible order items were found for download.",
           "uploadQueued": "{count} design upload queued."
         },
         "uploadQueue": {

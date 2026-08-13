@@ -8,6 +8,10 @@ export default function InProductionOrdersPage() {
     <OrdersStatusListPage
       listApiFn={OrdersAPI.productionItemsList}
       allowedStatuses={["processing", "pdf"]}
+      defaultSort={[
+        { field: "order_date", direction: "asc" },
+        { field: "status", direction: "asc" },
+      ]}
     />
   );
 }

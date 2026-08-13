@@ -195,6 +195,14 @@ export const OrdersPdfAPI = {
       config,
       fallbackFilename: "orders.pdf",
     }),
+  downloadOrderItemDesigns: (id, config = {}) =>
+    fetchBlobFile(
+      `/orders-pdf/${encodeURIComponent(id)}/order-item-designs/download`,
+      {
+        config,
+        fallbackFilename: "orders-pdf-designs.zip",
+      },
+    ),
   create: (payload) => api.post("/orders-pdf", payload),
   update: (id, payload) =>
     api.put(`/orders-pdf/${encodeURIComponent(id)}`, payload),
