@@ -2906,7 +2906,8 @@
         "actions": {
           "addDesign": "Tasarım Ekle",
           "downloadPdf": "PDF İndir",
-          "downloadDesigns": "Tasarımları İndir"
+          "downloadDesigns": "Tasarımları İndir",
+          "downloadOrderItemDesigns": "PDF Tasarımlarını İndir"
         },
         "status": {
           "active": "Aktif",
@@ -2942,8 +2943,11 @@
           "designDownloaded": "Tasarım indirildi.",
           "designsDownloaded": "Tasarımlar indirildi.",
           "designDownloadFailed": "Tasarımlar indirilemedi.",
+          "orderItemDesignsDownloaded": "PDF tasarımları indirildi.",
+          "orderItemDesignDownloadFailed": "PDF tasarımları indirilemedi.",
           "pdfDownloaded": "PDF indirildi.",
           "pdfDownloadFailed": "PDF indirilemedi.",
+          "noEligibleOrderItems": "İndirilecek uygun sipariş kalemi bulunamadı.",
           "uploadQueued": "{count} tasarım yüklemesi sıraya alındı."
         },
         "uploadQueue": {

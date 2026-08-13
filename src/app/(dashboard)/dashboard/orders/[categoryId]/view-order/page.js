@@ -5,15 +5,15 @@ import { App as AntdApp, Button } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import OrdersStatusListPage from "../../OrdersStatusListPage";
 import { OrdersAPI } from "@/utils/api";
-import { saveBlobAsFile } from "@/utils/apiHelpers";
+import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { useTranslations } from "@/i18n/use-translations";
-
 
 export default function CategoryViewOrderPage({ params }) {
   const { categoryId } = params || {};
   const { message } = AntdApp.useApp();
   const tCommonActions = useTranslations("common.actions");
+  const tPdfMessages = useTranslations("dashboard.orders.ordersPdf.messages");
   const [downloading, setDownloading] = useState(false);
   const tableRef = useRef(null);
 
@@ -41,13 +41,16 @@ export default function CategoryViewOrderPage({ params }) {
       saveBlobAsFile(blob, filename || "orders.pdf");
       tableRef.current?.reload?.();
     } catch (error) {
+      const errorMessage = await getBlobErrorMessage(error);
       message.error(
-        error?.response?.data?.error?.message || "PDF download failed."
+        errorMessage === "No eligible order items found for PDF download"
+          ? tPdfMessages("noEligibleOrderItems")
+          : errorMessage || tPdfMessages("pdfDownloadFailed"),
       );
     } finally {
       setDownloading(false);
     }
-  }, [categoryId, message]);
+  }, [categoryId, message, tPdfMessages]);
 
   const toolbarRight = (
     <Button

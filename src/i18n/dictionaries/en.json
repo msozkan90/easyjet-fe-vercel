@@ -3104,7 +3104,8 @@
         "actions": {
           "addDesign": "Add Design",
           "downloadPdf": "Download PDF",
-          "downloadDesigns": "Download Designs"
+          "downloadDesigns": "Download Designs",
+          "downloadOrderItemDesigns": "Download PDF Designs"
         },
         "status": {
           "active": "Active",
@@ -3140,8 +3141,11 @@
           "designDownloaded": "Design downloaded.",
           "designsDownloaded": "Designs downloaded.",
           "designDownloadFailed": "Designs could not be downloaded.",
+          "orderItemDesignsDownloaded": "PDF designs downloaded.",
+          "orderItemDesignDownloadFailed": "PDF designs could not be downloaded.",
           "pdfDownloaded": "PDF downloaded.",
           "pdfDownloadFailed": "PDF could not be downloaded.",
+          "noEligibleOrderItems": "No eligible order items were found for download.",
           "uploadQueued": "{count} design upload queued."
         },
         "uploadQueue": {
