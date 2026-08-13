@@ -394,11 +394,13 @@
         "title": "Filtreler",
         "entities": "Partner / Customer",
         "category": "Kategori",
+        "subCategory": "Alt Kategori",
         "orderStatus": "Sipariş Durumu",
         "orderDate": "Sipariş Tarihi",
         "entitiesPlaceholder": "Partner ve customer seçin",
         "selectAllEntities": "Tümünü Seç",
         "categoryPlaceholder": "Kategori seçin",
+        "subCategoryPlaceholder": "Alt kategori seçin",
         "orderStatusPlaceholder": "Durum seçin",
         "searchInColumn": "{column} ara",
         "search": "Ara",
@@ -813,7 +815,14 @@
       "filters": {
         "searchUser": "Kullanıcı veya e-posta ara",
         "selectRole": "Rol seç",
-        "selectStatus": "Durum seç"
+        "selectStatus": "Durum seç",
+        "presets": {
+          "today": "Bugün",
+          "thisWeek": "Bu Hafta",
+          "lastWeek": "Geçen Hafta",
+          "thisMonth": "Bu Ay",
+          "lastMonth": "Geçen Ay"
+        }
       },
       "metricLabels": {
         "completed": "Tamamlanan",

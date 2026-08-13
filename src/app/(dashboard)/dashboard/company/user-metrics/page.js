@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import dayjs from "dayjs";
 import moment from "moment";
 import {
   Alert,
@@ -32,12 +33,15 @@ import { RoleEnum } from "@/utils/consts";
 const { RangePicker } = DatePicker;
 
 const AUDIT_RETENTION_DAYS = 180;
-const createDefaultRange = () => [
-  moment()
-    .subtract(AUDIT_RETENTION_DAYS - 1, "days")
-    .startOf("day"),
-  moment().endOf("day"),
-];
+const createDateBounds = (now = dayjs()) => ({
+  earliest: now.subtract(AUDIT_RETENTION_DAYS - 1, "days").startOf("day"),
+  latest: now.endOf("day"),
+});
+
+const createDefaultRange = () => {
+  const now = dayjs();
+  return [now.startOf("month"), now.endOf("day")];
+};
 
 const STATUS_COLORS = {
   active: "green",
@@ -57,8 +61,10 @@ const METRIC_TAG_COLORS = {
 const buildRangeParams = (range) => {
   const [from, to] = Array.isArray(range) ? range : [];
   return {
-    date_from: from?.clone()?.startOf("day")?.toISOString(),
-    date_to: to?.clone()?.endOf("day")?.toISOString(),
+    date_from: from?.isValid?.()
+      ? from.startOf("day").toISOString()
+      : undefined,
+    date_to: to?.isValid?.() ? to.endOf("day").toISOString() : undefined,
   };
 };
 
@@ -148,8 +154,9 @@ export default function CompanyUserMetricsPage() {
   const tStatus = useTranslations("common.status");
   const tActions = useTranslations("common.actions");
   const tRoles = useTranslations("forms.common.roles");
-  const summaryTableRef = useRef(null);
   const detailTableRef = useRef(null);
+  const summaryRequestIdRef = useRef(0);
+  const dateBoundsRef = useRef(createDateBounds());
 
   const [dateRange, setDateRange] = useState(createDefaultRange);
   const [rows, setRows] = useState([]);
@@ -166,6 +173,7 @@ export default function CompanyUserMetricsPage() {
     remake_count: 0,
     refund_count: 0,
   });
+  const rangeParams = useMemo(() => buildRangeParams(dateRange), [dateRange]);
 
   const roleLabels = useMemo(
     () => ({
@@ -176,33 +184,31 @@ export default function CompanyUserMetricsPage() {
     [tRoles],
   );
 
-  const loadSummary = useCallback(async () => {
+  const loadSummary = useCallback(async (nextRangeParams) => {
+    const requestId = summaryRequestIdRef.current + 1;
+    summaryRequestIdRef.current = requestId;
     setLoading(true);
     setError("");
     try {
-      const response = await AuditLogsAPI.userMetricsSummary(
-        buildRangeParams(dateRange),
-      );
-      startTransition(() => {
-        setRows(normalizeSummaryList(response));
-      });
+      const response = await AuditLogsAPI.userMetricsSummary(nextRangeParams);
+      if (requestId !== summaryRequestIdRef.current) return;
+      setRows(normalizeSummaryList(response));
     } catch (requestError) {
+      if (requestId !== summaryRequestIdRef.current) return;
+      setRows([]);
       setError(
         requestError?.response?.data?.error?.message || t("messages.loadError"),
       );
     } finally {
-      setLoading(false);
+      if (requestId === summaryRequestIdRef.current) {
+        setLoading(false);
+      }
     }
-  }, [dateRange, t]);
+  }, [t]);
 
   useEffect(() => {
-    void loadSummary();
-  }, [loadSummary]);
-
-  useEffect(() => {
-    summaryTableRef.current?.setPage?.(1);
-    summaryTableRef.current?.reload?.();
-  }, [rows]);
+    void loadSummary(rangeParams);
+  }, [loadSummary, rangeParams]);
 
   const totals = useMemo(
     () =>
@@ -443,7 +449,7 @@ export default function CompanyUserMetricsPage() {
         const response = await AuditLogsAPI.userMetricLogs(
           selectedUser.user_id,
           {
-            ...buildRangeParams(dateRange),
+            ...rangeParams,
             page,
             limit: pageSize,
             metric: detailMetric,
@@ -480,8 +486,50 @@ export default function CompanyUserMetricsPage() {
         return { list: [], total: 0 };
       }
     },
-    [dateRange, detailMetric, selectedUser, t],
+    [detailMetric, rangeParams, selectedUser, t],
   );
+
+  const handleDateRangeChange = useCallback((value) => {
+    if (!Array.isArray(value) || !value[0] || !value[1]) return;
+    setDateRange([value[0].startOf("day"), value[1].endOf("day")]);
+  }, []);
+
+  const datePresets = useMemo(() => {
+    const now = dayjs();
+    const currentWeekDay = now.day() || 7;
+    const thisWeekStart = now
+      .subtract(currentWeekDay - 1, "day")
+      .startOf("day");
+
+    return [
+      {
+        label: t("filters.presets.today"),
+        value: [now.startOf("day"), now.endOf("day")],
+      },
+      {
+        label: t("filters.presets.thisWeek"),
+        value: [thisWeekStart, now.endOf("day")],
+      },
+      {
+        label: t("filters.presets.lastWeek"),
+        value: [
+          thisWeekStart.subtract(7, "day"),
+          thisWeekStart.subtract(1, "day").endOf("day"),
+        ],
+      },
+      {
+        label: t("filters.presets.thisMonth"),
+        value: [now.startOf("month"), now.endOf("day")],
+      },
+      {
+        label: t("filters.presets.lastMonth"),
+        value: [
+          now.subtract(1, "month").startOf("month"),
+          now.subtract(1, "month").endOf("month"),
+        ],
+      },
+    ];
+  }, [t]);
 
   return (
     <RequireRole anyOfRoles={["companyadmin"]}>
@@ -500,49 +548,38 @@ export default function CompanyUserMetricsPage() {
               <RangePicker
                 value={dateRange}
                 allowClear={false}
+                format="DD/MM/YYYY"
+                presets={datePresets}
                 disabledDate={(current) =>
                   Boolean(
                     current &&
-                      (current.isBefore(
-                        moment()
-                          .subtract(AUDIT_RETENTION_DAYS - 1, "days")
-                          .startOf("day"),
-                        "day",
-                      ) ||
-                        current.isAfter(moment().endOf("day"), "day")),
+                      (current.isBefore(dateBoundsRef.current.earliest, "day") ||
+                        current.isAfter(dateBoundsRef.current.latest, "day")),
                   )
                 }
-                onChange={(value) =>
-                  setDateRange(value || createDefaultRange())
-                }
+                onChange={handleDateRangeChange}
               />
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => void loadSummary()}
-              >
-                {tActions("refresh")}
-              </Button>
             </Space>
           </div>
         </Card>
 
         <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.total")} value={totals.total} />
           </Card>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.completed")} value={totals.completed} />
           </Card>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.shipped")} value={totals.shipped} />
           </Card>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.scrap")} value={totals.scrap} />
           </Card>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.remake")} value={totals.remake} />
           </Card>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl" loading={loading}>
             <Statistic title={t("stats.refund")} value={totals.refund} />
           </Card>
         </div>
@@ -552,26 +589,29 @@ export default function CompanyUserMetricsPage() {
             <Alert type="error" showIcon message={error} className="mb-4" />
           ) : null}
 
-          {loading ? null : !rows.length ? (
+          {!loading && !rows.length ? (
             <Empty description={t("messages.empty")} />
           ) : null}
 
-          <CrudTable
-            ref={summaryTableRef}
-            columns={columns}
-            request={summaryRequest}
-            initialPageSize={10}
-            initialFilters={{
-              full_name: "",
-              role_code: undefined,
-              status: undefined,
-            }}
-            initialSort={{ orderBy: "total_count", orderDir: "desc" }}
-            tableProps={{
-              locale: { emptyText: t("messages.empty") },
-              scroll: { x: 980 },
-            }}
-          />
+          {!loading && rows.length ? (
+            <CrudTable
+              key={`${rangeParams.date_from || ""}-${rangeParams.date_to || ""}`}
+              columns={columns}
+              request={summaryRequest}
+              showRefresh={false}
+              initialPageSize={10}
+              initialFilters={{
+                full_name: "",
+                role_code: undefined,
+                status: undefined,
+              }}
+              initialSort={{ orderBy: "total_count", orderDir: "desc" }}
+              tableProps={{
+                locale: { emptyText: t("messages.empty") },
+                scroll: { x: 980 },
+              }}
+            />
+          ) : null}
         </Card>
 
         <Modal
@@ -676,7 +716,7 @@ export default function CompanyUserMetricsPage() {
 
               <CrudTable
                 ref={detailTableRef}
-                key={`${selectedUser.user_id}-${detailMetric}-${buildRangeParams(dateRange).date_from || ""}-${buildRangeParams(dateRange).date_to || ""}`}
+                key={`${selectedUser.user_id}-${detailMetric}-${rangeParams.date_from || ""}-${rangeParams.date_to || ""}`}
                 rowKey="id"
                 columns={detailColumns}
                 request={detailRequest}

@@ -394,11 +394,13 @@
         "title": "Filters",
         "entities": "Partner / Customer",
         "category": "Category",
+        "subCategory": "Sub Category",
         "orderStatus": "Order Status",
         "orderDate": "Order Date",
         "entitiesPlaceholder": "Select partners and customers",
         "selectAllEntities": "Select All",
         "categoryPlaceholder": "Select category",
+        "subCategoryPlaceholder": "Select sub category",
         "orderStatusPlaceholder": "Select status",
         "searchInColumn": "Search {column}",
         "search": "Search",
@@ -813,7 +815,14 @@
       "filters": {
         "searchUser": "Search user or email",
         "selectRole": "Select role",
-        "selectStatus": "Select status"
+        "selectStatus": "Select status",
+        "presets": {
+          "today": "Today",
+          "thisWeek": "This Week",
+          "lastWeek": "Last Week",
+          "thisMonth": "This Month",
+          "lastMonth": "Last Month"
+        }
       },
       "metricLabels": {
         "completed": "Completed",

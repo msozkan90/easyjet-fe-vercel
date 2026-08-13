@@ -64,6 +64,7 @@ const createDefaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
 const createDefaultFilters = () => ({
   entity_ids: [],
   category_id: undefined,
+  sub_category_id: undefined,
   order_status: [],
   date_range: createDefaultRange(),
 });
@@ -112,6 +113,7 @@ const buildReportPayload = (filters, entityOptionsMap) => {
     customer_ids: customer_ids.length ? customer_ids : undefined,
     partner_ids: partner_ids.length ? partner_ids : undefined,
     category_id: filters?.category_id || undefined,
+    sub_category_id: filters?.sub_category_id || undefined,
     order_status:
       Array.isArray(filters?.order_status) && filters.order_status.length
         ? filters.order_status
@@ -184,6 +186,11 @@ export default function OrderReportPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailData, setDetailData] = useState(null);
+  const [detailFilters, setDetailFilters] = useState({
+    product: [],
+    size: [],
+    color: [],
+  });
   const deferredDailyRows = useDeferredValue(reportData.daily_rows);
 
   const loadFilterOptions = useCallback(async () => {
@@ -276,6 +283,23 @@ export default function OrderReportPage() {
     [categories],
   );
 
+  const subCategoryOptions = useMemo(() => {
+    const selectedCategory = categories.find(
+      (category) => category.id === filters.category_id,
+    );
+
+    return (selectedCategory?.sub_categories || [])
+      .map((subCategory) => ({
+        value: subCategory.id,
+        label: subCategory.name || subCategory.id,
+      }))
+      .sort((left, right) =>
+        String(left.label).localeCompare(String(right.label), undefined, {
+          sensitivity: "base",
+        }),
+      );
+  }, [categories, filters.category_id]);
+
   const statusOptions = useMemo(
     () =>
       ORDER_STATUS_KEYS.map((status) => ({
@@ -316,6 +340,14 @@ export default function OrderReportPage() {
     setFilters((prev) => ({ ...prev, [key]: value || undefined }));
   }, []);
 
+  const handleCategoryChange = useCallback((value) => {
+    setFilters((prev) => ({
+      ...prev,
+      category_id: value || undefined,
+      sub_category_id: undefined,
+    }));
+  }, []);
+
   const handleEntityChange = useCallback(
     (value) => {
       const nextValues = Array.isArray(value) ? value : [];
@@ -350,6 +382,7 @@ export default function OrderReportPage() {
 
   const handleOpenDetail = useCallback(
     async (record) => {
+      setDetailFilters({ product: [], size: [], color: [] });
       setDrawerOpen(true);
       setDetailLoading(true);
       try {
@@ -418,17 +451,93 @@ export default function OrderReportPage() {
 
   const detailRows = useMemo(
     () =>
-      (detailData?.products || []).map((product) => ({
-        ...product,
-        __search_size: (product.children || [])
-          .map((child) => child.size_name || "")
-          .join(" "),
-        __search_color: (product.children || [])
-          .map((child) => child.color_name || "")
-          .join(" "),
-      })),
+      (detailData?.products || []).map((product) => {
+        const children = product.children || [];
+        return {
+          ...product,
+          children,
+        };
+      }),
     [detailData?.products],
   );
+
+  const detailDropdownOptions = useMemo(() => {
+    const createOptions = (rows) =>
+      Array.from(
+        new Map(
+          rows
+            .filter((row) => row?.value && row?.text)
+            .map((row) => [String(row.value), { text: row.text, value: row.value }]),
+        ).values(),
+      ).sort((left, right) =>
+        String(left.text).localeCompare(String(right.text), undefined, {
+          sensitivity: "base",
+        }),
+      );
+
+    const children = detailRows.flatMap((product) => product.children || []);
+
+    return {
+      products: createOptions(
+        detailRows.map((product) => ({
+          value: product.product_id || product.product_name,
+          text: product.product_name,
+        })),
+      ),
+      sizes: createOptions(
+        children.map((child) => ({ value: child.size_id, text: child.size_name })),
+      ),
+      colors: createOptions(
+        children.map((child) => ({ value: child.color_id, text: child.color_name })),
+      ),
+    };
+  }, [detailRows]);
+
+  const filteredDetailRows = useMemo(() => {
+    const selectedProducts = new Set(detailFilters.product.map(String));
+    const selectedSizes = new Set(detailFilters.size.map(String));
+    const selectedColors = new Set(detailFilters.color.map(String));
+    const hasVariantFilter = selectedSizes.size > 0 || selectedColors.size > 0;
+
+    return detailRows.flatMap((product) => {
+      const productValue = String(product.product_id || product.product_name || "");
+      if (selectedProducts.size && !selectedProducts.has(productValue)) return [];
+
+      const children = hasVariantFilter
+        ? (product.children || []).filter(
+            (child) =>
+              (!selectedSizes.size || selectedSizes.has(String(child.size_id || ""))) &&
+              (!selectedColors.size || selectedColors.has(String(child.color_id || ""))),
+          )
+        : product.children || [];
+
+      if (hasVariantFilter && !children.length) return [];
+      if (!hasVariantFilter) return [{ ...product, children }];
+
+      return [
+        {
+          ...product,
+          children,
+          item_quantity: children.reduce(
+            (total, child) => total + Number(child.item_quantity || 0),
+            0,
+          ),
+          revenue: children.reduce(
+            (total, child) => total + Number(child.revenue || 0),
+            0,
+          ),
+        },
+      ];
+    });
+  }, [detailFilters, detailRows]);
+
+  const handleDetailTableChange = useCallback((_, nextFilters) => {
+    setDetailFilters({
+      product: nextFilters.product_name || [],
+      size: nextFilters.size_name || [],
+      color: nextFilters.color_name || [],
+    });
+  }, []);
 
   const dailyColumns = useMemo(
     () => [
@@ -498,33 +607,38 @@ export default function OrderReportPage() {
         sorter: (left, right) =>
           String(left.product_name || "").localeCompare(String(right.product_name || "")),
         render: (value, record) => (record?.children ? <Text strong>{value}</Text> : ""),
-        ...getTextColumnSearchProps(t("detailTable.product"), (record) => record.product_name),
+        filters: detailDropdownOptions.products,
+        filteredValue: detailFilters.product,
+        filterSearch: true,
+        onFilter: () => true,
       },
       {
         title: t("detailTable.size"),
         dataIndex: "size_name",
         key: "size_name",
         sorter: (left, right) =>
-          String(left.size_name || left.__search_size || "").localeCompare(
-            String(right.size_name || right.__search_size || ""),
+          String(left.size_name || "").localeCompare(
+            String(right.size_name || ""),
           ),
         render: (value, record) => (record?.children ? "-" : value || "-"),
-        ...getTextColumnSearchProps(t("detailTable.size"), (record) =>
-          record.children ? record.__search_size : record.size_name,
-        ),
+        filters: detailDropdownOptions.sizes,
+        filteredValue: detailFilters.size,
+        filterSearch: true,
+        onFilter: () => true,
       },
       {
         title: t("detailTable.color"),
         dataIndex: "color_name",
         key: "color_name",
         sorter: (left, right) =>
-          String(left.color_name || left.__search_color || "").localeCompare(
-            String(right.color_name || right.__search_color || ""),
+          String(left.color_name || "").localeCompare(
+            String(right.color_name || ""),
           ),
         render: (value, record) => (record?.children ? "-" : value || "-"),
-        ...getTextColumnSearchProps(t("detailTable.color"), (record) =>
-          record.children ? record.__search_color : record.color_name,
-        ),
+        filters: detailDropdownOptions.colors,
+        filteredValue: detailFilters.color,
+        filterSearch: true,
+        onFilter: () => true,
       },
       {
         title: t("detailTable.itemQuantity"),
@@ -546,7 +660,7 @@ export default function OrderReportPage() {
         ...getTextColumnSearchProps(t("detailTable.revenue"), (record) => record.revenue),
       },
     ],
-    [getTextColumnSearchProps, t],
+    [detailDropdownOptions, detailFilters, getTextColumnSearchProps, t],
   );
 
   const summaryCards = useMemo(
@@ -659,7 +773,7 @@ export default function OrderReportPage() {
           }
         >
           <Row gutter={[16, 16]}>
-            <Col xs={24} lg={12}>
+            <Col xs={24} lg={8}>
               <Text strong>{t("filters.entities")}</Text>
               <Select
                 allowClear
@@ -678,16 +792,31 @@ export default function OrderReportPage() {
                 }
               />
             </Col>
-            <Col xs={24} md={12} lg={6}>
+            <Col xs={24} md={12} lg={5}>
               <Text strong>{t("filters.category")}</Text>
               <Select
                 allowClear
                 showSearch
                 value={filters.category_id}
-                onChange={(value) => handleFilterChange("category_id", value)}
+                onChange={handleCategoryChange}
                 options={categoryOptions}
                 loading={filterOptionsLoading}
                 placeholder={t("filters.categoryPlaceholder")}
+                style={{ width: "100%", marginTop: 8 }}
+                optionFilterProp="label"
+              />
+            </Col>
+            <Col xs={24} md={12} lg={5}>
+              <Text strong>{t("filters.subCategory")}</Text>
+              <Select
+                allowClear
+                showSearch
+                value={filters.sub_category_id}
+                onChange={(value) => handleFilterChange("sub_category_id", value)}
+                options={subCategoryOptions}
+                loading={filterOptionsLoading}
+                disabled={!filters.category_id}
+                placeholder={t("filters.subCategoryPlaceholder")}
                 style={{ width: "100%", marginTop: 8 }}
                 optionFilterProp="label"
               />
@@ -749,6 +878,7 @@ export default function OrderReportPage() {
           onClose={() => {
             setDrawerOpen(false);
             setDetailData(null);
+            setDetailFilters({ product: [], size: [], color: [] });
           }}
           destroyOnClose
         >
@@ -788,7 +918,8 @@ export default function OrderReportPage() {
               }
               loading={detailLoading}
               columns={detailColumns}
-              dataSource={detailRows}
+              dataSource={filteredDetailRows}
+              onChange={handleDetailTableChange}
               pagination={{ pageSize: 10, showSizeChanger: false }}
               expandable={{ defaultExpandAllRows: true }}
               locale={{

@@ -205,6 +205,7 @@ function DateRangeFilterDropdown({
  *   toolbarRight?: React.ReactNode,
  *   tableProps?: any,
  *   onFiltersChange?: (filters: Record<string, any>) => void,
+ *   showRefresh?: boolean,
  * }} props
  */
 const CrudTable = forwardRef(function CrudTable(
@@ -218,6 +219,7 @@ const CrudTable = forwardRef(function CrudTable(
     toolbarLeft,
     toolbarRight,
     onFiltersChange,
+    showRefresh = true,
     tableProps = {},
   },
   ref
@@ -465,19 +467,23 @@ const CrudTable = forwardRef(function CrudTable(
   return (
     <div className="flex flex-col gap-4">
       {/* Toolbar */}
-      <Card className="shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            {toolbarLeft}
+      {showRefresh || toolbarLeft || toolbarRight ? (
+        <Card className="shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              {toolbarLeft}
+            </div>
+            <Space wrap>
+              {showRefresh ? (
+                <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
+                  {tActions("refresh")}
+                </Button>
+              ) : null}
+              {toolbarRight}
+            </Space>
           </div>
-          <Space wrap>
-            <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
-              {tActions("refresh")}
-            </Button>
-            {toolbarRight}
-          </Space>
-        </div>
-      </Card>
+        </Card>
+      ) : null}
       {/* Table */}
       <Card className="shadow-sm">
         <Table
