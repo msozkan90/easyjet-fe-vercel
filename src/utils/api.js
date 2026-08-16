@@ -694,6 +694,11 @@ export const ProductMappersAPI = {
   },
 };
 
+export const CustomizationMappersAPI = {
+  get: () => api.get("/customization-mappers"),
+  update: (data) => api.put("/customization-mappers", data),
+};
+
 export const ProductVariationAPI = {
   list: () => api.get("/product-mappers/customer/products"),
 };

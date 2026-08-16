@@ -258,6 +258,7 @@
       "columns": {
         "id": "ID",
         "ownerType": "Sahip Tipi",
+        "owner": "Sahip",
         "amount": "Tutar",
         "approvedAmount": "Onaylanan Tutar",
         "currency": "Para Birimi",
@@ -3188,7 +3189,8 @@
         "title": "Ürün Eşleştirici",
         "products": "Ürünler",
         "sizes": "Bedenler",
-        "colors": "Renkler"
+        "colors": "Renkler",
+        "customizations": "Özelleştirme Eşleştirici"
       },
       "customer": {
         "title": "Müşteri",
@@ -3529,6 +3531,28 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "customizationMapper": {
+      "title": "Özelleştirme Eşleştirici",
+      "description": "Bu mağazada personalization davranışını başlatacak option adlarını tanımlayın.",
+      "labels": {
+        "mapper": "Özelleştirme option adları"
+      },
+      "placeholder": "Örn. please include, bikini color",
+      "help": "Personalization her zaman aktiftir. Diğer option adlarını ekleyip Enter veya virgül tuşuna basın.",
+      "actions": {
+        "save": "Kaydet"
+      },
+      "messages": {
+        "loadError": "Özelleştirme eşleştirici yüklenemedi.",
+        "saveSuccess": "Özelleştirme eşleştirici kaydedildi.",
+        "saveError": "Özelleştirme eşleştirici kaydedilemedi."
+      },
+      "validation": {
+        "required": "En az bir özelleştirme eşleştirici gereklidir.",
+        "maxCount": "En fazla 50 özelleştirme eşleştirici adı eklenebilir.",
+        "maxLength": "Özelleştirme eşleştirici adları 200 karakteri geçemez."
       }
     },
     "productSizeMapper": {

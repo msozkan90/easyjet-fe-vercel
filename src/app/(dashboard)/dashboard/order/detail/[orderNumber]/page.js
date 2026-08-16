@@ -714,15 +714,7 @@ const OrderItemCard = ({
 }) => {
   const options = Array.isArray(item?.options) ? item.options : [];
   const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
-  const hasPersonalization = options.some((option) => {
-    const name = String(option?.name || "")
-      .trim()
-      .toLowerCase();
-    return (
-      (name === "personalization" || name === "personalisation") &&
-      String(option?.value ?? "").trim()
-    );
-  });
+  const hasPersonalization = Boolean(item?.has_personalization);
   const usesPersonalizedDesignGroups =
     hasPersonalization && Number(item?.quantity || 1) > 1;
   const groupedDesigns = new Map();

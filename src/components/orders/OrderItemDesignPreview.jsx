@@ -4,16 +4,7 @@ import { Card, Empty, Tag, Typography } from "antd";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
 
 const hasFilledPersonalization = (item) =>
-  Number(item?.quantity || 1) > 1 &&
-  (Array.isArray(item?.options) ? item.options : []).some((option) => {
-    const name = String(option?.name || "")
-      .trim()
-      .toLowerCase();
-    return (
-      (name === "personalization" || name === "personalisation") &&
-      String(option?.value ?? "").trim()
-    );
-  });
+  Number(item?.quantity || 1) > 1 && Boolean(item?.has_personalization);
 
 const buildPersonalizedDesignGroups = (item) => {
   const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
