@@ -798,6 +798,15 @@ export default function Sidebar({ collapsed }) {
                         </Link>
                       ),
                     },
+                    {
+                      key: "product-mapper-customizations",
+                      icon: <SettingOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-mapper/customizations">
+                          {tSidebar("productMapper.customizations")}
+                        </Link>
+                      ),
+                    },
                   ],
                 },
               ]

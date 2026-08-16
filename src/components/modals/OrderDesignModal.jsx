@@ -121,17 +121,6 @@ const createPersonalizedDesignGroup = () => ({
   legacy: false,
 });
 
-const extractPersonalizationValue = (options) => {
-  if (!Array.isArray(options)) return "";
-  const row = options.find((option) => {
-    const name = String(option?.name || "")
-      .trim()
-      .toLowerCase();
-    return name === "personalization" || name === "personalisation";
-  });
-  return String(row?.value ?? "").trim();
-};
-
 const normalizePersonalizedEntriesForSnapshot = (groups = []) =>
   groups.map((group) => ({
     quantity: Number(group?.quantity || 0),
@@ -272,11 +261,8 @@ export default function OrderDesignModal({
   }, [orderDetail]);
 
   const itemQuantity = Math.max(1, Number(orderDetail?.quantity || 1));
-  const personalizationValue = extractPersonalizationValue(
-    orderDetail?.options,
-  );
   const isPersonalizedQuantityMode = Boolean(
-    personalizationValue && itemQuantity > 1,
+    orderDetail?.has_personalization && itemQuantity > 1,
   );
 
   const existingDesignMap = useMemo(() => {

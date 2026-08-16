@@ -1410,6 +1410,28 @@
         "none": "-"
       }
     },
+    "customizationMapper": {
+      "title": "Customization Mapper",
+      "description": "Define the option names that should trigger personalization behavior for this store.",
+      "labels": {
+        "mapper": "Customization option names"
+      },
+      "placeholder": "e.g. please include, bikini color",
+      "help": "Personalization is always active. Add other option names and press Enter or comma.",
+      "actions": {
+        "save": "Save"
+      },
+      "messages": {
+        "loadError": "Customization mapper could not be loaded.",
+        "saveSuccess": "Customization mapper saved.",
+        "saveError": "Customization mapper could not be saved."
+      },
+      "validation": {
+        "required": "At least one customization mapper is required.",
+        "maxCount": "A maximum of 50 customization mapper names is allowed.",
+        "maxLength": "Customization mapper names cannot exceed 200 characters."
+      }
+    },
     "productSizeMapper": {
       "columns": {
         "id": "ID",
@@ -3386,7 +3408,8 @@
         "title": "Product Mapper",
         "products": "Products",
         "sizes": "Sizes",
-        "colors": "Colors"
+        "colors": "Colors",
+        "customizations": "Customization Mapper"
       },
       "customer": {
         "title": "Customer",
