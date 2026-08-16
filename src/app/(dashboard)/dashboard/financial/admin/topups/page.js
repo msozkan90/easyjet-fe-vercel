@@ -22,6 +22,13 @@ const statusColor = {
   canceled: "default",
 };
 
+const resolveOwnerName = (record) => {
+  if (!record) return "-";
+
+  const owner = record[record.owner_type];
+  return owner?.name || owner?.id || record[`${record.owner_type}_id`] || "-";
+};
+
 export default function WalletTopupsAdminListPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.financial");
@@ -102,6 +109,11 @@ export default function WalletTopupsAdminListPage() {
           const label = t(`ownerTypes.${value}`);
           return label === `ownerTypes.${value}` ? value : label;
         },
+      },
+      {
+        title: t("columns.owner"),
+        key: "owner",
+        render: (_, record) => resolveOwnerName(record),
       },
       {
         title: t("columns.amount"),

@@ -258,6 +258,7 @@
       "columns": {
         "id": "ID",
         "ownerType": "Sahip Tipi",
+        "owner": "Sahip",
         "amount": "Tutar",
         "approvedAmount": "Onaylanan Tutar",
         "currency": "Para Birimi",

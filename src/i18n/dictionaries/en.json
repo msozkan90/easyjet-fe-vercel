@@ -258,6 +258,7 @@
       "columns": {
         "id": "ID",
         "ownerType": "Owner Type",
+        "owner": "Owner",
         "amount": "Amount",
         "approvedAmount": "Approved Amount",
         "currency": "Currency",

@@ -712,6 +712,7 @@ const OrderItemCard = ({
   tCommonActions,
   fallbackText,
 }) => {
+  const options = Array.isArray(item?.options) ? item.options : [];
   const rawDesigns = Array.isArray(item?.designs) ? item.designs : [];
   const hasPersonalization = Boolean(item?.has_personalization);
   const usesPersonalizedDesignGroups =
