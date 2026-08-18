@@ -42,6 +42,17 @@ const formatBytes = (value) => {
   return `${amount.toFixed(amount >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`;
 };
 
+const normalizeProgressPercent = (value) => {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return 0;
+  return Math.round(Math.max(0, Math.min(100, percent)) * 100) / 100;
+};
+
+const formatProgressPercent = (value) => {
+  const percent = normalizeProgressPercent(value);
+  return percent.toFixed(Number.isInteger(percent) ? 0 : 2);
+};
+
 export function TransferDesignUploadQueueProvider({ children }) {
   const tQueue = useTranslations("dashboard.orders.transferUploadQueue");
   const [tasks, setTasks] = useState([]);
@@ -70,7 +81,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
         status: "uploading",
         serverStatus: "preparing",
         startedAt: Date.now(),
-        progress: currentTask.progress || 0,
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: currentTask.fileSize,
         errorMessage: null,
       });
 
@@ -97,8 +111,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
         updateTask(taskId, {
           uploadSessionId,
-          serverStatus: "uploading",
-          progress: 1,
+          serverStatus: "preparing",
+          progress: 50,
+          preparationProgress: 50,
         });
 
         const partNumbers = Array.from({ length: totalParts }, (_, index) => index + 1);
@@ -118,6 +133,14 @@ export function TransferDesignUploadQueueProvider({ children }) {
           throw new Error(tQueue("messages.uploadFailed"));
         }
 
+        updateTask(taskId, {
+          serverStatus: "uploading",
+          progress: 0,
+          preparationProgress: 100,
+          uploadedBytes: 0,
+          uploadTotalBytes: currentTask.fileSize,
+        });
+
         const loadedByPart = new Map();
         const reportAggregateProgress = () => {
           const loadedTotal = Array.from(loadedByPart.values()).reduce(
@@ -125,13 +148,11 @@ export function TransferDesignUploadQueueProvider({ children }) {
             0,
           );
           const totalSize = Math.max(1, Number(currentTask.fileSize || currentTask.file?.size || 0));
-          const percent = Math.max(
-            1,
-            Math.min(95, Math.round((loadedTotal / totalSize) * 95)),
-          );
           updateTask(taskId, {
             serverStatus: "uploading",
-            progress: percent,
+            progress: normalizeProgressPercent((loadedTotal / totalSize) * 100),
+            uploadedBytes: Math.min(loadedTotal, totalSize),
+            uploadTotalBytes: totalSize,
           });
         };
 
@@ -199,7 +220,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
         updateTask(taskId, {
           serverStatus: "saving",
-          progress: 99,
+          progress: 100,
+          preparationProgress: 100,
+          uploadedBytes: currentTask.fileSize,
+          uploadTotalBytes: currentTask.fileSize,
         });
 
         await TransferOrdersAPI.completeDesignUpload({
@@ -210,6 +234,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
         updateTask(taskId, {
           status: "success",
           progress: 100,
+          preparationProgress: 100,
+          uploadedBytes: currentTask.fileSize,
+          uploadTotalBytes: currentTask.fileSize,
           finishedAt: Date.now(),
           errorMessage: null,
           serverStatus: "completed",
@@ -276,6 +303,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
       fileSize: file.size || 0,
       status: "queued",
       progress: 0,
+      preparationProgress: 0,
+      uploadedBytes: 0,
+      uploadTotalBytes: file.size || 0,
       createdAt: now,
       startedAt: null,
       finishedAt: null,
@@ -312,6 +342,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
     updateTask(taskId, {
       status: "queued",
       progress: 0,
+      preparationProgress: 0,
+      uploadedBytes: 0,
+      uploadTotalBytes: currentTask.fileSize,
       startedAt: null,
       finishedAt: null,
       errorMessage: null,
@@ -459,7 +492,24 @@ export function TransferDesignUploadQueueProvider({ children }) {
                         size="small"
                         status={task.status === "failed" ? "exception" : task.status === "success" ? "success" : "active"}
                         showInfo={task.status !== "queued"}
+                        format={(percent) => `${formatProgressPercent(percent)}%`}
                       />
+                      {task.status === "uploading" ? (
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                          {isPreparing
+                            ? tQueue("fields.preparationProgress", {
+                                percent: formatProgressPercent(
+                                  task.preparationProgress,
+                                ),
+                              })
+                            : tQueue("fields.uploadProgress", {
+                                uploaded: formatBytes(task.uploadedBytes),
+                                total: formatBytes(
+                                  task.uploadTotalBytes || task.fileSize,
+                                ),
+                              })}
+                        </Typography.Text>
+                      ) : null}
                       {task.errorMessage ? (
                         <Typography.Text type="danger" style={{ fontSize: 12 }}>
                           {task.errorMessage}

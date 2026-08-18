@@ -2538,7 +2538,9 @@
             "order": "Order",
             "fileCount": "{count} files",
             "unitCount": "{count} print files",
-            "multipleFiles": "{name} +{count} files"
+            "multipleFiles": "{name} +{count} files",
+            "preparationProgress": "Preparing files: {percent}%",
+            "uploadProgress": "{uploaded} / {total} uploaded"
           },
           "actions": {
             "clearFinished": "Clear Finished",
@@ -3099,7 +3101,9 @@
         },
         "fields": {
           "order": "Order",
-          "quantity": "Quantity"
+          "quantity": "Quantity",
+          "preparationProgress": "Preparing file: {percent}%",
+          "uploadProgress": "{uploaded} / {total} uploaded"
         },
         "actions": {
           "clearFinished": "Clear Finished",
@@ -3198,6 +3202,10 @@
           "badges": {
             "uploading": "Uploading: {count}",
             "queued": "Queued: {count}"
+          },
+          "fields": {
+            "preparationProgress": "Preparing file: {percent}%",
+            "uploadProgress": "{uploaded} / {total} uploaded"
           },
           "actions": {
             "clearFinished": "Clear Finished",

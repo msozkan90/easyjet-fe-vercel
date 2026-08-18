@@ -2318,7 +2318,9 @@
             "order": "Sipariş",
             "fileCount": "{count} dosya",
             "unitCount": "{count} baskı dosyası",
-            "multipleFiles": "{name} +{count} dosya"
+            "multipleFiles": "{name} +{count} dosya",
+            "preparationProgress": "Dosyalar hazırlanıyor: {percent}%",
+            "uploadProgress": "{uploaded} / {total} yüklendi"
           },
           "actions": {
             "clearFinished": "Tamamlananları Temizle",
@@ -2879,7 +2881,9 @@
         },
         "fields": {
           "order": "Sipariş",
-          "quantity": "Adet"
+          "quantity": "Adet",
+          "preparationProgress": "Dosya hazırlanıyor: {percent}%",
+          "uploadProgress": "{uploaded} / {total} yüklendi"
         },
         "actions": {
           "clearFinished": "Tamamlananları Temizle",
@@ -2978,6 +2982,10 @@
           "badges": {
             "uploading": "Yükleniyor: {count}",
             "queued": "Sırada: {count}"
+          },
+          "fields": {
+            "preparationProgress": "Dosya hazırlanıyor: {percent}%",
+            "uploadProgress": "{uploaded} / {total} yüklendi"
           },
           "actions": {
             "clearFinished": "Tamamlananları Temizle",

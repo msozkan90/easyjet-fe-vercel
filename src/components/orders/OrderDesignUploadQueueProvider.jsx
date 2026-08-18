@@ -52,6 +52,17 @@ const extractProgressData = (response) => {
   return response;
 };
 
+const normalizeProgressPercent = (value) => {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return 0;
+  return Math.round(Math.max(0, Math.min(100, percent)) * 100) / 100;
+};
+
+const formatProgressPercent = (value) => {
+  const percent = normalizeProgressPercent(value);
+  return percent.toFixed(Number.isInteger(percent) ? 0 : 2);
+};
+
 export function OrderDesignUploadQueueProvider({ children }) {
   const tQueue = useTranslations("dashboard.orders.design.uploadQueue");
   const [tasks, setTasks] = useState([]);
@@ -82,8 +93,11 @@ export function OrderDesignUploadQueueProvider({ children }) {
 
       updateTask(taskId, {
         status: "uploading",
-        serverStatus: "pending",
-        progress: currentTask.progress || 0,
+        serverStatus: "preparing",
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: currentTask.uploadTotalBytes || currentTask.totalSize,
         startedAt: Date.now(),
         errorMessage: null,
       });
@@ -139,7 +153,21 @@ export function OrderDesignUploadQueueProvider({ children }) {
             lastServerStatus = serverStatus;
 
             if (serverStatus === "saving") {
-              updateTask(taskId, { serverStatus: "saving", progress: 99 });
+              const totalBytes = Number(
+                progressData?.total_bytes ||
+                  currentTask.uploadTotalBytes ||
+                  currentTask.totalSize ||
+                  0,
+              );
+              updateTask(taskId, {
+                serverStatus: "saving",
+                progress: 100,
+                preparationProgress: 100,
+                uploadedBytes: Number(
+                  progressData?.uploaded_bytes || totalBytes,
+                ),
+                uploadTotalBytes: totalBytes,
+              });
               return;
             }
 
@@ -147,18 +175,16 @@ export function OrderDesignUploadQueueProvider({ children }) {
               serverStatus === "uploading" &&
               Number.isFinite(serverPercent)
             ) {
-              const mappedPercent = Math.max(
-                90,
-                Math.min(98, Math.round(90 + serverPercent * 0.08)),
-              );
-              const snapshot = tasksRef.current.find(
-                (task) => task.id === taskId,
-              );
               updateTask(taskId, {
                 serverStatus: "uploading",
-                progress: Math.max(
-                  Number(snapshot?.progress || 0),
-                  mappedPercent,
+                progress: normalizeProgressPercent(serverPercent),
+                preparationProgress: 100,
+                uploadedBytes: Number(progressData?.uploaded_bytes || 0),
+                uploadTotalBytes: Number(
+                  progressData?.total_bytes ||
+                    currentTask.uploadTotalBytes ||
+                    currentTask.totalSize ||
+                    0,
                 ),
               });
               return;
@@ -201,12 +227,17 @@ export function OrderDesignUploadQueueProvider({ children }) {
             const snapshot = tasksRef.current.find(
               (task) => task.id === taskId,
             );
-            if (snapshot?.serverStatus !== "pending") return;
+            if (
+              snapshot?.serverStatus !== "preparing" &&
+              snapshot?.serverStatus !== "pending"
+            ) {
+              return;
+            }
             updateTask(taskId, {
-              serverStatus: loaded >= total ? "uploading" : "pending",
-              progress: Math.max(
-                Number(snapshot?.progress || 0),
-                Math.max(1, Math.min(90, Math.round((loaded / total) * 90))),
+              serverStatus: "preparing",
+              progress: normalizeProgressPercent((loaded / total) * 100),
+              preparationProgress: normalizeProgressPercent(
+                (loaded / total) * 100,
               ),
             });
           },
@@ -214,10 +245,22 @@ export function OrderDesignUploadQueueProvider({ children }) {
 
         pollStopped = true;
         if (progressTimer) clearTimeout(progressTimer);
+        const completedSnapshot = tasksRef.current.find(
+          (task) => task.id === taskId,
+        );
+        const completedTotalBytes = Number(
+          completedSnapshot?.uploadTotalBytes ||
+            currentTask.uploadTotalBytes ||
+            currentTask.totalSize ||
+            0,
+        );
         updateTask(taskId, {
           status: "success",
           serverStatus: "completed",
           progress: 100,
+          preparationProgress: 100,
+          uploadedBytes: completedTotalBytes,
+          uploadTotalBytes: completedTotalBytes,
           finishedAt: Date.now(),
           errorMessage: null,
         });
@@ -286,6 +329,16 @@ export function OrderDesignUploadQueueProvider({ children }) {
         );
       if (!normalizedFiles.length) return null;
 
+      const totalSize = normalizedFiles.reduce(
+        (sum, entry) => sum + Number(entry.file?.size || 0),
+        0,
+      );
+      const uploadTotalBytes = normalizedFiles.reduce(
+        (sum, entry) =>
+          sum + Number(entry.file?.size || 0) * Number(entry.quantity || 1),
+        0,
+      );
+
       const task = {
         id: createTaskId(),
         orderId: String(orderId),
@@ -312,14 +365,14 @@ export function OrderDesignUploadQueueProvider({ children }) {
           (sum, entry) => sum + entry.quantity,
           0,
         ),
-        totalSize: normalizedFiles.reduce(
-          (sum, entry) => sum + Number(entry.file?.size || 0),
-          0,
-        ),
+        totalSize,
         fileName: normalizedFiles[0]?.file?.name || "untitled",
         status: "queued",
         serverStatus: null,
         progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes,
         createdAt: Date.now(),
         startedAt: null,
         finishedAt: null,
@@ -334,7 +387,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
   );
 
   const cancelUpload = useCallback(
-    (taskId) => {
+    async (taskId) => {
       const task = tasksRef.current.find((item) => item.id === taskId);
       if (!task) return;
       if (task.status === "queued") {
@@ -346,6 +399,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
         return;
       }
       if (task.status === "uploading") {
+        await OrdersAPI.cancelDesignUpload(taskId).catch(() => undefined);
         controllersRef.current.get(taskId)?.abort();
       }
     },
@@ -357,9 +411,13 @@ export function OrderDesignUploadQueueProvider({ children }) {
       const task = tasksRef.current.find((item) => item.id === taskId);
       if (!task || !["failed", "canceled"].includes(task.status)) return;
       updateTask(taskId, {
+        id: createTaskId(),
         status: "queued",
         serverStatus: null,
         progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: task.uploadTotalBytes || task.totalSize,
         startedAt: null,
         finishedAt: null,
         errorMessage: null,
@@ -497,7 +555,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
               {tasks.map((task) => {
                 const isPreparing =
                   task.status === "uploading" &&
-                  task.serverStatus === "pending";
+                  ["pending", "preparing"].includes(task.serverStatus);
                 const isSaving =
                   task.status === "uploading" && task.serverStatus === "saving";
                 const meta = isPreparing
@@ -505,10 +563,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
                   : isSaving
                     ? statusMeta.saving
                     : statusMeta[task.status] || statusMeta.queued;
-                const canCancel =
-                  task.status === "queued" ||
-                  (task.status === "uploading" &&
-                    task.serverStatus === "pending");
+                const canCancel = ["queued", "uploading"].includes(task.status);
                 const canRetry = ["failed", "canceled"].includes(task.status);
                 const canRemove = ["success", "failed", "canceled"].includes(
                   task.status,
@@ -565,7 +620,29 @@ export function OrderDesignUploadQueueProvider({ children }) {
                               : "active"
                         }
                         showInfo={task.status !== "queued"}
+                        format={(percent) =>
+                          `${formatProgressPercent(percent)}%`
+                        }
                       />
+                      {task.status === "uploading" ? (
+                        <Typography.Text
+                          type="secondary"
+                          style={{ fontSize: 12 }}
+                        >
+                          {isPreparing
+                            ? tQueue("fields.preparationProgress", {
+                                percent: formatProgressPercent(
+                                  task.preparationProgress,
+                                ),
+                              })
+                            : tQueue("fields.uploadProgress", {
+                                uploaded: formatBytes(task.uploadedBytes),
+                                total: formatBytes(
+                                  task.uploadTotalBytes || task.totalSize,
+                                ),
+                              })}
+                        </Typography.Text>
+                      ) : null}
                       {task.errorMessage ? (
                         <Typography.Text type="danger" style={{ fontSize: 12 }}>
                           {task.errorMessage}

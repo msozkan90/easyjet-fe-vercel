@@ -44,6 +44,17 @@ const formatBytes = (value) => {
   return `${amount.toFixed(amount >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`;
 };
 
+const normalizeProgressPercent = (value) => {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return 0;
+  return Math.round(Math.max(0, Math.min(100, percent)) * 100) / 100;
+};
+
+const formatProgressPercent = (value) => {
+  const percent = normalizeProgressPercent(value);
+  return percent.toFixed(Number.isInteger(percent) ? 0 : 2);
+};
+
 export function OrdersPdfDesignUploadQueueProvider({ children }) {
   const tQueue = useTranslations("dashboard.orders.ordersPdf.uploadQueue");
   const [tasks, setTasks] = useState([]);
@@ -73,9 +84,12 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
       let lastServerStatus = "pending";
       updateTask(taskId, {
         status: "uploading",
-        serverStatus: "pending",
+        serverStatus: "preparing",
         startedAt: Date.now(),
-        progress: currentTask.progress || 0,
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: currentTask.fileSize,
         errorMessage: null,
       });
 
@@ -109,34 +123,34 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
             lastServerStatus = serverStatus;
 
             if (serverStatus === "pending") {
-              const snapshot = tasksRef.current.find(
-                (item) => item.id === taskId,
-              );
-              updateTask(taskId, {
-                serverStatus: "pending",
-                progress: Math.max(
-                  1,
-                  Math.min(95, Number(snapshot?.progress || 0) + 2),
-                ),
-              });
               return;
             }
 
             if (serverStatus === "saving") {
-              const snapshot = tasksRef.current.find(
-                (item) => item.id === taskId,
+              const totalBytes = Number(
+                progressData?.total_bytes || currentTask.fileSize || 0,
               );
               updateTask(taskId, {
                 serverStatus: "saving",
-                progress: Math.max(99, Number(snapshot?.progress || 99)),
+                progress: 100,
+                preparationProgress: 100,
+                uploadedBytes: Number(
+                  progressData?.uploaded_bytes || totalBytes,
+                ),
+                uploadTotalBytes: totalBytes,
               });
               return;
             }
 
-            if (Number.isFinite(percent)) {
+            if (serverStatus === "uploading" && Number.isFinite(percent)) {
               updateTask(taskId, {
-                serverStatus,
-                progress: Math.max(1, Math.min(99, Math.round(percent))),
+                serverStatus: "uploading",
+                progress: normalizeProgressPercent(percent),
+                preparationProgress: 100,
+                uploadedBytes: Number(progressData?.uploaded_bytes || 0),
+                uploadTotalBytes: Number(
+                  progressData?.total_bytes || currentTask.fileSize || 0,
+                ),
               });
             }
           } catch {
@@ -165,15 +179,20 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
             const snapshot = tasksRef.current.find(
               (item) => item.id === taskId,
             );
-            if (snapshot?.serverStatus !== "pending") return;
+            if (
+              snapshot?.serverStatus !== "preparing" &&
+              snapshot?.serverStatus !== "pending"
+            ) {
+              return;
+            }
             const total = Number(event?.total || currentTask?.fileSize || 0);
             const loaded = Number(event?.loaded || 0);
             if (!total || !Number.isFinite(total) || total <= 0) return;
             updateTask(taskId, {
-              serverStatus: "pending",
-              progress: Math.max(
-                1,
-                Math.min(95, Math.round((loaded / total) * 100)),
+              serverStatus: "preparing",
+              progress: normalizeProgressPercent((loaded / total) * 100),
+              preparationProgress: normalizeProgressPercent(
+                (loaded / total) * 100,
               ),
             });
           },
@@ -183,7 +202,11 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         if (progressTimer) clearTimeout(progressTimer);
         updateTask(taskId, {
           status: "success",
+          serverStatus: "completed",
           progress: 100,
+          preparationProgress: 100,
+          uploadedBytes: currentTask.fileSize,
+          uploadTotalBytes: currentTask.fileSize,
           finishedAt: Date.now(),
           errorMessage: null,
         });
@@ -234,6 +257,9 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
       fileSize: file.size || 0,
       status: "queued",
       progress: 0,
+      preparationProgress: 0,
+      uploadedBytes: 0,
+      uploadTotalBytes: file.size || 0,
       createdAt: now,
       startedAt: null,
       finishedAt: null,
@@ -246,15 +272,17 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
   }, []);
 
   const cancelUpload = useCallback(
-    (taskId) => {
+    async (taskId) => {
       const currentTask = tasksRef.current.find((task) => task.id === taskId);
       if (!currentTask) return;
       if (currentTask.status === "queued") {
         updateTask(taskId, { status: "canceled", finishedAt: Date.now() });
         return;
       }
-      if (currentTask.status === "uploading")
+      if (currentTask.status === "uploading") {
+        await OrdersPdfAPI.cancelDesignUpload(taskId).catch(() => undefined);
         controllersRef.current.get(taskId)?.abort();
+      }
     },
     [updateTask],
   );
@@ -265,8 +293,12 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
       if (!currentTask || !["failed", "canceled"].includes(currentTask.status))
         return;
       updateTask(taskId, {
+        id: createTaskId(),
         status: "queued",
         progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: currentTask.fileSize,
         startedAt: null,
         finishedAt: null,
         errorMessage: null,
@@ -406,7 +438,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
               {tasks.map((task) => {
                 const isPreparing =
                   task.status === "uploading" &&
-                  task.serverStatus === "pending";
+                  ["pending", "preparing"].includes(task.serverStatus);
                 const isSaving =
                   task.status === "uploading" && task.serverStatus === "saving";
                 const meta = isPreparing
@@ -456,7 +488,29 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
                               : "active"
                         }
                         showInfo={task.status !== "queued"}
+                        format={(percent) =>
+                          `${formatProgressPercent(percent)}%`
+                        }
                       />
+                      {task.status === "uploading" ? (
+                        <Typography.Text
+                          type="secondary"
+                          style={{ fontSize: 12 }}
+                        >
+                          {isPreparing
+                            ? tQueue("fields.preparationProgress", {
+                                percent: formatProgressPercent(
+                                  task.preparationProgress,
+                                ),
+                              })
+                            : tQueue("fields.uploadProgress", {
+                                uploaded: formatBytes(task.uploadedBytes),
+                                total: formatBytes(
+                                  task.uploadTotalBytes || task.fileSize,
+                                ),
+                              })}
+                        </Typography.Text>
+                      ) : null}
                       {task.errorMessage ? (
                         <Typography.Text type="danger" style={{ fontSize: 12 }}>
                           {task.errorMessage}

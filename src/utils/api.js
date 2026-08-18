@@ -169,6 +169,8 @@ export const OrdersAPI = {
     api.putMultipart("/orders/items", formData, config),
   designUploadProgress: (uploadId) =>
     api.get(`/orders/items/designs/progress/${encodeURIComponent(uploadId)}`),
+  cancelDesignUpload: (uploadId) =>
+    api.post(`/orders/items/designs/cancel/${encodeURIComponent(uploadId)}`),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
   sendToProductionWithLabel: (formData, config = {}) =>
@@ -218,6 +220,8 @@ export const OrdersPdfAPI = {
     api.postMultipart("/orders-pdf/designs", payload, config),
   uploadDesignProgress: (uploadId) =>
     api.get(`/orders-pdf/designs/progress/${encodeURIComponent(uploadId)}`),
+  cancelDesignUpload: (uploadId) =>
+    api.post(`/orders-pdf/designs/cancel/${encodeURIComponent(uploadId)}`),
   updateDesign: (id, payload) =>
     api.put(`/orders-pdf/designs/${encodeURIComponent(id)}`, payload),
   downloadDesign: (id, config = {}) =>
