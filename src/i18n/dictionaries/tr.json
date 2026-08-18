@@ -102,6 +102,7 @@
       "completed": "Tamamlanan"
     },
     "overview": {
+      "fallbackTitle": "Kontrol Paneli",
       "title": "Transfer Üretim Paneli",
       "subtitle": "Transfer siparişlerindeki üretim iş yükünü lineer inch bazında takip edin.",
       "shipmentTitle": "Transfer Kargo Paneli",

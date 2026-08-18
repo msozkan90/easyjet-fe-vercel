@@ -102,6 +102,7 @@
       "completed": "Completed"
     },
     "overview": {
+      "fallbackTitle": "Dashboard",
       "title": "Transfer Production Dashboard",
       "subtitle": "Track the production workload of transfer orders in linear inches.",
       "shipmentTitle": "Transfer Shipment Dashboard",
