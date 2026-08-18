@@ -17,5 +17,15 @@ export default function DashboardHome() {
     return <DashboardComponent />;
   }
 
-  return <Title level={2}>{t("title")}</Title>;
+  const entityName = String(user?.entity?.entity_name || "").trim();
+  const userName =
+    String(user?.displayName || "").trim() ||
+    [user?.first_name, user?.last_name]
+      .filter(Boolean)
+      .map((part) => String(part).trim())
+      .filter(Boolean)
+      .join(" ") ||
+    String(user?.email || "").trim();
+
+  return <Title level={2}>{entityName || userName || t("fallbackTitle")}</Title>;
 }
