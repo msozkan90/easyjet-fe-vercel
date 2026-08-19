@@ -12,6 +12,7 @@ import { resetBalance } from "@/redux/features/balanceSlice";
 import { TransferDesignUploadQueueProvider } from "@/components/transfer-orders/TransferDesignUploadQueueProvider";
 import { OrdersPdfDesignUploadQueueProvider } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import { OrderDesignUploadQueueProvider } from "@/components/orders/OrderDesignUploadQueueProvider";
+import { DownloadQueueProvider } from "@/components/downloads/DownloadQueueProvider";
 import {
   resetCategories,
   setCategoriesError,
@@ -32,7 +33,8 @@ function AuthBootstrap() {
     };
 
     window.addEventListener("auth:session-expired", handleSessionExpired);
-    return () => window.removeEventListener("auth:session-expired", handleSessionExpired);
+    return () =>
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
   }, [dispatch]);
 
   useEffect(() => {
@@ -42,7 +44,10 @@ function AuthBootstrap() {
         const me = await AuthAPI.me();
         dispatch(setUser(me));
         const roleName = me?.data?.role?.name;
-        if (roleName === RoleEnum.COMPANY_COMPLETED_WORKER || roleName === RoleEnum.CUSTOMER_ADMIN) {
+        if (
+          roleName === RoleEnum.COMPANY_COMPLETED_WORKER ||
+          roleName === RoleEnum.CUSTOMER_ADMIN
+        ) {
           try {
             dispatch(setCategoriesLoading());
             const categories = await CategoriesAPI.listWithSubCategories();
@@ -80,8 +85,10 @@ export function Providers({ children }) {
         <TransferDesignUploadQueueProvider>
           <OrderDesignUploadQueueProvider>
             <OrdersPdfDesignUploadQueueProvider>
-              <AuthBootstrap />
-              {children}
+              <DownloadQueueProvider>
+                <AuthBootstrap />
+                {children}
+              </DownloadQueueProvider>
             </OrdersPdfDesignUploadQueueProvider>
           </OrderDesignUploadQueueProvider>
         </TransferDesignUploadQueueProvider>

@@ -37,7 +37,10 @@ const formatBytes = (value) => {
   const size = Number(value || 0);
   if (!Number.isFinite(size) || size <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
-  const exp = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+  const exp = Math.min(
+    Math.floor(Math.log(size) / Math.log(1024)),
+    units.length - 1,
+  );
   const amount = size / 1024 ** exp;
   return `${amount.toFixed(amount >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`;
 };
@@ -94,7 +97,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
           sub_category_id: currentTask.subCategoryId,
           quantity: Number(currentTask.quantity || 1),
           file_name: currentTask.fileName,
-          file_size: Number(currentTask.fileSize || currentTask.file?.size || 0),
+          file_size: Number(
+            currentTask.fileSize || currentTask.file?.size || 0,
+          ),
           content_type: currentTask.file?.type || undefined,
         });
 
@@ -116,7 +121,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
           preparationProgress: 50,
         });
 
-        const partNumbers = Array.from({ length: totalParts }, (_, index) => index + 1);
+        const partNumbers = Array.from(
+          { length: totalParts },
+          (_, index) => index + 1,
+        );
         const partUrlsResponse = await TransferOrdersAPI.designUploadPartUrls({
           upload_session_id: uploadSessionId,
           part_numbers: partNumbers,
@@ -125,9 +133,14 @@ export function TransferDesignUploadQueueProvider({ children }) {
           partUrlsResponse?.data && typeof partUrlsResponse.data === "object"
             ? partUrlsResponse.data
             : partUrlsResponse;
-        const urlEntries = Array.isArray(partUrlsData?.urls) ? partUrlsData.urls : [];
+        const urlEntries = Array.isArray(partUrlsData?.urls)
+          ? partUrlsData.urls
+          : [];
         const urlMap = new Map(
-          urlEntries.map((entry) => [Number(entry?.part_number), String(entry?.url || "")]),
+          urlEntries.map((entry) => [
+            Number(entry?.part_number),
+            String(entry?.url || ""),
+          ]),
         );
         if (urlMap.size !== totalParts) {
           throw new Error(tQueue("messages.uploadFailed"));
@@ -147,7 +160,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
             (sum, value) => sum + Number(value || 0),
             0,
           );
-          const totalSize = Math.max(1, Number(currentTask.fileSize || currentTask.file?.size || 0));
+          const totalSize = Math.max(
+            1,
+            Number(currentTask.fileSize || currentTask.file?.size || 0),
+          );
           updateTask(taskId, {
             serverStatus: "uploading",
             progress: normalizeProgressPercent((loadedTotal / totalSize) * 100),
@@ -166,12 +182,17 @@ export function TransferDesignUploadQueueProvider({ children }) {
           }
 
           let lastError = null;
-          for (let attempt = 1; attempt <= PART_UPLOAD_RETRY_COUNT; attempt += 1) {
+          for (
+            let attempt = 1;
+            attempt <= PART_UPLOAD_RETRY_COUNT;
+            attempt += 1
+          ) {
             try {
               loadedByPart.set(partNumber, 0);
               const response = await axios.put(signedUrl, blob, {
                 headers: {
-                  "Content-Type": currentTask.file?.type || "application/octet-stream",
+                  "Content-Type":
+                    currentTask.file?.type || "application/octet-stream",
                 },
                 signal: controller.signal,
                 onUploadProgress: (event) => {
@@ -192,7 +213,10 @@ export function TransferDesignUploadQueueProvider({ children }) {
               };
             } catch (error) {
               lastError = error;
-              if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+              if (
+                error?.name === "CanceledError" ||
+                error?.code === "ERR_CANCELED"
+              ) {
                 throw error;
               }
               if (attempt >= PART_UPLOAD_RETRY_COUNT) {
@@ -228,7 +252,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
 
         await TransferOrdersAPI.completeDesignUpload({
           upload_session_id: uploadSessionId,
-          parts: parts.sort((left, right) => left.part_number - right.part_number),
+          parts: parts.sort(
+            (left, right) => left.part_number - right.part_number,
+          ),
         });
 
         updateTask(taskId, {
@@ -242,8 +268,11 @@ export function TransferDesignUploadQueueProvider({ children }) {
           serverStatus: "completed",
         });
       } catch (error) {
-        const canceled = error?.name === "CanceledError" || error?.code === "ERR_CANCELED";
-        const taskSnapshot = tasksRef.current.find((item) => item.id === taskId);
+        const canceled =
+          error?.name === "CanceledError" || error?.code === "ERR_CANCELED";
+        const taskSnapshot = tasksRef.current.find(
+          (item) => item.id === taskId,
+        );
         const uploadSessionId = taskSnapshot?.uploadSessionId;
         if (canceled && uploadSessionId) {
           await TransferOrdersAPI.abortDesignUpload({
@@ -255,7 +284,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
           finishedAt: Date.now(),
           errorMessage: canceled
             ? null
-            : error?.response?.data?.error?.message || error?.message || tQueue("messages.uploadFailed"),
+            : error?.response?.data?.error?.message ||
+              error?.message ||
+              tQueue("messages.uploadFailed"),
           serverStatus: canceled ? "canceled" : "failed",
         });
       } finally {
@@ -266,7 +297,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
   );
 
   useEffect(() => {
-    const activeCount = tasks.filter((task) => task.status === "uploading").length;
+    const activeCount = tasks.filter(
+      (task) => task.status === "uploading",
+    ).length;
     if (activeCount >= MAX_CONCURRENT_UPLOADS) return;
 
     const queued = tasks
@@ -278,80 +311,92 @@ export function TransferDesignUploadQueueProvider({ children }) {
     });
   }, [runTask, tasks]);
 
-  const enqueueUploads = useCallback(({ orderId, orderNumber, subCategoryId, files }) => {
-    const nextFiles = Array.from(files || [])
-      .map((entry) =>
-        entry instanceof File
-          ? { file: entry, quantity: 1 }
-          : {
-              file: entry?.file instanceof File ? entry.file : null,
-              quantity: Number.parseInt(entry?.quantity || 1, 10) || 1,
-            },
-      )
-      .filter((entry) => entry.file instanceof File);
-    if (!nextFiles.length) return [];
+  const enqueueUploads = useCallback(
+    ({ orderId, orderNumber, subCategoryId, files }) => {
+      const nextFiles = Array.from(files || [])
+        .map((entry) =>
+          entry instanceof File
+            ? { file: entry, quantity: 1 }
+            : {
+                file: entry?.file instanceof File ? entry.file : null,
+                quantity: Number.parseInt(entry?.quantity || 1, 10) || 1,
+              },
+        )
+        .filter((entry) => entry.file instanceof File);
+      if (!nextFiles.length) return [];
 
-    const now = Date.now();
-    const newTasks = nextFiles.map(({ file, quantity }) => ({
-      id: createTaskId(),
-      orderId: String(orderId),
-      orderNumber: orderNumber || "-",
-      subCategoryId: String(subCategoryId),
-      file,
-      quantity,
-      fileName: file.name || "untitled",
-      fileSize: file.size || 0,
-      status: "queued",
-      progress: 0,
-      preparationProgress: 0,
-      uploadedBytes: 0,
-      uploadTotalBytes: file.size || 0,
-      createdAt: now,
-      startedAt: null,
-      finishedAt: null,
-      errorMessage: null,
-      serverStatus: null,
-      uploadSessionId: null,
-    }));
+      const now = Date.now();
+      const newTasks = nextFiles.map(({ file, quantity }) => ({
+        id: createTaskId(),
+        orderId: String(orderId),
+        orderNumber: orderNumber || "-",
+        subCategoryId: String(subCategoryId),
+        file,
+        quantity,
+        fileName: file.name || "untitled",
+        fileSize: file.size || 0,
+        status: "queued",
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: file.size || 0,
+        createdAt: now,
+        startedAt: null,
+        finishedAt: null,
+        errorMessage: null,
+        serverStatus: null,
+        uploadSessionId: null,
+      }));
 
-    setTasks((prev) => [...newTasks, ...prev]);
-    setCollapsed(false);
-    return newTasks.map((task) => task.id);
-  }, []);
+      setTasks((prev) => [...newTasks, ...prev]);
+      setCollapsed(false);
+      return newTasks.map((task) => task.id);
+    },
+    [],
+  );
 
-  const cancelUpload = useCallback((taskId) => {
-    const currentTask = tasksRef.current.find((task) => task.id === taskId);
-    if (!currentTask) return;
+  const cancelUpload = useCallback(
+    (taskId) => {
+      const currentTask = tasksRef.current.find((task) => task.id === taskId);
+      if (!currentTask) return;
 
-    if (currentTask.status === "queued") {
-      updateTask(taskId, { status: "canceled", finishedAt: Date.now() });
-      return;
-    }
+      if (currentTask.status === "queued") {
+        updateTask(taskId, { status: "canceled", finishedAt: Date.now() });
+        return;
+      }
 
-    if (currentTask.status === "uploading") {
-      const controller = controllersRef.current.get(taskId);
-      if (controller) controller.abort();
-    }
-  }, [updateTask]);
+      if (currentTask.status === "uploading") {
+        const controller = controllersRef.current.get(taskId);
+        if (controller) controller.abort();
+      }
+    },
+    [updateTask],
+  );
 
-  const retryUpload = useCallback((taskId) => {
-    const currentTask = tasksRef.current.find((task) => task.id === taskId);
-    if (!currentTask || (currentTask.status !== "failed" && currentTask.status !== "canceled")) {
-      return;
-    }
-    updateTask(taskId, {
-      status: "queued",
-      progress: 0,
-      preparationProgress: 0,
-      uploadedBytes: 0,
-      uploadTotalBytes: currentTask.fileSize,
-      startedAt: null,
-      finishedAt: null,
-      errorMessage: null,
-      serverStatus: null,
-      uploadSessionId: null,
-    });
-  }, [updateTask]);
+  const retryUpload = useCallback(
+    (taskId) => {
+      const currentTask = tasksRef.current.find((task) => task.id === taskId);
+      if (
+        !currentTask ||
+        (currentTask.status !== "failed" && currentTask.status !== "canceled")
+      ) {
+        return;
+      }
+      updateTask(taskId, {
+        status: "queued",
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: currentTask.fileSize,
+        startedAt: null,
+        finishedAt: null,
+        errorMessage: null,
+        serverStatus: null,
+        uploadSessionId: null,
+      });
+    },
+    [updateTask],
+  );
 
   const removeTask = useCallback((taskId) => {
     const currentTask = tasksRef.current.find((task) => task.id === taskId);
@@ -364,11 +409,18 @@ export function TransferDesignUploadQueueProvider({ children }) {
   }, []);
 
   const clearFinished = useCallback(() => {
-    setTasks((prev) => prev.filter((task) => task.status === "queued" || task.status === "uploading"));
+    setTasks((prev) =>
+      prev.filter(
+        (task) => task.status === "queued" || task.status === "uploading",
+      ),
+    );
   }, []);
 
   const hasOngoingUploads = useMemo(
-    () => tasks.some((task) => task.status === "queued" || task.status === "uploading"),
+    () =>
+      tasks.some(
+        (task) => task.status === "queued" || task.status === "uploading",
+      ),
     [tasks],
   );
 
@@ -407,7 +459,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
   );
 
   const queuedCount = tasks.filter((task) => task.status === "queued").length;
-  const uploadingCount = tasks.filter((task) => task.status === "uploading").length;
+  const uploadingCount = tasks.filter(
+    (task) => task.status === "uploading",
+  ).length;
   const statusMeta = useMemo(
     () => ({
       queued: { label: tQueue("status.queued"), color: "default" },
@@ -429,7 +483,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
           style={{
             position: "fixed",
             right: 16,
-            bottom: 16,
+            bottom: "calc(16px + var(--download-queue-offset, 0px))",
             width: 380,
             zIndex: 1800,
             pointerEvents: "none",
@@ -437,65 +491,123 @@ export function TransferDesignUploadQueueProvider({ children }) {
         >
           <Card
             size="small"
-            style={{ pointerEvents: "auto", boxShadow: "0 10px 32px rgba(0,0,0,0.16)" }}
+            style={{
+              pointerEvents: "auto",
+              boxShadow: "0 10px 32px rgba(0,0,0,0.16)",
+            }}
             title={
               <Space>
                 <Badge status={hasOngoingUploads ? "processing" : "default"} />
                 <span>{tQueue("title")}</span>
                 <Tag>{tasks.length}</Tag>
-                {uploadingCount ? <Tag color="processing">{tQueue("badges.uploading", { count: uploadingCount })}</Tag> : null}
-                {queuedCount ? <Tag color="default">{tQueue("badges.queued", { count: queuedCount })}</Tag> : null}
+                {uploadingCount ? (
+                  <Tag color="processing">
+                    {tQueue("badges.uploading", { count: uploadingCount })}
+                  </Tag>
+                ) : null}
+                {queuedCount ? (
+                  <Tag color="default">
+                    {tQueue("badges.queued", { count: queuedCount })}
+                  </Tag>
+                ) : null}
               </Space>
             }
             extra={
               <Space>
-                <Button size="small" icon={<MinusOutlined />} onClick={() => setCollapsed((prev) => !prev)} />
+                <Button
+                  size="small"
+                  icon={<MinusOutlined />}
+                  onClick={() => setCollapsed((prev) => !prev)}
+                />
               </Space>
             }
-            bodyStyle={{ display: collapsed ? "none" : "block", maxHeight: 340, overflowY: "auto" }}
+            bodyStyle={{
+              display: collapsed ? "none" : "block",
+              maxHeight: 340,
+              overflowY: "auto",
+            }}
           >
             <Space direction="vertical" size="small" style={{ width: "100%" }}>
               <Space style={{ width: "100%", justifyContent: "space-between" }}>
-                <Typography.Text type="secondary">{tQueue("subtitle")}</Typography.Text>
-                <Button size="small" icon={<DeleteOutlined />} onClick={clearFinished}>
+                <Typography.Text type="secondary">
+                  {tQueue("subtitle")}
+                </Typography.Text>
+                <Button
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={clearFinished}
+                >
                   {tQueue("actions.clearFinished")}
                 </Button>
               </Space>
 
               {tasks.map((task) => {
                 const isPreparing =
-                  task.status === "uploading" && task.serverStatus === "preparing";
-                const isSaving = task.status === "uploading" && task.serverStatus === "saving";
+                  task.status === "uploading" &&
+                  task.serverStatus === "preparing";
+                const isSaving =
+                  task.status === "uploading" && task.serverStatus === "saving";
                 const meta = isPreparing
                   ? statusMeta.preparing
                   : isSaving
                     ? statusMeta.saving
                     : statusMeta[task.status] || statusMeta.queued;
-                const canCancel = task.status === "queued" || task.status === "uploading";
-                const canRetry = task.status === "failed" || task.status === "canceled";
+                const canCancel =
+                  task.status === "queued" || task.status === "uploading";
+                const canRetry =
+                  task.status === "failed" || task.status === "canceled";
                 const canRemove = !canCancel;
 
                 return (
-                  <Card key={task.id} size="small" styles={{ body: { padding: 10 } }}>
-                    <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                      <Space style={{ width: "100%", justifyContent: "space-between" }}>
+                  <Card
+                    key={task.id}
+                    size="small"
+                    styles={{ body: { padding: 10 } }}
+                  >
+                    <Space
+                      direction="vertical"
+                      size={4}
+                      style={{ width: "100%" }}
+                    >
+                      <Space
+                        style={{
+                          width: "100%",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <Typography.Text ellipsis style={{ maxWidth: 210 }}>
                           {task.fileName}
                         </Typography.Text>
                         <Tag color={meta.color}>{meta.label}</Tag>
                       </Space>
-                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {tQueue("fields.order")}: {task.orderNumber} • {tQueue("fields.quantity")}: {task.quantity || 1} • {formatBytes(task.fileSize)}
+                      <Typography.Text
+                        type="secondary"
+                        style={{ fontSize: 12 }}
+                      >
+                        {tQueue("fields.order")}: {task.orderNumber} •{" "}
+                        {tQueue("fields.quantity")}: {task.quantity || 1} •{" "}
+                        {formatBytes(task.fileSize)}
                       </Typography.Text>
                       <Progress
                         percent={task.status === "queued" ? 0 : task.progress}
                         size="small"
-                        status={task.status === "failed" ? "exception" : task.status === "success" ? "success" : "active"}
+                        status={
+                          task.status === "failed"
+                            ? "exception"
+                            : task.status === "success"
+                              ? "success"
+                              : "active"
+                        }
                         showInfo={task.status !== "queued"}
-                        format={(percent) => `${formatProgressPercent(percent)}%`}
+                        format={(percent) =>
+                          `${formatProgressPercent(percent)}%`
+                        }
                       />
                       {task.status === "uploading" ? (
-                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        <Typography.Text
+                          type="secondary"
+                          style={{ fontSize: 12 }}
+                        >
                           {isPreparing
                             ? tQueue("fields.preparationProgress", {
                                 percent: formatProgressPercent(
@@ -515,9 +627,15 @@ export function TransferDesignUploadQueueProvider({ children }) {
                           {task.errorMessage}
                         </Typography.Text>
                       ) : null}
-                      <Space style={{ width: "100%", justifyContent: "flex-end" }}>
+                      <Space
+                        style={{ width: "100%", justifyContent: "flex-end" }}
+                      >
                         {canRetry ? (
-                          <Button size="small" icon={<RedoOutlined />} onClick={() => retryUpload(task.id)}>
+                          <Button
+                            size="small"
+                            icon={<RedoOutlined />}
+                            onClick={() => retryUpload(task.id)}
+                          >
                             {tQueue("actions.retry")}
                           </Button>
                         ) : null}
@@ -532,7 +650,11 @@ export function TransferDesignUploadQueueProvider({ children }) {
                           </Button>
                         ) : null}
                         {canRemove ? (
-                          <Button size="small" icon={<DeleteOutlined />} onClick={() => removeTask(task.id)}>
+                          <Button
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            onClick={() => removeTask(task.id)}
+                          >
                             {tQueue("actions.remove")}
                           </Button>
                         ) : null}
@@ -552,7 +674,9 @@ export function TransferDesignUploadQueueProvider({ children }) {
 export const useTransferDesignUploadQueue = () => {
   const context = useContext(TransferDesignUploadQueueContext);
   if (!context) {
-    throw new Error("useTransferDesignUploadQueue must be used within TransferDesignUploadQueueProvider");
+    throw new Error(
+      "useTransferDesignUploadQueue must be used within TransferDesignUploadQueueProvider",
+    );
   }
   return context;
 };

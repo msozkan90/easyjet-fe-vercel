@@ -1,20 +1,20 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Button } from "antd";
+import { useCallback, useMemo, useRef } from "react";
+import { Button } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import OrdersStatusListPage from "../../../OrdersStatusListPage";
 import { OrdersAPI } from "@/utils/api";
-import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
+import { getBlobErrorMessage } from "@/utils/apiHelpers";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { useTranslations } from "@/i18n/use-translations";
+import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 
 export default function SubCategoryViewOrderPage({ params }) {
   const { categoryId, subCategoryId } = params || {};
-  const { message } = AntdApp.useApp();
   const tCommonActions = useTranslations("common.actions");
   const tPdfMessages = useTranslations("dashboard.orders.ordersPdf.messages");
-  const [downloading, setDownloading] = useState(false);
+  const { enqueueDownload, isDownloading } = useDownloadQueue();
   const tableRef = useRef(null);
 
   const listApiFn = useMemo(
@@ -32,34 +32,40 @@ export default function SubCategoryViewOrderPage({ params }) {
     [categoryId, subCategoryId],
   );
 
-  const handleDownload = useCallback(async () => {
+  const downloadKey = `orders-pdf:create:${categoryId}:${subCategoryId}`;
+  const handleDownload = useCallback(() => {
     if (!categoryId) return;
-    setDownloading(true);
-    try {
-      const payload = {
-        category_id: categoryId,
-        ...(subCategoryId ? { sub_category_id: subCategoryId } : {}),
-      };
-      const { blob, filename } = await OrdersAPI.DownloadPdf(payload);
-      saveBlobAsFile(blob, filename || "orders.pdf");
-      tableRef.current?.reload?.();
-    } catch (error) {
-      const errorMessage = await getBlobErrorMessage(error);
-      message.error(
-        errorMessage === "No eligible order items found for PDF download"
+    const payload = {
+      category_id: categoryId,
+      ...(subCategoryId ? { sub_category_id: subCategoryId } : {}),
+    };
+    enqueueDownload({
+      key: downloadKey,
+      title: tCommonActions("downloadPdf"),
+      fallbackFilename: "orders.pdf",
+      request: (config) => OrdersAPI.DownloadPdf(payload, config),
+      onSuccess: () => tableRef.current?.reload?.(),
+      getErrorMessage: async (error) => {
+        const errorMessage = await getBlobErrorMessage(error);
+        return errorMessage === "No eligible order items found for PDF download"
           ? tPdfMessages("noEligibleOrderItems")
-          : errorMessage || tPdfMessages("pdfDownloadFailed"),
-      );
-    } finally {
-      setDownloading(false);
-    }
-  }, [categoryId, message, subCategoryId, tPdfMessages]);
+          : errorMessage || tPdfMessages("pdfDownloadFailed");
+      },
+    });
+  }, [
+    categoryId,
+    downloadKey,
+    enqueueDownload,
+    subCategoryId,
+    tCommonActions,
+    tPdfMessages,
+  ]);
 
   const toolbarRight = (
     <Button
       icon={<DownloadOutlined />}
       onClick={handleDownload}
-      loading={downloading}
+      loading={isDownloading(downloadKey)}
     >
       {tCommonActions("downloadPdf")}
     </Button>
