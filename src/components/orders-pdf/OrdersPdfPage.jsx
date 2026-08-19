@@ -22,10 +22,11 @@ import {
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersPdfAPI } from "@/utils/api";
-import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
+import { getBlobErrorMessage } from "@/utils/apiHelpers";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvider";
+import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -37,16 +38,12 @@ const formatDate = (value) => {
   }).format(date);
 };
 
-const openUrl = (url) => {
-  if (!url || typeof window === "undefined") return;
-  window.open(url, "_blank", "noopener,noreferrer");
-};
-
 export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders.ordersPdf");
   const tActions = useTranslations("common.actions");
   const { enqueueUploads, tasks } = useOrdersPdfDesignUploadQueue();
+  const { enqueueDownload, isDownloading } = useDownloadQueue();
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -54,11 +51,6 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [designs, setDesigns] = useState([]);
   const [designsLoading, setDesignsLoading] = useState(false);
-  const [downloadingPdfIds, setDownloadingPdfIds] = useState({});
-  const [downloadingOrderItemDesignIds, setDownloadingOrderItemDesignIds] =
-    useState({});
-  const [bulkDownloading, setBulkDownloading] = useState(false);
-  const [downloadingDesignIds, setDownloadingDesignIds] = useState({});
   const handledSuccessTaskIdsRef = useRef(new Set());
 
   const fixedFilters = useMemo(
@@ -185,111 +177,88 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   }, [loadDesigns, loadRows, selectedPdf]);
 
   const handleDownloadDesign = useCallback(
-    async (row) => {
+    (row) => {
       if (!row?.id) return;
-      setDownloadingDesignIds((prev) => ({ ...prev, [row.id]: true }));
-      try {
-        const { blob, filename } = await OrdersPdfAPI.downloadDesign(row.id);
-        saveBlobAsFile(blob, filename);
-        message.success(t("messages.designDownloaded"));
-        await refreshAfterDesignDownload();
-      } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message ||
-            t("messages.designDownloadFailed"),
-        );
-      } finally {
-        setDownloadingDesignIds((prev) => {
-          const next = { ...prev };
-          delete next[row.id];
-          return next;
-        });
-      }
+      enqueueDownload({
+        key: `orders-pdf:design:${row.id}`,
+        title: row.design_name || t("empty.unnamedDesign"),
+        subtitle: selectedPdf?.pdf_name || null,
+        fallbackFilename: row.design_name || "orders-pdf-design",
+        request: (config) => OrdersPdfAPI.downloadDesign(row.id, config),
+        onSuccess: async () => {
+          message.success(t("messages.designDownloaded"));
+          await refreshAfterDesignDownload();
+        },
+        getErrorMessage: (error) =>
+          getBlobErrorMessage(error, t("messages.designDownloadFailed")),
+      });
     },
-    [message, refreshAfterDesignDownload, t],
+    [enqueueDownload, message, refreshAfterDesignDownload, selectedPdf, t],
   );
 
   const handleDownloadPdf = useCallback(
-    async (pdf) => {
+    (pdf) => {
       if (!pdf?.id) return;
-      setDownloadingPdfIds((prev) => ({ ...prev, [pdf.id]: true }));
-      try {
-        const { blob, filename } = await OrdersPdfAPI.downloadPdf(pdf.id);
-        saveBlobAsFile(blob, filename);
-        setSelectedPdf((current) =>
-          current?.id === pdf.id
-            ? { ...current, pdf_status: "pdf_downloaded" }
-            : current,
-        );
-        await loadRows();
-        message.success(t("messages.pdfDownloaded"));
-      } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message ||
-            t("messages.pdfDownloadFailed"),
-        );
-      } finally {
-        setDownloadingPdfIds((prev) => {
-          const next = { ...prev };
-          delete next[pdf.id];
-          return next;
-        });
-      }
+      enqueueDownload({
+        key: `orders-pdf:pdf:${pdf.id}`,
+        title: pdf.pdf_name || t("empty.unnamedPdf"),
+        fallbackFilename: pdf.pdf_name || "orders.pdf",
+        request: (config) => OrdersPdfAPI.downloadPdf(pdf.id, config),
+        onSuccess: async () => {
+          setSelectedPdf((current) =>
+            current?.id === pdf.id
+              ? { ...current, pdf_status: "pdf_downloaded" }
+              : current,
+          );
+          await loadRows();
+          message.success(t("messages.pdfDownloaded"));
+        },
+        getErrorMessage: (error) =>
+          getBlobErrorMessage(error, t("messages.pdfDownloadFailed")),
+      });
     },
-    [loadRows, message, t],
+    [enqueueDownload, loadRows, message, t],
   );
 
   const handleDownloadOrderItemDesigns = useCallback(
-    async (pdf) => {
+    (pdf) => {
       if (!pdf?.id || !Array.isArray(pdf.design_ids) || !pdf.design_ids.length)
         return;
-      setDownloadingOrderItemDesignIds((prev) => ({
-        ...prev,
-        [pdf.id]: true,
-      }));
-      try {
-        const { blob, filename } = await OrdersPdfAPI.downloadOrderItemDesigns(
-          pdf.id,
-        );
-        saveBlobAsFile(blob, filename);
-        message.success(t("messages.orderItemDesignsDownloaded"));
-      } catch (error) {
-        message.error(
-          await getBlobErrorMessage(
+      enqueueDownload({
+        key: `orders-pdf:order-item-designs:${pdf.id}`,
+        title: t("actions.downloadOrderItemDesigns"),
+        subtitle: pdf.pdf_name || null,
+        fallbackFilename: "orders-pdf-designs.zip",
+        request: (config) =>
+          OrdersPdfAPI.downloadOrderItemDesigns(pdf.id, config),
+        onSuccess: () =>
+          message.success(t("messages.orderItemDesignsDownloaded")),
+        getErrorMessage: (error) =>
+          getBlobErrorMessage(
             error,
             t("messages.orderItemDesignDownloadFailed"),
           ),
-        );
-      } finally {
-        setDownloadingOrderItemDesignIds((prev) => {
-          const next = { ...prev };
-          delete next[pdf.id];
-          return next;
-        });
-      }
+      });
     },
-    [message, t],
+    [enqueueDownload, message, t],
   );
 
-  const handleDownloadAllDesigns = useCallback(async () => {
+  const handleDownloadAllDesigns = useCallback(() => {
     if (!selectedPdf?.id) return;
-    setBulkDownloading(true);
-    try {
-      const { blob, filename } = await OrdersPdfAPI.downloadDesigns(
-        selectedPdf.id,
-      );
-      saveBlobAsFile(blob, filename);
-      message.success(t("messages.designsDownloaded"));
-      await refreshAfterDesignDownload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message ||
-          t("messages.designDownloadFailed"),
-      );
-    } finally {
-      setBulkDownloading(false);
-    }
-  }, [message, refreshAfterDesignDownload, selectedPdf, t]);
+    enqueueDownload({
+      key: `orders-pdf:designs:${selectedPdf.id}`,
+      title: t("actions.downloadDesigns"),
+      subtitle: selectedPdf.pdf_name || null,
+      fallbackFilename: "orders-pdf-designs.zip",
+      request: (config) => OrdersPdfAPI.downloadDesigns(selectedPdf.id, config),
+      onSuccess: async () => {
+        message.success(t("messages.designsDownloaded"));
+        await refreshAfterDesignDownload();
+      },
+      getErrorMessage: (error) =>
+        getBlobErrorMessage(error, t("messages.designDownloadFailed")),
+    });
+  }, [enqueueDownload, message, refreshAfterDesignDownload, selectedPdf, t]);
 
   const handleUpload = (pdf, fileList) => {
     const files = fileList
@@ -308,7 +277,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         <Button
           type="link"
           icon={<DownloadOutlined />}
-          loading={Boolean(downloadingPdfIds[row.id])}
+          loading={isDownloading(`orders-pdf:pdf:${row.id}`)}
           onClick={() => handleDownloadPdf(row)}
         >
           {value || t("empty.unnamedPdf")}
@@ -367,7 +336,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
           </Button>
           <Button
             icon={<DownloadOutlined />}
-            loading={Boolean(downloadingOrderItemDesignIds[row.id])}
+            loading={isDownloading(`orders-pdf:order-item-designs:${row.id}`)}
             disabled={!Array.isArray(row.design_ids) || !row.design_ids.length}
             onClick={() => handleDownloadOrderItemDesigns(row)}
           >
@@ -403,7 +372,8 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         <Button
           type="link"
           icon={<DownloadOutlined />}
-          onClick={() => openUrl(row.design_url)}
+          loading={isDownloading(`orders-pdf:design:${row.id}`)}
+          onClick={() => handleDownloadDesign(row)}
         >
           {value || t("empty.unnamedDesign")}
         </Button>
@@ -443,7 +413,7 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         <Space>
           <Button
             icon={<DownloadOutlined />}
-            loading={Boolean(downloadingDesignIds[row.id])}
+            loading={isDownloading(`orders-pdf:design:${row.id}`)}
             onClick={() => handleDownloadDesign(row)}
           />
           <Popconfirm
@@ -518,14 +488,14 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
             <Space wrap>
               <Button
                 icon={<DownloadOutlined />}
-                loading={Boolean(downloadingPdfIds[selectedPdf.id])}
+                loading={isDownloading(`orders-pdf:pdf:${selectedPdf.id}`)}
                 onClick={() => handleDownloadPdf(selectedPdf)}
               >
                 {t("actions.downloadPdf")}
               </Button>
               <Button
                 icon={<DownloadOutlined />}
-                loading={bulkDownloading}
+                loading={isDownloading(`orders-pdf:designs:${selectedPdf.id}`)}
                 disabled={!designs.length}
                 onClick={handleDownloadAllDesigns}
               >

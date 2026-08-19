@@ -2997,6 +2997,39 @@
             "uploadFailed": "Yükleme başarısız",
             "beforeUnload": "Yüklemeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
           }
+        },
+        "downloadQueue": {
+          "title": "İndirmeler",
+          "subtitle": "İndirmeler uygulama içinde gezinirken devam eder.",
+          "status": {
+            "queued": "Sırada",
+            "preparing": "Hazırlanıyor",
+            "downloading": "İndiriliyor",
+            "success": "Tamamlandı",
+            "failed": "Başarısız",
+            "canceled": "İptal Edildi"
+          },
+          "badges": {
+            "downloading": "İndiriliyor: {count}",
+            "queued": "Sırada: {count}"
+          },
+          "fields": {
+            "preparing": "Dosya boyutu ve indirme akışı hazırlanıyor",
+            "progressKnown": "{downloaded} / {total} indirildi",
+            "progressEstimated": "{downloaded} / yaklaşık {total} indirildi",
+            "progressUnknown": "{downloaded} indirildi • toplam boyut hazırlanıyor"
+          },
+          "actions": {
+            "clearFinished": "Tamamlananları Temizle",
+            "retry": "Tekrar Dene",
+            "cancel": "İptal",
+            "remove": "Kaldır",
+            "collapse": "İndirme panelini daralt"
+          },
+          "messages": {
+            "downloadFailed": "İndirme başarısız",
+            "beforeUnload": "İndirmeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
+          }
         }
       },
       "shippingRates": {

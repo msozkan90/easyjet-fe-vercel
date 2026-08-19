@@ -3217,6 +3217,39 @@
             "uploadFailed": "Upload failed",
             "beforeUnload": "Uploads are still in progress. Are you sure you want to leave this page?"
           }
+        },
+        "downloadQueue": {
+          "title": "Downloads",
+          "subtitle": "Downloads continue while you navigate inside the app.",
+          "status": {
+            "queued": "Queued",
+            "preparing": "Preparing",
+            "downloading": "Downloading",
+            "success": "Completed",
+            "failed": "Failed",
+            "canceled": "Canceled"
+          },
+          "badges": {
+            "downloading": "Downloading: {count}",
+            "queued": "Queued: {count}"
+          },
+          "fields": {
+            "preparing": "Preparing file size and download stream",
+            "progressKnown": "{downloaded} / {total} downloaded",
+            "progressEstimated": "{downloaded} / approximately {total} downloaded",
+            "progressUnknown": "{downloaded} downloaded • calculating total size"
+          },
+          "actions": {
+            "clearFinished": "Clear Finished",
+            "retry": "Retry",
+            "cancel": "Cancel",
+            "remove": "Remove",
+            "collapse": "Collapse download panel"
+          },
+          "messages": {
+            "downloadFailed": "Download failed",
+            "beforeUnload": "Downloads are still in progress. Are you sure you want to leave this page?"
+          }
         }
       },
       "shippingRates": {
