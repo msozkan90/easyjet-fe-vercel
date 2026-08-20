@@ -2033,7 +2033,8 @@
         "confirmApproveOk": "Approve",
         "confirmCancelTitle": "Cancel this order?",
         "confirmCancelSelectedTitle": "Cancel selected orders?",
-        "confirmCancelOk": "Cancel",
+        "confirmCancelOk": "Cancel Order",
+        "confirmCancelDismiss": "Go Back",
         "restore": "Restore to Pool",
         "confirmRestoreTitle": "Restore this item to the pool?",
         "confirmRestoreOk": "Restore"
@@ -2074,6 +2075,7 @@
           "sku": "SKU",
           "item": "Item",
           "quantity": "Qty",
+          "name": "Name",
           "unitPrice": "Unit Price",
           "taxAmount": "Tax",
           "shippingAmount": "Shipping",
@@ -2163,6 +2165,7 @@
           "newOrder": "New Order",
           "processing": "Processing",
           "pdf": "PDF",
+          "designFlaw": "Design Flaw",
           "completed": "Completed",
           "downloaded": "Downloaded",
           "printed": "Printed",
@@ -3142,7 +3145,9 @@
           "createdAt": "Created At",
           "downloadedAt": "Downloaded At",
           "actions": "Actions",
-          "designName": "Design Name"
+          "designName": "Design Name",
+          "orderNumber": "Order Number",
+          "sku": "SKU"
         },
         "actions": {
           "addDesign": "Add Design",
@@ -3254,6 +3259,71 @@
             "downloadFailed": "Download failed",
             "beforeUnload": "Downloads are still in progress. Are you sure you want to leave this page?"
           }
+        }
+      },
+      "designFlaws": {
+        "modal": {
+          "title": "Mark as Design Flaw",
+          "description": "Select the missing design groups and quantities for order {orderNumber}."
+        },
+        "records": {
+          "title": "Design Flaw Records",
+          "subtitle": "Downloaded design flaw batches and their subsequently uploaded designs.",
+          "detailTitle": "Design Flaw Record Detail"
+        },
+        "groups": {
+          "legacy": "Legacy Group",
+          "number": "Design Group {number}",
+          "available": "Available: {quantity}"
+        },
+        "fields": {
+          "missingQuantity": "Missing Quantity",
+          "missingGroups": "Missing Group / Quantity",
+          "actions": "Actions",
+          "batchName": "Batch Name",
+          "items": "Order Items",
+          "designs": "Designs",
+          "uploadStatus": "Upload Status",
+          "downloadedAt": "Downloaded At",
+          "createdAt": "Created At",
+          "designName": "Design Name"
+        },
+        "actions": {
+          "mark": "Mark as Design Flaw",
+          "cancel": "Cancel",
+          "detail": "View order detail",
+          "download": "Download Designs",
+          "addDesign": "Add Design",
+          "downloadUploaded": "Download Uploaded Designs"
+        },
+        "status": {
+          "uploaded": "Uploaded",
+          "downloaded": "Downloaded"
+        },
+        "validation": {
+          "groupRequired": "Select at least one design group."
+        },
+        "empty": {
+          "records": "No design flaw download records found.",
+          "designs": "No designs uploaded yet.",
+          "unnamedDesign": "Untitled design"
+        },
+        "confirm": {
+          "deleteDesign": "Delete this design file?"
+        },
+        "messages": {
+          "optionsFailed": "Design group information could not be loaded.",
+          "marked": "Order item marked as Design Flaw.",
+          "markFailed": "Order item could not be marked as Design Flaw.",
+          "noGroups": "No active design groups found.",
+          "downloadFailed": "Designs could not be downloaded.",
+          "sourceDesignsDownloaded": "Record designs downloaded again.",
+          "recordsLoadFailed": "Design flaw records could not be loaded.",
+          "designLoadFailed": "Designs could not be loaded.",
+          "uploadQueued": "{count} design upload queued.",
+          "designDownloadFailed": "Design could not be downloaded.",
+          "designDeleted": "Design deleted.",
+          "designDeleteFailed": "Design could not be deleted."
         }
       },
       "shippingRates": {
@@ -3483,6 +3553,8 @@
         "refundRemake": "Refund / Remake",
         "viewOrder": "View Order",
         "ordersPdf": "PDFs",
+        "designFlaws": "Design Flaw",
+        "designFlawRecords": "Design Flaw Records",
         "printer": "Printer"
       },
       "company": {

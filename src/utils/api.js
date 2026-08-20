@@ -183,6 +183,19 @@ export const OrdersAPI = {
       fallbackFilename: "orders.pdf",
     }),
 
+  designFlawOptions: (id) =>
+    api.get(`/orders/items/${encodeURIComponent(id)}/design-flaw-options`),
+  markDesignFlaw: (id, payload) =>
+    api.post(`/orders/items/${encodeURIComponent(id)}/design-flaw`, payload),
+  designFlawItemsList: (payload) =>
+    api.post("/orders/items/design-flaws/list", payload),
+  downloadDesignFlaws: (payload, config = {}) =>
+    fetchBlobFilePost("/orders/design-flaws/download", {
+      data: payload,
+      config,
+      fallbackFilename: "design-flaws.zip",
+    }),
+
   // Label
   voidLabel: (data) => api.post("/orders/labels/void", data),
   retryProductionLabelRecovery: (id) =>
@@ -231,6 +244,45 @@ export const OrdersPdfAPI = {
     }),
   deleteDesign: (id) =>
     api.del(`/orders-pdf/designs/${encodeURIComponent(id)}`),
+};
+
+export const OrdersDesignFlawsAPI = {
+  list: (payload) => api.post("/orders-design-flaws/list", payload),
+  get: (id) => api.get(`/orders-design-flaws/${encodeURIComponent(id)}`),
+  downloadSourceDesigns: (id, config = {}) =>
+    fetchBlobFile(
+      `/orders-design-flaws/${encodeURIComponent(id)}/order-item-designs/download`,
+      { config, fallbackFilename: "design-flaw-designs.zip" },
+    ),
+  designsList: (id, payload) =>
+    api.post(
+      `/orders-design-flaws/${encodeURIComponent(id)}/designs/list`,
+      payload,
+    ),
+  downloadDesigns: (id, config = {}) =>
+    fetchBlobFile(
+      `/orders-design-flaws/${encodeURIComponent(id)}/designs/download`,
+      { config, fallbackFilename: "design-flaw-designs.zip" },
+    ),
+  uploadDesigns: (payload, config = {}) =>
+    api.postMultipart("/orders-design-flaws/designs", payload, config),
+  uploadDesignProgress: (uploadId) =>
+    api.get(
+      `/orders-design-flaws/designs/progress/${encodeURIComponent(uploadId)}`,
+    ),
+  cancelDesignUpload: (uploadId) =>
+    api.post(
+      `/orders-design-flaws/designs/cancel/${encodeURIComponent(uploadId)}`,
+    ),
+  updateDesign: (id, payload) =>
+    api.put(`/orders-design-flaws/designs/${encodeURIComponent(id)}`, payload),
+  downloadDesign: (id, config = {}) =>
+    fetchBlobFile(
+      `/orders-design-flaws/designs/${encodeURIComponent(id)}/download`,
+      { config, fallbackFilename: "design-flaw-design" },
+    ),
+  deleteDesign: (id) =>
+    api.del(`/orders-design-flaws/designs/${encodeURIComponent(id)}`),
 };
 
 export const TransferOrdersAPI = {

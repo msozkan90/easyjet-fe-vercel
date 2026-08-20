@@ -49,6 +49,7 @@ const ORDER_STATUS_KEYS = [
   "newOrder",
   "processing",
   "pdf",
+  "designFlaw",
   "completed",
   "downloaded",
   "printed",

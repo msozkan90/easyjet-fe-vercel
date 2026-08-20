@@ -16,7 +16,7 @@ import {
   MinusOutlined,
   RedoOutlined,
 } from "@ant-design/icons";
-import { OrdersPdfAPI } from "@/utils/api";
+import { OrdersDesignFlawsAPI, OrdersPdfAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
 const MAX_CONCURRENT_UPLOADS = 3;
@@ -94,15 +94,24 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
       });
 
       try {
+        const uploadApi =
+          currentTask.kind === "designFlaw"
+            ? OrdersDesignFlawsAPI
+            : OrdersPdfAPI;
         const formData = new FormData();
-        formData.append("orders_pdf_id", currentTask.ordersPdfId);
+        formData.append(
+          currentTask.kind === "designFlaw"
+            ? "orders_design_flaw_id"
+            : "orders_pdf_id",
+          currentTask.parentId,
+        );
         formData.append("upload_id", currentTask.id);
         formData.append("design_files", currentTask.file);
 
         const pollProgress = async () => {
           if (pollStopped) return;
           try {
-            const progressResponse = await OrdersPdfAPI.uploadDesignProgress(
+            const progressResponse = await uploadApi.uploadDesignProgress(
               currentTask.id,
             );
             const progressData =
@@ -173,7 +182,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         void pollProgress();
         scheduleNextPoll();
 
-        await OrdersPdfAPI.uploadDesigns(formData, {
+        await uploadApi.uploadDesigns(formData, {
           signal: controller.signal,
           onUploadProgress: (event) => {
             const snapshot = tasksRef.current.find(
@@ -242,34 +251,41 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
       .forEach((task) => void runTask(task.id));
   }, [runTask, tasks]);
 
-  const enqueueUploads = useCallback(({ ordersPdfId, pdfName, files }) => {
-    const nextFiles = Array.from(files || []).filter(
-      (file) => file instanceof File,
-    );
-    if (!nextFiles.length) return [];
-    const now = Date.now();
-    const newTasks = nextFiles.map((file) => ({
-      id: createTaskId(),
-      ordersPdfId: String(ordersPdfId),
-      pdfName: pdfName || "-",
-      file,
-      fileName: file.name || "untitled",
-      fileSize: file.size || 0,
-      status: "queued",
-      progress: 0,
-      preparationProgress: 0,
-      uploadedBytes: 0,
-      uploadTotalBytes: file.size || 0,
-      createdAt: now,
-      startedAt: null,
-      finishedAt: null,
-      errorMessage: null,
-      serverStatus: null,
-    }));
-    setTasks((prev) => [...newTasks, ...prev]);
-    setCollapsed(false);
-    return newTasks.map((task) => task.id);
-  }, []);
+  const enqueueUploads = useCallback(
+    ({ ordersPdfId, ordersDesignFlawId, pdfName, batchName, files }) => {
+      const nextFiles = Array.from(files || []).filter(
+        (file) => file instanceof File,
+      );
+      if (!nextFiles.length) return [];
+      const now = Date.now();
+      const kind = ordersDesignFlawId ? "designFlaw" : "ordersPdf";
+      const parentId = ordersDesignFlawId || ordersPdfId;
+      if (!parentId) return [];
+      const newTasks = nextFiles.map((file) => ({
+        id: createTaskId(),
+        kind,
+        parentId: String(parentId),
+        pdfName: batchName || pdfName || "-",
+        file,
+        fileName: file.name || "untitled",
+        fileSize: file.size || 0,
+        status: "queued",
+        progress: 0,
+        preparationProgress: 0,
+        uploadedBytes: 0,
+        uploadTotalBytes: file.size || 0,
+        createdAt: now,
+        startedAt: null,
+        finishedAt: null,
+        errorMessage: null,
+        serverStatus: null,
+      }));
+      setTasks((prev) => [...newTasks, ...prev]);
+      setCollapsed(false);
+      return newTasks.map((task) => task.id);
+    },
+    [],
+  );
 
   const cancelUpload = useCallback(
     async (taskId) => {
@@ -280,7 +296,11 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         return;
       }
       if (currentTask.status === "uploading") {
-        await OrdersPdfAPI.cancelDesignUpload(taskId).catch(() => undefined);
+        const uploadApi =
+          currentTask.kind === "designFlaw"
+            ? OrdersDesignFlawsAPI
+            : OrdersPdfAPI;
+        await uploadApi.cancelDesignUpload(taskId).catch(() => undefined);
         controllersRef.current.get(taskId)?.abort();
       }
     },

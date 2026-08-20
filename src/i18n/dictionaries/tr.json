@@ -1813,7 +1813,8 @@
         "confirmApproveOk": "Onayla",
         "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
         "confirmCancelSelectedTitle": "Seçili siparişleri iptal etmek istiyor musunuz?",
-        "confirmCancelOk": "İptal et",
+        "confirmCancelOk": "Siparişi İptal Et",
+        "confirmCancelDismiss": "İşlemden Vazgeç",
         "restore": "Havuza Geri Al",
         "confirmRestoreTitle": "Bu kalemi havuza geri almak istiyor musunuz?",
         "confirmRestoreOk": "Geri Al"
@@ -1854,6 +1855,7 @@
           "sku": "Stok Kodu",
           "item": "Ürün",
           "quantity": "Adet",
+          "name": "İsim",
           "unitPrice": "Birim Fiyat",
           "taxAmount": "Vergi",
           "shippingAmount": "Kargo",
@@ -1943,6 +1945,7 @@
           "newOrder": "Yeni Sipariş",
           "processing": "İşleniyor",
           "pdf": "PDF",
+          "designFlaw": "Design Eksik",
           "completed": "Tamamlandı",
           "downloaded": "İndirildi",
           "printed": "Yazdırıldı",
@@ -2922,7 +2925,9 @@
           "createdAt": "Oluşturulma",
           "downloadedAt": "İndirilme Tarihi",
           "actions": "İşlemler",
-          "designName": "Tasarım Adı"
+          "designName": "Tasarım Adı",
+          "orderNumber": "Sipariş Numarası",
+          "sku": "SKU"
         },
         "actions": {
           "addDesign": "Tasarım Ekle",
@@ -3034,6 +3039,71 @@
             "downloadFailed": "İndirme başarısız",
             "beforeUnload": "İndirmeler halen devam ediyor. Sayfadan ayrılmak istediğinize emin misiniz?"
           }
+        }
+      },
+      "designFlaws": {
+        "modal": {
+          "title": "Design Eksiğe Çek",
+          "description": "{orderNumber} numaralı sipariş kalemi için eksik design group ve adetlerini seçin."
+        },
+        "records": {
+          "title": "Design Eksik Kayıtları",
+          "subtitle": "İndirilen eksik design batch kayıtları ve sonradan yüklenen tasarımlar.",
+          "detailTitle": "Design Eksik Kayıt Detayı"
+        },
+        "groups": {
+          "legacy": "Legacy Group",
+          "number": "Design Group {number}",
+          "available": "Mevcut: {quantity}"
+        },
+        "fields": {
+          "missingQuantity": "Eksik Adet",
+          "missingGroups": "Eksik Group / Adet",
+          "actions": "İşlemler",
+          "batchName": "Batch Adı",
+          "items": "Sipariş Kalemleri",
+          "designs": "Tasarımlar",
+          "uploadStatus": "Yükleme Durumu",
+          "downloadedAt": "İndirilme Tarihi",
+          "createdAt": "Oluşturulma",
+          "designName": "Tasarım Adı"
+        },
+        "actions": {
+          "mark": "Design Eksiğe Çek",
+          "cancel": "İptal",
+          "detail": "Sipariş detayını görüntüle",
+          "download": "Designları İndir",
+          "addDesign": "Tasarım Ekle",
+          "downloadUploaded": "Yüklenen Tasarımları İndir"
+        },
+        "status": {
+          "uploaded": "Yüklendi",
+          "downloaded": "İndirildi"
+        },
+        "validation": {
+          "groupRequired": "En az bir design group seçin."
+        },
+        "empty": {
+          "records": "Design eksik indirme kaydı bulunamadı.",
+          "designs": "Henüz tasarım yüklenmedi.",
+          "unnamedDesign": "İsimsiz tasarım"
+        },
+        "confirm": {
+          "deleteDesign": "Bu tasarım dosyası silinsin mi?"
+        },
+        "messages": {
+          "optionsFailed": "Design group bilgileri yüklenemedi.",
+          "marked": "Sipariş kalemi Design Eksik durumuna çekildi.",
+          "markFailed": "Sipariş kalemi Design Eksik durumuna çekilemedi.",
+          "noGroups": "Aktif design group bulunamadı.",
+          "downloadFailed": "Designlar indirilemedi.",
+          "sourceDesignsDownloaded": "Record designları yeniden indirildi.",
+          "recordsLoadFailed": "Design eksik kayıtları yüklenemedi.",
+          "designLoadFailed": "Tasarımlar yüklenemedi.",
+          "uploadQueued": "{count} tasarım yüklemesi sıraya alındı.",
+          "designDownloadFailed": "Tasarım indirilemedi.",
+          "designDeleted": "Tasarım silindi.",
+          "designDeleteFailed": "Tasarım silinemedi."
         }
       },
       "shippingRates": {
@@ -3263,6 +3333,8 @@
         "refundRemake": "İade / Yeniden Üretim",
         "viewOrder": "Siparişleri Görüntüle",
         "ordersPdf": "PDFler",
+        "designFlaws": "Design Eksik",
+        "designFlawRecords": "Design Eksik Kayıtları",
         "printer": "Printer"
       },
       "company": {

@@ -34,6 +34,7 @@ export default function SelectionFloatActions({
   confirmApproveOk,
   confirmCancelTitle,
   confirmCancelOk,
+  confirmCancelDismiss,
   approving = false,
   cancelling = false,
   onApprove,
@@ -68,7 +69,9 @@ export default function SelectionFloatActions({
             icon={approving ? <LoadingOutlined /> : <CheckOutlined />}
             style={{
               ...BASE_BUTTON_STYLE,
-              background: busy ? token.colorBgContainerDisabled : token.colorPrimary,
+              background: busy
+                ? token.colorBgContainerDisabled
+                : token.colorPrimary,
               boxShadow: busy
                 ? token.boxShadowSecondary
                 : "0 12px 24px rgba(22, 119, 255, 0.32)",
@@ -83,6 +86,7 @@ export default function SelectionFloatActions({
       <Popconfirm
         title={confirmCancelTitle}
         okText={confirmCancelOk}
+        cancelText={confirmCancelDismiss}
         okButtonProps={{ loading: cancelling, danger: true }}
         onConfirm={onCancel}
         disabled={busy}
@@ -95,7 +99,9 @@ export default function SelectionFloatActions({
             icon={cancelling ? <LoadingOutlined /> : <CloseOutlined />}
             style={{
               ...BASE_BUTTON_STYLE,
-              background: busy ? token.colorBgContainerDisabled : token.colorError,
+              background: busy
+                ? token.colorBgContainerDisabled
+                : token.colorError,
               boxShadow: busy
                 ? token.boxShadowSecondary
                 : "0 12px 24px rgba(255, 77, 79, 0.28)",
