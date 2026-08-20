@@ -1813,7 +1813,8 @@
         "confirmApproveOk": "Onayla",
         "confirmCancelTitle": "Bu siparişi iptal etmek istiyor musunuz?",
         "confirmCancelSelectedTitle": "Seçili siparişleri iptal etmek istiyor musunuz?",
-        "confirmCancelOk": "İptal et",
+        "confirmCancelOk": "Siparişi İptal Et",
+        "confirmCancelDismiss": "İşlemden Vazgeç",
         "restore": "Havuza Geri Al",
         "confirmRestoreTitle": "Bu kalemi havuza geri almak istiyor musunuz?",
         "confirmRestoreOk": "Geri Al"
@@ -1854,6 +1855,7 @@
           "sku": "Stok Kodu",
           "item": "Ürün",
           "quantity": "Adet",
+          "name": "İsim",
           "unitPrice": "Birim Fiyat",
           "taxAmount": "Vergi",
           "shippingAmount": "Kargo",

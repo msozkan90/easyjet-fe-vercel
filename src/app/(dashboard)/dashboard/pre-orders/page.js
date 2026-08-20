@@ -793,20 +793,36 @@ export default function OrdersPage({ mode = "pending" }) {
         },
         render: (value) => value || t("common.none"),
       },
-      // {
-      //   title: t("items.columns.item"),
-      //   dataIndex: "name",
-      //   width: 500,
-      //   filter: {
-      //     type: "text",
-      //     placeholder: t("filters.searchItem"),
-      //   },
-      //   render: (value) => value || t("common.none"),
-      // },
       {
         title: t("items.columns.quantity"),
         dataIndex: "quantity",
         render: (value) => value ?? t("common.none"),
+      },
+      {
+        title: t("items.columns.name"),
+        dataIndex: "name",
+        width: 220,
+        render: (value) => {
+          const name = typeof value === "string" ? value.trim() : "";
+          if (!name) return t("common.none");
+
+          return (
+            <Popover content={name} trigger="hover">
+              <span
+                style={{
+                  display: "block",
+                  maxWidth: 200,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  cursor: "default",
+                }}
+              >
+                {name}
+              </span>
+            </Popover>
+          );
+        },
       },
       {
         title: t("items.columns.options"),
@@ -1084,6 +1100,7 @@ export default function OrdersPage({ mode = "pending" }) {
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
                   okText={t("actions.confirmCancelOk")}
+                  cancelText={t("actions.confirmCancelDismiss")}
                   okButtonProps={{ danger: true, loading: cancelLoading }}
                   disabled={disableActions}
                   onConfirm={() => handleCancelOrder(record)}
@@ -1241,6 +1258,7 @@ export default function OrdersPage({ mode = "pending" }) {
           confirmApproveOk={t("actions.confirmApproveOk")}
           confirmCancelTitle={t("actions.confirmCancelSelectedTitle")}
           confirmCancelOk={t("actions.confirmCancelOk")}
+          confirmCancelDismiss={t("actions.confirmCancelDismiss")}
           approving={bulkApproving}
           cancelling={bulkCancelling}
           onApprove={handleBulkApprove}

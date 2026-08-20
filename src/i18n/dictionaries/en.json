@@ -2033,7 +2033,8 @@
         "confirmApproveOk": "Approve",
         "confirmCancelTitle": "Cancel this order?",
         "confirmCancelSelectedTitle": "Cancel selected orders?",
-        "confirmCancelOk": "Cancel",
+        "confirmCancelOk": "Cancel Order",
+        "confirmCancelDismiss": "Go Back",
         "restore": "Restore to Pool",
         "confirmRestoreTitle": "Restore this item to the pool?",
         "confirmRestoreOk": "Restore"
@@ -2074,6 +2075,7 @@
           "sku": "SKU",
           "item": "Item",
           "quantity": "Qty",
+          "name": "Name",
           "unitPrice": "Unit Price",
           "taxAmount": "Tax",
           "shippingAmount": "Shipping",
