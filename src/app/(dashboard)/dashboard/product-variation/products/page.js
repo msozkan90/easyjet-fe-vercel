@@ -72,7 +72,7 @@ export default function ProductsPage() {
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
-    normalizeListAndMeta
+    normalizeListAndMeta,
   );
 
   const columns = useMemo(
@@ -100,9 +100,18 @@ export default function ProductsPage() {
       },
       {
         title: t("columns.subCategory"),
-        dataIndex: "sub_category_id",
-        sorter: true,
-        render: (_, record) => record?.subCategory?.name || t("common.none"),
+        dataIndex: "sub_category_ids",
+        render: (_, record) =>
+          Array.isArray(record?.subCategories) &&
+          record.subCategories.length ? (
+            <Space size={[4, 4]} wrap>
+              {record.subCategories.map((subCategory) => (
+                <Tag key={subCategory.id}>{subCategory.name}</Tag>
+              ))}
+            </Space>
+          ) : (
+            t("common.none")
+          ),
       },
       {
         title: t("columns.status"),
@@ -162,7 +171,7 @@ export default function ProductsPage() {
         ),
       },
     ],
-    [categories, t, tStatus]
+    [categories, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -181,7 +190,7 @@ export default function ProductsPage() {
       setEditingRow(null);
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.operationFailed")
+        error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
     }
   };
@@ -193,7 +202,7 @@ export default function ProductsPage() {
       tableRef.current?.reload();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
+        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
@@ -210,7 +219,7 @@ export default function ProductsPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          t("messages.templateDownloadError")
+          t("messages.templateDownloadError"),
       );
     } finally {
       setTemplateLoading(false);
@@ -247,7 +256,7 @@ export default function ProductsPage() {
       const failedCount = resultData?.failed ?? 0;
       if (failedCount > 0) {
         message.warning(
-          t("messages.importCompletedWithErrors", { failed: failedCount })
+          t("messages.importCompletedWithErrors", { failed: failedCount }),
         );
       } else {
         message.success(t("messages.importSuccess"));
@@ -262,8 +271,7 @@ export default function ProductsPage() {
         message.warning(t("messages.importCompletedWithErrorsFallback"));
       } else {
         message.error(
-          error?.response?.data?.error?.message ||
-            t("messages.importFailed")
+          error?.response?.data?.error?.message || t("messages.importFailed"),
         );
       }
     } finally {
@@ -279,7 +287,7 @@ export default function ProductsPage() {
       message: t("import.errorMessage"),
       noErrors: t("import.noErrors"),
     }),
-    [t]
+    [t],
   );
 
   const buildImportSummary = useCallback(
@@ -291,7 +299,7 @@ export default function ProductsPage() {
       const failed = resultData?.failed ?? 0;
       return t("import.summary", { total, created, updated, failed });
     },
-    [t]
+    [t],
   );
 
   return (
@@ -378,19 +386,16 @@ export default function ProductsPage() {
                   name: editingRow?.name,
                   category_id:
                     editingRow?.category_id ?? editingRow?.category?.id,
-                  sub_category_id:
-                    editingRow?.sub_category_id ??
-                    editingRow?.subCategory?.id,
-                  sub_category_name:
-                    editingRow?.sub_category?.name ??
-                    editingRow?.subCategory?.name ??
-                    undefined,
-                  sub_category:
-                    editingRow?.sub_category ?? editingRow?.subCategory,
+                  sub_category_ids:
+                    editingRow?.sub_category_ids ??
+                    editingRow?.subCategories?.map((item) => item.id) ??
+                    [],
+                  subCategories: editingRow?.subCategories ?? [],
                   status: editingRow?.status,
                 }
               : undefined
           }
+          multipleSubCategories
         />
       </Modal>
 
