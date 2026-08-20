@@ -108,6 +108,7 @@ export default function OrdersStatusListPage({
       newOrder: t("status.values.newOrder"),
       processing: t("status.values.processing"),
       pdf: t("status.values.pdf"),
+      designFlaw: t("status.values.designFlaw"),
       completed: t("status.values.completed"),
       shipped: t("status.values.shipped"),
       waitingForDesign: t("status.values.waitingForDesign"),

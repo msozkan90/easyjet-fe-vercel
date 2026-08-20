@@ -207,6 +207,22 @@ export default function Sidebar({ collapsed }) {
           ),
         },
         {
+          key: `category-${category.id}-design-flaws`,
+          label: (
+            <Link href={`/dashboard/orders/${category.id}/design-flaws`}>
+              {tSidebar("order.designFlaws")}
+            </Link>
+          ),
+        },
+        {
+          key: `category-${category.id}-design-flaw-records`,
+          label: (
+            <Link href={`/dashboard/orders/${category.id}/design-flaw-records`}>
+              {tSidebar("order.designFlawRecords")}
+            </Link>
+          ),
+        },
+        {
           key: `category-${category.id}-printer`,
           label: (
             <Link href={`/dashboard/orders/${category.id}/printer`}>
@@ -247,6 +263,26 @@ export default function Sidebar({ collapsed }) {
                 href={`/dashboard/orders/${category.id}/${subCategory.id}/pdfs`}
               >
                 {tSidebar("order.ordersPdf")}
+              </Link>
+            ),
+          },
+          {
+            key: `subcategory-${category.id}-${subCategory.id}-design-flaws`,
+            label: (
+              <Link
+                href={`/dashboard/orders/${category.id}/${subCategory.id}/design-flaws`}
+              >
+                {tSidebar("order.designFlaws")}
+              </Link>
+            ),
+          },
+          {
+            key: `subcategory-${category.id}-${subCategory.id}-design-flaw-records`,
+            label: (
+              <Link
+                href={`/dashboard/orders/${category.id}/${subCategory.id}/design-flaw-records`}
+              >
+                {tSidebar("order.designFlawRecords")}
               </Link>
             ),
           },
