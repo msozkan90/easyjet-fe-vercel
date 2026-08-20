@@ -25,6 +25,7 @@ export default function ProductForm({
   submitText,
   categories = [],
   showWithoutDesign = false,
+  multipleSubCategories = false,
 }) {
   const [form] = Form.useForm();
   const [manageForm] = Form.useForm();
@@ -47,6 +48,24 @@ export default function ProductForm({
 
   const previousCategoryIdRef = useRef();
   const categoryId = Form.useWatch("category_id", form);
+  const subCategoryFieldName = multipleSubCategories
+    ? "sub_category_ids"
+    : "sub_category_id";
+
+  const selectSubCategory = useCallback(
+    (id) => {
+      if (multipleSubCategories) {
+        const current = form.getFieldValue("sub_category_ids");
+        const next = Array.isArray(current) ? current : [];
+        form.setFieldsValue({
+          sub_category_ids: Array.from(new Set([...next, id])),
+        });
+        return;
+      }
+      form.setFieldsValue({ sub_category_id: id });
+    },
+    [form, multipleSubCategories],
+  );
 
   const categoryLabel = useMemo(() => {
     if (!categoryId) return "";
@@ -66,7 +85,7 @@ export default function ProductForm({
       setSubCategories([]);
       setSubCategorySearch("");
       previousCategoryIdRef.current = undefined;
-      form.setFieldsValue({ sub_category_id: undefined });
+      form.setFieldsValue({ [subCategoryFieldName]: undefined });
       return;
     }
 
@@ -74,7 +93,7 @@ export default function ProductForm({
       previousCategoryIdRef.current &&
       previousCategoryIdRef.current !== categoryId
     ) {
-      form.setFieldsValue({ sub_category_id: undefined });
+      form.setFieldsValue({ [subCategoryFieldName]: undefined });
     }
     previousCategoryIdRef.current = categoryId;
 
@@ -104,7 +123,7 @@ export default function ProductForm({
     return () => {
       alive = false;
     };
-  }, [categoryId, form, messageApi, tForm]);
+  }, [categoryId, form, messageApi, subCategoryFieldName, tForm]);
 
   const confirmModal = useCallback(
     ({ title, content, okText }) =>
@@ -119,7 +138,7 @@ export default function ProductForm({
           onCancel: () => resolve(false),
         });
       }),
-    [modalApi, tCommon]
+    [modalApi, tCommon],
   );
 
   const handleCreateSubCategory = useCallback(
@@ -132,12 +151,12 @@ export default function ProductForm({
       }
 
       const existing = subCategories.find(
-        (item) => item?.name?.toLowerCase() === trimmed.toLowerCase()
+        (item) => item?.name?.toLowerCase() === trimmed.toLowerCase(),
       );
       if (existing) {
-        form.setFieldsValue({ sub_category_id: existing.id });
+        selectSubCategory(existing.id);
         messageApi.info(
-          tForm("messages.subCategoryAlreadyExists", { name: existing.name })
+          tForm("messages.subCategoryAlreadyExists", { name: existing.name }),
         );
         if (resetSearch) setSubCategorySearch("");
         return existing;
@@ -170,7 +189,7 @@ export default function ProductForm({
           if (existsAlready) return list;
           return [...list, { ...item, optional: item.optional ?? optional }];
         });
-        form.setFieldsValue({ sub_category_id: item.id });
+        selectSubCategory(item.id);
         messageApi.success(tForm("messages.subCategoryCreateSuccess"));
         if (resetSearch) setSubCategorySearch("");
         return item;
@@ -188,9 +207,10 @@ export default function ProductForm({
       form,
       messageApi,
       normalizeItemResponse,
+      selectSubCategory,
       subCategories,
       tForm,
-    ]
+    ],
   );
 
   const sortedSubCategories = useMemo(() => {
@@ -198,7 +218,7 @@ export default function ProductForm({
     return list.sort((a, b) =>
       (a?.name ?? "").localeCompare(b?.name ?? "", undefined, {
         sensitivity: "base",
-      })
+      }),
     );
   }, [subCategories]);
 
@@ -208,18 +228,18 @@ export default function ProductForm({
         value: subCategory.id,
         label: subCategory.name,
       })),
-    [sortedSubCategories]
+    [sortedSubCategories],
   );
 
   const trimmedSearch = subCategorySearch.trim();
   const createButtonLabel = trimmedSearch
     ? tForm(
         subCategories.some(
-          (item) => item?.name?.toLowerCase() === trimmedSearch.toLowerCase()
+          (item) => item?.name?.toLowerCase() === trimmedSearch.toLowerCase(),
         )
           ? "helpers.subCategoryExisting"
           : "actions.createSubCategory",
-        { name: trimmedSearch }
+        { name: trimmedSearch },
       )
     : tForm("actions.createSubCategoryPlaceholder");
   const createButtonDisabled = !categoryId || !trimmedSearch;
@@ -231,36 +251,64 @@ export default function ProductForm({
     if (initialCategoryId && categoryId && initialCategoryId !== categoryId)
       return;
 
-    const initialSubCategoryId =
-      initialValues?.sub_category_id ?? initialValues?.sub_category?.id;
-    const initialSubCategoryName =
-      initialValues?.sub_category?.name ??
-      initialValues?.sub_category_name ??
-      initialValues?.sub_categoryLabel ??
-      initialValues?.sub_category ??
-      "";
-
-    if (!initialSubCategoryId || !initialSubCategoryName) return;
+    const initialSubCategoryItems = multipleSubCategories
+      ? Array.isArray(initialValues?.subCategories)
+        ? initialValues.subCategories
+        : []
+      : [
+          initialValues?.sub_category ??
+            initialValues?.subCategory ?? {
+              id: initialValues?.sub_category_id,
+              name:
+                initialValues?.sub_category_name ??
+                initialValues?.sub_categoryLabel ??
+                "",
+            },
+        ];
+    const validInitialItems = initialSubCategoryItems.filter(
+      (item) => item?.id && item?.name,
+    );
+    if (!validInitialItems.length) return;
 
     setSubCategories((prev) => {
       const list = Array.isArray(prev) ? prev : [];
-      if (list.some((item) => item?.id === initialSubCategoryId)) return list;
+      const knownIds = new Set(list.map((item) => item?.id));
       return [
         ...list,
-        { id: initialSubCategoryId, name: initialSubCategoryName },
+        ...validInitialItems.filter((item) => !knownIds.has(item.id)),
       ];
     });
-  }, [categoryId, initialValues]);
+  }, [categoryId, initialValues, multipleSubCategories]);
 
   useEffect(() => {
     if (!initialValues) return;
-    const initialSubCategoryId =
-      initialValues?.sub_category_id ?? initialValues?.sub_category?.id;
-    if (!initialSubCategoryId) return;
-    const currentValue = form.getFieldValue("sub_category_id");
+    const initialCategoryId =
+      initialValues?.category_id ?? initialValues?.category?.id;
+    if (initialCategoryId && categoryId && initialCategoryId !== categoryId)
+      return;
+    const initialValue = multipleSubCategories
+      ? (initialValues?.sub_category_ids ??
+        initialValues?.subCategories?.map((item) => item.id))
+      : (initialValues?.sub_category_id ??
+        initialValues?.sub_category?.id ??
+        initialValues?.subCategory?.id);
+    if (
+      initialValue === undefined ||
+      initialValue === null ||
+      (Array.isArray(initialValue) && !initialValue.length)
+    )
+      return;
+    const currentValue = form.getFieldValue(subCategoryFieldName);
     if (currentValue !== undefined && currentValue !== null) return;
-    form.setFieldsValue({ sub_category_id: initialSubCategoryId });
-  }, [form, initialValues, subCategories]);
+    form.setFieldsValue({ [subCategoryFieldName]: initialValue });
+  }, [
+    categoryId,
+    form,
+    initialValues,
+    multipleSubCategories,
+    subCategories,
+    subCategoryFieldName,
+  ]);
 
   useEffect(() => {
     if (!manageModalOpen) return;
@@ -323,12 +371,12 @@ export default function ProductForm({
       const existing = subCategories.find(
         (item) =>
           item?.id !== editingSubCategory.id &&
-          item?.name?.toLowerCase() === trimmed.toLowerCase()
+          item?.name?.toLowerCase() === trimmed.toLowerCase(),
       );
       if (existing) {
-        form.setFieldsValue({ sub_category_id: existing.id });
+        selectSubCategory(existing.id);
         messageApi.info(
-          tForm("messages.subCategoryAlreadyExists", { name: existing.name })
+          tForm("messages.subCategoryAlreadyExists", { name: existing.name }),
         );
         setEditingSubCategory(null);
         manageForm.resetFields();
@@ -370,9 +418,6 @@ export default function ProductForm({
           }
           return list;
         });
-        if (form.getFieldValue("sub_category_id") === editingSubCategory.id) {
-          form.setFieldsValue({ sub_category_id: editingSubCategory.id });
-        }
         messageApi.success(tForm("messages.subCategoryUpdateSuccess"));
         setEditingSubCategory(null);
         manageForm.resetFields();
@@ -394,6 +439,7 @@ export default function ProductForm({
     messageApi,
     normalizeItemResponse,
     editingSubCategory,
+    selectSubCategory,
     subCategories,
     tCommon,
     tForm,
@@ -447,8 +493,12 @@ export default function ProductForm({
           />
         </Form.Item>
 
-        <Form.Item name="sub_category_id" label={tForm("labels.subCategory")}>
+        <Form.Item
+          name={subCategoryFieldName}
+          label={tForm("labels.subCategory")}
+        >
           <Select
+            mode={multipleSubCategories ? "multiple" : undefined}
             disabled={!categoryId}
             allowClear
             showSearch

@@ -466,8 +466,27 @@ export default function OrderDesignModal({
     return candidate;
   }, [orderDetail]);
 
+  const productSubCategoryOptions = useMemo(() => {
+    const subCategories = Array.isArray(orderDetail?.product?.sub_categories)
+      ? orderDetail.product.sub_categories
+      : [];
+    return subCategories
+      .filter((item) => item?.id && (!item?.status || item.status === "active"))
+      .map((item) => ({
+        value: String(item.id),
+        label: item.name || `#${item.id}`,
+      }));
+  }, [orderDetail]);
+  const requiresProductSubCategoryRouting =
+    productSubCategoryOptions.length > 1;
+  const hasValidProductSubCategoryRouting =
+    !requiresProductSubCategoryRouting ||
+    productSubCategoryOptions.some(
+      (option) => option.value === String(routingSubCategoryId || ""),
+    );
   const canRouteToPrint =
     (user?.roles || []).includes("customeradmin") &&
+    !requiresProductSubCategoryRouting &&
     String(orderDetail?.product?.category?.name || "")
       .trim()
       .toLowerCase() === "engraving";
@@ -738,11 +757,17 @@ export default function OrderDesignModal({
     [message, t],
   );
 
-  const canSave = Boolean(itemId && orderDetail?.id);
+  const canSave = Boolean(
+    itemId && orderDetail?.id && hasValidProductSubCategoryRouting,
+  );
 
   const handleSave = useCallback(async () => {
     if (!orderDetail?.id) {
       message.error(t("messages.missingParams"));
+      return;
+    }
+    if (!hasValidProductSubCategoryRouting) {
+      message.error(t("messages.productSubCategoryRequired"));
       return;
     }
     if (isPersonalizedQuantityMode) {
@@ -802,7 +827,8 @@ export default function OrderDesignModal({
             "-",
           note,
           isSubCategory,
-          includeRoutingSubCategory: canRouteToPrint,
+          includeRoutingSubCategory:
+            canRouteToPrint || requiresProductSubCategoryRouting,
           routingSubCategoryId,
           positions: Array.from(new Set(files.map((file) => file.positionId))),
           files,
@@ -852,7 +878,8 @@ export default function OrderDesignModal({
             "-",
           note,
           isSubCategory,
-          includeRoutingSubCategory: canRouteToPrint,
+          includeRoutingSubCategory:
+            canRouteToPrint || requiresProductSubCategoryRouting,
           routingSubCategoryId,
           positions: positionsToSubmit,
           files,
@@ -874,7 +901,7 @@ export default function OrderDesignModal({
     formData.append("order_id", String(orderDetail.order_id));
     formData.append("note", note || "");
     formData.append("is_sub_category", String(Boolean(isSubCategory)));
-    if (canRouteToPrint) {
+    if (canRouteToPrint || requiresProductSubCategoryRouting) {
       formData.append(
         "routing_sub_category_id",
         routingSubCategoryId ? String(routingSubCategoryId) : "",
@@ -897,6 +924,7 @@ export default function OrderDesignModal({
     canRouteToPrint,
     designFiles,
     enqueueUpload,
+    hasValidProductSubCategoryRouting,
     isSubCategory,
     isPersonalizedQuantityMode,
     message,
@@ -907,6 +935,7 @@ export default function OrderDesignModal({
     personalizedQuantityIncomplete,
     positionMap,
     routingSubCategoryId,
+    requiresProductSubCategoryRouting,
     selectedPositionIds,
     t,
   ]);
@@ -1486,6 +1515,34 @@ export default function OrderDesignModal({
             </Card>
 
             <Card title={t("fields.positions")}>
+              {requiresProductSubCategoryRouting ? (
+                <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                  <Typography.Text strong>
+                    {t("fields.productSubCategoryRouting")}
+                  </Typography.Text>
+                  <Select
+                    className="mt-2 w-full"
+                    value={
+                      hasValidProductSubCategoryRouting
+                        ? routingSubCategoryId || undefined
+                        : undefined
+                    }
+                    onChange={(value) => setRoutingSubCategoryId(value || null)}
+                    options={productSubCategoryOptions}
+                    placeholder={t(
+                      "fields.productSubCategoryRoutingPlaceholder",
+                    )}
+                    optionFilterProp="label"
+                    showSearch
+                    status={
+                      hasValidProductSubCategoryRouting ? undefined : "error"
+                    }
+                  />
+                  <Typography.Text type="secondary" className="mt-2 block">
+                    {t("fields.productSubCategoryRoutingHelp")}
+                  </Typography.Text>
+                </div>
+              ) : null}
               {canRouteToPrint ? (
                 <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
                   <Typography.Text strong>
