@@ -16,6 +16,7 @@ import {
 } from "antd";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 
 export default function DesignFlawModal({
   open,
@@ -167,6 +168,7 @@ export default function DesignFlawModal({
                           </Typography.Text>
                         )}
                         <Typography.Text>{position.name}</Typography.Text>
+                        <OriginalDesignButton url={position.original_url} block />
                       </Space>
                     ))}
                   </Space>

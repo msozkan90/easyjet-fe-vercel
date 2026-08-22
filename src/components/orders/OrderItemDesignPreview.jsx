@@ -1,7 +1,10 @@
 "use client";
 
 import { Card, Empty, Image, Tag, Typography } from "antd";
-import { resolveDesignThumbnailStatus } from "@/components/common/media/DesignThumbnailImage";
+import {
+  OriginalDesignButton,
+  resolveDesignThumbnailStatus,
+} from "@/components/common/media/DesignThumbnailImage";
 import { useTranslations } from "@/i18n/use-translations";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
 
@@ -176,6 +179,7 @@ const PositionDesignCard = ({
           {tDetail("designs.positionLabel")}
         </Typography.Text>
         <Typography.Text>{positionName}</Typography.Text>
+        <OriginalDesignButton url={design?.design_url} block />
       </div>
     </Card>
   );

@@ -19,7 +19,10 @@ import {
   Typography,
 } from "antd";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { resolveDesignThumbnailStatus } from "@/components/common/media/DesignThumbnailImage";
+import {
+  OriginalDesignButton,
+  resolveDesignThumbnailStatus,
+} from "@/components/common/media/DesignThumbnailImage";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
@@ -228,6 +231,7 @@ const ItemDesignPreview = ({
                 {tDetail("designs.positionLabel")}
               </Typography.Text>
               <Typography.Text>{positionName}</Typography.Text>
+              <OriginalDesignButton url={design?.design_url} block />
             </div>
           </Card>
         );

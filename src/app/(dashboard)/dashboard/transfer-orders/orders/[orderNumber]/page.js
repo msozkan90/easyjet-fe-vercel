@@ -539,20 +539,6 @@ export default function TransferOrderDetailPage() {
                                   }}
                                 >
                                   <Space>
-                                    <Button
-                                      size="small"
-                                      icon={<ExportOutlined />}
-                                      onClick={() => {
-                                        if (!design?.design_url) return;
-                                        window.open(
-                                          design.design_url,
-                                          "_blank",
-                                          "noopener,noreferrer",
-                                        );
-                                      }}
-                                    >
-                                      {tDetail("actions.open")}
-                                    </Button>
                                     {canDeleteDesign ? (
                                       <Popconfirm
                                         title={tDetail(

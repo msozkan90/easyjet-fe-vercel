@@ -34,6 +34,7 @@ import {
   GuardedPreviewImage,
   isFilePreviewAllowed,
 } from "@/components/common/media/ImagePreviewGate";
+import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
 
 const formatAmount = (value, fallback = "-") => {
@@ -1163,6 +1164,7 @@ export default function OrderDesignModal({
           )}
         </div>
         <div className="mt-auto flex flex-col gap-2">
+          <OriginalDesignButton url={existingDesign?.design_url} block />
           <Upload
             accept={ACCEPT_ATTR}
             maxCount={1}
@@ -1194,6 +1196,9 @@ export default function OrderDesignModal({
     const designPreviewUrl = getDesignPreviewUrl(
       extractUploadFileList(fileList),
     );
+    const originalDesignUrl = extractUploadFileList(fileList).find(
+      (file) => !file?.originFileObj && file?.url,
+    )?.url;
     const designPreviewFallback = getDesignPreviewFallback(
       extractUploadFileList(fileList),
       t("positions.designAreaPlaceholder"),
@@ -1267,6 +1272,7 @@ export default function OrderDesignModal({
             )}
           </div>
 
+          <OriginalDesignButton url={originalDesignUrl} block />
           <Upload
             accept={ACCEPT_ATTR}
             maxCount={1}

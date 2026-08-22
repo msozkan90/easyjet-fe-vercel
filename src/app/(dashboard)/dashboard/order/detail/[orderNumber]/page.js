@@ -23,7 +23,10 @@ import {
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { resolveDesignThumbnailStatus } from "@/components/common/media/DesignThumbnailImage";
+import {
+  OriginalDesignButton,
+  resolveDesignThumbnailStatus,
+} from "@/components/common/media/DesignThumbnailImage";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
@@ -719,6 +722,7 @@ const ItemDesignPreview = ({
                 {tDesign("designs.positionLabel")}
               </Typography.Text>
               <Typography.Text>{positionName}</Typography.Text>
+              <OriginalDesignButton url={design?.design_url} block />
             </div>
           </Card>
         );

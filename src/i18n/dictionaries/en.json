@@ -66,7 +66,7 @@
       "failed": "Preview could not be generated.",
       "notApplicable": "This file type cannot be previewed.",
       "empty": "No preview",
-      "openOriginal": "Open original"
+      "openOriginal": "Download original"
     },
     "none": "-"
   },
