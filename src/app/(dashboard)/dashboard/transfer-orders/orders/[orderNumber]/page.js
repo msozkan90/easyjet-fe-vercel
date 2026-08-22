@@ -27,7 +27,7 @@ import {
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
-import { LazyGuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
+import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { TransferOrdersAPI } from "@/utils/api";
 import {
   DeleteOutlined,
@@ -498,12 +498,9 @@ export default function TransferOrderDetailPage() {
                                 size={8}
                                 style={{ width: "100%" }}
                               >
-                                <LazyGuardedPreviewImage
-                                  src={design?.design_url}
+                                <DesignThumbnailImage
+                                  design={design}
                                   alt={`design-${design?.id}`}
-                                  openLabel={tDetail("actions.open")}
-                                  preparingText={tDetail("preview.preparing")}
-                                  emptyText={tDetail("preview.empty")}
                                 />
                                 <Typography.Text
                                   type="secondary"

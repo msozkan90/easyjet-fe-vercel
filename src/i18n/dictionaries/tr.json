@@ -61,6 +61,13 @@
       "selectPlaceholder": "{label} seç",
       "totalItems": "Toplam {count} kayıt"
     },
+    "designThumbnail": {
+      "preparing": "Önizleme hazırlanıyor...",
+      "failed": "Önizleme hazırlanamadı.",
+      "notApplicable": "Bu dosya türü önizlenemez.",
+      "empty": "Önizleme yok",
+      "openOriginal": "Orijinali aç"
+    },
     "none": "-"
   },
   "home": {

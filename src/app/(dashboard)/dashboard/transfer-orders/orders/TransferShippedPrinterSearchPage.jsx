@@ -23,8 +23,8 @@ import { PrinterOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import {
   GuardedPreviewImage,
-  LazyGuardedPreviewImage,
 } from "@/components/common/media/ImagePreviewGate";
+import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
@@ -195,12 +195,9 @@ const TransferOrderItemCard = ({
                     size={8}
                     style={{ width: "100%" }}
                   >
-                    <LazyGuardedPreviewImage
-                      src={design?.design_url}
+                    <DesignThumbnailImage
+                      design={design}
                       alt={`design-${design?.id}`}
-                      openLabel={tCommonActions("open")}
-                      preparingText={tDetail("preview.preparing")}
-                      emptyText={tDetail("preview.empty")}
                     />
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                       {tDetail("designCard.size")}:{" "}
@@ -801,13 +798,10 @@ export default function TransferShippedPrinterSearchPage() {
                           <Checkbox value={designKey} />
                           <div className="h-14 w-14 flex-none overflow-hidden rounded border border-slate-100 bg-slate-50">
                             {design?.design_url ? (
-                              <GuardedPreviewImage
-                                src={design.design_url}
+                              <DesignThumbnailImage
+                                design={design}
                                 alt={`shipping-checklist-design-${design?.id}`}
                                 width={56}
-                                openLabel={tCommonActions("open")}
-                                preparingText={tDetail("preview.preparing")}
-                                emptyText={tDetail("preview.empty")}
                                 preview
                               />
                             ) : null}

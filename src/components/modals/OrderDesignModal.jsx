@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Empty,
+  Image,
   Input,
   InputNumber,
   Modal,
@@ -360,6 +361,8 @@ export default function OrderDesignModal({
                             t("positions.designUploadLabel"),
                           status: "done",
                           url,
+                          thumbUrl: design?.thumbnail_url || undefined,
+                          thumbnailStatus: design?.thumbnail_status,
                         },
                       ]
                     : [],
@@ -401,6 +404,8 @@ export default function OrderDesignModal({
                 t("positions.designUploadLabel"),
               status: "done",
               url,
+              thumbUrl: designInfo?.thumbnail_url || undefined,
+              thumbnailStatus: designInfo?.thumbnail_status,
             },
           ];
         }
@@ -1031,7 +1036,20 @@ export default function OrderDesignModal({
   const getDesignPreviewUrl = (fileList) => {
     if (!Array.isArray(fileList) || !fileList.length) return undefined;
     const file = fileList[0];
-    return file?.thumbUrl || file?.url || file?.response?.url;
+    return file?.thumbUrl || file?.response?.thumbnail_url;
+  };
+
+  const getDesignPreviewFallback = (fileList, defaultText) => {
+    const file = Array.isArray(fileList) ? fileList[0] : null;
+    if (file?.thumbUrl || file?.originFileObj) return defaultText;
+    if (file?.thumbnailStatus === "failed") {
+      return tCommon("designThumbnail.failed");
+    }
+    if (file?.thumbnailStatus === "not_applicable") {
+      return tCommon("designThumbnail.notApplicable");
+    }
+    if (file?.url) return tCommon("designThumbnail.preparing");
+    return defaultText;
   };
 
   const renderPositionCard = (position) => {
@@ -1060,6 +1078,10 @@ export default function OrderDesignModal({
     const fileList = designFiles[positionId] || [];
     const designPreviewUrl = getDesignPreviewUrl(
       extractUploadFileList(fileList),
+    );
+    const designPreviewFallback = getDesignPreviewFallback(
+      extractUploadFileList(fileList),
+      t("positions.designAreaPlaceholder"),
     );
     const designArea = extractDesignAreaFromRecord(position);
     return (
@@ -1117,14 +1139,17 @@ export default function OrderDesignModal({
                     }}
                   >
                     {designPreviewUrl ? (
-                      <img
+                      <Image
                         src={designPreviewUrl}
                         alt="design preview"
-                        className="h-full w-full rounded-lg object-contain"
+                        width="100%"
+                        height="100%"
+                        preview={{ src: designPreviewUrl }}
+                        style={{ objectFit: "contain", borderRadius: 8 }}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-                        {t("positions.designAreaPlaceholder")}
+                        {designPreviewFallback}
                       </div>
                     )}
                   </div>
@@ -1169,6 +1194,10 @@ export default function OrderDesignModal({
     const designPreviewUrl = getDesignPreviewUrl(
       extractUploadFileList(fileList),
     );
+    const designPreviewFallback = getDesignPreviewFallback(
+      extractUploadFileList(fileList),
+      t("positions.designAreaPlaceholder"),
+    );
     const designArea = position ? extractDesignAreaFromRecord(position) : null;
     const positionImageUrl =
       position?.images?.[0]?.image_url || orderDetail?.image_url;
@@ -1196,33 +1225,42 @@ export default function OrderDesignModal({
                       }}
                     >
                       {designPreviewUrl ? (
-                        <img
+                        <Image
                           src={designPreviewUrl}
                           alt="design preview"
-                          className="h-full w-full rounded-lg object-contain"
+                          width="100%"
+                          height="100%"
+                          preview={{ src: designPreviewUrl }}
+                          style={{ objectFit: "contain", borderRadius: 8 }}
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-                          {t("positions.designAreaPlaceholder")}
+                          {designPreviewFallback}
                         </div>
                       )}
                     </div>
                   ) : designPreviewUrl ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <img
+                      <Image
                         src={designPreviewUrl}
                         alt="design preview"
-                        className="h-24 w-24 rounded-lg object-contain"
+                        width={96}
+                        height={96}
+                        preview={{ src: designPreviewUrl }}
+                        style={{ objectFit: "contain", borderRadius: 8 }}
                       />
                     </div>
                   ) : null}
                 </div>
               </div>
             ) : designPreviewUrl ? (
-              <img
+              <Image
                 src={designPreviewUrl}
                 alt="design preview"
-                className="h-36 w-full object-contain"
+                width="100%"
+                height={144}
+                preview={{ src: designPreviewUrl }}
+                style={{ objectFit: "contain" }}
               />
             ) : (
               <Empty description={t("positions.noPreview")} />

@@ -9,6 +9,7 @@ import {
   Card,
   Empty,
   Form,
+  Image,
   Input,
   InputNumber,
   Modal,
@@ -22,6 +23,7 @@ import {
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
+import { resolveDesignThumbnailStatus } from "@/components/common/media/DesignThumbnailImage";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
@@ -590,6 +592,7 @@ const ItemDesignPreview = ({
   tOrders,
   fallbackText,
 }) => {
+  const tThumbnail = useTranslations("common.designThumbnail");
   if (!designs.length) {
     return <Empty description={tDesign("designs.empty")} />;
   }
@@ -604,7 +607,16 @@ const ItemDesignPreview = ({
           : null;
         const positionImageUrl = position?.images?.[0]?.image_url;
         const previewImageUrl = positionImageUrl || item?.image_url;
-        const designPreviewUrl = design?.design_url;
+        const designPreviewUrl = design?.thumbnail_url;
+        const thumbnailStatus = resolveDesignThumbnailStatus(design);
+        const thumbnailFallbackText =
+          thumbnailStatus === "pending" || thumbnailStatus === "processing"
+            ? tThumbnail("preparing")
+            : thumbnailStatus === "failed"
+              ? tThumbnail("failed")
+              : thumbnailStatus === "not_applicable"
+                ? tThumbnail("notApplicable")
+                : fallbackText;
         const positionName =
           position?.name ||
           design?.product_position?.name ||
@@ -655,23 +667,29 @@ const ItemDesignPreview = ({
                         }}
                       >
                         {designPreviewUrl ? (
-                          <img
+                          <Image
                             src={designPreviewUrl}
                             alt="design preview"
-                            className="h-full w-full rounded-lg object-contain"
+                            width="100%"
+                            height="100%"
+                            preview={{ src: designPreviewUrl }}
+                            style={{ objectFit: "contain", borderRadius: 8 }}
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-                            {fallbackText}
+                            {thumbnailFallbackText}
                           </div>
                         )}
                       </div>
                     ) : designPreviewUrl ? (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <img
+                        <Image
                           src={designPreviewUrl}
                           alt="design preview"
-                          className="h-24 w-24 rounded-lg object-contain"
+                          width={96}
+                          height={96}
+                          preview={{ src: designPreviewUrl }}
+                          style={{ objectFit: "contain", borderRadius: 8 }}
                         />
                       </div>
                     ) : null}
@@ -679,15 +697,20 @@ const ItemDesignPreview = ({
                 </div>
               ) : designPreviewUrl ? (
                 <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <img
+                  <Image
                     src={designPreviewUrl}
                     alt="design preview"
-                    className="h-full w-full object-contain"
+                    width="100%"
+                    height="100%"
+                    preview={{ src: designPreviewUrl }}
+                    style={{ objectFit: "contain" }}
                   />
                 </div>
               ) : (
                 <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Empty description={tDesign("designs.noPreview")} />
+                  <Empty
+                    description={thumbnailFallbackText || tDesign("designs.noPreview")}
+                  />
                 </div>
               )}
             </div>

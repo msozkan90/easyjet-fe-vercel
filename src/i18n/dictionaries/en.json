@@ -61,6 +61,13 @@
       "selectPlaceholder": "Select {label}",
       "totalItems": "Total {count} items"
     },
+    "designThumbnail": {
+      "preparing": "Preparing preview...",
+      "failed": "Preview could not be generated.",
+      "notApplicable": "This file type cannot be previewed.",
+      "empty": "No preview",
+      "openOriginal": "Open original"
+    },
     "none": "-"
   },
   "home": {
