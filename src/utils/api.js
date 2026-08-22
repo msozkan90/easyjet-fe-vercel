@@ -432,6 +432,7 @@ export const NestShipperAPI = {
 // --- NEW: Companies
 export const CompaniesAPI = {
   list: (data) => api.post("/companies/list", data),
+  forest: () => api.get("/companies/forest"),
   create: (data) => api.post("/companies", data),
   update: (id, data) => api.put(`/companies/${id}`, data),
   updateShippingStatus: (data) => api.put(`/companies/shipping/status`, data),

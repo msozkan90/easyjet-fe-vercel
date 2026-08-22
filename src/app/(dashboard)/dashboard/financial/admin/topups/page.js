@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { FundingAccountsAPI, WalletTopupsAPI } from "@/utils/api";
+import { CompaniesAPI, FundingAccountsAPI, WalletTopupsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
@@ -36,6 +36,7 @@ export default function WalletTopupsAdminListPage() {
   const dispatch = useDispatch();
 
   const [fundingAccounts, setFundingAccounts] = useState([]);
+  const [orgForest, setOrgForest] = useState([]);
 
   useEffect(() => {
     let alive = true;
@@ -56,6 +57,25 @@ export default function WalletTopupsAdminListPage() {
     };
   }, [message, t]);
 
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const resp = await CompaniesAPI.forest();
+        if (!alive) return;
+        const list = resp?.data ?? resp;
+        setOrgForest(Array.isArray(list) ? list : []);
+      } catch {
+        if (alive) {
+          message.error(t("messages.loadOwnersError"));
+        }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [message, t]);
+
   const listRequest = useMemo(
     () =>
       makeListRequest(
@@ -65,6 +85,20 @@ export default function WalletTopupsAdminListPage() {
             { field: "status", direction: "asc" },
             { field: "created_at", direction: "desc" },
           ],
+          filterTransform: (filters = {}) => {
+            const next = { ...filters };
+            const [ownerType, ownerId] = String(next.owner || "").split(":");
+            delete next.owner;
+
+            if (
+              ownerId &&
+              ["company", "partner", "customer"].includes(ownerType)
+            ) {
+              next[`${ownerType}_id`] = ownerId;
+            }
+
+            return next;
+          },
         },
         normalizeListAndMeta
       ),
@@ -88,6 +122,32 @@ export default function WalletTopupsAdminListPage() {
       })),
     [fundingAccounts]
   );
+
+  const ownerOptions = useMemo(() => {
+    const options = [];
+    const addOption = (type, entity) => {
+      if (!entity?.id) return;
+      options.push({
+        value: `${type}:${entity.id}`,
+        label: `${t(`ownerTypes.${type}`)}: ${entity.name || entity.id}`,
+      });
+    };
+
+    orgForest.forEach((company) => {
+      addOption("company", company);
+      (company.customers || []).forEach((customer) =>
+        addOption("customer", customer)
+      );
+      (company.partners || []).forEach((partner) => {
+        addOption("partner", partner);
+        (partner.customers || []).forEach((customer) =>
+          addOption("customer", customer)
+        );
+      });
+    });
+
+    return options;
+  }, [orgForest, t]);
 
   const columns = useMemo(
     () => [
@@ -113,6 +173,12 @@ export default function WalletTopupsAdminListPage() {
       {
         title: t("columns.owner"),
         key: "owner",
+        filter: {
+          type: "select",
+          placeholder: t("filters.owner"),
+          options: ownerOptions,
+          width: 300,
+        },
         render: (_, record) => resolveOwnerName(record),
       },
       {
@@ -187,7 +253,7 @@ export default function WalletTopupsAdminListPage() {
         ),
       },
     ],
-    [fundingOptions, t, tStatus]
+    [fundingOptions, ownerOptions, t, tStatus]
   );
 
   return (

@@ -15,6 +15,7 @@ import {
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
+import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 
@@ -330,11 +331,9 @@ export default function TransferPrinterOrderSearchPage({
                                     bodyStyle={{ padding: 10 }}
                                   >
                                     <div className="space-y-2">
-                                      <GuardedPreviewImage
-                                        src={design?.design_url}
+                                      <DesignThumbnailImage
+                                        design={design}
                                         alt="transfer-design"
-                                        openLabel={tCommonActions("open")}
-                                        emptyText={tOrders("common.none")}
                                         style={{
                                           width: "100%",
                                           maxHeight: 220,

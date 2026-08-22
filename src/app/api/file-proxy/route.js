@@ -13,6 +13,7 @@ const getErrorResponse = (message, status = 400) =>
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const target = searchParams.get("url");
+  const forceDownload = searchParams.get("download") === "1";
 
   if (!target) {
     return getErrorResponse("Missing 'url' query parameter.");
@@ -52,19 +53,27 @@ export async function GET(request) {
     const contentDisposition = upstreamResponse.headers.get(
       "content-disposition",
     );
-    const body = await upstreamResponse.arrayBuffer();
-
     const headers = new Headers({
       "content-type": contentType,
       "cache-control": "no-store",
-      "content-length": String(body.byteLength),
     });
 
-    if (contentDisposition) {
+    const contentLength = upstreamResponse.headers.get("content-length");
+    if (contentLength) headers.set("content-length", contentLength);
+
+    if (forceDownload) {
+      const pathname = decodeURIComponent(parsedUrl.pathname || "");
+      const rawFilename = pathname.split("/").filter(Boolean).pop() || "design";
+      const safeFilename = rawFilename.replace(/[\\/:*?"<>|\r\n]/g, "_");
+      headers.set(
+        "content-disposition",
+        `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`,
+      );
+    } else if (contentDisposition) {
       headers.set("content-disposition", contentDisposition);
     }
 
-    return new Response(body, {
+    return new Response(upstreamResponse.body, {
       status: 200,
       headers,
     });

@@ -28,9 +28,7 @@ import {
 } from "@ant-design/icons";
 import { TransferOrdersAPI } from "@/utils/api";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
-import {
-  LazyGuardedPreviewImage,
-} from "@/components/common/media/ImagePreviewGate";
+import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 
@@ -107,20 +105,16 @@ const normalizeAddress = (order) => ({
   customer_email: order?.shipping_address?.customer_email || "",
 });
 
-function TransferDesignPreviewCard({ design, tCommonActions, tModal }) {
+function TransferDesignPreviewCard({ design }) {
   return (
     <Space
       direction="vertical"
       size={8}
       style={{ width: "100%" }}
     >
-      <LazyGuardedPreviewImage
-        src={design?.design_url}
+      <DesignThumbnailImage
+        design={design}
         alt={`design-${design?.id}`}
-        openLabel={tCommonActions("open")}
-        preparingText={tModal("preview.preparing")}
-        emptyText={tModal("preview.empty")}
-        blockedButtonProps={{ block: true }}
       />
     </Space>
   );

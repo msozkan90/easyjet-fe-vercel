@@ -77,6 +77,22 @@ const fetchDesignFile = async (url) => {
   return response.blob();
 };
 
+export const downloadOriginalDesign = async ({
+  url,
+  fallbackName = "design",
+}) => {
+  if (!url) return { downloaded: false };
+  const filename = extractFilenameFromUrl(url, fallbackName);
+  const anchor = document.createElement("a");
+  anchor.href = `/api/file-proxy?download=1&url=${encodeURIComponent(url)}`;
+  anchor.download = filename;
+  anchor.rel = "noopener noreferrer";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  return { downloaded: true, filename };
+};
+
 const fetchLabelFile = async (url) => {
   const proxyUrl = `/api/file-proxy?url=${encodeURIComponent(url)}`;
   const proxyResponse = await fetch(proxyUrl, {

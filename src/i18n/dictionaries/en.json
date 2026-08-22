@@ -61,6 +61,13 @@
       "selectPlaceholder": "Select {label}",
       "totalItems": "Total {count} items"
     },
+    "designThumbnail": {
+      "preparing": "Preparing preview...",
+      "failed": "Preview could not be generated.",
+      "notApplicable": "This file type cannot be previewed.",
+      "empty": "No preview",
+      "openOriginal": "Download original"
+    },
     "none": "-"
   },
   "home": {
@@ -273,6 +280,7 @@
       "filters": {
         "status": "Select status",
         "ownerType": "Select owner type",
+        "owner": "Select owner",
         "fundingAccount": "Select funding account",
         "createdAt": "Select date range"
       },
@@ -296,6 +304,7 @@
       },
       "messages": {
         "loadFundingError": "Funding accounts could not be loaded.",
+        "loadOwnersError": "Owner options could not be loaded.",
         "createSuccess": "Top-up request created.",
         "createError": "Top-up request failed.",
         "cancelSuccess": "Top-up request canceled.",

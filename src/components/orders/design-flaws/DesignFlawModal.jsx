@@ -6,6 +6,7 @@ import {
   Card,
   Checkbox,
   Empty,
+  Image,
   InputNumber,
   Modal,
   Space,
@@ -15,6 +16,7 @@ import {
 } from "antd";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 
 export default function DesignFlawModal({
   open,
@@ -24,6 +26,7 @@ export default function DesignFlawModal({
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders.designFlaws");
+  const tThumbnail = useTranslations("common.designThumbnail");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [groups, setGroups] = useState([]);
@@ -147,13 +150,25 @@ export default function DesignFlawModal({
                     {(group.positions || []).map((position) => (
                       <Space key={position.id} direction="vertical" size={2}>
                         {position.preview_url ? (
-                          <img
+                          <Image
                             src={position.preview_url}
                             alt={position.name}
-                            className="h-16 w-16 rounded border object-contain"
+                            width={64}
+                            height={64}
+                            preview={{ src: position.preview_url }}
+                            style={{ objectFit: "contain", borderRadius: 6 }}
                           />
-                        ) : null}
+                        ) : (
+                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {position.preview_status === "failed"
+                              ? tThumbnail("failed")
+                              : position.preview_status === "not_applicable"
+                                ? tThumbnail("notApplicable")
+                                : tThumbnail("preparing")}
+                          </Typography.Text>
+                        )}
                         <Typography.Text>{position.name}</Typography.Text>
+                        <OriginalDesignButton url={position.original_url} block />
                       </Space>
                     ))}
                   </Space>
