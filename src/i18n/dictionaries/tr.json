@@ -273,6 +273,7 @@
       "filters": {
         "status": "Durum seçin",
         "ownerType": "Sahip tipi seçin",
+        "owner": "Sahip seçin",
         "fundingAccount": "Hesap seçin",
         "createdAt": "Tarih aralığı seçin"
       },
@@ -296,6 +297,7 @@
       },
       "messages": {
         "loadFundingError": "Hesaplar yüklenemedi.",
+        "loadOwnersError": "Sahip seçenekleri yüklenemedi.",
         "createSuccess": "Bakiye yükleme talebi oluşturuldu.",
         "createError": "Bakiye yükleme talebi başarısız.",
         "cancelSuccess": "Bakiye yükleme talebi iptal edildi.",
