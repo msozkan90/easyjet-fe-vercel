@@ -6,6 +6,8 @@ import OrdersStatusListPage from "./OrdersStatusListPage";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 
+const fetchProducts = () => fetchGenericList("product");
+
 const withDetailAction =
   (t) =>
   (baseColumns = []) => [
@@ -46,7 +48,7 @@ export default function AffiliatedOrdersStatusListPage({
       {...rest}
       requireRoles={requireRoles}
       columnsBuilder={buildAffiliatedColumns}
-      productListFetcher={() => fetchGenericList("product")}
+      productListFetcher={fetchProducts}
       affilated
       showCustomerColumn
     />

@@ -1,6 +1,8 @@
 import { GenericListAPI } from "./api";
 import { normalizeListAndMeta } from "./normalizeListAndMeta";
 
+const pendingRequests = new Map();
+
 const extractList = (response) => {
   const tryNormalize = normalizeListAndMeta(response);
   if (Array.isArray(tryNormalize.list) && tryNormalize.list.length) {
@@ -60,7 +62,20 @@ export const fetchGenericList = async (tableName, options = {}) => {
     throw new Error("fetchGenericList requires a table_name");
   }
 
-  const response = await GenericListAPI.list(payload);
+  const requestKey = JSON.stringify(payload);
+  let request = pendingRequests.get(requestKey);
+  if (!request) {
+    request = GenericListAPI.list(payload);
+    pendingRequests.set(requestKey, request);
+    const removePendingRequest = () => {
+      if (pendingRequests.get(requestKey) === request) {
+        pendingRequests.delete(requestKey);
+      }
+    };
+    request.then(removePendingRequest, removePendingRequest);
+  }
+
+  const response = await request;
   const list = extractList(response);
   return Array.isArray(list) ? list.filter((item) => item != null) : [];
 };
