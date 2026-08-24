@@ -10,6 +10,8 @@ import { getBlobErrorMessage } from "@/utils/apiHelpers";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 import { useTranslations } from "@/i18n/use-translations";
 
+const fetchProducts = () => fetchGenericList("product");
+
 export default function DesignFlawItemsPage({ categoryId, subCategoryId }) {
   const tableRef = useRef(null);
   const { enqueueDownload, isDownloading } = useDownloadQueue();
@@ -97,7 +99,7 @@ export default function DesignFlawItemsPage({ categoryId, subCategoryId }) {
       allowedStatuses={["designFlaw"]}
       enableStatusFilter={false}
       requireRoles={["companyCompletedWorker", "companyAdmin"]}
-      productListFetcher={() => fetchGenericList("product")}
+      productListFetcher={fetchProducts}
       affilated
       columnsBuilder={columnsBuilder}
       toolbarRight={

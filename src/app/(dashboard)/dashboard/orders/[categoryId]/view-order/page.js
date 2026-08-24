@@ -15,6 +15,8 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 import DesignFlawModal from "@/components/orders/design-flaws/DesignFlawModal";
 
+const fetchProducts = () => fetchGenericList("product");
+
 export default function CategoryViewOrderPage({ params }) {
   const { categoryId } = params || {};
   const tCommonActions = useTranslations("common.actions");
@@ -116,7 +118,7 @@ export default function CategoryViewOrderPage({ params }) {
           { field: "order_date", direction: "asc" },
         ]}
         requireRoles={["companyCompletedWorker"]}
-        productListFetcher={() => fetchGenericList("product")}
+        productListFetcher={fetchProducts}
         affilated
         toolbarRight={toolbarRight}
         columnsBuilder={columnsBuilder}

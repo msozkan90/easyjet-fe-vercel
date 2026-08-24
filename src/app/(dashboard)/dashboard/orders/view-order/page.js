@@ -4,6 +4,8 @@ import OrdersStatusListPage from "../OrdersStatusListPage";
 import { OrdersAPI } from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 
+const fetchProducts = () => fetchGenericList("product");
+
 export default function OrdersViewOrderPage() {
   return (
     <OrdersStatusListPage
@@ -14,7 +16,7 @@ export default function OrdersViewOrderPage() {
         { field: "order_date", direction: "asc" },
       ]}
       requireRoles={["companyShipmentWorker"]}
-      productListFetcher={() => fetchGenericList("product")}
+      productListFetcher={fetchProducts}
     />
   );
 }
