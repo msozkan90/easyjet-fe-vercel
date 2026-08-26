@@ -63,6 +63,7 @@ export function DownloadQueueProvider({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const tasksRef = useRef(tasks);
   const controllersRef = useRef(new Map());
+  const progressSamplesRef = useRef(new Map());
   const panelRef = useRef(null);
 
   useEffect(() => {
@@ -112,6 +113,7 @@ export function DownloadQueueProvider({ children }) {
       const controller = new AbortController();
       const startedAt = Date.now();
       controllersRef.current.set(taskId, controller);
+      progressSamplesRef.current.set(taskId, null);
       updateTask(taskId, {
         status: "preparing",
         startedAt,
@@ -136,17 +138,20 @@ export function DownloadQueueProvider({ children }) {
             );
             const responseTotal = Number(event?.total || 0);
             const total = responseTotal > 0 ? responseTotal : headerTotal;
-            const elapsedSeconds = Math.max(
-              (Date.now() - startedAt) / 1000,
-              0.001,
-            );
+            const now = Date.now();
+            const previousSample = progressSamplesRef.current.get(taskId);
+            const sampledRate = previousSample
+              ? ((loaded - previousSample.loaded) * 1000) /
+                Math.max(now - previousSample.at, 1)
+              : 0;
+            progressSamplesRef.current.set(taskId, { loaded, at: now });
             updateTask(taskId, {
               status: "downloading",
               loadedBytes: loaded,
               totalBytes: total > 0 ? total : 0,
               totalIsEstimated: responseTotal <= 0 && headerTotal > 0,
               progress: normalizePercent(loaded, total),
-              speedBytes: Number(event?.rate || loaded / elapsedSeconds || 0),
+              speedBytes: Number(event?.rate || sampledRate || 0),
             });
           },
         });
@@ -191,6 +196,7 @@ export function DownloadQueueProvider({ children }) {
         }
       } finally {
         controllersRef.current.delete(taskId);
+        progressSamplesRef.current.delete(taskId);
       }
     },
     [t, updateTask],

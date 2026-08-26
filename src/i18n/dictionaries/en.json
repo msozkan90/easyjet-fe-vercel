@@ -3252,10 +3252,10 @@
             "queued": "Queued: {count}"
           },
           "fields": {
-            "preparing": "Preparing file size and download stream",
+            "preparing": "Preparing PDF and download stream",
             "progressKnown": "{downloaded} / {total} downloaded",
             "progressEstimated": "{downloaded} / approximately {total} downloaded",
-            "progressUnknown": "{downloaded} downloaded • calculating total size"
+            "progressUnknown": "{downloaded} downloaded"
           },
           "actions": {
             "clearFinished": "Clear Finished",
