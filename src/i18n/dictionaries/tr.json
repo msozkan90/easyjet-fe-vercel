@@ -3032,10 +3032,10 @@
             "queued": "Sırada: {count}"
           },
           "fields": {
-            "preparing": "Dosya boyutu ve indirme akışı hazırlanıyor",
+            "preparing": "PDF ve indirme akışı hazırlanıyor",
             "progressKnown": "{downloaded} / {total} indirildi",
             "progressEstimated": "{downloaded} / yaklaşık {total} indirildi",
-            "progressUnknown": "{downloaded} indirildi • toplam boyut hazırlanıyor"
+            "progressUnknown": "{downloaded} indirildi"
           },
           "actions": {
             "clearFinished": "Tamamlananları Temizle",
