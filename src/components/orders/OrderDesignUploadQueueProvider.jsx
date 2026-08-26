@@ -18,11 +18,9 @@ import {
 } from "@ant-design/icons";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { uploadFileDirectMultipart } from "@/utils/directMultipartUpload";
 
-const MAX_CONCURRENT_UPLOADS = 3;
-const DEFAULT_POLL_INTERVAL_MS = 3000;
-const PENDING_POLL_INTERVAL_MS = 4000;
-const SAVING_POLL_INTERVAL_MS = 2000;
+const MAX_CONCURRENT_UPLOADS = 2;
 
 const OrderDesignUploadQueueContext = createContext(null);
 
@@ -43,13 +41,6 @@ const formatBytes = (value) => {
   );
   const amount = size / 1024 ** exp;
   return `${amount.toFixed(amount >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`;
-};
-
-const extractProgressData = (response) => {
-  if (response?.data && typeof response.data === "object") {
-    return response.data;
-  }
-  return response;
 };
 
 const normalizeProgressPercent = (value) => {
@@ -87,9 +78,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
 
       const controller = new AbortController();
       controllersRef.current.set(taskId, controller);
-      let pollStopped = false;
-      let progressTimer = null;
-      let lastServerStatus = "pending";
+      const uploadSessionIds = [];
 
       updateTask(taskId, {
         status: "uploading",
@@ -97,182 +86,137 @@ export function OrderDesignUploadQueueProvider({ children }) {
         progress: 0,
         preparationProgress: 0,
         uploadedBytes: 0,
-        uploadTotalBytes: currentTask.uploadTotalBytes || currentTask.totalSize,
+        uploadTotalBytes: currentTask.totalSize,
+        uploadSpeed: 0,
+        uploadSessionIds: [],
         startedAt: Date.now(),
         errorMessage: null,
       });
 
       try {
-        const formData = new FormData();
-        formData.append("order_item_id", currentTask.orderItemId);
-        formData.append("order_id", currentTask.orderId);
-        formData.append("upload_id", currentTask.id);
-        formData.append("note", currentTask.note || "");
-        formData.append(
-          "is_sub_category",
-          String(Boolean(currentTask.isSubCategory)),
-        );
-        if (currentTask.includeRoutingSubCategory) {
-          formData.append(
-            "routing_sub_category_id",
-            currentTask.routingSubCategoryId || "",
-          );
-        }
-        currentTask.positions.forEach((positionId) => {
-          formData.append("positions", positionId);
-        });
-        formData.append(
-          "design_entries",
-          JSON.stringify(
-            currentTask.files.map(
-              ({ clientId, groupId, positionId, quantity }) => ({
-                client_id: clientId,
-                group_id: groupId,
-                position_id: positionId,
-                quantity,
+        let completedBytes = 0;
+        const completedPartsBySession = [];
+        for (const entry of currentTask.files) {
+          const result = await uploadFileDirectMultipart({
+            file: entry.file,
+            signal: controller.signal,
+            initUpload: () =>
+              OrdersAPI.initDirectDesignUpload({
+                order_id: currentTask.orderId,
+                order_item_id: currentTask.orderItemId,
+                position_id: entry.positionId,
+                client_id: entry.clientId,
+                file_name: entry.file.name || "untitled",
+                file_size: entry.file.size,
+                content_type: entry.file.type || "application/octet-stream",
               }),
-            ),
-          ),
-        );
-        currentTask.files.forEach(({ clientId, file }) => {
-          formData.append(`design_files[${clientId}]`, file);
-        });
-
-        const pollProgress = async () => {
-          if (pollStopped) return;
-          try {
-            const response = await OrdersAPI.designUploadProgress(
-              currentTask.id,
-            );
-            const progressData = extractProgressData(response);
-            const serverStatus =
-              typeof progressData?.status === "string"
-                ? progressData.status
-                : "pending";
-            const serverPercent = Number(progressData?.progress_percent);
-            lastServerStatus = serverStatus;
-
-            if (serverStatus === "saving") {
-              const totalBytes = Number(
-                progressData?.total_bytes ||
-                  currentTask.uploadTotalBytes ||
-                  currentTask.totalSize ||
-                  0,
-              );
+            getPartUrls: (sessionId, partNumbers) =>
+              OrdersAPI.directDesignUploadPartUrls({
+                upload_session_id: sessionId,
+                part_numbers: partNumbers,
+              }),
+            onSession: (sessionId) => {
+              uploadSessionIds.push(sessionId);
               updateTask(taskId, {
-                serverStatus: "saving",
-                progress: 100,
+                uploadSessionIds: [...uploadSessionIds],
+                serverStatus: "uploading",
                 preparationProgress: 100,
-                uploadedBytes: Number(
-                  progressData?.uploaded_bytes || totalBytes,
-                ),
-                uploadTotalBytes: totalBytes,
               });
-              return;
-            }
-
-            if (
-              serverStatus === "uploading" &&
-              Number.isFinite(serverPercent)
-            ) {
+            },
+            onProgress: ({ loaded, bytesPerSecond }) => {
+              const aggregate = completedBytes + loaded;
               updateTask(taskId, {
                 serverStatus: "uploading",
-                progress: normalizeProgressPercent(serverPercent),
-                preparationProgress: 100,
-                uploadedBytes: Number(progressData?.uploaded_bytes || 0),
-                uploadTotalBytes: Number(
-                  progressData?.total_bytes ||
-                    currentTask.uploadTotalBytes ||
-                    currentTask.totalSize ||
-                    0,
+                progress: normalizeProgressPercent(
+                  (aggregate / currentTask.totalSize) * 100,
                 ),
+                preparationProgress: 100,
+                uploadedBytes: aggregate,
+                uploadTotalBytes: currentTask.totalSize,
+                uploadSpeed: bytesPerSecond,
               });
-              return;
-            }
-
-            if (serverStatus === "failed") {
-              const serverError = progressData?.error_message;
-              if (serverError) {
-                updateTask(taskId, { errorMessage: serverError });
+            },
+          });
+          completedBytes += entry.file.size;
+          completedPartsBySession.push(result);
+        }
+        updateTask(taskId, { serverStatus: "saving", uploadSpeed: 0 });
+        await OrdersAPI.completeDirectDesignUpload({
+          order_id: currentTask.orderId,
+          order_item_id: currentTask.orderItemId,
+          upload_session_ids: completedPartsBySession.map(
+            (entry) => entry.uploadSessionId,
+          ),
+          note: currentTask.note || "",
+          is_sub_category: Boolean(currentTask.isSubCategory),
+          ...(currentTask.includeRoutingSubCategory
+            ? {
+                routing_sub_category_id:
+                  currentTask.routingSubCategoryId || null,
               }
-            }
-          } catch {
-            // The progress record is created after the multipart body reaches the API.
-          }
-        };
-
-        const scheduleNextPoll = () => {
-          if (pollStopped) return;
-          const delay =
-            lastServerStatus === "pending"
-              ? PENDING_POLL_INTERVAL_MS
-              : lastServerStatus === "saving"
-                ? SAVING_POLL_INTERVAL_MS
-                : DEFAULT_POLL_INTERVAL_MS;
-          progressTimer = setTimeout(async () => {
-            await pollProgress();
-            scheduleNextPoll();
-          }, delay);
-        };
-
-        void pollProgress();
-        scheduleNextPoll();
-
-        await OrdersAPI.saveDesign(formData, {
-          signal: controller.signal,
-          onUploadProgress: (event) => {
-            const total = Number(event?.total || currentTask.totalSize || 0);
-            const loaded = Number(event?.loaded || 0);
-            if (!total || !Number.isFinite(total) || total <= 0) return;
-            const snapshot = tasksRef.current.find(
-              (task) => task.id === taskId,
-            );
-            if (
-              snapshot?.serverStatus !== "preparing" &&
-              snapshot?.serverStatus !== "pending"
-            ) {
-              return;
-            }
-            updateTask(taskId, {
-              serverStatus: "preparing",
-              progress: normalizeProgressPercent((loaded / total) * 100),
-              preparationProgress: normalizeProgressPercent(
-                (loaded / total) * 100,
-              ),
-            });
-          },
+            : {}),
+          positions: currentTask.positions,
+          design_entries: currentTask.files.map(
+            ({ clientId, groupId, positionId, quantity }) => ({
+              client_id: clientId,
+              group_id: groupId,
+              position_id: positionId,
+              quantity,
+            }),
+          ),
         });
-
-        pollStopped = true;
-        if (progressTimer) clearTimeout(progressTimer);
-        const completedSnapshot = tasksRef.current.find(
-          (task) => task.id === taskId,
-        );
-        const completedTotalBytes = Number(
-          completedSnapshot?.uploadTotalBytes ||
-            currentTask.uploadTotalBytes ||
-            currentTask.totalSize ||
-            0,
-        );
         updateTask(taskId, {
           status: "success",
           serverStatus: "completed",
           progress: 100,
           preparationProgress: 100,
-          uploadedBytes: completedTotalBytes,
-          uploadTotalBytes: completedTotalBytes,
+          uploadedBytes: currentTask.totalSize,
+          uploadTotalBytes: currentTask.totalSize,
+          uploadSpeed: 0,
           finishedAt: Date.now(),
           errorMessage: null,
         });
       } catch (error) {
-        pollStopped = true;
-        if (progressTimer) clearTimeout(progressTimer);
         const canceled =
           error?.name === "CanceledError" || error?.code === "ERR_CANCELED";
+        if (!canceled && uploadSessionIds.length) {
+          try {
+            const progressRows = await Promise.all(
+              uploadSessionIds.map(async (uploadSessionId) => {
+                const response = await OrdersAPI.designUploadProgress(uploadSessionId);
+                return response?.data || response;
+              }),
+            );
+            if (progressRows.every((row) => row?.status === "completed")) {
+              updateTask(taskId, {
+                status: "success",
+                serverStatus: "completed",
+                progress: 100,
+                preparationProgress: 100,
+                uploadedBytes: currentTask.totalSize,
+                uploadTotalBytes: currentTask.totalSize,
+                uploadSpeed: 0,
+                finishedAt: Date.now(),
+                errorMessage: null,
+              });
+              return;
+            }
+          } catch {
+            // Fall through to cleanup and the original error.
+          }
+        }
+        await Promise.all(
+          uploadSessionIds.map((uploadSessionId) =>
+            OrdersAPI.abortDirectDesignUpload({ upload_session_id: uploadSessionId }).catch(
+              () => undefined,
+            ),
+          ),
+        );
         updateTask(taskId, {
           status: canceled ? "canceled" : "failed",
           serverStatus: canceled ? "canceled" : "failed",
           finishedAt: Date.now(),
+          uploadSpeed: 0,
           errorMessage: canceled
             ? null
             : error?.response?.data?.error?.message ||
@@ -333,11 +277,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
         (sum, entry) => sum + Number(entry.file?.size || 0),
         0,
       );
-      const uploadTotalBytes = normalizedFiles.reduce(
-        (sum, entry) =>
-          sum + Number(entry.file?.size || 0) * Number(entry.quantity || 1),
-        0,
-      );
+      const uploadTotalBytes = totalSize;
 
       const task = {
         id: createTaskId(),
@@ -373,6 +313,8 @@ export function OrderDesignUploadQueueProvider({ children }) {
         preparationProgress: 0,
         uploadedBytes: 0,
         uploadTotalBytes,
+        uploadSpeed: 0,
+        uploadSessionIds: [],
         createdAt: Date.now(),
         startedAt: null,
         finishedAt: null,
@@ -399,7 +341,13 @@ export function OrderDesignUploadQueueProvider({ children }) {
         return;
       }
       if (task.status === "uploading") {
-        await OrdersAPI.cancelDesignUpload(taskId).catch(() => undefined);
+        await Promise.all(
+          (task.uploadSessionIds || []).map((uploadSessionId) =>
+            OrdersAPI.abortDirectDesignUpload({ upload_session_id: uploadSessionId }).catch(
+              () => undefined,
+            ),
+          ),
+        );
         controllersRef.current.get(taskId)?.abort();
       }
     },
@@ -418,6 +366,8 @@ export function OrderDesignUploadQueueProvider({ children }) {
         preparationProgress: 0,
         uploadedBytes: 0,
         uploadTotalBytes: task.uploadTotalBytes || task.totalSize,
+        uploadSpeed: 0,
+        uploadSessionIds: [],
         startedAt: null,
         finishedAt: null,
         errorMessage: null,
@@ -641,6 +591,9 @@ export function OrderDesignUploadQueueProvider({ children }) {
                                   task.uploadTotalBytes || task.totalSize,
                                 ),
                               })}
+                          {!isPreparing && task.uploadSpeed > 0
+                            ? ` • ${formatBytes(task.uploadSpeed)}/s`
+                            : ""}
                         </Typography.Text>
                       ) : null}
                       {task.errorMessage ? (

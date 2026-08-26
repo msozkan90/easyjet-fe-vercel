@@ -18,11 +18,9 @@ import {
 } from "@ant-design/icons";
 import { OrdersDesignFlawsAPI, OrdersPdfAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import { uploadFileDirectMultipart } from "@/utils/directMultipartUpload";
 
 const MAX_CONCURRENT_UPLOADS = 3;
-const DEFAULT_POLL_INTERVAL_MS = 3000;
-const PENDING_POLL_INTERVAL_MS = 4000;
-const SAVING_POLL_INTERVAL_MS = 2000;
 
 const OrdersPdfDesignUploadQueueContext = createContext(null);
 
@@ -79,9 +77,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
 
       const controller = new AbortController();
       controllersRef.current.set(taskId, controller);
-      let pollStopped = false;
-      let progressTimer = null;
-      let lastServerStatus = "pending";
+      let uploadSessionId = null;
       updateTask(taskId, {
         status: "uploading",
         serverStatus: "preparing",
@@ -90,6 +86,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         preparationProgress: 0,
         uploadedBytes: 0,
         uploadTotalBytes: currentTask.fileSize,
+        uploadSpeed: 0,
         errorMessage: null,
       });
 
@@ -98,117 +95,47 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
           currentTask.kind === "designFlaw"
             ? OrdersDesignFlawsAPI
             : OrdersPdfAPI;
-        const formData = new FormData();
-        formData.append(
-          currentTask.kind === "designFlaw"
-            ? "orders_design_flaw_id"
-            : "orders_pdf_id",
-          currentTask.parentId,
-        );
-        formData.append("upload_id", currentTask.id);
-        formData.append("design_files", currentTask.file);
-
-        const pollProgress = async () => {
-          if (pollStopped) return;
-          try {
-            const progressResponse = await uploadApi.uploadDesignProgress(
-              currentTask.id,
-            );
-            const progressData =
-              progressResponse?.data &&
-              typeof progressResponse.data === "object"
-                ? progressResponse.data
-                : progressResponse;
-            const percent = Number(
-              progressData?.progress_percent ??
-                progressData?.data?.progress_percent,
-            );
-            const serverStatus =
-              typeof progressData?.status === "string"
-                ? progressData.status
-                : typeof progressData?.data?.status === "string"
-                  ? progressData.data.status
-                  : "pending";
-            lastServerStatus = serverStatus;
-
-            if (serverStatus === "pending") {
-              return;
-            }
-
-            if (serverStatus === "saving") {
-              const totalBytes = Number(
-                progressData?.total_bytes || currentTask.fileSize || 0,
-              );
-              updateTask(taskId, {
-                serverStatus: "saving",
-                progress: 100,
-                preparationProgress: 100,
-                uploadedBytes: Number(
-                  progressData?.uploaded_bytes || totalBytes,
-                ),
-                uploadTotalBytes: totalBytes,
-              });
-              return;
-            }
-
-            if (serverStatus === "uploading" && Number.isFinite(percent)) {
-              updateTask(taskId, {
-                serverStatus: "uploading",
-                progress: normalizeProgressPercent(percent),
-                preparationProgress: 100,
-                uploadedBytes: Number(progressData?.uploaded_bytes || 0),
-                uploadTotalBytes: Number(
-                  progressData?.total_bytes || currentTask.fileSize || 0,
-                ),
-              });
-            }
-          } catch {
-            // progress endpoint can lag behind the multipart request start
-          }
-        };
-        const scheduleNextPoll = () => {
-          if (pollStopped) return;
-          const delay =
-            lastServerStatus === "pending"
-              ? PENDING_POLL_INTERVAL_MS
-              : lastServerStatus === "saving"
-                ? SAVING_POLL_INTERVAL_MS
-                : DEFAULT_POLL_INTERVAL_MS;
-          progressTimer = setTimeout(async () => {
-            await pollProgress();
-            scheduleNextPoll();
-          }, delay);
-        };
-        void pollProgress();
-        scheduleNextPoll();
-
-        await uploadApi.uploadDesigns(formData, {
+        const { parts } = await uploadFileDirectMultipart({
+          file: currentTask.file,
           signal: controller.signal,
-          onUploadProgress: (event) => {
-            const snapshot = tasksRef.current.find(
-              (item) => item.id === taskId,
-            );
-            if (
-              snapshot?.serverStatus !== "preparing" &&
-              snapshot?.serverStatus !== "pending"
-            ) {
-              return;
-            }
-            const total = Number(event?.total || currentTask?.fileSize || 0);
-            const loaded = Number(event?.loaded || 0);
-            if (!total || !Number.isFinite(total) || total <= 0) return;
+          initUpload: () =>
+            uploadApi.initDesignUpload({
+              [currentTask.kind === "designFlaw"
+                ? "orders_design_flaw_id"
+                : "orders_pdf_id"]: currentTask.parentId,
+              file_name: currentTask.fileName,
+              file_size: currentTask.fileSize,
+              content_type:
+                currentTask.file?.type || "application/octet-stream",
+            }),
+          getPartUrls: (sessionId, partNumbers) =>
+            uploadApi.designUploadPartUrls({
+              upload_session_id: sessionId,
+              part_numbers: partNumbers,
+            }),
+          onSession: (sessionId) => {
+            uploadSessionId = sessionId;
             updateTask(taskId, {
-              serverStatus: "preparing",
-              progress: normalizeProgressPercent((loaded / total) * 100),
-              preparationProgress: normalizeProgressPercent(
-                (loaded / total) * 100,
-              ),
+              uploadSessionId: sessionId,
+              serverStatus: "uploading",
+              preparationProgress: 100,
             });
           },
+          onProgress: ({ loaded, total, bytesPerSecond }) =>
+            updateTask(taskId, {
+              serverStatus: "uploading",
+              progress: normalizeProgressPercent((loaded / total) * 100),
+              preparationProgress: 100,
+              uploadedBytes: loaded,
+              uploadTotalBytes: total,
+              uploadSpeed: bytesPerSecond,
+            }),
         });
-
-        pollStopped = true;
-        if (progressTimer) clearTimeout(progressTimer);
+        updateTask(taskId, { serverStatus: "saving", uploadSpeed: 0 });
+        await uploadApi.completeDesignUpload({
+          upload_session_id: uploadSessionId,
+          parts,
+        });
         updateTask(taskId, {
           status: "success",
           serverStatus: "completed",
@@ -216,14 +143,44 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
           preparationProgress: 100,
           uploadedBytes: currentTask.fileSize,
           uploadTotalBytes: currentTask.fileSize,
+          uploadSpeed: 0,
           finishedAt: Date.now(),
           errorMessage: null,
         });
       } catch (error) {
-        pollStopped = true;
-        if (progressTimer) clearTimeout(progressTimer);
         const canceled =
           error?.name === "CanceledError" || error?.code === "ERR_CANCELED";
+        if (uploadSessionId) {
+          const uploadApi =
+            currentTask.kind === "designFlaw"
+              ? OrdersDesignFlawsAPI
+              : OrdersPdfAPI;
+          if (!canceled) {
+            try {
+              const progress = await uploadApi.uploadDesignProgress(uploadSessionId);
+              const progressData = progress?.data || progress;
+              if (progressData?.status === "completed") {
+                updateTask(taskId, {
+                  status: "success",
+                  serverStatus: "completed",
+                  progress: 100,
+                  preparationProgress: 100,
+                  uploadedBytes: currentTask.fileSize,
+                  uploadTotalBytes: currentTask.fileSize,
+                  uploadSpeed: 0,
+                  finishedAt: Date.now(),
+                  errorMessage: null,
+                });
+                return;
+              }
+            } catch {
+              // Fall through to cleanup and the original error.
+            }
+          }
+          await uploadApi
+            .abortDesignUpload({ upload_session_id: uploadSessionId })
+            .catch(() => undefined);
+        }
         updateTask(taskId, {
           status: canceled ? "canceled" : "failed",
           finishedAt: Date.now(),
@@ -232,6 +189,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
             : error?.response?.data?.error?.message ||
               error?.message ||
               tQueue("messages.uploadFailed"),
+          uploadSpeed: 0,
         });
       } finally {
         controllersRef.current.delete(taskId);
@@ -274,6 +232,8 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         preparationProgress: 0,
         uploadedBytes: 0,
         uploadTotalBytes: file.size || 0,
+        uploadSpeed: 0,
+        uploadSessionId: null,
         createdAt: now,
         startedAt: null,
         finishedAt: null,
@@ -300,7 +260,13 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
           currentTask.kind === "designFlaw"
             ? OrdersDesignFlawsAPI
             : OrdersPdfAPI;
-        await uploadApi.cancelDesignUpload(taskId).catch(() => undefined);
+        if (currentTask.uploadSessionId) {
+          await uploadApi
+            .abortDesignUpload({
+              upload_session_id: currentTask.uploadSessionId,
+            })
+            .catch(() => undefined);
+        }
         controllersRef.current.get(taskId)?.abort();
       }
     },
@@ -319,6 +285,8 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         preparationProgress: 0,
         uploadedBytes: 0,
         uploadTotalBytes: currentTask.fileSize,
+        uploadSpeed: 0,
+        uploadSessionId: null,
         startedAt: null,
         finishedAt: null,
         errorMessage: null,
@@ -529,6 +497,9 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
                                   task.uploadTotalBytes || task.fileSize,
                                 ),
                               })}
+                          {!isPreparing && task.uploadSpeed > 0
+                            ? ` • ${formatBytes(task.uploadSpeed)}/s`
+                            : ""}
                         </Typography.Text>
                       ) : null}
                       {task.errorMessage ? (

@@ -171,6 +171,14 @@ export const OrdersAPI = {
     api.get(`/orders/items/designs/progress/${encodeURIComponent(uploadId)}`),
   cancelDesignUpload: (uploadId) =>
     api.post(`/orders/items/designs/cancel/${encodeURIComponent(uploadId)}`),
+  initDirectDesignUpload: (payload) =>
+    api.post("/orders/items/designs/upload/init", payload),
+  directDesignUploadPartUrls: (payload) =>
+    api.post("/orders/items/designs/upload/part-urls", payload),
+  completeDirectDesignUpload: (payload) =>
+    api.post("/orders/items/designs/upload/complete", payload),
+  abortDirectDesignUpload: (payload) =>
+    api.post("/orders/items/designs/upload/abort", payload),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
   sendToProductionWithLabel: (formData, config = {}) =>
@@ -235,6 +243,14 @@ export const OrdersPdfAPI = {
     api.get(`/orders-pdf/designs/progress/${encodeURIComponent(uploadId)}`),
   cancelDesignUpload: (uploadId) =>
     api.post(`/orders-pdf/designs/cancel/${encodeURIComponent(uploadId)}`),
+  initDesignUpload: (payload) =>
+    api.post("/orders-pdf/designs/upload/init", payload),
+  designUploadPartUrls: (payload) =>
+    api.post("/orders-pdf/designs/upload/part-urls", payload),
+  completeDesignUpload: (payload) =>
+    api.post("/orders-pdf/designs/upload/complete", payload),
+  abortDesignUpload: (payload) =>
+    api.post("/orders-pdf/designs/upload/abort", payload),
   updateDesign: (id, payload) =>
     api.put(`/orders-pdf/designs/${encodeURIComponent(id)}`, payload),
   downloadDesign: (id, config = {}) =>
@@ -274,6 +290,14 @@ export const OrdersDesignFlawsAPI = {
     api.post(
       `/orders-design-flaws/designs/cancel/${encodeURIComponent(uploadId)}`,
     ),
+  initDesignUpload: (payload) =>
+    api.post("/orders-design-flaws/designs/upload/init", payload),
+  designUploadPartUrls: (payload) =>
+    api.post("/orders-design-flaws/designs/upload/part-urls", payload),
+  completeDesignUpload: (payload) =>
+    api.post("/orders-design-flaws/designs/upload/complete", payload),
+  abortDesignUpload: (payload) =>
+    api.post("/orders-design-flaws/designs/upload/abort", payload),
   updateDesign: (id, payload) =>
     api.put(`/orders-design-flaws/designs/${encodeURIComponent(id)}`, payload),
   downloadDesign: (id, config = {}) =>
