@@ -1974,6 +1974,7 @@
         "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
         "editAddress": "Adres Düzenle",
+        "rematch": "Ürün varyasyonunu yeniden eşleştir",
         "shippingRates": "Kargo fiyatları",
         "confirmCancelTitle": "Bu sipariş iptal edilsin mi?",
         "confirmCancelOk": "İptal",
@@ -1986,9 +1987,21 @@
         "printLabel": "Label Yazdır",
         "manualOrder": "Manuel Order"
       },
+      "rematch": {
+        "title": "Ürün Varyasyonunu Yeniden Eşleştir",
+        "submit": "Güncelle",
+        "cancel": "İptal",
+        "customerPrice": "Müşteri fiyatı:",
+        "productRequired": "Ürün seçin.",
+        "sizeRequired": "Beden seçin.",
+        "colorRequired": "Renk seçin."
+      },
       "messages": {
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
         "loadCustomersError": "Müşteriler yüklenemedi.",
+        "rematchSuccess": "Sipariş kaleminin ürün varyasyonu güncellendi.",
+        "rematchError": "Sipariş kaleminin ürün varyasyonu güncellenemedi.",
+        "rematchPriceMissing": "Seçilen varyasyon için aktif müşteri fiyatı bulunamadı. Fiyatı olan bir varyasyon seçin veya işlemi iptal edin.",
         "statusUpdateSuccess": "Sipariş durumu güncellendi.",
         "statusUpdateError": "Sipariş durumu güncellenemedi.",
         "addressLoadError": "Sipariş detayları yüklenemedi.",

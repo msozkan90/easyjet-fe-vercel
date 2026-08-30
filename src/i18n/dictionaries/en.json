@@ -2194,6 +2194,7 @@
         "sendToProduction": "Send To Production",
         "viewDetail": "View detail",
         "editAddress": "Edit billing info",
+        "rematch": "Rematch product variation",
         "shippingRates": "Shipping rates",
         "confirmCancelTitle": "Cancel this order?",
         "confirmCancelOk": "Cancel",
@@ -2206,9 +2207,21 @@
         "printLabel": "Print Label",
         "manualOrder": "Manual Order"
       },
+      "rematch": {
+        "title": "Rematch Product Variation",
+        "submit": "Update",
+        "cancel": "Cancel",
+        "customerPrice": "Customer price:",
+        "productRequired": "Select a product.",
+        "sizeRequired": "Select a size.",
+        "colorRequired": "Select a color."
+      },
       "messages": {
         "loadVariationsError": "Failed to load product variations.",
         "loadCustomersError": "Failed to load customers.",
+        "rematchSuccess": "Order item product variation updated.",
+        "rematchError": "Failed to update the order item product variation.",
+        "rematchPriceMissing": "No active customer price exists for the selected variation. Select a priced variation or cancel.",
         "statusUpdateSuccess": "Order status updated.",
         "statusUpdateError": "Failed to update order status.",
         "addressLoadError": "Unable to load order details.",

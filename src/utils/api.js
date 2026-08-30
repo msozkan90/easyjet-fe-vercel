@@ -157,6 +157,8 @@ export const OrdersAPI = {
     api.post("/orders/items/affilated/shipped/list", data),
   cancelItemsList: (data) => api.post("/orders/items/cancel/list", data),
   update: (data) => api.put(`/orders/items`, data),
+  rematchItem: (id, data) =>
+    api.put(`/orders/items/${encodeURIComponent(id)}/rematch`, data),
   updateOrder: (id, data) => api.put(`/orders/update/${id}`, data),
   remove: (id) => api.del(`/orders/${id}`),
 
