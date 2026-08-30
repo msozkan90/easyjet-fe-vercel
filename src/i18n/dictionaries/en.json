@@ -2810,6 +2810,24 @@
           "purchase": "Purchase Label",
           "upload": "Upload Label"
         },
+        "fulfillment": {
+          "title": "Fulfillment method",
+          "subtitle": "Choose how the selected delayed items will join the shipping flow.",
+        "optionsError": "Fulfillment options could not be loaded.",
+        "targetPlaceholder": "Select target shipment",
+        "noMergeTarget": "no eligible unshipped shipment",
+        "replaceWarning": "The new combined label will be purchased first, then the current label and its shipping charge will be voided.",
+        "oldShipping": "Old shipping",
+        "newShipping": "New shipping",
+        "refund": "Refund",
+        "netCharge": "Net shipping change",
+          "reuseAcknowledgement": "I accept that adding items without replacing the label may cause carrier weight or price adjustments.",
+          "actions": {
+            "new": "Send as a separate package",
+            "replace": "Merge and replace label",
+            "reuse": "Merge and keep current label"
+          }
+        },
         "upload": {
           "title": "Upload Label",
           "help": "Upload one PDF, PNG, JPG, JPEG or WEBP label file up to 20 MB.",

@@ -912,6 +912,19 @@ export default function OrderDetailPage() {
     () => (Array.isArray(orderDetail?.labels) ? orderDetail.labels : []),
     [orderDetail],
   );
+  const shipments = useMemo(
+    () => (Array.isArray(orderDetail?.shipments) ? orderDetail.shipments : []),
+    [orderDetail],
+  );
+  const shipmentTotal = useMemo(
+    () =>
+      shipments.reduce(
+        (total, shipment) =>
+          total + Number(shipment?.shipment_price || 0),
+        0,
+      ),
+    [shipments],
+  );
   const labelVoids = useMemo(
     () =>
       Array.isArray(orderDetail?.label_voids) ? orderDetail.label_voids : [],
@@ -1429,6 +1442,33 @@ export default function OrderDetailPage() {
       label: tDesign("tabs.labelsAndProduction"),
       children: (
         <div className="space-y-6">
+          {shipments.length ? (
+            <div className="space-y-4">
+              <SectionHeader title="Shipments" />
+              <div className="grid gap-4 lg:grid-cols-2">
+                {shipments.map((shipment) => (
+                  <div
+                    key={shipment.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Typography.Text strong>
+                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                      </Typography.Text>
+                      <Tag color={shipment.fulfillment_status === "shipped" ? "green" : "blue"}>
+                        {shipment.fulfillment_status}
+                      </Tag>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      {shipment.items?.length || 0} items • ${formatAmount(
+                        shipment.shipment_price,
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="space-y-4">
             <SectionHeader title={tDesign("sections.labels")} />
             {labels.length ? (
@@ -1596,9 +1636,9 @@ export default function OrderDetailPage() {
                   <MetricCard
                     label={tDesign("fields.amountPaid")}
                     value={
-                      orderDetail?.shipments[0]?.shipping_amount
+                      shipmentTotal
                         ? formatAmount(
-                            orderDetail?.shipments[0]?.shipping_amount,
+                            shipmentTotal,
                           ) +
                           formatAmount(
                             orderDetail?.items
@@ -1620,7 +1660,7 @@ export default function OrderDetailPage() {
                   <MetricCard
                     label={tDesign("fields.shippingAmount")}
                     value={formatAmount(
-                      orderDetail?.shipments[0]?.shipping_amount,
+                      shipmentTotal,
                     )}
                   />
                 </div>

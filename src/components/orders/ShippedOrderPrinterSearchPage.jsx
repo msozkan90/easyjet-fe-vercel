@@ -284,7 +284,7 @@ export default function ShippedOrderPrinterSearchPage() {
 
       try {
         const response = await OrdersAPI.shippedItems({
-          order_number: nextOrderNumber,
+          shipment_number: nextOrderNumber,
         });
 
         const responseOrder = response?.data?.order || null;

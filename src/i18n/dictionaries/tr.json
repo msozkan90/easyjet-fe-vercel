@@ -2590,6 +2590,24 @@
           "purchase": "Label Satın Al",
           "upload": "Label Yükle"
         },
+        "fulfillment": {
+          "title": "Gönderim yöntemi",
+          "subtitle": "Seçili gecikmiş kalemlerin kargo akışına nasıl katılacağını seçin.",
+        "optionsError": "Gönderim seçenekleri yüklenemedi.",
+        "targetPlaceholder": "Hedef kargoyu seçin",
+        "noMergeTarget": "uygun, gönderilmemiş kargo yok",
+        "replaceWarning": "Önce birleşik yeni label satın alınacak, ardından mevcut label ve ona ait kargo ücreti void edilecektir.",
+        "oldShipping": "Eski kargo",
+        "newShipping": "Yeni kargo",
+        "refund": "İade",
+        "netCharge": "Net kargo farkı",
+          "reuseAcknowledgement": "Label değiştirilmeden ürün eklenmesinin taşıyıcı ağırlık veya fiyat düzeltmesine neden olabileceğini kabul ediyorum.",
+          "actions": {
+            "new": "Ayrı paket olarak gönder",
+            "replace": "Birleştir ve label değiştir",
+            "reuse": "Birleştir ve mevcut label'ı koru"
+          }
+        },
         "upload": {
           "title": "Label Yükle",
           "help": "En fazla 20 MB boyutunda bir PDF, PNG, JPG, JPEG veya WEBP label dosyası yükleyin.",

@@ -181,6 +181,7 @@ export const OrdersAPI = {
     api.post("/orders/items/designs/upload/abort", payload),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
+  productionOptions: (data) => api.post("/orders/production/options", data),
   sendToProductionWithLabel: (formData, config = {}) =>
     api.postMultipart("/orders/production", formData, config),
 
