@@ -2193,6 +2193,11 @@
         "downloadDesigns": "Download Designs",
         "sendToProduction": "Send To Production",
         "viewDetail": "View detail",
+        "cancelItem": "Cancel Order Item",
+        "cancelItemConfirmTitle": "Cancel this order item?",
+        "cancelItemConfirmDescription": "If this is the shipment's last active item, its shipping label will also be voided.",
+        "cancelItemConfirmOk": "Cancel Item",
+        "cancelItemConfirmDismiss": "Keep Item",
         "editAddress": "Edit billing info",
         "rematch": "Rematch product variation",
         "shippingRates": "Shipping rates",
@@ -2237,7 +2242,9 @@
         "uploadQueued": "{count} design upload queued.",
         "poolIncomplete": "This order still has {count} pending items in its source pre-order. It cannot move to production until all items are transferred.",
         "noItems": "No items found.",
-        "loadListError": "Failed to load the list."
+        "loadListError": "Failed to load the list.",
+        "itemCancelSuccess": "Order item canceled successfully.",
+        "itemCancelError": "Failed to cancel the order item."
       },
       "table": {
         "noData": "No data"
@@ -2826,14 +2833,14 @@
         "fulfillment": {
           "title": "Fulfillment method",
           "subtitle": "Choose how the selected delayed items will join the shipping flow.",
-        "optionsError": "Fulfillment options could not be loaded.",
-        "targetPlaceholder": "Select target shipment",
-        "noMergeTarget": "no eligible unshipped shipment",
-        "replaceWarning": "The new combined label will be purchased first, then the current label and its shipping charge will be voided.",
-        "oldShipping": "Old shipping",
-        "newShipping": "New shipping",
-        "refund": "Refund",
-        "netCharge": "Net shipping change",
+          "optionsError": "Fulfillment options could not be loaded.",
+          "targetPlaceholder": "Select target shipment",
+          "noMergeTarget": "no eligible unshipped shipment",
+          "replaceWarning": "The new combined label will be purchased first, then the current label and its shipping charge will be voided.",
+          "oldShipping": "Old shipping",
+          "newShipping": "New shipping",
+          "refund": "Refund",
+          "netCharge": "Net shipping change",
           "reuseAcknowledgement": "I accept that adding items without replacing the label may cause carrier weight or price adjustments.",
           "actions": {
             "new": "Send as a separate package",

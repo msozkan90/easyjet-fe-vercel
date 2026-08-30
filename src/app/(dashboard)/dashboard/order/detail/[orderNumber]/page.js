@@ -761,6 +761,10 @@ const OrderItemCard = ({
         ? Number(item.quantity)
         : 1,
   }));
+  const statusKey = item?.status || "";
+  const statusLabel = statusKey
+    ? tOrders(`status.values.${statusKey}`) || statusKey
+    : tOrders("common.none");
 
   return (
     <Card
@@ -800,6 +804,12 @@ const OrderItemCard = ({
             <Tag className="rounded-full" color="green">
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
+            </Tag>
+            <Tag
+              className="rounded-full"
+              color={STATUS_COLORS[statusKey] || "default"}
+            >
+              {tOrders("columns.status")}: {statusLabel}
             </Tag>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -905,7 +915,13 @@ export default function OrderDetailPage() {
   const [recordingScrap, setRecordingScrap] = useState(false);
 
   const items = useMemo(
-    () => (Array.isArray(orderDetail?.items) ? orderDetail.items : []),
+    () =>
+      (Array.isArray(orderDetail?.items) ? orderDetail.items : []).filter(
+        (item) =>
+          !["cancel", "cancelled", "canceled"].includes(
+            String(item?.status || "").toLowerCase(),
+          ),
+      ),
     [orderDetail],
   );
   const labels = useMemo(
