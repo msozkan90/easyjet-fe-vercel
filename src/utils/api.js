@@ -155,8 +155,12 @@ export const OrdersAPI = {
     api.post("/orders/items/affilated/completed/list", data),
   affiliatedShippedItemsList: (data) =>
     api.post("/orders/items/affilated/shipped/list", data),
+  cancelAffiliatedItem: (id) =>
+    api.post(`/orders/items/${encodeURIComponent(id)}/affiliated-cancel`),
   cancelItemsList: (data) => api.post("/orders/items/cancel/list", data),
   update: (data) => api.put(`/orders/items`, data),
+  rematchItem: (id, data) =>
+    api.put(`/orders/items/${encodeURIComponent(id)}/rematch`, data),
   updateOrder: (id, data) => api.put(`/orders/update/${id}`, data),
   remove: (id) => api.del(`/orders/${id}`),
 
@@ -181,6 +185,7 @@ export const OrdersAPI = {
     api.post("/orders/items/designs/upload/abort", payload),
   deleteDesign: (id) => api.del(`/orders/items/designs/${id}`),
   sendToProduction: (data) => api.post("/orders/production", data),
+  productionOptions: (data) => api.post("/orders/production/options", data),
   sendToProductionWithLabel: (formData, config = {}) =>
     api.postMultipart("/orders/production", formData, config),
 

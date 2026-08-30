@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   App as AntdApp,
   Button,
+  Checkbox,
   Divider,
   Empty,
   InputNumber,
@@ -209,6 +210,12 @@ const LABEL_MODES = {
   UPLOAD: "upload_label",
 };
 
+const FULFILLMENT_ACTIONS = {
+  NEW: "new_shipment",
+  REPLACE: "replace_label",
+  REUSE: "reuse_label",
+};
+
 const LABEL_FILE_TYPES = new Set([
   "application/pdf",
   "image/png",
@@ -216,6 +223,14 @@ const LABEL_FILE_TYPES = new Set([
   "image/webp",
 ]);
 const MAX_LABEL_FILE_SIZE = 20 * 1024 * 1024;
+
+const createIdempotencyKey = () =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+        const value = Math.floor(Math.random() * 16);
+        return (char === "x" ? value : (value & 0x3) | 0x8).toString(16);
+      });
 
 const createServiceEntry = () => ({
   rates: [],
@@ -259,6 +274,16 @@ const ShippingRatesModal = ({
   );
   const [labelFiles, setLabelFiles] = useState([]);
   const [sendingProduction, setSendingProduction] = useState(false);
+  const [productionOptions, setProductionOptions] = useState(null);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [fulfillmentAction, setFulfillmentAction] = useState(
+    FULFILLMENT_ACTIONS.NEW,
+  );
+  const [targetShipmentId, setTargetShipmentId] = useState(null);
+  const [reuseAcknowledged, setReuseAcknowledged] = useState(false);
+  const [productionRequestKey, setProductionRequestKey] = useState(() =>
+    createIdempotencyKey(),
+  );
 
   const orderId = record?.order?.id ?? record?.order_id;
   const quoteDefaults = useMemo(() => createQuoteDefaults(record), [record]);
@@ -340,6 +365,8 @@ const ShippingRatesModal = ({
       resetServiceState();
       setActiveLabelMode(LABEL_MODES.PURCHASE);
       setLabelFiles([]);
+    } else {
+      setProductionRequestKey(createIdempotencyKey());
     }
   }, [open, resetServiceState]);
 
@@ -352,6 +379,38 @@ const ShippingRatesModal = ({
   );
 
   const orderItems = useMemo(() => flattenOrderItems(record), [record]);
+  const orderItemIds = useMemo(
+    () => orderItems.map((item) => item?.id).filter(Boolean),
+    [orderItems],
+  );
+
+  useEffect(() => {
+    if (!open || !orderId || !orderItemIds.length) return;
+    let active = true;
+    setOptionsLoading(true);
+    OrdersAPI.productionOptions({ order_id: orderId, item_ids: orderItemIds })
+      .then((response) => {
+        if (!active) return;
+        setProductionOptions(response?.data || null);
+        setFulfillmentAction(FULFILLMENT_ACTIONS.NEW);
+        setTargetShipmentId(null);
+        setReuseAcknowledged(false);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProductionOptions(null);
+        message.error(
+          error?.response?.data?.error?.message ||
+            tShipping("fulfillment.optionsError"),
+        );
+      })
+      .finally(() => {
+        if (active) setOptionsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, orderId, orderItemIds, message, tShipping]);
 
   const orderItemsTotal = useMemo(() => {
     const total = orderItems.reduce((sum, item) => {
@@ -366,6 +425,11 @@ const ShippingRatesModal = ({
       if (!orderId || !serviceKey) return;
       const payload = {
         order_id: orderId,
+        item_ids: orderItemIds,
+        fulfillment_action: fulfillmentAction,
+        ...(targetShipmentId
+          ? { target_shipment_id: targetShipmentId }
+          : {}),
         ...sanitizeQuotePayload(values),
       };
       setServiceState((prev) => {
@@ -435,11 +499,24 @@ const ShippingRatesModal = ({
         });
       }
     },
-    [message, orderId],
+    [
+      fulfillmentAction,
+      message,
+      orderId,
+      orderItemIds,
+      targetShipmentId,
+    ],
   );
 
   useEffect(() => {
-    if (!open || !record || !orderId || !activeServiceTab) return;
+    if (
+      !open ||
+      !record ||
+      !orderId ||
+      !activeServiceTab ||
+      fulfillmentAction === FULFILLMENT_ACTIONS.REUSE
+    )
+      return;
     if (!serviceTabs.length) return;
     const isTabAvailable = serviceTabs.some(
       (tab) => tab.key === activeServiceTab,
@@ -500,6 +577,16 @@ const ShippingRatesModal = ({
     const amount = Number(selectedRate?.amount);
     return Number.isFinite(amount) ? amount : 0;
   }, [selectedRate]);
+  const selectedTargetShipment = useMemo(
+    () =>
+      (productionOptions?.merge_targets || []).find(
+        (shipment) => shipment.id === targetShipmentId,
+      ) || null,
+    [productionOptions?.merge_targets, targetShipmentId],
+  );
+  const previousShippingAmount = Number(
+    selectedTargetShipment?.shipment_price || 0,
+  );
 
   const selectedLabelFile =
     labelFiles[0]?.originFileObj ||
@@ -507,11 +594,17 @@ const ShippingRatesModal = ({
       ? labelFiles[0]
       : null);
   const isUploadMode = activeLabelMode === LABEL_MODES.UPLOAD;
+  const isReuseMode = fulfillmentAction === FULFILLMENT_ACTIONS.REUSE;
+  const requiresTarget = fulfillmentAction !== FULFILLMENT_ACTIONS.NEW;
   const grandTotal =
-    orderItemsTotal + (isUploadMode ? 0 : selectedRateAmount);
+    orderItemsTotal + (isUploadMode || isReuseMode ? 0 : selectedRateAmount);
   const canSendToProduction =
     Boolean(orderId) &&
-    (isUploadMode
+    Boolean(orderItemIds.length) &&
+    (!requiresTarget || Boolean(targetShipmentId)) &&
+    (isReuseMode
+      ? reuseAcknowledged
+      : isUploadMode
       ? Boolean(selectedLabelFile)
       : Boolean(selectedRate) &&
         selectedRateAmount > 0 &&
@@ -534,12 +627,12 @@ const ShippingRatesModal = ({
 
   const handleSendToProduction = useCallback(async () => {
     if (!orderId) return;
-    if (isUploadMode && !selectedLabelFile) {
+    if (!isReuseMode && isUploadMode && !selectedLabelFile) {
       message.warning(tShipping("upload.required"));
       return;
     }
-    if (!isUploadMode && !selectedRate) return;
-    if (!isUploadMode && !activeServiceData.isQuoteFresh) {
+    if (!isReuseMode && !isUploadMode && !selectedRate) return;
+    if (!isReuseMode && !isUploadMode && !activeServiceData.isQuoteFresh) {
       message.warning(tShipping("errors.mustRefreshRates"));
       return;
     }
@@ -550,9 +643,25 @@ const ShippingRatesModal = ({
 
     setSendingProduction(true);
     try {
-      if (isUploadMode) {
+      if (isReuseMode) {
+        await OrdersAPI.sendToProduction({
+          order_id: orderId,
+          idempotency_key: productionRequestKey,
+          item_ids: orderItemIds,
+          order_price: orderItemsTotal,
+          fulfillment_action: FULFILLMENT_ACTIONS.REUSE,
+          target_shipment_id: targetShipmentId,
+          acknowledge_label_reuse: true,
+        });
+      } else if (isUploadMode) {
         const payload = new FormData();
         payload.append("order_id", String(orderId));
+        payload.append("idempotency_key", productionRequestKey);
+        orderItemIds.forEach((id) => payload.append("item_ids", String(id)));
+        payload.append("fulfillment_action", fulfillmentAction);
+        if (targetShipmentId) {
+          payload.append("target_shipment_id", targetShipmentId);
+        }
         payload.append("order_price", String(orderItemsTotal));
         payload.append("source", "self_label");
         payload.append("label_file", selectedLabelFile);
@@ -561,6 +670,10 @@ const ShippingRatesModal = ({
         const payload = {
           carrier_service: selectedRate,
           order_id: orderId,
+          idempotency_key: productionRequestKey,
+          item_ids: orderItemIds,
+          fulfillment_action: fulfillmentAction,
+          ...(targetShipmentId ? { target_shipment_id: targetShipmentId } : {}),
           shipping_price: selectedRateAmount,
           order_price: orderItemsTotal,
           weight: {
@@ -608,6 +721,7 @@ const ShippingRatesModal = ({
     orderItemsTotal,
     activeServiceData.isQuoteFresh,
     isUploadMode,
+    isReuseMode,
     activeServiceTab,
     quoteValues.heightIn,
     quoteValues.lengthIn,
@@ -617,6 +731,10 @@ const ShippingRatesModal = ({
     selectedRate,
     selectedRateAmount,
     selectedLabelFile,
+    fulfillmentAction,
+    orderItemIds,
+    targetShipmentId,
+    productionRequestKey,
     dispatch,
     onClose,
     onSendSuccess,
@@ -845,7 +963,110 @@ const ShippingRatesModal = ({
             </div>
           </div>
 
+          <div className="rounded-3xl border border-blue-100 bg-blue-50/50 p-5 shadow-sm space-y-4">
+            <div>
+              <Typography.Title level={4} style={{ margin: 0 }}>
+                {tShipping("fulfillment.title")}
+              </Typography.Title>
+              <Typography.Text type="secondary">
+                {tShipping("fulfillment.subtitle")}
+              </Typography.Text>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Select
+                loading={optionsLoading}
+                value={fulfillmentAction}
+                onChange={(value) => {
+                  setFulfillmentAction(value);
+                  setTargetShipmentId(null);
+                  setReuseAcknowledged(false);
+                  resetServiceState();
+                }}
+                options={[
+                  {
+                    value: FULFILLMENT_ACTIONS.NEW,
+                    label: tShipping("fulfillment.actions.new"),
+                  },
+                  {
+                    value: FULFILLMENT_ACTIONS.REPLACE,
+                    label: productionOptions?.allowed_actions?.includes(
+                      FULFILLMENT_ACTIONS.REPLACE,
+                    )
+                      ? tShipping("fulfillment.actions.replace")
+                      : `${tShipping("fulfillment.actions.replace")} — ${tShipping("fulfillment.noMergeTarget")}`,
+                    disabled: !productionOptions?.allowed_actions?.includes(
+                      FULFILLMENT_ACTIONS.REPLACE,
+                    ),
+                  },
+                  {
+                    value: FULFILLMENT_ACTIONS.REUSE,
+                    label: productionOptions?.allowed_actions?.includes(
+                      FULFILLMENT_ACTIONS.REUSE,
+                    )
+                      ? tShipping("fulfillment.actions.reuse")
+                      : `${tShipping("fulfillment.actions.reuse")} — ${tShipping("fulfillment.noMergeTarget")}`,
+                    disabled: !productionOptions?.allowed_actions?.includes(
+                      FULFILLMENT_ACTIONS.REUSE,
+                    ),
+                  },
+                ]}
+              />
+              {requiresTarget ? (
+                <Select
+                  placeholder={tShipping("fulfillment.targetPlaceholder")}
+                  value={targetShipmentId || undefined}
+                  onChange={setTargetShipmentId}
+                  options={(productionOptions?.merge_targets || []).map(
+                    (shipment) => ({
+                      value: shipment.id,
+                      label: `${shipment.shipment_number} • ${shipment.fulfillment_status} • $${safeFormatAmount(
+                        shipment.shipment_price,
+                        "0",
+                      )}`,
+                    }),
+                  )}
+                />
+              ) : null}
+            </div>
+            {fulfillmentAction === FULFILLMENT_ACTIONS.REPLACE &&
+            targetShipmentId ? (
+              <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 space-y-2">
+                <div>{tShipping("fulfillment.replaceWarning")}</div>
+                <div className="grid gap-2 sm:grid-cols-4">
+                  <span>
+                    {tShipping("fulfillment.oldShipping")}: ${safeFormatAmount(previousShippingAmount, "0")}
+                  </span>
+                  <span>
+                    {tShipping("fulfillment.newShipping")}: ${safeFormatAmount(selectedRateAmount, "0")}
+                  </span>
+                  <span>
+                    {tShipping("fulfillment.refund")}: -${safeFormatAmount(previousShippingAmount, "0")}
+                  </span>
+                  <strong>
+                    {tShipping("fulfillment.netCharge")}: ${safeFormatAmount(
+                      selectedRateAmount - previousShippingAmount,
+                      "0",
+                    )}
+                  </strong>
+                </div>
+              </div>
+            ) : null}
+            {isReuseMode ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                <Checkbox
+                  checked={reuseAcknowledged}
+                  onChange={(event) =>
+                    setReuseAcknowledged(event.target.checked)
+                  }
+                >
+                  {tShipping("fulfillment.reuseAcknowledgement")}
+                </Checkbox>
+              </div>
+            ) : null}
+          </div>
+
           <Tabs
+            style={{ display: isReuseMode ? "none" : undefined }}
             activeKey={activeLabelMode}
             onChange={setActiveLabelMode}
             items={[
@@ -1109,7 +1330,7 @@ const ShippingRatesModal = ({
                 <span className="text-base font-semibold text-gray-900">
                   ${" "}
                   {safeFormatAmount(
-                    isUploadMode ? 0 : selectedRateAmount,
+                    isUploadMode || isReuseMode ? 0 : selectedRateAmount,
                     tCommon("none"),
                   )}
                 </span>

@@ -8,6 +8,7 @@ export default function AffiliatedCompletedOrdersPage() {
     <AffiliatedOrdersStatusListPage
       listApiFn={OrdersAPI.affiliatedCompletedItemsList}
       allowedStatuses={["completed"]}
+      enableItemCancel
     />
   );
 }

@@ -1973,7 +1973,13 @@
         "downloadDesigns": "Tasarımları İndir",
         "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
+        "cancelItem": "Order Itemı İptal Et",
+        "cancelItemConfirmTitle": "Bu order item iptal edilsin mi?",
+        "cancelItemConfirmDescription": "Bu shipment'ın son aktif itemıysa kargo labelı da void edilecektir.",
+        "cancelItemConfirmOk": "Itemı İptal Et",
+        "cancelItemConfirmDismiss": "Itemı Koru",
         "editAddress": "Adres Düzenle",
+        "rematch": "Ürün varyasyonunu yeniden eşleştir",
         "shippingRates": "Kargo fiyatları",
         "confirmCancelTitle": "Bu sipariş iptal edilsin mi?",
         "confirmCancelOk": "İptal",
@@ -1986,9 +1992,21 @@
         "printLabel": "Label Yazdır",
         "manualOrder": "Manuel Order"
       },
+      "rematch": {
+        "title": "Ürün Varyasyonunu Yeniden Eşleştir",
+        "submit": "Güncelle",
+        "cancel": "İptal",
+        "customerPrice": "Müşteri fiyatı:",
+        "productRequired": "Ürün seçin.",
+        "sizeRequired": "Beden seçin.",
+        "colorRequired": "Renk seçin."
+      },
       "messages": {
         "loadVariationsError": "Ürün varyasyonları yüklenemedi.",
         "loadCustomersError": "Müşteriler yüklenemedi.",
+        "rematchSuccess": "Sipariş kaleminin ürün varyasyonu güncellendi.",
+        "rematchError": "Sipariş kaleminin ürün varyasyonu güncellenemedi.",
+        "rematchPriceMissing": "Seçilen varyasyon için aktif müşteri fiyatı bulunamadı. Fiyatı olan bir varyasyon seçin veya işlemi iptal edin.",
         "statusUpdateSuccess": "Sipariş durumu güncellendi.",
         "statusUpdateError": "Sipariş durumu güncellenemedi.",
         "addressLoadError": "Sipariş detayları yüklenemedi.",
@@ -2004,7 +2022,9 @@
         "uploadQueued": "{count} tasarım yüklemesi sıraya alındı.",
         "poolIncomplete": "Bu siparişin pre-order kaynağında hâlâ {count} bekleyen kalem var. Tüm kalemler aktarılmadan üretime geçilemez.",
         "noItems": "Kayıt bulunamadı.",
-        "loadListError": "Liste yüklenemedi."
+        "loadListError": "Liste yüklenemedi.",
+        "itemCancelSuccess": "Order item başarıyla iptal edildi.",
+        "itemCancelError": "Order item iptal edilemedi."
       },
       "table": {
         "noData": "Kayıt bulunamadı"
@@ -2589,6 +2609,24 @@
         "modes": {
           "purchase": "Label Satın Al",
           "upload": "Label Yükle"
+        },
+        "fulfillment": {
+          "title": "Gönderim yöntemi",
+          "subtitle": "Seçili gecikmiş kalemlerin kargo akışına nasıl katılacağını seçin.",
+          "optionsError": "Gönderim seçenekleri yüklenemedi.",
+          "targetPlaceholder": "Hedef kargoyu seçin",
+          "noMergeTarget": "uygun, gönderilmemiş kargo yok",
+          "replaceWarning": "Önce birleşik yeni label satın alınacak, ardından mevcut label ve ona ait kargo ücreti void edilecektir.",
+          "oldShipping": "Eski kargo",
+          "newShipping": "Yeni kargo",
+          "refund": "İade",
+          "netCharge": "Net kargo farkı",
+          "reuseAcknowledgement": "Label değiştirilmeden ürün eklenmesinin taşıyıcı ağırlık veya fiyat düzeltmesine neden olabileceğini kabul ediyorum.",
+          "actions": {
+            "new": "Ayrı paket olarak gönder",
+            "replace": "Birleştir ve label değiştir",
+            "reuse": "Birleştir ve mevcut label'ı koru"
+          }
         },
         "upload": {
           "title": "Label Yükle",

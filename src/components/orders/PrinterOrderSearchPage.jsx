@@ -548,8 +548,10 @@ export default function PrinterOrderSearchPage({
                   nextItems.find((item) => item?.order_id)?.order_id ||
                   null,
                 order_number:
-                  firstGroup?.order?.order_number ||
-                  firstGroup?.order_number ||
+                  firstGroup?.shipment_number ||
+                  firstGroup?.shipment?.shipment_number ||
+                  nextItems.find((item) => item?.shipment?.shipment_number)
+                    ?.shipment?.shipment_number ||
                   nextOrderNumber,
                 customer_name:
                   firstGroup?.order?.customer?.name ||
@@ -587,7 +589,7 @@ export default function PrinterOrderSearchPage({
       try {
         const payload = {
           category_id: categoryId,
-          order_number: nextOrderNumber,
+          shipment_number: nextOrderNumber,
           ...(subCategoryId ? { sub_category_id: subCategoryId } : {}),
           ...(scrapPayload ? { scrap: scrapPayload } : {}),
         };
@@ -600,7 +602,10 @@ export default function PrinterOrderSearchPage({
           responseOrder
             ? {
                 id: responseOrder?.id || orderSummary?.id || null,
-                order_number: responseOrder?.order_number || nextOrderNumber,
+                order_number:
+                  responseOrder?.shipment_number ||
+                  responseOrder?.order_number ||
+                  nextOrderNumber,
               }
             : { id: orderSummary?.id || null, order_number: nextOrderNumber },
         );
@@ -615,7 +620,10 @@ export default function PrinterOrderSearchPage({
           setDownloadingDesign(true);
           try {
             const downloadResult = await downloadOrderItemDesigns({
-              orderNumber: responseOrder?.order_number || nextOrderNumber,
+              orderNumber:
+                responseOrder?.shipment_number ||
+                responseOrder?.order_number ||
+                nextOrderNumber,
               designs: designDownload.designs,
             });
             if (downloadResult?.downloaded) {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
+import { useSelector } from "react-redux";
 import {
   App as AntdApp,
   Button,
@@ -21,14 +22,17 @@ import {
   PlusOutlined,
   DollarOutlined,
   FileSearchOutlined,
+  RetweetOutlined,
 } from "@ant-design/icons";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import OrderDesignModal from "@/components/modals/OrderDesignModal";
+import OrderItemRematchModal from "@/components/modals/OrderItemRematchModal";
 import OrdersStatusListPage from "../OrdersStatusListPage";
 import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
+import { hasAnyRole } from "@/utils/rbac";
 
 const PENDING_STATUSES = ["newOrder", "waitingForDesign"];
 
@@ -59,6 +63,7 @@ const toNullableString = (value) => {
 
 export default function PendingOrdersPage() {
   const { message } = AntdApp.useApp();
+  const user = useSelector((state) => state.auth.user);
   const { tasks: designUploadTasks } = useOrderDesignUploadQueue();
   const t = useTranslations("dashboard.orders");
   const tableRef = useRef(null);
@@ -73,7 +78,9 @@ export default function PendingOrdersPage() {
   const [shippingModalRecord, setShippingModalRecord] = useState(null);
   const [designModalOpen, setDesignModalOpen] = useState(false);
   const [designModalRecord, setDesignModalRecord] = useState(null);
+  const [rematchRecord, setRematchRecord] = useState(null);
   const handledDesignUploadIdsRef = useRef(new Set());
+  const isCustomerAdmin = hasAnyRole(user, ["customerAdmin"]);
 
   useEffect(() => {
     let hasNewSuccess = false;
@@ -363,6 +370,11 @@ export default function PendingOrdersPage() {
     [message, setRowActionLoadingState, t],
   );
 
+  const handleRematchSaved = useCallback(() => {
+    setRematchRecord(null);
+    tableRef.current?.reload?.();
+  }, []);
+
   const editingOrder = useMemo(
     () => editingDetail?.order ?? editingRecord?.order ?? null,
     [editingDetail, editingRecord],
@@ -432,6 +444,11 @@ export default function PendingOrdersPage() {
             record?.hasImage ??
             record?.has_image ??
             Boolean(record?.designs?.length);
+          const canRematch =
+            isCustomerAdmin &&
+            record?.status === "newOrder" &&
+            !hasDesignImage &&
+            Boolean(rowId);
           const detailHref = canViewDetail
             ? `/dashboard/order/detail/${orderNumber}`
             : "";
@@ -459,6 +476,15 @@ export default function PendingOrdersPage() {
                   onClick={() => handleOpenAddressEditor(record)}
                 />
               </Popover>
+              {canRematch ? (
+                <Popover content={t("actions.rematch")}>
+                  <Button
+                    icon={<RetweetOutlined />}
+                    type="default"
+                    onClick={() => setRematchRecord(record)}
+                  />
+                </Popover>
+              ) : null}
               {canShowDesignAction ? (
                 <Popover
                   content={
@@ -578,6 +604,7 @@ export default function PendingOrdersPage() {
       handleOpenDesignModal,
       handleOpenShippingModal,
       handleStatusUpdate,
+      isCustomerAdmin,
       isRowActionLoading,
       shouldShowShippingRates,
       t,
@@ -624,6 +651,12 @@ export default function PendingOrdersPage() {
         onCancel={handleDesignModalClose}
         onSaved={handleDesignSaved}
         zIndex={1500}
+      />
+      <OrderItemRematchModal
+        open={Boolean(rematchRecord)}
+        record={rematchRecord}
+        onCancel={() => setRematchRecord(null)}
+        onSaved={handleRematchSaved}
       />
     </>
   );
