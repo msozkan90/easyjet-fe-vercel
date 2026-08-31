@@ -163,7 +163,14 @@ const AddressBlock = ({ title, rows }) => (
   </Card>
 );
 
-const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
+const LabelCard = ({
+  label,
+  tDesign,
+  tOrders,
+  onVoid,
+  voiding,
+  canManageVoid = true,
+}) => {
   const detail = label?.label_detail || {};
   const source = label?.source;
   const statusValue = detail?.status || label?.status;
@@ -181,6 +188,7 @@ const LabelCard = ({ label, tDesign, tOrders, onVoid, voiding }) => {
     tOrders("common.none"),
   );
   const canVoid =
+    canManageVoid &&
     source !== "self_label" &&
     (detail?.status === "PURCHASED" ||
       detail?.status === "completed" ||
@@ -904,6 +912,7 @@ export default function OrderDetailPage() {
     "companyadmin",
     "systemadmin",
   ]);
+  const isCompanyAdmin = hasAnyRole(user, ["companyadmin"]);
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1179,6 +1188,8 @@ export default function OrderDetailPage() {
   const statusLabel = orderDetail?.order_status || orderDetail?.status;
   const statusColor = STATUS_COLORS[statusLabel] || "default";
   const isReordered = isReorderedOrder(orderDetail);
+  const canManageLabelVoid =
+    String(statusLabel || "").toLowerCase() !== "pdf" || isCompanyAdmin;
 
   const billingRows = useMemo(
     () => [
@@ -1496,6 +1507,7 @@ export default function OrderDetailPage() {
                     tDesign={tDesign}
                     tOrders={tOrders}
                     onVoid={handleVoidLabel}
+                    canManageVoid={canManageLabelVoid}
                     voiding={
                       voidingLabelId &&
                       String(
