@@ -47,9 +47,13 @@ export default function AffiliatedOrdersStatusListPage({
       width: 120,
       render: (_, record) => {
         const orderNumber = record?.order?.order_number || record?.order_number;
+        const orderStatus = String(
+          record?.order?.order_status || record?.order_status || "",
+        ).toLowerCase();
         const canCancel =
           enableItemCancel &&
           isCompanyAdmin &&
+          ["pdf", "completed"].includes(orderStatus) &&
           ["pdf", "completed"].includes(record?.status) &&
           Boolean(record?.id);
         const canViewDetail = !record?.__isChild && Boolean(orderNumber);

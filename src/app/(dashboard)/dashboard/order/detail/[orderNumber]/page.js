@@ -169,7 +169,7 @@ const LabelCard = ({
   tOrders,
   onVoid,
   voiding,
-  canManageVoid = true,
+  canManageVoid = false,
 }) => {
   const detail = label?.label_detail || {};
   const source = label?.source;
@@ -912,7 +912,6 @@ export default function OrderDetailPage() {
     "companyadmin",
     "systemadmin",
   ]);
-  const isCompanyAdmin = hasAnyRole(user, ["companyadmin"]);
 
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1189,7 +1188,12 @@ export default function OrderDetailPage() {
   const statusColor = STATUS_COLORS[statusLabel] || "default";
   const isReordered = isReorderedOrder(orderDetail);
   const canManageLabelVoid =
-    String(statusLabel || "").toLowerCase() !== "pdf" || isCompanyAdmin;
+    hasAnyRole(user, ["customeradmin"]) &&
+    String(statusLabel || "").toLowerCase() === "processing" &&
+    items.length > 0 &&
+    items.every(
+      (item) => String(item?.status || "").toLowerCase() === "processing",
+    );
 
   const billingRows = useMemo(
     () => [
