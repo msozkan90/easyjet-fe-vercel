@@ -923,13 +923,25 @@ export default function OrderDetailPage() {
   const [recordingScrap, setRecordingScrap] = useState(false);
 
   const items = useMemo(
-    () =>
-      (Array.isArray(orderDetail?.items) ? orderDetail.items : []).filter(
+    () => {
+      const orderStatus = String(
+        orderDetail?.order_status || orderDetail?.status || "",
+      ).toLowerCase();
+      const orderItems = Array.isArray(orderDetail?.items)
+        ? orderDetail.items
+        : [];
+
+      if (["cancel", "cancelled", "canceled"].includes(orderStatus)) {
+        return orderItems;
+      }
+
+      return orderItems.filter(
         (item) =>
           !["cancel", "cancelled", "canceled"].includes(
             String(item?.status || "").toLowerCase(),
           ),
-      ),
+      );
+    },
     [orderDetail],
   );
   const labels = useMemo(
