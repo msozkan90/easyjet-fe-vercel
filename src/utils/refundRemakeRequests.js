@@ -15,6 +15,57 @@ const toPositiveInteger = (value, fallback = 0) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+const normalizeOrderItemDesignGroups = (record, maxQuantity) => {
+  const designs = Array.isArray(record?.designs) ? record.designs : [];
+  if (!designs.some((design) => Boolean(design?.design_group_id))) return [];
+
+  const grouped = new Map();
+  designs.forEach((design) => {
+    const groupKey = design?.design_group_id || "legacy";
+    const positionId = String(design?.product_position_id || "");
+    if (!positionId) return;
+    const group = grouped.get(groupKey) || new Map();
+    const positionDesigns = group.get(positionId) || [];
+    positionDesigns.push(design);
+    group.set(positionId, positionDesigns);
+    grouped.set(groupKey, group);
+  });
+
+  return Array.from(grouped.entries()).map(([groupKey, positions]) => {
+    const isLegacy = groupKey === "legacy";
+    const positionRows = Array.from(positions.values()).map((positionDesigns) => {
+      const first = positionDesigns[0] || {};
+      return {
+        id: String(first?.product_position_id || ""),
+        name:
+          first?.product_position?.name ||
+          first?.product_position?.slug ||
+          first?.product_position_id ||
+          "-",
+        quantity: isLegacy
+          ? record?.has_personalization
+            ? maxQuantity
+            : 1
+          : positionDesigns.length,
+        previewUrl: first?.thumbnail_url || "",
+        previewStatus: first?.thumbnail_status || "pending",
+        originalUrl: first?.design_url || "",
+      };
+    });
+    return {
+      groupKey,
+      designGroupId: isLegacy ? null : groupKey,
+      isLegacy,
+      availableQuantity: isLegacy
+        ? record?.has_personalization
+          ? maxQuantity
+          : 1
+        : Math.max(1, ...positionRows.map((position) => position.quantity)),
+      positions: positionRows,
+    };
+  });
+};
+
 const cleanObject = (obj = {}) =>
   Object.fromEntries(
     Object.entries(obj).filter(([, value]) => {
@@ -137,6 +188,28 @@ const normalizeSingleRequestItem = (rawItem = {}, keyHint) => {
       rawItem?.product?.name ||
       rawItem?.name ||
       "",
+    designGroups: Array.isArray(rawItem?.design_groups)
+      ? rawItem.design_groups.map((group) => ({
+          groupKey: group?.group_key || "",
+          designGroupId: group?.design_group_id ?? null,
+          isLegacy: Boolean(group?.is_legacy),
+          quantity: toPositiveInteger(group?.quantity, 0),
+          availableQuantity: toPositiveInteger(
+            group?.available_quantity ?? group?.available_quantity_snapshot,
+            toPositiveInteger(group?.quantity, 1),
+          ),
+          positions: Array.isArray(group?.positions)
+            ? group.positions.map((position) => ({
+                id: String(position?.id || ""),
+                name: position?.name || position?.slug || "-",
+                quantity: toPositiveInteger(position?.quantity, 1),
+                previewUrl: position?.preview_url || "",
+                previewStatus: position?.preview_status || "pending",
+                originalUrl: position?.original_url || "",
+              }))
+            : [],
+        }))
+      : [],
   };
 };
 
@@ -192,7 +265,7 @@ export const normalizeRefundRemakeImages = (detail) => {
   return [];
 };
 
-const toCandidateOrderItem = (record = {}) => {
+const toCandidateOrderItem = (record = {}, { includeDesignGroups = false } = {}) => {
   const id = record?.id || record?.order_item_id || record?.uuid;
   if (!id) return null;
   const maxQuantity = toPositiveInteger(record?.quantity, 0);
@@ -216,14 +289,17 @@ const toCandidateOrderItem = (record = {}) => {
     maxQuantity,
     initialQuantity: 1,
     initialPrice: price,
+    designGroups: includeDesignGroups
+      ? normalizeOrderItemDesignGroups(record, maxQuantity)
+      : [],
   };
 };
 
-export const collectRequestableOrderItemsFromRow = (row) => {
+export const collectRequestableOrderItemsFromRow = (row, options) => {
   const source = [row, ...(Array.isArray(row?.children) ? row.children : [])];
   const unique = new Map();
   source.forEach((item) => {
-    const candidate = toCandidateOrderItem(item);
+    const candidate = toCandidateOrderItem(item, options);
     if (!candidate) return;
     if (unique.has(candidate.orderItemId)) return;
     unique.set(candidate.orderItemId, candidate);

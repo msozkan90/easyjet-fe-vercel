@@ -49,7 +49,7 @@ export default function ShippedOrdersPage() {
   }, [user?.entity?.entity_name, user?.entity?.id, user?.parent_entity?.company?.id, user?.parent_entity?.company?.name]);
 
   const selectedOrderItems = useMemo(
-    () => collectRequestableOrderItemsFromRow(selectedRow),
+    () => collectRequestableOrderItemsFromRow(selectedRow, { includeDesignGroups: true }),
     [selectedRow]
   );
 
@@ -129,7 +129,7 @@ export default function ShippedOrdersPage() {
           const canCreate =
             isCustomerAdmin &&
             Boolean(record?.order?.id || record?.order_id) &&
-            collectRequestableOrderItemsFromRow(record).length > 0;
+            collectRequestableOrderItemsFromRow(record, { includeDesignGroups: true }).length > 0;
           return (
             <Space>
               <Tooltip title={t("actions.viewOrderDetail")}>

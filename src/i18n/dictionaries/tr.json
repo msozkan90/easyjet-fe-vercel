@@ -3213,6 +3213,8 @@
         "missingOrderId": "Sipariş bilgisi eksik.",
         "selectAtLeastOneItem": "En az bir sipariş kalemi seçin.",
         "invalidQuantity": "{orderItemId} için adet geçersiz. Maks: {maxQuantity}",
+        "selectAtLeastOneDesignGroup": "{orderItemId} için en az bir tasarım grubu seçin.",
+        "invalidDesignGroupQuantity": "{group} tasarım grubu için adet geçersiz. Maks: {maxQuantity}",
         "tooManyImages": "En fazla {max} görsel yüklenebilir.",
         "imageConversionError": "Görseller hazırlanamadı.",
         "imageTypeError": "Sadece PNG/JPG/JPEG/WEBP görseller kabul edilir.",
@@ -3246,6 +3248,13 @@
           "maxQuantity": "Maks Adet",
           "quantity": "Adet",
           "price": "Fiyat"
+        },
+        "groups": {
+          "legacy": "Eski tasarım grubu",
+          "number": "Tasarım Grubu {number}",
+          "available": "Kullanılabilir: {quantity}",
+          "quantity": "Talep adedi",
+          "previewUnavailable": "Önizleme hazırlanıyor"
         }
       },
       "validation": {
@@ -3283,6 +3292,12 @@
           "quantity": "Adet",
           "price": "Fiyat",
           "lineTotal": "Satır Toplamı"
+        },
+        "groups": {
+          "legacy": "Eski tasarım grubu",
+          "number": "Tasarım Grubu {number}",
+          "selected": "Seçilen adet: {quantity}",
+          "previewUnavailable": "Önizleme yok"
         }
       },
       "common": {
