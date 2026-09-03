@@ -366,7 +366,7 @@ export function DownloadQueueProvider({ children }) {
           ref={panelRef}
           style={{
             position: "fixed",
-            right: 16,
+            left: 16,
             bottom: 16,
             width: 400,
             maxWidth: "calc(100vw - 32px)",

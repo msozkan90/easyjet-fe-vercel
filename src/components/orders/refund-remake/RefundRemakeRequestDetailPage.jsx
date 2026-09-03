@@ -25,6 +25,7 @@ import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
+import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 import { useTranslations } from "@/i18n/use-translations";
 import { RefundRemakeRequestsAPI } from "@/utils/api";
 import {
@@ -216,6 +217,53 @@ export default function RefundRemakeRequestDetailPage({
     [t, tCommonActions],
   );
 
+  const renderDesignGroups = useCallback(
+    (record) => (
+      <div className="refund-remake-detail-groups">
+        {(record?.designGroups || []).map((group, index) => (
+          <Card
+            key={group.groupKey || index}
+            size="small"
+            title={
+              group.isLegacy
+                ? t("detail.groups.legacy")
+                : t("detail.groups.number", { number: index + 1 })
+            }
+            extra={
+              <Tag color="blue">
+                {t("detail.groups.selected", { quantity: group.quantity })}
+              </Tag>
+            }
+          >
+            <Space wrap align="start">
+              {(group.positions || []).map((position) => (
+                <Space key={position.id} direction="vertical" size={2}>
+                  {position.previewUrl ? (
+                    <Image
+                      src={position.previewUrl}
+                      alt={position.name}
+                      width={72}
+                      height={72}
+                      preview={{ src: position.previewUrl }}
+                      style={{ objectFit: "contain", borderRadius: 6 }}
+                    />
+                  ) : (
+                    <span className="refund-remake-detail-preview-empty">
+                      {t("detail.groups.previewUnavailable")}
+                    </span>
+                  )}
+                  <span>{position.name}</span>
+                  <OriginalDesignButton url={position.originalUrl} block />
+                </Space>
+              ))}
+            </Space>
+          </Card>
+        ))}
+      </div>
+    ),
+    [t],
+  );
+
   return (
     <RequireRole anyOfRoles={requireRoles}>
       <Space direction="vertical" style={{ width: "100%" }} size="middle">
@@ -311,6 +359,11 @@ export default function RefundRemakeRequestDetailPage({
                   pagination={false}
                   locale={{ emptyText: t("messages.noItems") }}
                   scroll={{ x: true }}
+                  expandable={{
+                    expandedRowRender: renderDesignGroups,
+                    rowExpandable: (record) => Boolean(record?.designGroups?.length),
+                    defaultExpandAllRows: true,
+                  }}
                 />
               </Card>
 
@@ -362,6 +415,25 @@ export default function RefundRemakeRequestDetailPage({
           </Form.Item>
         </Form>
       </Modal>
+      <style jsx global>{`
+        .refund-remake-detail-groups {
+          display: grid;
+          gap: 12px;
+          padding: 4px 0;
+        }
+        .refund-remake-detail-preview-empty {
+          width: 72px;
+          height: 72px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #f0f0f0;
+          border-radius: 6px;
+          color: #8c8c8c;
+          font-size: 11px;
+          text-align: center;
+        }
+      `}</style>
     </RequireRole>
   );
 }

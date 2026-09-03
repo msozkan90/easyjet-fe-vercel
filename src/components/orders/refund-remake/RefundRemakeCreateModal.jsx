@@ -4,15 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   App as AntdApp,
+  Card,
   Checkbox,
   Form,
   Input,
   InputNumber,
+  Image,
   Modal,
   Popover,
   Select,
   Space,
   Table,
+  Tag,
+  Typography,
   Upload,
 } from "antd";
 import {
@@ -25,6 +29,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { fileToDataUrl } from "@/utils/fileToDataUrl";
+import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 
 const MAX_IMAGE_COUNT = 10;
 const MAX_IMAGE_SIZE_MB = 8;
@@ -129,6 +134,12 @@ export default function RefundRemakeCreateModal({
         checked: true,
         quantity: item?.initialQuantity || 1,
         maxQuantity: item?.maxQuantity || 1,
+        groupSelections: Object.fromEntries(
+          (item?.designGroups || []).map((group, index) => [
+            group.groupKey,
+            { checked: index === 0, quantity: 1 },
+          ]),
+        ),
       };
     });
     setItemSelections(initial);
@@ -146,6 +157,35 @@ export default function RefundRemakeCreateModal({
       [orderItemId]: { ...(prev?.[orderItemId] || {}), ...patch },
     }));
   }, []);
+
+  const updateGroupSelection = useCallback((orderItemId, groupKey, patch) => {
+    setItemSelections((prev) => {
+      const item = prev?.[orderItemId] || {};
+      return {
+        ...prev,
+        [orderItemId]: {
+          ...item,
+          groupSelections: {
+            ...(item.groupSelections || {}),
+            [groupKey]: {
+              ...(item.groupSelections?.[groupKey] || {}),
+              ...patch,
+            },
+          },
+        },
+      };
+    });
+  }, []);
+
+  const getSelectedGroupQuantity = useCallback(
+    (orderItemId) =>
+      Object.values(itemSelections?.[orderItemId]?.groupSelections || {}).reduce(
+        (sum, group) =>
+          group?.checked ? sum + (Number.parseInt(group?.quantity, 10) || 0) : sum,
+        0,
+      ),
+    [itemSelections],
+  );
 
   const tableColumns = useMemo(
     () => [
@@ -225,20 +265,26 @@ export default function RefundRemakeCreateModal({
         title: t("create.columns.quantity"),
         dataIndex: "quantity",
         width: 160,
-        render: (_, record) => (
-          <InputNumber
-            min={1}
-            max={record?.maxQuantity || 1}
-            precision={0}
-            style={{ width: "100%" }}
-            value={itemSelections?.[record.orderItemId]?.quantity}
-            onChange={(value) =>
-              updateItemSelection(record.orderItemId, {
-                quantity: Number.parseInt(value || 1, 10) || 1,
-              })
-            }
-          />
-        ),
+        render: (_, record) =>
+          record?.designGroups?.length ? (
+            <Tag color="blue">
+              {getSelectedGroupQuantity(record.orderItemId)} / {record?.maxQuantity || 1}
+            </Tag>
+          ) : (
+            <InputNumber
+              min={1}
+              max={record?.maxQuantity || 1}
+              precision={0}
+              disabled={!itemSelections?.[record.orderItemId]?.checked}
+              style={{ width: "100%" }}
+              value={itemSelections?.[record.orderItemId]?.quantity}
+              onChange={(value) =>
+                updateItemSelection(record.orderItemId, {
+                  quantity: Number.parseInt(value || 1, 10) || 1,
+                })
+              }
+            />
+          ),
       },
       {
         title: t("create.columns.price"),
@@ -247,7 +293,92 @@ export default function RefundRemakeCreateModal({
         render: (_, record) => formatPriceDisplay(record?.initialPrice),
       },
     ],
-    [itemSelections, t, tCommonActions, updateItemSelection]
+    [getSelectedGroupQuantity, itemSelections, t, tCommonActions, updateItemSelection]
+  );
+
+  const renderDesignGroups = useCallback(
+    (record) => {
+      const itemSelection = itemSelections?.[record.orderItemId] || {};
+      return (
+        <div className="refund-remake-design-groups">
+          {(record?.designGroups || []).map((group, index) => {
+            const selection = itemSelection?.groupSelections?.[group.groupKey] || {};
+            const selected = Boolean(selection.checked) && Boolean(itemSelection.checked);
+            return (
+              <Card
+                key={group.groupKey}
+                size="small"
+                title={
+                  <Checkbox
+                    checked={selected}
+                    disabled={!itemSelection.checked}
+                    onChange={(event) =>
+                      updateGroupSelection(record.orderItemId, group.groupKey, {
+                        checked: event.target.checked,
+                        quantity: selection.quantity || 1,
+                      })
+                    }
+                  >
+                    {group.isLegacy
+                      ? t("create.groups.legacy")
+                      : t("create.groups.number", { number: index + 1 })}
+                  </Checkbox>
+                }
+                extra={
+                  <Tag color="blue">
+                    {t("create.groups.available", {
+                      quantity: group.availableQuantity,
+                    })}
+                  </Tag>
+                }
+              >
+                <div className="refund-remake-design-group-content">
+                  <Space wrap align="start">
+                    {(group.positions || []).map((position) => (
+                      <Space key={position.id} direction="vertical" size={2}>
+                        {position.previewUrl ? (
+                          <Image
+                            src={position.previewUrl}
+                            alt={position.name}
+                            width={64}
+                            height={64}
+                            preview={{ src: position.previewUrl }}
+                            style={{ objectFit: "contain", borderRadius: 6 }}
+                          />
+                        ) : (
+                          <div className="refund-remake-design-placeholder">
+                            {t("create.groups.previewUnavailable")}
+                          </div>
+                        )}
+                        <Typography.Text>{position.name}</Typography.Text>
+                        <OriginalDesignButton url={position.originalUrl} block />
+                      </Space>
+                    ))}
+                  </Space>
+                  <Space direction="vertical" size={4}>
+                    <Typography.Text>{t("create.groups.quantity")}</Typography.Text>
+                    <InputNumber
+                      min={1}
+                      max={group.availableQuantity}
+                      precision={0}
+                      disabled={!selected}
+                      value={selected ? selection.quantity : null}
+                      onChange={(value) =>
+                        updateGroupSelection(record.orderItemId, group.groupKey, {
+                          quantity: Number.parseInt(value || 1, 10) || 1,
+                        })
+                      }
+                      style={{ width: 160 }}
+                    />
+                  </Space>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      );
+    },
+    [itemSelections, t, updateGroupSelection],
   );
 
   const handleConfirm = useCallback(async () => {
@@ -274,7 +405,42 @@ export default function RefundRemakeCreateModal({
     const order_items = {};
     for (const [orderItemId, selection] of selectedEntries) {
       const maxQuantity = Number(selection?.maxQuantity) || 0;
-      const quantity = Number.parseInt(selection?.quantity, 10);
+      const item = orderItems.find((entry) => entry.orderItemId === orderItemId);
+      const designGroups = Array.isArray(item?.designGroups) ? item.designGroups : [];
+      const selectedDesignGroups = designGroups.flatMap((group) => {
+        const groupSelection = selection?.groupSelections?.[group.groupKey];
+        if (!groupSelection?.checked) return [];
+        const quantity = Number.parseInt(groupSelection?.quantity, 10);
+        if (
+          !Number.isInteger(quantity) ||
+          quantity <= 0 ||
+          quantity > Number(group.availableQuantity || 0)
+        ) {
+          return [{ invalid: true, group }];
+        }
+        return [{
+          group_key: group.groupKey,
+          design_group_id: group.designGroupId,
+          quantity,
+        }];
+      });
+      if (designGroups.length && !selectedDesignGroups.length) {
+        message.error(t("messages.selectAtLeastOneDesignGroup", { orderItemId }));
+        return;
+      }
+      const invalidGroup = selectedDesignGroups.find((group) => group.invalid);
+      if (invalidGroup) {
+        message.error(
+          t("messages.invalidDesignGroupQuantity", {
+            group: invalidGroup.group?.groupKey,
+            maxQuantity: invalidGroup.group?.availableQuantity || 0,
+          }),
+        );
+        return;
+      }
+      const quantity = designGroups.length
+        ? selectedDesignGroups.reduce((sum, group) => sum + group.quantity, 0)
+        : Number.parseInt(selection?.quantity, 10);
       if (!Number.isInteger(quantity) || quantity <= 0 || quantity > maxQuantity) {
         message.error(
           t("messages.invalidQuantity", {
@@ -284,7 +450,10 @@ export default function RefundRemakeCreateModal({
         );
         return;
       }
-      order_items[orderItemId] = { quantity };
+      order_items[orderItemId] = {
+        quantity,
+        ...(designGroups.length ? { design_groups: selectedDesignGroups } : {}),
+      };
     }
 
     const uploadList = extractUploadFileList(values?.images);
@@ -322,7 +491,7 @@ export default function RefundRemakeCreateModal({
     }
 
     await onSubmit?.(payload);
-  }, [form, itemSelections, message, onSubmit, orderId, t]);
+  }, [form, itemSelections, message, onSubmit, orderId, orderItems, t]);
 
   const validateImageFile = useCallback(
     (file) => {
@@ -459,11 +628,44 @@ export default function RefundRemakeCreateModal({
           dataSource={orderItems}
           locale={{ emptyText: t("messages.noOrderItems") }}
           scroll={{ x: true }}
+          expandable={{
+            expandedRowRender: renderDesignGroups,
+            rowExpandable: (record) => Boolean(record?.designGroups?.length),
+            defaultExpandAllRows: true,
+          }}
         />
       </Space>
       <style jsx global>{`
         .refund-remake-create-upload .ant-upload-list-item-name {
           display: none !important;
+        }
+        .refund-remake-design-groups {
+          display: grid;
+          gap: 12px;
+          padding: 4px 0;
+        }
+        .refund-remake-design-group-content {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 180px;
+          gap: 20px;
+          align-items: start;
+        }
+        .refund-remake-design-placeholder {
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #f0f0f0;
+          border-radius: 6px;
+          color: #8c8c8c;
+          font-size: 11px;
+          text-align: center;
+        }
+        @media (max-width: 720px) {
+          .refund-remake-design-group-content {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
       </Modal>

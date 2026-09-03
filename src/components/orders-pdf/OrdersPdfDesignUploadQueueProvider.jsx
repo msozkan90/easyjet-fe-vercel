@@ -367,7 +367,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
         <div
           style={{
             position: "fixed",
-            right: 16,
+            left: 16,
             bottom: "calc(16px + var(--download-queue-offset, 0px))",
             width: 380,
             zIndex: 1810,

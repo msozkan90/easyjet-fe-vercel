@@ -3433,6 +3433,8 @@
         "missingOrderId": "Order information is missing.",
         "selectAtLeastOneItem": "Select at least one order item.",
         "invalidQuantity": "Invalid quantity for {orderItemId}. Max: {maxQuantity}",
+        "selectAtLeastOneDesignGroup": "Select at least one design group for {orderItemId}.",
+        "invalidDesignGroupQuantity": "Invalid quantity for design group {group}. Max: {maxQuantity}",
         "tooManyImages": "Maximum {max} images are allowed.",
         "imageConversionError": "Images could not be prepared.",
         "imageTypeError": "Only PNG/JPG/JPEG/WEBP images are allowed.",
@@ -3466,6 +3468,13 @@
           "maxQuantity": "Max Qty",
           "quantity": "Quantity",
           "price": "Price"
+        },
+        "groups": {
+          "legacy": "Legacy design group",
+          "number": "Design Group {number}",
+          "available": "Available: {quantity}",
+          "quantity": "Request quantity",
+          "previewUnavailable": "Preview is preparing"
         }
       },
       "validation": {
@@ -3503,6 +3512,12 @@
           "quantity": "Quantity",
           "price": "Price",
           "lineTotal": "Line Total"
+        },
+        "groups": {
+          "legacy": "Legacy design group",
+          "number": "Design Group {number}",
+          "selected": "Selected quantity: {quantity}",
+          "previewUnavailable": "No preview"
         }
       },
       "common": {
