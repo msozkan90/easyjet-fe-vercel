@@ -949,7 +949,12 @@ export default function OrderDetailPage() {
     [orderDetail],
   );
   const shipments = useMemo(
-    () => (Array.isArray(orderDetail?.shipments) ? orderDetail.shipments : []),
+    () => (Array.isArray(orderDetail?.shipments) ? orderDetail.shipments : [])
+      .filter((shipment) => shipment.status === "active" && shipment.fulfillment_status !== "canceled"),
+    [orderDetail],
+  );
+  const canceledShipments = useMemo(
+    () => Array.isArray(orderDetail?.canceled_shipments) ? orderDetail.canceled_shipments : [],
     [orderDetail],
   );
   const shipmentTotal = useMemo(
@@ -1503,9 +1508,29 @@ export default function OrderDetailPage() {
                       </Tag>
                     </div>
                     <div className="mt-2 text-sm text-slate-600">
-                      {shipment.items?.length || 0} items • ${formatAmount(
+                      {shipment.items?.filter((item) => item.status !== "cancel").length || 0} items • ${formatAmount(
                         shipment.shipment_price,
                       )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {canceledShipments.length ? (
+            <div className="space-y-4">
+              <SectionHeader title="Canceled shipment history" />
+              <div className="grid gap-4 lg:grid-cols-2">
+                {canceledShipments.map((shipment) => (
+                  <div key={shipment.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Typography.Text strong>
+                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                      </Typography.Text>
+                      <Tag>canceled</Tag>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      {shipment.labels?.length || 0} labels • {shipment.label_voids?.length || 0} voids
                     </div>
                   </div>
                 ))}
