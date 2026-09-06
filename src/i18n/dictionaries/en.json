@@ -2466,6 +2466,63 @@
           "error": "Manual transfer order could not be created."
         }
       },
+      "manualNormalOrderModal": {
+        "title": "Create Manual Order",
+        "fields": {
+          "orderNumber": "Order Number",
+          "orderDate": "Order Date",
+          "requestedService": "Requested Service",
+          "carrierCode": "Carrier Code",
+          "serviceCode": "Service Code",
+          "packageCode": "Package Code",
+          "customerEmail": "Customer Email",
+          "customerNotes": "Customer Notes",
+          "gift": "Gift",
+          "giftMessage": "Gift Message",
+          "address": "Shipping Address",
+          "items": "Order Items",
+          "itemSku": "SKU",
+          "itemName": "Item Name",
+          "quantity": "Quantity",
+          "product": "Product",
+          "size": "Size",
+          "color": "Color",
+          "customerPrice": "Customer Price",
+          "options": "Options",
+          "optionName": "Option name",
+          "optionValue": "Option value"
+        },
+        "actions": {
+          "create": "Create",
+          "cancel": "Cancel",
+          "address": "Edit Address",
+          "addItem": "Add Item",
+          "removeItem": "Remove Item",
+          "addOption": "Add Option"
+        },
+        "validation": {
+          "orderNumberRequired": "Order number is required.",
+          "orderNumberWhitespace": "Order number cannot contain spaces.",
+          "orderDateRequired": "Order date is required.",
+          "emailInvalid": "Enter a valid email address.",
+          "addressRequired": "Complete the required shipping address fields.",
+          "itemsRequired": "At least one order item is required.",
+          "itemSkuRequired": "SKU is required.",
+          "itemNameRequired": "Item name is required.",
+          "quantityRequired": "Quantity is required.",
+          "productRequired": "Select a product.",
+          "sizeRequired": "Select a size.",
+          "colorRequired": "Select a color.",
+          "priceMissing": "No active customer price exists for this product variation.",
+          "optionNameRequired": "Option name is required.",
+          "optionValueRequired": "Option value is required."
+        },
+        "messages": {
+          "productsError": "Product variations could not be loaded.",
+          "success": "Manual order created.",
+          "error": "Manual order could not be created."
+        }
+      },
       "designUploadModal": {
         "title": "Upload Designs",
         "fields": {
