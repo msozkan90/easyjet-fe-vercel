@@ -2246,6 +2246,63 @@
           "error": "Manuel transfer order oluşturulamadı."
         }
       },
+      "manualNormalOrderModal": {
+        "title": "Manuel Order Oluştur",
+        "fields": {
+          "orderNumber": "Order Number",
+          "orderDate": "Order Date",
+          "requestedService": "Talep Edilen Servis",
+          "carrierCode": "Carrier Code",
+          "serviceCode": "Service Code",
+          "packageCode": "Package Code",
+          "customerEmail": "Müşteri E-postası",
+          "customerNotes": "Müşteri Notları",
+          "gift": "Hediye",
+          "giftMessage": "Hediye Mesajı",
+          "address": "Teslimat Adresi",
+          "items": "Order Itemlar",
+          "itemSku": "SKU",
+          "itemName": "Item Adı",
+          "quantity": "Adet",
+          "product": "Ürün",
+          "size": "Beden",
+          "color": "Renk",
+          "customerPrice": "Müşteri Fiyatı",
+          "options": "Seçenekler",
+          "optionName": "Seçenek adı",
+          "optionValue": "Seçenek değeri"
+        },
+        "actions": {
+          "create": "Oluştur",
+          "cancel": "İptal",
+          "address": "Adres Düzenle",
+          "addItem": "Item Ekle",
+          "removeItem": "Itemı Kaldır",
+          "addOption": "Seçenek Ekle"
+        },
+        "validation": {
+          "orderNumberRequired": "Order number zorunludur.",
+          "orderNumberWhitespace": "Order number boşluk içeremez.",
+          "orderDateRequired": "Order date zorunludur.",
+          "emailInvalid": "Geçerli bir e-posta adresi girin.",
+          "addressRequired": "Zorunlu teslimat adresi alanlarını tamamlayın.",
+          "itemsRequired": "En az bir order item zorunludur.",
+          "itemSkuRequired": "SKU zorunludur.",
+          "itemNameRequired": "Item adı zorunludur.",
+          "quantityRequired": "Adet zorunludur.",
+          "productRequired": "Ürün seçin.",
+          "sizeRequired": "Beden seçin.",
+          "colorRequired": "Renk seçin.",
+          "priceMissing": "Bu ürün varyasyonu için aktif müşteri fiyatı bulunamadı.",
+          "optionNameRequired": "Seçenek adı zorunludur.",
+          "optionValueRequired": "Seçenek değeri zorunludur."
+        },
+        "messages": {
+          "productsError": "Ürün varyasyonları yüklenemedi.",
+          "success": "Manuel order oluşturuldu.",
+          "error": "Manuel order oluşturulamadı."
+        }
+      },
       "designUploadModal": {
         "title": "Tasarım Yükle",
         "fields": {

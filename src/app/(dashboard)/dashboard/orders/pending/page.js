@@ -30,6 +30,7 @@ import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import OrderDesignModal from "@/components/modals/OrderDesignModal";
 import OrderItemRematchModal from "@/components/modals/OrderItemRematchModal";
+import ManualOrderModal from "@/components/modals/ManualOrderModal";
 import OrdersStatusListPage from "../OrdersStatusListPage";
 import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
 import { hasAnyRole } from "@/utils/rbac";
@@ -79,6 +80,7 @@ export default function PendingOrdersPage() {
   const [designModalOpen, setDesignModalOpen] = useState(false);
   const [designModalRecord, setDesignModalRecord] = useState(null);
   const [rematchRecord, setRematchRecord] = useState(null);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
   const handledDesignUploadIdsRef = useRef(new Set());
   const isCustomerAdmin = hasAnyRole(user, ["customerAdmin"]);
 
@@ -624,6 +626,25 @@ export default function PendingOrdersPage() {
         enableStatusFilter
         columnsBuilder={columnsBuilder}
         tableRefExternal={tableRef}
+        toolbarRight={
+          isCustomerAdmin ? (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setManualModalOpen(true)}
+            >
+              {t("actions.manualOrder")}
+            </Button>
+          ) : null
+        }
+      />
+      <ManualOrderModal
+        open={manualModalOpen}
+        onCancel={() => setManualModalOpen(false)}
+        onCreated={() => {
+          setManualModalOpen(false);
+          tableRef.current?.reload?.();
+        }}
       />
       <ShippingRatesModal
         open={shippingModalOpen}

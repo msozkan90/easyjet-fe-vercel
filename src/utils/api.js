@@ -136,6 +136,7 @@ export const OrdersAPI = {
 
   // order list
   create: (data) => api.post("/orders", data),
+  createManual: (data) => api.post("/orders/manual", data),
   itemsList: (data) => api.post("/orders/items/list", data),
   pendingItemsList: (data) => api.post("/orders/items/pending/list", data),
   productionItemsList: (data) =>
