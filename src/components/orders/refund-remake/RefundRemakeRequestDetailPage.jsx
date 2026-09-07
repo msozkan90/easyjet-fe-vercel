@@ -36,7 +36,7 @@ import {
 
 const STATUS_COLORS = {
   pending: "gold",
-  completed: "green",
+  approved: "green",
   canceled: "red",
 };
 
@@ -276,8 +276,8 @@ export default function RefundRemakeRequestDetailPage({
           {canManageStatus ? (
             <>
               <Popconfirm
-                title={t("actions.completeConfirm")}
-                onConfirm={() => updateStatus({ status: "completed" })}
+                title={t("actions.approveConfirm")}
+                onConfirm={() => updateStatus({ status: "approved" })}
                 okButtonProps={{ loading: statusUpdating }}
                 disabled={!isPending || statusUpdating}
               >
@@ -286,7 +286,7 @@ export default function RefundRemakeRequestDetailPage({
                   disabled={!isPending || statusUpdating}
                   loading={statusUpdating}
                 >
-                  {t("actions.complete")}
+                  {t("actions.approve")}
                 </Button>
               </Popconfirm>
               <Button

@@ -1,7 +1,7 @@
 import { normalizeListAndMeta } from "./normalizeListAndMeta";
 
 export const REFUND_REMAKE_TYPE_VALUES = ["refund", "remake"];
-export const REFUND_REMAKE_STATUS_VALUES = ["pending", "completed", "canceled"];
+export const REFUND_REMAKE_STATUS_VALUES = ["pending", "approved", "canceled"];
 
 const isNil = (value) => value === undefined || value === null;
 

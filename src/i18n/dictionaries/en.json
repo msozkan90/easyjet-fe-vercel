@@ -3460,16 +3460,16 @@
       },
       "status": {
         "pending": "Pending",
-        "completed": "Completed",
+        "approved": "Approved",
         "canceled": "Canceled"
       },
       "actions": {
         "viewDetail": "View detail",
         "viewOrderDetail": "View order detail",
         "createRequest": "Create request",
-        "complete": "Complete",
+        "approve": "Approve",
         "cancel": "Cancel",
-        "completeConfirm": "Mark this request as completed?",
+        "approveConfirm": "Approve this request?",
         "cancelModalTitle": "Cancel Request",
         "cancelConfirm": "Cancel Request",
         "backToList": "Back to list",
