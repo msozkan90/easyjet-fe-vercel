@@ -190,6 +190,7 @@ const LabelCard = ({
   const canVoid =
     canManageVoid &&
     source !== "self_label" &&
+    source !== "rexven_label" &&
     (detail?.status === "PURCHASED" ||
       detail?.status === "completed" ||
       label?.status === "active");
@@ -1204,13 +1205,37 @@ export default function OrderDetailPage() {
   const statusLabel = orderDetail?.order_status || orderDetail?.status;
   const statusColor = STATUS_COLORS[statusLabel] || "default";
   const isReordered = isReorderedOrder(orderDetail);
-  const canManageLabelVoid =
-    hasAnyRole(user, ["customeradmin"]) &&
-    String(statusLabel || "").toLowerCase() === "processing" &&
-    items.length > 0 &&
-    items.every(
-      (item) => String(item?.status || "").toLowerCase() === "processing",
-    );
+  const canManageLabelVoid = useCallback(
+    (label) => {
+      if (!hasAnyRole(user, ["customeradmin"])) return false;
+      const orderStatus = String(statusLabel || "").toLowerCase();
+      if (orderStatus !== "processing" && orderStatus !== "neworder") {
+        return false;
+      }
+      const shipmentId = label?.shipment_id || label?.shipment?.id;
+      if (!shipmentId) return false;
+      const shipmentStatus = String(
+        label?.shipment?.fulfillment_status || "",
+      ).toLowerCase();
+      if (shipmentStatus === "shipped" || shipmentStatus === "canceled") {
+        return false;
+      }
+      const shipmentItems = items.filter(
+        (item) => String(item?.shipment_id || "") === String(shipmentId),
+      );
+      const activeShipmentItems = shipmentItems.filter(
+        (item) => String(item?.status || "").toLowerCase() !== "cancel",
+      );
+      return (
+        activeShipmentItems.length > 0 &&
+        activeShipmentItems.every(
+          (item) =>
+            String(item?.status || "").toLowerCase() === "processing",
+        )
+      );
+    },
+    [items, statusLabel, user],
+  );
 
   const billingRows = useMemo(
     () => [
@@ -1548,7 +1573,7 @@ export default function OrderDetailPage() {
                     tDesign={tDesign}
                     tOrders={tOrders}
                     onVoid={handleVoidLabel}
-                    canManageVoid={canManageLabelVoid}
+                    canManageVoid={canManageLabelVoid(label)}
                     voiding={
                       voidingLabelId &&
                       String(
