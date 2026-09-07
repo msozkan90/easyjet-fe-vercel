@@ -32,7 +32,7 @@ const cleanFilters = (filters = {}) =>
 
 const STATUS_COLORS = {
   pending: "gold",
-  completed: "green",
+  approved: "green",
   canceled: "red",
 };
 
@@ -89,7 +89,7 @@ export default function RefundRemakeRequestsListPage({
   const statusOptions = useMemo(
     () => [
       { value: "pending", label: t("status.pending") },
-      { value: "completed", label: t("status.completed") },
+      { value: "approved", label: t("status.approved") },
       { value: "canceled", label: t("status.canceled") },
     ],
     [t]

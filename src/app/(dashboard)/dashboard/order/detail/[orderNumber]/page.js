@@ -32,6 +32,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import { STATUS_COLORS } from "@/app/(dashboard)/dashboard/orders/statusConstants";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
+import { resolveTrackingUrl } from "@/utils/trackingUrl";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
 import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
@@ -203,6 +204,39 @@ const LabelCard = ({
     detail?.trackingNumber ||
     label?.tracking_number ||
     tOrders("common.none");
+  const trackingUrl = resolveTrackingUrl({
+    trackingNumber:
+      detail?.tracking_number ||
+      detail?.trackingNumber ||
+      label?.tracking_number,
+    trackingUrl:
+      detail?.tracking_url ||
+      detail?.trackingUrl ||
+      label?.tracking_url ||
+      label?.trackingUrl,
+    carrier: detail?.carrier || label?.carrier,
+    carrierCode: detail?.carrier_code || label?.carrier_code,
+    service:
+      detail?.service ||
+      detail?.service_code ||
+      label?.service ||
+      label?.service_code,
+  });
+  const trackingDisplayValue =
+    source && trackingUrl ? (
+      <a
+        href={trackingUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all text-blue-600 underline decoration-blue-300 underline-offset-2 transition hover:text-blue-800"
+      >
+        {trackingValue}
+      </a>
+    ) : source ? (
+      trackingValue
+    ) : (
+      tOrders("common.none")
+    );
 
   return (
     <Card
@@ -236,7 +270,7 @@ const LabelCard = ({
         <InfoField label={tDesign("fields.labelRate")} value={rateText} />
         <InfoField
           label={tDesign("fields.labelTracking")}
-          value={source ? trackingValue : tOrders("common.none")}
+          value={trackingDisplayValue}
         />
         <InfoField label={tDesign("fields.labelCreatedAt")} value={createdAt} />
       </div>

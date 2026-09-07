@@ -3240,16 +3240,16 @@
       },
       "status": {
         "pending": "Bekliyor",
-        "completed": "Tamamlandı",
+        "approved": "Onaylandı",
         "canceled": "İptal"
       },
       "actions": {
         "viewDetail": "Detayı görüntüle",
         "viewOrderDetail": "Sipariş detayını görüntüle",
         "createRequest": "Talep oluştur",
-        "complete": "Tamamla",
+        "approve": "Onayla",
         "cancel": "İptal Et",
-        "completeConfirm": "Bu talep tamamlandı olarak işaretlensin mi?",
+        "approveConfirm": "Bu talep onaylansın mı?",
         "cancelModalTitle": "Talebi İptal Et",
         "cancelConfirm": "Talebi İptal Et",
         "backToList": "Listeye dön",
