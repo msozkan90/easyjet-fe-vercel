@@ -2753,10 +2753,14 @@
           "confirmSendDescription": "Seçili kargo etiketi satın alınacak ve sipariş üretime gönderilecek. Devam edilsin mi?",
           "confirmUploadTitle": "Yüklenen label ile üretime gönderilsin mi?",
           "confirmUploadDescription": "Yüklenen dosya self label olarak kaydedilecek ve sipariş üretime gönderilecek. Devam edilsin mi?",
-          "confirmSendOk": "Evet, gönder"
+          "confirmSendOk": "Evet, gönder",
+          "createShipmentLabel": "Label Oluştur ve Sevk Et",
+          "labelCreateSuccess": "Kargo labelı oluşturuldu ve sipariş sevk edildi.",
+          "labelCreateError": "Kargo labelı oluşturulamadı."
         },
         "errors": {
-          "mustRefreshRates": "Fiyatlar güncel değil. Lütfen göndermeden önce yenileyin."
+          "mustRefreshRates": "Fiyatlar güncel değil. Lütfen göndermeden önce yenileyin.",
+          "weightRequired": "Yalnızca bir ağırlık değeri girin: lb veya oz."
         }
       },
       "workerPrinter": {
@@ -2780,7 +2784,8 @@
           "designDownloadError": "Tasarım dosyaları indirilemedi.",
           "labelPrintPreparing": "Kargo etiketi yazdırma için hazırlanıyor.",
           "labelPrintOpened": "Kargo etiketi yazdırma penceresi açıldı.",
-          "labelPrintError": "Kargo etiketi yazdırılamadı."
+          "labelPrintError": "Kargo etiketi yazdırılamadı.",
+          "remakeLabelRequired": "Bu company remake siparişinde aktif label yok. Sevkiyatı tamamlamak için label satın alın veya yükleyin."
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",

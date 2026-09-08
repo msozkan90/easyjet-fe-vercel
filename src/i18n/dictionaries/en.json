@@ -2973,10 +2973,14 @@
           "confirmSendDescription": "We will purchase the selected shipping label and send this order to production. Continue?",
           "confirmUploadTitle": "Send to production with uploaded label?",
           "confirmUploadDescription": "The uploaded label will be saved as a self label and this order will be sent to production. Continue?",
-          "confirmSendOk": "Yes, send"
+          "confirmSendOk": "Yes, send",
+          "createShipmentLabel": "Create Label & Ship",
+          "labelCreateSuccess": "Shipping label created and order shipped.",
+          "labelCreateError": "Shipping label could not be created."
         },
         "errors": {
-          "mustRefreshRates": "Rates are outdated. Please refresh before sending."
+          "mustRefreshRates": "Rates are outdated. Please refresh before sending.",
+          "weightRequired": "Enter exactly one weight value: pounds or ounces."
         }
       },
       "workerPrinter": {
@@ -3000,7 +3004,8 @@
           "designDownloadError": "Design files could not be downloaded.",
           "labelPrintPreparing": "Shipping label is being prepared for printing.",
           "labelPrintOpened": "Shipping label print dialog opened.",
-          "labelPrintError": "Shipping label could not be printed."
+          "labelPrintError": "Shipping label could not be printed.",
+          "remakeLabelRequired": "This company remake has no active shipping label. Purchase or upload a label to complete shipment."
         },
         "scrap": {
           "title": "Record Fire / Scrap",
