@@ -19,6 +19,7 @@ import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
+import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
 
 const STATUS_COLORS = {
   newOrder: "geekblue",
@@ -206,6 +207,7 @@ export default function ShippedOrderPrinterSearchPage() {
   const [order, setOrder] = useState(null);
   const [positionsByProductId, setPositionsByProductId] = useState({});
   const [positionsLoading, setPositionsLoading] = useState(false);
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
 
   const items = useMemo(() => {
     if (!Array.isArray(order?.items)) return [];
@@ -292,6 +294,12 @@ export default function ShippedOrderPrinterSearchPage() {
 
         setOrder(responseOrder);
 
+        if (response?.data?.requires_label_creation === true) {
+          setShippingModalOpen(true);
+          message.warning(tOrders("scanner.messages.remakeLabelRequired"));
+          return;
+        }
+
         if (labelUrl) {
           setPrintingLabel(true);
           try {
@@ -340,8 +348,33 @@ export default function ShippedOrderPrinterSearchPage() {
     [handleSearch],
   );
 
+  const handleLabelCreated = useCallback(
+    async (payload) => {
+      const responseOrder = payload?.order || null;
+      const labelUrl = payload?.label_download?.label_url;
+      setOrder(responseOrder);
+      setShippingModalOpen(false);
+      if (labelUrl) {
+        setPrintingLabel(true);
+        try {
+          const printResult = await printOrderLabel({ labelUrl });
+          if (printResult?.printed) {
+            message.success(tOrders("scanner.messages.labelPrintOpened"));
+          }
+        } catch (error) {
+          message.error(error?.message || tOrders("scanner.messages.labelPrintError"));
+        } finally {
+          setPrintingLabel(false);
+        }
+      }
+      setOrderNumber("");
+      window.requestAnimationFrame(() => orderNumberInputRef.current?.focus());
+    },
+    [message, tOrders],
+  );
+
   return (
-    <RequireRole anyOfRoles={["companyShipmentWorker"]}>
+    <RequireRole anyOfRoles={["companyShipmentWorker", "companyadmin"]}>
       <div className="space-y-4 p-4">
         <Typography.Title level={4} style={{ margin: 0 }}>
           {tOrders("scanner.title")}
@@ -417,6 +450,12 @@ export default function ShippedOrderPrinterSearchPage() {
         {searched && !searching && !items.length ? (
           <Empty description={tDetail("messages.noItems")} />
         ) : null}
+        <RemakeShippingRatesModal
+          open={shippingModalOpen}
+          order={order}
+          onClose={() => setShippingModalOpen(false)}
+          onCreated={handleLabelCreated}
+        />
       </div>
     </RequireRole>
   );

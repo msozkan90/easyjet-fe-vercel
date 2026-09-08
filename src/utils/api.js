@@ -150,6 +150,10 @@ export const OrdersAPI = {
   workerShippedItemsList: (data) =>
     api.post("/orders/items/worker/shipped/list", data),
   shippedItems: (data) => api.post("/orders/items/shipped/", data),
+  createRemakeShipmentLabel: (data) =>
+    api.post("/orders/items/shipped/label", data),
+  createRemakeShipmentLabelWithFile: (formData, config = {}) =>
+    api.postMultipart("/orders/items/shipped/label", formData, config),
   affiliatedProductionItemsList: (data) =>
     api.post("/orders/items/affilated/production/list", data),
   affiliatedCompletedItemsList: (data) =>
