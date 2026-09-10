@@ -421,6 +421,31 @@ export default function EntityAuditTimeline({
                 onCopy={() => handleCopyJson(selectedEntry?.response)}
               />
             </div>
+
+            {selectedEntry?.external_api_request != null ||
+            selectedEntry?.external_api_response != null ? (
+              <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
+                <Typography.Text strong>
+                  {t("detailModal.sections.externalApi")}
+                </Typography.Text>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <JsonPreview
+                    title={t("detailModal.sections.externalApiRequest")}
+                    value={selectedEntry?.external_api_request}
+                    emptyText={t("detailModal.messages.noExternalApiRequest")}
+                    copyLabel={t("detailModal.actions.copy")}
+                    onCopy={() => handleCopyJson(selectedEntry?.external_api_request)}
+                  />
+                  <JsonPreview
+                    title={t("detailModal.sections.externalApiResponse")}
+                    value={selectedEntry?.external_api_response}
+                    emptyText={t("detailModal.messages.noExternalApiResponse")}
+                    copyLabel={t("detailModal.actions.copy")}
+                    onCopy={() => handleCopyJson(selectedEntry?.external_api_response)}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </Modal>

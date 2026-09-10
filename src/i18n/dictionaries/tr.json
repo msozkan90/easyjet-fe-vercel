@@ -2088,7 +2088,10 @@
           "sections": {
             "metadata": "Metadata",
             "payload": "Request Payload",
-            "response": "Response Payload"
+            "response": "Response Payload",
+            "externalApi": "Dış API Çağrısı",
+            "externalApiRequest": "Dış API Request",
+            "externalApiResponse": "Dış API Response"
           },
           "fields": {
             "title": "Başlık",
@@ -2113,7 +2116,9 @@
           },
           "messages": {
             "noPayload": "Kaydedilmiş request payload bulunmuyor.",
-            "noResponse": "Kaydedilmiş response payload bulunmuyor."
+            "noResponse": "Kaydedilmiş response payload bulunmuyor.",
+            "noExternalApiRequest": "Kaydedilmiş dış API request bilgisi bulunmuyor.",
+            "noExternalApiResponse": "Kaydedilmiş dış API response bilgisi bulunmuyor."
           }
         },
         "subjects": {
