@@ -6,6 +6,7 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import dayjs from "dayjs";
@@ -32,6 +33,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { useSelector } from "react-redux";
 import {
   CategoriesAPI,
   CustomersAPI,
@@ -40,7 +42,9 @@ import {
   TransferOrdersAPI,
 } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
-import { useTranslations } from "@/i18n/use-translations";
+import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
+import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
+import ReportExportButton from "@/components/reports/ReportExportButton";
 
 const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
@@ -163,10 +167,13 @@ function TextColumnFilter({
 }
 
 export default function TransferOrderReportPage() {
+  const user = useSelector((state) => state.auth.user);
+  const isCustomerAdmin = user?.roles?.includes("customeradmin");
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.transferOrderReport");
   const tOrders = useTranslations("dashboard.orders");
   const tActions = useTranslations("common.actions");
+  const { locale } = useLocaleInfo();
 
   const [filters, setFilters] = useState(() => createDefaultFilters());
   const [reportData, setReportData] = useState({
@@ -181,6 +188,9 @@ export default function TransferOrderReportPage() {
     applied_range: null,
   });
   const [loading, setLoading] = useState(true);
+  const [appliedPayload, setAppliedPayload] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
+  const reportRequest = useRef(0);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [partners, setPartners] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -195,10 +205,10 @@ export default function TransferOrderReportPage() {
     setFilterOptionsLoading(true);
     try {
       const [partnersResp, customersResp, categoriesResp, transferProductsResp] = await Promise.all([
-        PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
-        CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CategoriesAPI.listWithSubCategories(),
-        TransferProductsAPI.list({
+        isCustomerAdmin ? null : TransferProductsAPI.list({
           pagination: { page: 1, pageSize: 500 },
           filters: { status: "active" },
         }),
@@ -219,7 +229,7 @@ export default function TransferOrderReportPage() {
     } finally {
       setFilterOptionsLoading(false);
     }
-  }, [message, t]);
+  }, [isCustomerAdmin, message, t]);
 
   const entityOptions = useMemo(() => {
     const partnerRows = partners.map((partner) => ({
@@ -250,32 +260,35 @@ export default function TransferOrderReportPage() {
 
   const fetchReport = useCallback(
     async (nextFilters) => {
+      const request = ++reportRequest.current;
       setLoading(true);
       try {
-        const response = await TransferOrdersAPI.report(
-          buildReportPayload(nextFilters, entityOptionsMap),
-        );
-        startTransition(() => {
+        const payload = buildReportPayload(nextFilters, entityOptionsMap);
+        const response = await TransferOrdersAPI.report(payload);
+        if (request === reportRequest.current) startTransition(() => {
           setReportData(extractPayload(response));
+          setAppliedPayload(payload);
         });
       } catch (error) {
-        message.error(
+        if (request === reportRequest.current) message.error(
           error?.response?.data?.error?.message || t("messages.loadReportError"),
         );
       } finally {
-        setLoading(false);
+        if (request === reportRequest.current) setLoading(false);
       }
     },
     [entityOptionsMap, message, t],
   );
 
   useEffect(() => {
+    if (!user) return;
     loadFilterOptions();
-  }, [loadFilterOptions]);
+  }, [loadFilterOptions, user]);
 
   useEffect(() => {
+    if (!user) return;
     fetchReport(createDefaultFilters());
-  }, [fetchReport]);
+  }, [fetchReport, user]);
 
   const statusOptions = useMemo(
     () =>
@@ -374,13 +387,26 @@ export default function TransferOrderReportPage() {
     fetchReport(next);
   }, [fetchReport]);
 
+  const handleExport = useCallback(async (format) => {
+    if (!appliedPayload) return;
+    setExportLoading(true);
+    try {
+      const file = await TransferOrdersAPI.reportExport({ ...appliedPayload, format, locale });
+      saveBlobAsFile(file.blob, file.filename);
+    } catch (error) {
+      message.error(await getBlobErrorMessage(error, t("exportError")));
+    } finally {
+      setExportLoading(false);
+    }
+  }, [appliedPayload, locale, message, t]);
+
   const handleOpenDetail = useCallback(
     async (record) => {
       setDrawerOpen(true);
       setDetailLoading(true);
       try {
         const response = await TransferOrdersAPI.reportDayDetail({
-          ...buildReportPayload(filters, entityOptionsMap),
+          ...appliedPayload,
           date: record.date,
         });
         startTransition(() => {
@@ -395,7 +421,7 @@ export default function TransferOrderReportPage() {
         setDetailLoading(false);
       }
     },
-    [entityOptionsMap, filters, message, t],
+    [appliedPayload, message, t],
   );
 
   const datePresets = useMemo(
@@ -601,7 +627,7 @@ export default function TransferOrderReportPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin"]}>
+    <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
         <Card
           bordered={false}
@@ -619,7 +645,7 @@ export default function TransferOrderReportPage() {
             <Title level={3} style={{ margin: 0 }}>
               {t("title")}
             </Title>
-            <Text type="secondary">{t("subtitle")}</Text>
+            <Text type="secondary">{t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}</Text>
             {reportData?.applied_range ? (
               <Text type="secondary">
                 {t("rangeLabel", {
@@ -671,11 +697,13 @@ export default function TransferOrderReportPage() {
               <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                 {t("filters.search")}
               </Button>
+              <ReportExportButton onExport={handleExport} loading={exportLoading}
+                disabled={!appliedPayload || loading} label={t("exportReport")} />
             </Space>
           }
         >
           <Row gutter={[16, 16]}>
-            <Col xs={24} lg={14}>
+            {!isCustomerAdmin && <Col xs={24} lg={14}>
               <Text strong>{t("filters.entities")}</Text>
               <Select
                 allowClear
@@ -693,8 +721,8 @@ export default function TransferOrderReportPage() {
                   getTextValue(option?.searchText).includes(getTextValue(input))
                 }
               />
-            </Col>
-            <Col xs={24} md={12} lg={5}>
+            </Col>}
+            {!isCustomerAdmin && <Col xs={24} md={12} lg={5}>
               <Text strong>{t("filters.product")}</Text>
               <Select
                 allowClear
@@ -709,7 +737,7 @@ export default function TransferOrderReportPage() {
                 style={{ width: "100%", marginTop: 8 }}
                 optionFilterProp="label"
               />
-            </Col>
+            </Col>}
             <Col xs={24} md={12} lg={10}>
               <Text strong>{t("filters.orderStatus")}</Text>
               <Select

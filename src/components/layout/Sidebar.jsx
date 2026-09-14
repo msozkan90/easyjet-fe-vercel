@@ -67,7 +67,7 @@ export default function Sidebar({ collapsed }) {
     isPartnerAdmin && hasTransferOrderCategory;
   const showCustomerProductMapperMenu =
     isCustomerAdmin && !hasTransferOrderCategory;
-  const isFinancialUser = isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
+  const isFinancialUser = isSystemAdmin || isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector((s) => {
     s?.categories?.listWithSubCategories;
 
@@ -464,7 +464,7 @@ export default function Sidebar({ collapsed }) {
             icon: <DollarOutlined />,
             label: tSidebar("financial.title"),
             children: [
-              {
+              ...(!isSystemAdmin ? [{
                 key: "wallet-topups",
                 icon: <DollarOutlined />,
                 label: (
@@ -472,15 +472,16 @@ export default function Sidebar({ collapsed }) {
                     {tSidebar("financial.topupList")}
                   </Link>
                 ),
-              },
-              ...(isCompanyAdmin || isPartnerAdmin || isCustomerAdmin
+              }] : []),
+              ...(isSystemAdmin || isCompanyAdmin || isPartnerAdmin || isCustomerAdmin
                 ? [
                     {
                       key: "financial-report",
                       icon: <BankOutlined />,
                       label: tSidebar("financial.report"),
                       children: [
-                        ...(showCompanyOrdersMenu
+                        ...((showCompanyOrdersMenu ||
+                          (isCustomerAdmin && hasStandardProductVariationCategory))
                           ? [
                               {
                                 key: "order-report",
@@ -492,7 +493,8 @@ export default function Sidebar({ collapsed }) {
                               },
                             ]
                           : []),
-                        ...(showCompanyTransferOrdersMenu
+                        ...((showCompanyTransferOrdersMenu ||
+                          (isCustomerAdmin && hasTransferOrderCategory))
                           ? [
                               {
                                 key: "transfer-order-report",
@@ -503,6 +505,16 @@ export default function Sidebar({ collapsed }) {
                                 ),
                               },
                             ]
+                          : []),
+                        ...(isSystemAdmin || isCompanyAdmin || isCustomerAdmin
+                          ? [{
+                              key: "shipment-report",
+                              label: (
+                                <Link href="/dashboard/shipment-report">
+                                  {tSidebar("financial.shipmentReport")}
+                                </Link>
+                              ),
+                            }]
                           : []),
                       ],
                     },
