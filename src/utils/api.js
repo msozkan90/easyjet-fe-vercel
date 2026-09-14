@@ -31,6 +31,10 @@ export const api = {
 export const ShipmentReportAPI = {
   report: (payload) => api.post('/shipments/report', payload),
   dayDetail: (payload) => api.post('/shipments/report/day-detail', payload),
+  filterOptions: () => api.get('/shipments/report/filter-options'),
+  reportExport: (payload) => fetchBlobFilePost('/shipments/report/export', {
+    data: payload, fallbackFilename: `shipment-report.${payload.format}`,
+  }),
 };
 
 const sanitizeFilters = (filters) => {
@@ -179,6 +183,9 @@ export const OrdersAPI = {
   orderDetail: (orderNumber) => api.get(`/orders/${orderNumber}`),
   report: (payload) => api.post("/orders/report", payload),
   reportDayDetail: (payload) => api.post("/orders/report/day-detail", payload),
+  reportExport: (payload) => fetchBlobFilePost('/orders/report/export', {
+    data: payload, fallbackFilename: `order-report.${payload.format}`,
+  }),
   saveDesign: (formData, config = {}) =>
     api.putMultipart("/orders/items", formData, config),
   designUploadProgress: (uploadId) =>
@@ -330,6 +337,9 @@ export const TransferOrdersAPI = {
   report: (payload) => api.post("/transfer-orders/report", payload),
   reportDayDetail: (payload) =>
     api.post("/transfer-orders/report/day-detail", payload),
+  reportExport: (payload) => fetchBlobFilePost('/transfer-orders/report/export', {
+    data: payload, fallbackFilename: `transfer-order-report.${payload.format}`,
+  }),
   list: (payload) => api.post("/transfer-orders/list", payload),
   detail: (orderNumber) =>
     api.get(`/transfer-orders/${encodeURIComponent(orderNumber)}`),

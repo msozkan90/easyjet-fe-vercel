@@ -392,6 +392,8 @@
     },
     "orderReport": {
       "title": "Sipariş Raporu",
+      "exportReport": "Raporu Dışa Aktar",
+      "exportError": "Rapor indirilemedi.",
       "subtitle": "Company kapsamındaki siparişlerin günlük ciro ve ürün dağılım raporu.",
       "customerSubtitle": "Siparişlerinizin günlük ciro ve ürün dağılım raporu.",
       "heroBadge": "Financial Insight",
@@ -459,9 +461,16 @@
     },
     "shipmentReport": {
       "title": "Shipment Raporu",
+      "exportReport": "Raporu Dışa Aktar",
+      "exportError": "Rapor indirilemedi.",
       "subtitle": "Satın alınan labelların ve iptallerin günlük özeti.",
       "customerSubtitle": "Siparişlerinizin label ücretleri ve iptalleri.",
       "filters": "Tarih Aralığı",
+      "companyFilter": "Şirket filtresi",
+      "customerFilter": "Müşteri filtresi",
+      "allCompanies": "Tüm şirketler",
+      "allCustomers": "Tüm müşteriler",
+      "columnSearch": "{column} ara",
       "search": "Ara",
       "reset": "Temizle",
       "summary": "Günlük Shipment Özeti",
@@ -494,11 +503,15 @@
       "void": "İptal",
       "eventTime": "İşlem Zamanı",
       "unresolved": "Ücret eşleşmedi",
+      "resolved": "Eşleşen",
       "empty": "Bu aralıkta label işlemi bulunamadı.",
-      "loadError": "Shipment raporu yüklenemedi."
+      "loadError": "Shipment raporu yüklenemedi.",
+      "loadOptionsError": "Filtre seçenekleri yüklenemedi."
     },
     "transferOrderReport": {
       "title": "Transfer Sipariş Raporu",
+      "exportReport": "Raporu Dışa Aktar",
+      "exportError": "Rapor indirilemedi.",
       "subtitle": "Company kapsamındaki transfer siparişlerinin günlük ciro, inch ve ürün dağılım raporu.",
       "customerSubtitle": "Transfer siparişlerinizin günlük ciro, inch ve ürün dağılım raporu.",
       "heroBadge": "Transfer Financial Insight",

@@ -6,6 +6,7 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import dayjs from "dayjs";
@@ -41,7 +42,9 @@ import {
   TransferOrdersAPI,
 } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
-import { useTranslations } from "@/i18n/use-translations";
+import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
+import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
+import ReportExportButton from "@/components/reports/ReportExportButton";
 
 const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
@@ -170,6 +173,7 @@ export default function TransferOrderReportPage() {
   const t = useTranslations("dashboard.transferOrderReport");
   const tOrders = useTranslations("dashboard.orders");
   const tActions = useTranslations("common.actions");
+  const { locale } = useLocaleInfo();
 
   const [filters, setFilters] = useState(() => createDefaultFilters());
   const [reportData, setReportData] = useState({
@@ -184,6 +188,9 @@ export default function TransferOrderReportPage() {
     applied_range: null,
   });
   const [loading, setLoading] = useState(true);
+  const [appliedPayload, setAppliedPayload] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
+  const reportRequest = useRef(0);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [partners, setPartners] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -253,20 +260,21 @@ export default function TransferOrderReportPage() {
 
   const fetchReport = useCallback(
     async (nextFilters) => {
+      const request = ++reportRequest.current;
       setLoading(true);
       try {
-        const response = await TransferOrdersAPI.report(
-          buildReportPayload(nextFilters, entityOptionsMap),
-        );
-        startTransition(() => {
+        const payload = buildReportPayload(nextFilters, entityOptionsMap);
+        const response = await TransferOrdersAPI.report(payload);
+        if (request === reportRequest.current) startTransition(() => {
           setReportData(extractPayload(response));
+          setAppliedPayload(payload);
         });
       } catch (error) {
-        message.error(
+        if (request === reportRequest.current) message.error(
           error?.response?.data?.error?.message || t("messages.loadReportError"),
         );
       } finally {
-        setLoading(false);
+        if (request === reportRequest.current) setLoading(false);
       }
     },
     [entityOptionsMap, message, t],
@@ -379,13 +387,26 @@ export default function TransferOrderReportPage() {
     fetchReport(next);
   }, [fetchReport]);
 
+  const handleExport = useCallback(async (format) => {
+    if (!appliedPayload) return;
+    setExportLoading(true);
+    try {
+      const file = await TransferOrdersAPI.reportExport({ ...appliedPayload, format, locale });
+      saveBlobAsFile(file.blob, file.filename);
+    } catch (error) {
+      message.error(await getBlobErrorMessage(error, t("exportError")));
+    } finally {
+      setExportLoading(false);
+    }
+  }, [appliedPayload, locale, message, t]);
+
   const handleOpenDetail = useCallback(
     async (record) => {
       setDrawerOpen(true);
       setDetailLoading(true);
       try {
         const response = await TransferOrdersAPI.reportDayDetail({
-          ...buildReportPayload(filters, entityOptionsMap),
+          ...appliedPayload,
           date: record.date,
         });
         startTransition(() => {
@@ -400,7 +421,7 @@ export default function TransferOrderReportPage() {
         setDetailLoading(false);
       }
     },
-    [entityOptionsMap, filters, message, t],
+    [appliedPayload, message, t],
   );
 
   const datePresets = useMemo(
@@ -676,6 +697,8 @@ export default function TransferOrderReportPage() {
               <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                 {t("filters.search")}
               </Button>
+              <ReportExportButton onExport={handleExport} loading={exportLoading}
+                disabled={!appliedPayload || loading} label={t("exportReport")} />
             </Space>
           }
         >

@@ -392,6 +392,8 @@
     },
     "orderReport": {
       "title": "Order Report",
+      "exportReport": "Export Report",
+      "exportError": "Could not download the report.",
       "subtitle": "Daily revenue and product mix report for orders within the company scope.",
       "customerSubtitle": "Daily revenue and product mix report for your orders.",
       "heroBadge": "Financial Insight",
@@ -459,9 +461,16 @@
     },
     "shipmentReport": {
       "title": "Shipment Report",
+      "exportReport": "Export Report",
+      "exportError": "Could not download the report.",
       "subtitle": "Daily summary of purchased and voided labels.",
       "customerSubtitle": "Label charges and voids for your orders.",
       "filters": "Date Range",
+      "companyFilter": "Company filter",
+      "customerFilter": "Customer filter",
+      "allCompanies": "All companies",
+      "allCustomers": "All customers",
+      "columnSearch": "Search {column}",
       "search": "Search",
       "reset": "Clear",
       "summary": "Daily Shipment Summary",
@@ -494,11 +503,15 @@
       "void": "Void",
       "eventTime": "Event Time",
       "unresolved": "Charge not matched",
+      "resolved": "Matched",
       "empty": "No label events in this range.",
-      "loadError": "Failed to load shipment report."
+      "loadError": "Failed to load shipment report.",
+      "loadOptionsError": "Failed to load filter options."
     },
     "transferOrderReport": {
       "title": "Transfer Order Report",
+      "exportReport": "Export Report",
+      "exportError": "Could not download the report.",
       "subtitle": "Daily revenue, inch and product mix report for transfer orders within the company scope.",
       "customerSubtitle": "Daily revenue, inch and product mix report for your transfer orders.",
       "heroBadge": "Transfer Financial Insight",
