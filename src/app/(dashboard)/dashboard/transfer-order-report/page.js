@@ -32,6 +32,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { useSelector } from "react-redux";
 import {
   CategoriesAPI,
   CustomersAPI,
@@ -163,6 +164,8 @@ function TextColumnFilter({
 }
 
 export default function TransferOrderReportPage() {
+  const user = useSelector((state) => state.auth.user);
+  const isCustomerAdmin = user?.roles?.includes("customeradmin");
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.transferOrderReport");
   const tOrders = useTranslations("dashboard.orders");
@@ -195,10 +198,10 @@ export default function TransferOrderReportPage() {
     setFilterOptionsLoading(true);
     try {
       const [partnersResp, customersResp, categoriesResp, transferProductsResp] = await Promise.all([
-        PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
-        CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CategoriesAPI.listWithSubCategories(),
-        TransferProductsAPI.list({
+        isCustomerAdmin ? null : TransferProductsAPI.list({
           pagination: { page: 1, pageSize: 500 },
           filters: { status: "active" },
         }),
@@ -219,7 +222,7 @@ export default function TransferOrderReportPage() {
     } finally {
       setFilterOptionsLoading(false);
     }
-  }, [message, t]);
+  }, [isCustomerAdmin, message, t]);
 
   const entityOptions = useMemo(() => {
     const partnerRows = partners.map((partner) => ({
@@ -270,12 +273,14 @@ export default function TransferOrderReportPage() {
   );
 
   useEffect(() => {
+    if (!user) return;
     loadFilterOptions();
-  }, [loadFilterOptions]);
+  }, [loadFilterOptions, user]);
 
   useEffect(() => {
+    if (!user) return;
     fetchReport(createDefaultFilters());
-  }, [fetchReport]);
+  }, [fetchReport, user]);
 
   const statusOptions = useMemo(
     () =>
@@ -601,7 +606,7 @@ export default function TransferOrderReportPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin"]}>
+    <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
         <Card
           bordered={false}
@@ -619,7 +624,7 @@ export default function TransferOrderReportPage() {
             <Title level={3} style={{ margin: 0 }}>
               {t("title")}
             </Title>
-            <Text type="secondary">{t("subtitle")}</Text>
+            <Text type="secondary">{t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}</Text>
             {reportData?.applied_range ? (
               <Text type="secondary">
                 {t("rangeLabel", {
@@ -675,7 +680,7 @@ export default function TransferOrderReportPage() {
           }
         >
           <Row gutter={[16, 16]}>
-            <Col xs={24} lg={14}>
+            {!isCustomerAdmin && <Col xs={24} lg={14}>
               <Text strong>{t("filters.entities")}</Text>
               <Select
                 allowClear
@@ -693,8 +698,8 @@ export default function TransferOrderReportPage() {
                   getTextValue(option?.searchText).includes(getTextValue(input))
                 }
               />
-            </Col>
-            <Col xs={24} md={12} lg={5}>
+            </Col>}
+            {!isCustomerAdmin && <Col xs={24} md={12} lg={5}>
               <Text strong>{t("filters.product")}</Text>
               <Select
                 allowClear
@@ -709,7 +714,7 @@ export default function TransferOrderReportPage() {
                 style={{ width: "100%", marginTop: 8 }}
                 optionFilterProp="label"
               />
-            </Col>
+            </Col>}
             <Col xs={24} md={12} lg={10}>
               <Text strong>{t("filters.orderStatus")}</Text>
               <Select

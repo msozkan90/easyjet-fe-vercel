@@ -32,6 +32,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { useSelector } from "react-redux";
 import {
   CategoriesAPI,
   CustomersAPI,
@@ -163,6 +164,8 @@ function TextColumnFilter({
 }
 
 export default function OrderReportPage() {
+  const user = useSelector((state) => state.auth.user);
+  const isCustomerAdmin = user?.roles?.includes("customeradmin");
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orderReport");
   const tOrders = useTranslations("dashboard.orders");
@@ -198,8 +201,8 @@ export default function OrderReportPage() {
     setFilterOptionsLoading(true);
     try {
       const [partnersResp, customersResp, categoriesResp] = await Promise.all([
-        PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
-        CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
+        isCustomerAdmin ? null : CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CategoriesAPI.listWithSubCategories(),
       ]);
 
@@ -217,7 +220,7 @@ export default function OrderReportPage() {
     } finally {
       setFilterOptionsLoading(false);
     }
-  }, [message, t]);
+  }, [isCustomerAdmin, message, t]);
 
   const entityOptions = useMemo(() => {
     const partnerRows = partners.map((partner) => ({
@@ -268,12 +271,14 @@ export default function OrderReportPage() {
   );
 
   useEffect(() => {
+    if (!user) return;
     loadFilterOptions();
-  }, [loadFilterOptions]);
+  }, [loadFilterOptions, user]);
 
   useEffect(() => {
+    if (!user) return;
     fetchReport(createDefaultFilters());
-  }, [fetchReport]);
+  }, [fetchReport, user]);
 
   const categoryOptions = useMemo(
     () =>
@@ -695,7 +700,7 @@ export default function OrderReportPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin"]}>
+    <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
         <Card
           bordered={false}
@@ -713,7 +718,7 @@ export default function OrderReportPage() {
             <Title level={3} style={{ margin: 0 }}>
               {t("title")}
             </Title>
-            <Text type="secondary">{t("subtitle")}</Text>
+            <Text type="secondary">{t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}</Text>
             {reportData?.applied_range ? (
               <Text type="secondary">
                 {t("rangeLabel", {
@@ -774,7 +779,7 @@ export default function OrderReportPage() {
           }
         >
           <Row gutter={[16, 16]}>
-            <Col xs={24} lg={8}>
+            {!isCustomerAdmin && <Col xs={24} lg={8}>
               <Text strong>{t("filters.entities")}</Text>
               <Select
                 allowClear
@@ -792,7 +797,7 @@ export default function OrderReportPage() {
                   getTextValue(option?.searchText).includes(getTextValue(input))
                 }
               />
-            </Col>
+            </Col>}
             <Col xs={24} md={12} lg={5}>
               <Text strong>{t("filters.category")}</Text>
               <Select

@@ -28,6 +28,11 @@ export const api = {
     http.delete(url, { params, ...config }).then((r) => r.data),
 };
 
+export const ShipmentReportAPI = {
+  report: (payload) => api.post('/shipments/report', payload),
+  dayDetail: (payload) => api.post('/shipments/report/day-detail', payload),
+};
+
 const sanitizeFilters = (filters) => {
   if (!filters || typeof filters !== "object") return undefined;
   const entries = Object.entries(filters).filter(
