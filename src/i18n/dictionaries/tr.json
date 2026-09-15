@@ -145,6 +145,57 @@
       },
       "actions": {
         "retry": "Tekrar dene"
+      },
+      "urgency": {
+        "title": "Normal Sipariş Üretim Takibi",
+        "subtitle": "Üretimdeki siparişleri 72 saatlik hedefe göre önceliklendirin.",
+        "lastUpdated": "Son güncelleme: {date}",
+        "transferSection": "Transfer Üretim Verileri",
+        "transferShipmentSection": "Transfer Kargo Verileri",
+        "buckets": {
+          "overdue_72_plus": {
+            "title": "Üretim süresi aşıldı",
+            "range": "72 saat ve üzeri",
+            "listTitle": "Üretim süresi aşılan siparişler"
+          },
+          "critical_48_72": {
+            "title": "Acil bakılmalı",
+            "range": "Son 24 saat",
+            "listTitle": "Acil bakılması gereken siparişler"
+          },
+          "warning_24_48": {
+            "title": "Dikkat edilmeli",
+            "range": "24–48 saat",
+            "listTitle": "Dikkat edilmesi gereken siparişler"
+          },
+          "action_0_24": {
+            "title": "İşlem yapılmalı",
+            "range": "İlk 24 saat",
+            "listTitle": "İşlem yapılması gereken siparişler"
+          }
+        },
+        "metrics": {
+          "orders": "Sipariş",
+          "items": "Item",
+          "quantity": "Ürün"
+        },
+        "table": {
+          "elapsed": "Geçen süre",
+          "remaining": "Kalan / Aşılan",
+          "actions": "İşlemler",
+          "viewDetail": "Sipariş detayını görüntüle"
+        },
+        "duration": "{hours} sa {minutes} dk",
+        "remaining": "{duration} kaldı",
+        "exceeded": "{duration} aşıldı",
+        "messages": {
+          "loadError": "Üretim aciliyeti verileri yüklenemedi.",
+          "empty": "Üretimde takip edilecek normal sipariş bulunmuyor."
+        },
+        "actions": {
+          "refresh": "Yenile",
+          "retry": "Tekrar dene"
+        }
       }
     },
     "table": {
@@ -1975,6 +2026,7 @@
         "deliveryMethod": "Teslimat Yöntemi",
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
+        "productionAt": "Üretim Tarihi",
         "hasDesign": "Tasarım",
         "poolStatus": "Pre-order Durumu",
         "designChecklist": "Tasarım Kontrolü",

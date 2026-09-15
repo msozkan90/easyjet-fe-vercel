@@ -9,9 +9,10 @@ export default function AffiliatedProductionOrdersPage() {
       listApiFn={OrdersAPI.affiliatedProductionItemsList}
       allowedStatuses={["processing", "pdf"]}
       enableItemCancel
+      showProductionAt
       defaultSort={[
-        { field: "status", direction: "asc" },
-        { field: "order_date", direction: "asc" },
+        { field: "production_at", direction: "asc" },
+        { field: "id", direction: "asc" },
       ]}
     />
   );

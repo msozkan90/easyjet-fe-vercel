@@ -9,6 +9,11 @@ export default function AffiliatedCompletedOrdersPage() {
       listApiFn={OrdersAPI.affiliatedCompletedItemsList}
       allowedStatuses={["completed"]}
       enableItemCancel
+      showProductionAt
+      defaultSort={[
+        { field: "production_at", direction: "asc" },
+        { field: "id", direction: "asc" },
+      ]}
     />
   );
 }

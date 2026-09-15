@@ -8,6 +8,11 @@ export default function CompletedOrdersPage() {
     <OrdersStatusListPage
       listApiFn={OrdersAPI.completedItemsList}
       allowedStatuses={["completed"]}
+      showProductionAt
+      defaultSort={[
+        { field: "production_at", direction: "asc" },
+        { field: "id", direction: "asc" },
+      ]}
     />
   );
 }

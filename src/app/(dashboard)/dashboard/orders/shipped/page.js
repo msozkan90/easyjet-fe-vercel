@@ -164,6 +164,11 @@ export default function ShippedOrdersPage() {
       <OrdersStatusListPage
         listApiFn={OrdersAPI.shippedItemsList}
         allowedStatuses={["shipped"]}
+        showProductionAt
+        defaultSort={[
+          { field: "production_at", direction: "asc" },
+          { field: "id", direction: "asc" },
+        ]}
         columnsBuilder={columnsBuilder}
         tableRefExternal={tableRef}
       />

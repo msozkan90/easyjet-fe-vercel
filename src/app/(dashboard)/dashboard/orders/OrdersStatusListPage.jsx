@@ -72,6 +72,7 @@ export default function OrdersStatusListPage({
   productListFetcher,
   affilated,
   showCustomerColumn = false,
+  showProductionAt = false,
   toolbarRight,
   defaultSort = [{ field: "order_date", direction: "asc" }],
 }) {
@@ -671,6 +672,16 @@ export default function OrdersStatusListPage({
         },
         render: (_, record) => formatDateTime(record?.order?.order_date),
       },
+      ...(showProductionAt
+        ? [
+            {
+              title: t("columns.productionAt"),
+              dataIndex: "production_at",
+              sorter: true,
+              render: (value) => formatDateTime(value),
+            },
+          ]
+        : []),
       ...(showDetailAction
         ? [
             {
@@ -721,6 +732,7 @@ export default function OrdersStatusListPage({
     statusOptions,
     skuFilterKey,
     shouldShowCustomerColumn,
+    showProductionAt,
     t,
     tCommonActions,
   ]);
