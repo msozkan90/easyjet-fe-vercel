@@ -145,6 +145,57 @@
       },
       "actions": {
         "retry": "Retry"
+      },
+      "urgency": {
+        "title": "Standard Order Production Tracking",
+        "subtitle": "Prioritize in-production orders against the 72-hour target.",
+        "lastUpdated": "Last updated: {date}",
+        "transferSection": "Transfer Production Data",
+        "transferShipmentSection": "Transfer Shipment Data",
+        "buckets": {
+          "overdue_72_plus": {
+            "title": "Production time exceeded",
+            "range": "72 hours and over",
+            "listTitle": "Orders exceeding production time"
+          },
+          "critical_48_72": {
+            "title": "Urgent attention",
+            "range": "Final 24 hours",
+            "listTitle": "Orders requiring urgent attention"
+          },
+          "warning_24_48": {
+            "title": "Attention required",
+            "range": "24–48 hours",
+            "listTitle": "Orders requiring attention"
+          },
+          "action_0_24": {
+            "title": "Action required",
+            "range": "First 24 hours",
+            "listTitle": "Orders requiring action"
+          }
+        },
+        "metrics": {
+          "orders": "Orders",
+          "items": "Items",
+          "quantity": "Units"
+        },
+        "table": {
+          "elapsed": "Elapsed",
+          "remaining": "Remaining / Overdue",
+          "actions": "Actions",
+          "viewDetail": "View order detail"
+        },
+        "duration": "{hours}h {minutes}m",
+        "remaining": "{duration} remaining",
+        "exceeded": "{duration} overdue",
+        "messages": {
+          "loadError": "Production urgency data could not be loaded.",
+          "empty": "There are no standard orders to track in production."
+        },
+        "actions": {
+          "refresh": "Refresh",
+          "retry": "Retry"
+        }
       }
     },
     "table": {
