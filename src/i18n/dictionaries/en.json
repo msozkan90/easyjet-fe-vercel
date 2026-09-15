@@ -2195,6 +2195,7 @@
         "deliveryMethod": "Delivery Method",
         "localPickup": "Local Pickup",
         "orderDate": "Order Date",
+        "productionAt": "Production Date",
         "hasDesign": "Design",
         "poolStatus": "Pre-order Status",
         "designChecklist": "Design Check",

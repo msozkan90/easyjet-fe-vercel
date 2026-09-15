@@ -1975,6 +1975,7 @@
         "deliveryMethod": "Teslimat Yöntemi",
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
+        "productionAt": "Üretim Tarihi",
         "hasDesign": "Tasarım",
         "poolStatus": "Pre-order Durumu",
         "designChecklist": "Tasarım Kontrolü",
