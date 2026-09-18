@@ -266,7 +266,7 @@ export default function RefundRemakeCreateModal({
         dataIndex: "quantity",
         width: 160,
         render: (_, record) =>
-          record?.designGroups?.length ? (
+          record?.usesDesignGroupSelection ? (
             <Tag color="blue">
               {getSelectedGroupQuantity(record.orderItemId)} / {record?.maxQuantity || 1}
             </Tag>
@@ -304,32 +304,40 @@ export default function RefundRemakeCreateModal({
           {(record?.designGroups || []).map((group, index) => {
             const selection = itemSelection?.groupSelections?.[group.groupKey] || {};
             const selected = Boolean(selection.checked) && Boolean(itemSelection.checked);
+            const groupSelectable = Boolean(record?.usesDesignGroupSelection);
+            const groupTitle = group.isLegacy
+              ? t("create.groups.legacy")
+              : t("create.groups.number", { number: index + 1 });
             return (
               <Card
                 key={group.groupKey}
                 size="small"
                 title={
-                  <Checkbox
-                    checked={selected}
-                    disabled={!itemSelection.checked}
-                    onChange={(event) =>
-                      updateGroupSelection(record.orderItemId, group.groupKey, {
-                        checked: event.target.checked,
-                        quantity: selection.quantity || 1,
-                      })
-                    }
-                  >
-                    {group.isLegacy
-                      ? t("create.groups.legacy")
-                      : t("create.groups.number", { number: index + 1 })}
-                  </Checkbox>
+                  groupSelectable ? (
+                    <Checkbox
+                      checked={selected}
+                      disabled={!itemSelection.checked}
+                      onChange={(event) =>
+                        updateGroupSelection(record.orderItemId, group.groupKey, {
+                          checked: event.target.checked,
+                          quantity: selection.quantity || 1,
+                        })
+                      }
+                    >
+                      {groupTitle}
+                    </Checkbox>
+                  ) : (
+                    <Typography.Text strong>{groupTitle}</Typography.Text>
+                  )
                 }
                 extra={
-                  <Tag color="blue">
-                    {t("create.groups.available", {
-                      quantity: group.availableQuantity,
-                    })}
-                  </Tag>
+                  groupSelectable ? (
+                    <Tag color="blue">
+                      {t("create.groups.available", {
+                        quantity: group.availableQuantity,
+                      })}
+                    </Tag>
+                  ) : null
                 }
               >
                 <div className="refund-remake-design-group-content">
@@ -355,22 +363,24 @@ export default function RefundRemakeCreateModal({
                       </Space>
                     ))}
                   </Space>
-                  <Space direction="vertical" size={4}>
-                    <Typography.Text>{t("create.groups.quantity")}</Typography.Text>
-                    <InputNumber
-                      min={1}
-                      max={group.availableQuantity}
-                      precision={0}
-                      disabled={!selected}
-                      value={selected ? selection.quantity : null}
-                      onChange={(value) =>
-                        updateGroupSelection(record.orderItemId, group.groupKey, {
-                          quantity: Number.parseInt(value || 1, 10) || 1,
-                        })
-                      }
-                      style={{ width: 160 }}
-                    />
-                  </Space>
+                  {groupSelectable ? (
+                    <Space direction="vertical" size={4}>
+                      <Typography.Text>{t("create.groups.quantity")}</Typography.Text>
+                      <InputNumber
+                        min={1}
+                        max={group.availableQuantity}
+                        precision={0}
+                        disabled={!selected}
+                        value={selected ? selection.quantity : null}
+                        onChange={(value) =>
+                          updateGroupSelection(record.orderItemId, group.groupKey, {
+                            quantity: Number.parseInt(value || 1, 10) || 1,
+                          })
+                        }
+                        style={{ width: 160 }}
+                      />
+                    </Space>
+                  ) : null}
                 </div>
               </Card>
             );
@@ -406,7 +416,10 @@ export default function RefundRemakeCreateModal({
     for (const [orderItemId, selection] of selectedEntries) {
       const maxQuantity = Number(selection?.maxQuantity) || 0;
       const item = orderItems.find((entry) => entry.orderItemId === orderItemId);
-      const designGroups = Array.isArray(item?.designGroups) ? item.designGroups : [];
+      const designGroups =
+        item?.usesDesignGroupSelection && Array.isArray(item?.designGroups)
+          ? item.designGroups
+          : [];
       const selectedDesignGroups = designGroups.flatMap((group) => {
         const groupSelection = selection?.groupSelections?.[group.groupKey];
         if (!groupSelection?.checked) return [];
