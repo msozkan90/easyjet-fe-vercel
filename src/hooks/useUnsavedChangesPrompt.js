@@ -33,7 +33,6 @@ export function useUnsavedChangesPrompt() {
     [modal, t]
   );
 
-  
   return {
     confirmIfDirty,
     unsavedChangesModalContextHolder: contextHolder,
