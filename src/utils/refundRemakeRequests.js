@@ -17,7 +17,7 @@ const toPositiveInteger = (value, fallback = 0) => {
 
 const normalizeOrderItemDesignGroups = (record, maxQuantity) => {
   const designs = Array.isArray(record?.designs) ? record.designs : [];
-  if (!designs.some((design) => Boolean(design?.design_group_id))) return [];
+  if (!designs.length) return [];
 
   const grouped = new Map();
   designs.forEach((design) => {
@@ -280,6 +280,9 @@ const toCandidateOrderItem = (record = {}, { includeDesignGroups = false } = {})
     record?.product?.images?.[0]?.image_url ||
     record?.product?.images?.[0]?.url ||
     "";
+  const designGroups = includeDesignGroups
+    ? normalizeOrderItemDesignGroups(record, maxQuantity)
+    : [];
   return {
     orderItemId: String(id),
     sku: record?.sku || "",
@@ -289,9 +292,8 @@ const toCandidateOrderItem = (record = {}, { includeDesignGroups = false } = {})
     maxQuantity,
     initialQuantity: 1,
     initialPrice: price,
-    designGroups: includeDesignGroups
-      ? normalizeOrderItemDesignGroups(record, maxQuantity)
-      : [],
+    designGroups,
+    usesDesignGroupSelection: designGroups.some((group) => !group.isLegacy),
   };
 };
 
