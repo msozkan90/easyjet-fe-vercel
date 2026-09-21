@@ -1001,6 +1001,16 @@ export default function OrderDetailPage() {
       ),
     [shipments],
   );
+  const orderItemsTotal = useMemo(
+    () =>
+      (Array.isArray(orderDetail?.items) ? orderDetail.items : []).reduce(
+        (total, item) =>
+          total + Number(item?.price || 0) * Number(item?.quantity || 0),
+        0,
+      ),
+    [orderDetail?.items],
+  );
+  const amountPaidTotal = orderItemsTotal + shipmentTotal;
   const labelVoids = useMemo(
     () =>
       Array.isArray(orderDetail?.label_voids) ? orderDetail.label_voids : [],
@@ -1763,26 +1773,11 @@ export default function OrderDetailPage() {
                 <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
                   <MetricCard
                     label={tDesign("fields.amountPaid")}
-                    value={
-                      shipmentTotal
-                        ? formatAmount(
-                            shipmentTotal,
-                          ) +
-                          formatAmount(
-                            orderDetail?.items
-                              .map((i) => i.price * i.quantity)
-                              .reduce((a, b) => a + b, 0),
-                          )
-                        : "0.00"
-                    }
+                    value={formatAmount(amountPaidTotal, "0.00")}
                   />
                   <MetricCard
                     label={tDesign("fields.orderTotal")}
-                    value={formatAmount(
-                      orderDetail?.items
-                        .map((i) => i.price * i.quantity)
-                        .reduce((a, b) => a + b, 0),
-                    )}
+                    value={formatAmount(orderItemsTotal, "0.00")}
                   />
 
                   <MetricCard
