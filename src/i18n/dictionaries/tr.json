@@ -1040,6 +1040,7 @@
         "description": "Açıklama",
         "categories": "Kategoriler",
         "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "productMarkupLimit": "Ürün Kar Oranı Limiti (%)",
         "createdAt": "Oluşturulma",
         "status": "Durum",
         "actions": "İşlemler"
@@ -4151,16 +4152,19 @@
         "description": "Açıklama",
         "categories": "Kategori",
         "shipmentMultiplier": "Kargo Kar Oranı (%)",
+        "productMarkupLimit": "Ürün Kar Oranı Limiti (%)",
         "status": "Durum"
       },
       "placeholders": {
         "name": "örn. ACME Inc.",
         "description": "Açıklama girin",
         "categories": "Kategori seçin",
-        "shipmentMultiplier": "örn. 15"
+        "shipmentMultiplier": "örn. 15",
+        "productMarkupLimit": "örn. 25"
       },
       "tooltips": {
-        "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz."
+        "shipmentMultiplier": "Kargo etiket ücretine eklenecek kar yüzdesi. Boş bırakılırsa uygulanmaz.",
+        "productMarkupLimit": "Partnerin customer oluştururken girebileceği en yüksek ürün kar oranı."
       }
     },
     "product": {

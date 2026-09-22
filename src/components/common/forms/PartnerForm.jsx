@@ -91,6 +91,28 @@ export default function PartnerForm({
           />
         </Form.Item>
       )}
+
+      <Form.Item
+        name="product_markup_limit"
+        label={tForm("labels.productMarkupLimit")}
+        tooltip={tForm("tooltips.productMarkupLimit")}
+        rules={[
+          {
+            required: true,
+            message: tCommonForms("validation.required", {
+              field: tForm("labels.productMarkupLimit"),
+            }),
+          },
+        ]}
+      >
+        <InputNumber
+          className="w-full"
+          min={0}
+          step={0.1}
+          placeholder={tForm("placeholders.productMarkupLimit")}
+        />
+      </Form.Item>
+
       <Form.Item
         name="status"
         label={tForm("labels.status")}
