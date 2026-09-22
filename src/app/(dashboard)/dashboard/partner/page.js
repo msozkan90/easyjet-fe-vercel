@@ -126,6 +126,15 @@ export default function PartnersPage() {
           }
         : {},
       {
+        title: t("columns.productMarkupLimit"),
+        dataIndex: "product_markup_limit",
+        width: 190,
+        render: (value) => {
+          const percent = multiplierToPercent(value);
+          return typeof percent === "number" ? `%${percent}` : t("common.none");
+        },
+      },
+      {
         title: t("columns.createdAt"),
         dataIndex: "created_at",
         width: 180,
@@ -182,7 +191,7 @@ export default function PartnersPage() {
         ),
       },
     ],
-    [categories, t, isShippingOwner],
+    [categories, t, isShippingOwner, tStatus],
   );
 
   const buildPayload = (values) => {
@@ -194,6 +203,14 @@ export default function PartnersPage() {
 
     if (normalizedMultiplier !== undefined) {
       payload.shipment_multiplier = normalizedMultiplier;
+    }
+
+    const normalizedProductMarkupLimit = percentToMultiplier(
+      values?.product_markup_limit,
+    );
+    delete payload.product_markup_limit;
+    if (normalizedProductMarkupLimit !== undefined) {
+      payload.product_markup_limit = normalizedProductMarkupLimit;
     }
 
     return payload;
@@ -310,8 +327,14 @@ export default function PartnersPage() {
                     shipment_multiplier: multiplierToPercent(
                       getPrimaryShipmentMultiplier(editingRow),
                     ),
+                    product_markup_limit: multiplierToPercent(
+                      editingRow?.product_markup_limit,
+                    ),
                   }
-                : { status: "active", shipment_multiplier: 0 }
+                : {
+                    status: "active",
+                    shipment_multiplier: 0,
+                  }
             }
           />
         </div>

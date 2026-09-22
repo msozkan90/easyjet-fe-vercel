@@ -1040,6 +1040,7 @@
         "description": "Description",
         "categories": "Categories",
         "shipmentMultiplier": "Shipment Markup (%)",
+        "productMarkupLimit": "Product Markup Limit (%)",
         "createdAt": "Created At",
         "status": "Status",
         "actions": "Actions"
@@ -4151,16 +4152,19 @@
         "description": "Description",
         "categories": "Category",
         "shipmentMultiplier": "Shipment Markup (%)",
+        "productMarkupLimit": "Product Markup Limit (%)",
         "status": "Status"
       },
       "placeholders": {
         "name": "e.g. ACME Inc.",
         "description": "Enter description",
         "categories": "Select categories",
-        "shipmentMultiplier": "e.g. 15"
+        "shipmentMultiplier": "e.g. 15",
+        "productMarkupLimit": "e.g. 25"
       },
       "tooltips": {
-        "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none)."
+        "shipmentMultiplier": "Percentage profit added on top of shipping label costs (leave blank for none).",
+        "productMarkupLimit": "Maximum product markup the partner may enter when creating a customer."
       }
     },
     "product": {

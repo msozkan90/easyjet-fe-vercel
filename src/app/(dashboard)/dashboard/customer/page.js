@@ -27,12 +27,12 @@ export default function CustomersPage() {
   const user = useSelector((s) => s.auth.user);
   const isPartnerEntity = user?.entity?.entity_type === "partner";
   const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
-  const controllingCompany = isPartnerEntity
-    ? user?.parent_entity?.company
-    : user?.entity;
   const isMineControlEnabled = Boolean(
-    controllingCompany?.permissions?.IS_MINE_CONTROL,
+    user?.entity?.permissions?.IS_MINE_CONTROL,
   );
+  const productMarkupLimit = isPartnerEntity
+    ? multiplierToPercent(user?.entity?.product_markup_limit)
+    : undefined;
 
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
@@ -393,6 +393,7 @@ export default function CustomersPage() {
                   }
             }
             showProductMultiplier={isPartnerEntity}
+            productMarkupLimit={productMarkupLimit}
             showShipmentMultiplier={isShippingOwner}
             showIsMine={isMineControlEnabled}
           />

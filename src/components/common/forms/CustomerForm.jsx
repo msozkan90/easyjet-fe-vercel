@@ -37,6 +37,7 @@ export default function CustomerForm({
   has_api_key = false,
   categories = [],
   showProductMultiplier = false,
+  productMarkupLimit,
   showShipmentMultiplier = false,
   showIsMine = false,
   onDirtyChange,
@@ -293,6 +294,7 @@ export default function CustomerForm({
           <InputNumber
             className="w-full"
             min={0}
+            max={productMarkupLimit}
             step={0.1}
             placeholder={tForm("placeholders.productMultiplier")}
           />
