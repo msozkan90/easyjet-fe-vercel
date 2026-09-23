@@ -13,6 +13,7 @@ import SettingsHero from "@/components/settings/SettingsHero";
 import SettingsSideMenu from "@/components/settings/SettingsSideMenu";
 import NotificationSettingsTable from "@/components/settings/NotificationSettingsTable";
 import IntegrationsPlaceholder from "@/components/settings/IntegrationsPlaceholder";
+import CustomerApiKeysCard from "@/components/settings/CustomerApiKeysCard";
 import { SETTINGS_SECTIONS } from "@/components/settings/settings.constants";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
 import { filterSourcesByAccess } from "@/utils/apiSourceRules";
@@ -742,9 +743,10 @@ export default function SettingsPage() {
             <RequireRole
               anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}
             >
-              {canSeeShipStation &&
-              (visibleApiSources.length || loading.sources) ? (
-                <ShipStationCard
+              <div>
+                {canSeeShipStation &&
+                (visibleApiSources.length || loading.sources) ? (
+                  <ShipStationCard
                   form={shipForm}
                   credential={credential}
                   isEditing={isEditing}
@@ -772,10 +774,12 @@ export default function SettingsPage() {
                   isShipstation={isShipstationActive}
                   canRemove={Boolean(credential?.id)}
                   onRemove={handleRemoveShipstation}
-                />
-              ) : (
-                <IntegrationsPlaceholder tSettings={tSettings} />
-              )}
+                  />
+                ) : (
+                  <IntegrationsPlaceholder tSettings={tSettings} />
+                )}
+                {isCustomerAdmin ? <CustomerApiKeysCard /> : null}
+              </div>
             </RequireRole>
           ) : (
             <RequireRole

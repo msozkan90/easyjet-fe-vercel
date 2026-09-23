@@ -95,6 +95,12 @@ export const AuthAPI = {
   logout: () => api.post("/auth/logout"),
 };
 
+export const CustomerApiCredentialsAPI = {
+  list: () => api.get('/customer-api-credentials'),
+  create: (payload) => api.post('/customer-api-credentials', payload),
+  revoke: (id) => api.post(`/customer-api-credentials/${encodeURIComponent(id)}/revoke`),
+};
+
 export const DashboardAPI = {
   overview: (payload) => api.post("/dashboard/overview", payload),
   normalProductionUrgency: () => api.get("/dashboard/normal-production-urgency"),
