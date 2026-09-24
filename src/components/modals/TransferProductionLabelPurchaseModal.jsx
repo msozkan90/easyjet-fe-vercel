@@ -22,6 +22,7 @@ import { TransferOrdersAPI } from "@/utils/api";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
+import { getQuotedShippingPrice, toProductionCarrierService } from "@/utils/productionCarrierService";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -182,14 +183,18 @@ export default function TransferProductionLabelPurchaseModal({
   const sortedActiveRates = useMemo(
     () =>
       [...activeRates].sort((a, b) => {
-        const left = Number(a?.amount);
-        const right = Number(b?.amount);
+        const left = Number.isFinite(Number(a?.amount))
+          ? getQuotedShippingPrice(a, activeTab === SERVICE_TABS.EASYJET)
+          : Number.POSITIVE_INFINITY;
+        const right = Number.isFinite(Number(b?.amount))
+          ? getQuotedShippingPrice(b, activeTab === SERVICE_TABS.EASYJET)
+          : Number.POSITIVE_INFINITY;
         return (
           (Number.isFinite(left) ? left : Number.POSITIVE_INFINITY) -
           (Number.isFinite(right) ? right : Number.POSITIVE_INFINITY)
         );
       }),
-    [activeRates],
+    [activeRates, activeTab],
   );
   const selectedRate = useMemo(
     () =>
@@ -259,15 +264,18 @@ export default function TransferProductionLabelPurchaseModal({
     }
     setCreatingLabel(true);
     try {
-      const { baseAmount, ...carrierService } = selectedRate;
+      const { baseAmount } = selectedRate;
       const response = await TransferOrdersAPI.createProductionShipmentLabel({
         transfer_order_id: transferOrder.id,
         order_price: Number(transferOrder?.design_total_price || 0),
-        shipping_price: Number(selectedRate.amount || 0),
+        shipping_price: getQuotedShippingPrice(selectedRate, activeTab === SERVICE_TABS.EASYJET),
+        ...(activeTab === SERVICE_TABS.EASYJET
+          ? { postage_fee: Number(selectedRate.postageFee || 0) }
+          : {}),
         ...(Number.isFinite(Number(baseAmount))
           ? { base_shipping_price: Number(baseAmount) }
           : {}),
-        carrier_service: carrierService,
+        carrier_service: toProductionCarrierService(selectedRate),
         weight: {
           units: Number(weightOz) > 0 ? "ounces" : "pounds",
           value: Number(weightOz) > 0 ? Number(weightOz) : Number(weightLb),
@@ -540,7 +548,7 @@ export default function TransferProductionLabelPurchaseModal({
                 <Select
                   placeholder={tShipping("service.selectPlaceholder")}
                   options={sortedActiveRates.map((rate) => ({
-                    label: `${rate.carrier || "-"} - ${rate.serviceName || "-"} ($${formatAmount(rate.amount, "0.00")})`,
+                    label: `${rate.carrier || "-"} - ${rate.serviceName || "-"} ($${formatAmount(getQuotedShippingPrice(rate, activeTab === SERVICE_TABS.EASYJET), "0.00")})`,
                     value: getRateKey(rate),
                   }))}
                   value={selectedRateKey || undefined}
@@ -553,7 +561,7 @@ export default function TransferProductionLabelPurchaseModal({
               <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
                 <div className="flex flex-wrap justify-between gap-2">
                   <span>{tShipping("summary.selectedShippingRate")}</span>
-                  <strong>$ {formatAmount(selectedRate?.amount || 0, "0.00")}</strong>
+                  <strong>$ {formatAmount(getQuotedShippingPrice(selectedRate, activeTab === SERVICE_TABS.EASYJET), "0.00")}</strong>
                 </div>
                 <Typography.Text type="secondary">
                   {tShipping("summary.selectedService")}:{" "}
