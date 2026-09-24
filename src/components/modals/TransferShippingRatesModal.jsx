@@ -31,6 +31,7 @@ import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
+import { getQuotedShippingPrice, toProductionCarrierService } from "@/utils/productionCarrierService";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -228,14 +229,18 @@ export default function TransferShippingRatesModal({
   const sortedActiveRates = useMemo(
     () =>
       [...activeRates].sort((a, b) => {
-        const left = Number(a?.amount);
-        const right = Number(b?.amount);
+        const left = Number.isFinite(Number(a?.amount))
+          ? getQuotedShippingPrice(a, activeTab === SERVICE_TABS.EASYJET)
+          : Number.POSITIVE_INFINITY;
+        const right = Number.isFinite(Number(b?.amount))
+          ? getQuotedShippingPrice(b, activeTab === SERVICE_TABS.EASYJET)
+          : Number.POSITIVE_INFINITY;
         return (
           (Number.isFinite(left) ? left : Number.POSITIVE_INFINITY) -
           (Number.isFinite(right) ? right : Number.POSITIVE_INFINITY)
         );
       }),
-    [activeRates],
+    [activeRates, activeTab],
   );
   const selectedRate = useMemo(
     () =>
@@ -243,7 +248,10 @@ export default function TransferShippingRatesModal({
     [activeRates, selectedRateKey],
   );
 
-  const shippingAmount = Number(selectedRate?.amount || 0);
+  const shippingAmount = getQuotedShippingPrice(
+    selectedRate,
+    activeTab === SERVICE_TABS.EASYJET,
+  );
   const deliveryMethod = transferOrder?.delivery_method || null;
   const deliveryMethodDisplay = deliveryMethod || "-";
 
@@ -485,8 +493,8 @@ export default function TransferShippingRatesModal({
       const response = await TransferOrdersAPI.createWorkerShipmentLabel({
         transfer_order_id: transferOrder.id,
         order_price: Number(orderTotal || 0),
-        shipping_price: Number(selectedRate.amount || 0),
-        carrier_service: selectedRate,
+        shipping_price: getQuotedShippingPrice(selectedRate, activeTab === SERVICE_TABS.EASYJET),
+        carrier_service: toProductionCarrierService(selectedRate),
         weight: {
           units: Number(weightOz) > 0 ? "ounces" : "pounds",
           value: Number(weightOz) > 0 ? Number(weightOz) : Number(weightLb),
@@ -687,7 +695,7 @@ export default function TransferShippingRatesModal({
                 <Select
                   placeholder={tModal("service.selectPlaceholder")}
                   options={sortedActiveRates.map((rate) => ({
-                    label: `${rate.carrier || "-"} • ${rate.serviceName || "-"} ($${formatAmount(rate.amount, "0.00")})`,
+                    label: `${rate.carrier || "-"} • ${rate.serviceName || "-"} ($${formatAmount(getQuotedShippingPrice(rate, activeTab === SERVICE_TABS.EASYJET), "0.00")})`,
                     value: getRateKey(rate),
                   }))}
                   value={selectedRateKey || undefined}
@@ -705,7 +713,7 @@ export default function TransferShippingRatesModal({
                       {selectedRate.serviceName || selectedRate.serviceCode}
                     </span>
                     <span className="text-base font-semibold text-gray-900">
-                      $ {formatAmount(selectedRate.amount, "0.00")}
+                      $ {formatAmount(shippingAmount, "0.00")}
                     </span>
                   </div>
                   {selectedRate.zone ? (

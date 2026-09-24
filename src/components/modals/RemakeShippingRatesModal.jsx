@@ -22,6 +22,7 @@ import { InboxOutlined, ReloadOutlined } from "@ant-design/icons";
 import { NestShipperAPI, OrdersAPI, ShipStationAPI, WalletAPI } from "@/utils/api";
 import { setBalance } from "@/redux/features/balanceSlice";
 import { useTranslations } from "@/i18n/use-translations";
+import { getQuotedShippingPrice, toProductionCarrierService } from "@/utils/productionCarrierService";
 
 const SOURCES = {
   easyjet: "easyjet",
@@ -146,7 +147,9 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
         : Array.isArray(response?.data)
           ? response.data
           : [];
-      const sorted = [...list].sort((a, b) => Number(a?.amount || 0) - Number(b?.amount || 0));
+      const sorted = [...list].sort((a, b) =>
+        getQuotedShippingPrice(a, activeTab === "easyjet") -
+        getQuotedShippingPrice(b, activeTab === "easyjet"));
       setRates(sorted);
       setSelectedRateKey(sorted[0] ? rateKey(sorted[0]) : null);
     } catch (error) {
@@ -181,8 +184,8 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
           order_id: order.id,
           idempotency_key: requestKey,
           source: SOURCES[activeTab],
-          shipping_price: Number(selectedRate.amount),
-          carrier_service: selectedRate,
+          shipping_price: getQuotedShippingPrice(selectedRate, activeTab === "easyjet"),
+          carrier_service: toProductionCarrierService(selectedRate),
           weight: {
             units: values.weightOz ? "ounces" : "pounds",
             value: Number(values.weightOz || values.weightLb),
@@ -297,7 +300,7 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
                 onChange={setSelectedRateKey}
                 options={rates.map((rate) => ({
                   value: rateKey(rate),
-                  label: `${rate.carrier || "-"} · ${rate.serviceName || rate.serviceCode || "-"} · $${Number(rate.amount || 0).toFixed(2)}`,
+                  label: `${rate.carrier || "-"} · ${rate.serviceName || rate.serviceCode || "-"} · $${getQuotedShippingPrice(rate, activeTab === "easyjet").toFixed(2)}`,
                 }))}
               />
               <Button icon={<ReloadOutlined />} loading={loadingRates} onClick={() => void fetchRates()}>

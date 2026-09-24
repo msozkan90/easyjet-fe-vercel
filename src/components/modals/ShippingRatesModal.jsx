@@ -32,6 +32,10 @@ import {
 } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { setBalance } from "@/redux/features/balanceSlice";
+import {
+  getQuotedShippingPrice,
+  toProductionCarrierService,
+} from "@/utils/productionCarrierService";
 
 const normalizeNumber = (value) => {
   const parsed = Number(value);
@@ -148,13 +152,19 @@ const getRateKey = (rate) => {
   ].join("-");
 };
 
-const getRateAmountForSort = (rate) => {
+const getRateAmountForSort = (rate, includePostageFee = false) => {
   const amount = Number(rate?.amount);
-  return Number.isFinite(amount) ? amount : Number.POSITIVE_INFINITY;
+  return Number.isFinite(amount)
+    ? getQuotedShippingPrice(rate, includePostageFee)
+    : Number.POSITIVE_INFINITY;
 };
 
-const getSortedRates = (rates = []) =>
-  [...rates].sort((a, b) => getRateAmountForSort(a) - getRateAmountForSort(b));
+const getSortedRates = (rates = [], includePostageFee = false) =>
+  [...rates].sort(
+    (a, b) =>
+      getRateAmountForSort(a, includePostageFee) -
+      getRateAmountForSort(b, includePostageFee),
+  );
 
 const extractBalanceValue = (response) => {
   const candidate = response?.data?.balance ?? response?.balance;
@@ -458,7 +468,7 @@ const ShippingRatesModal = ({
           : Array.isArray(resp?.data)
             ? resp.data
             : [];
-        const sortedRates = getSortedRates(list);
+        const sortedRates = getSortedRates(list, serviceKey === SERVICE_TABS.EASYJET);
         const firstSortedRateKey = sortedRates.length
           ? getRateKey(sortedRates[0])
           : null;
@@ -573,10 +583,10 @@ const ShippingRatesModal = ({
     [activeServiceData.rates, activeServiceData.selectedRateKey],
   );
 
-  const selectedRateAmount = useMemo(() => {
-    const amount = Number(selectedRate?.amount);
-    return Number.isFinite(amount) ? amount : 0;
-  }, [selectedRate]);
+  const selectedRateAmount = useMemo(
+    () => getQuotedShippingPrice(selectedRate, activeServiceTab === SERVICE_TABS.EASYJET),
+    [selectedRate, activeServiceTab],
+  );
   const selectedTargetShipment = useMemo(
     () =>
       (productionOptions?.merge_targets || []).find(
@@ -668,7 +678,7 @@ const ShippingRatesModal = ({
         await OrdersAPI.sendToProductionWithLabel(payload);
       } else {
         const payload = {
-          carrier_service: selectedRate,
+          carrier_service: toProductionCarrierService(selectedRate),
           order_id: orderId,
           idempotency_key: productionRequestKey,
           item_ids: orderItemIds,
@@ -1171,12 +1181,18 @@ const ShippingRatesModal = ({
                   items={serviceTabs.map((tab) => {
                     const currentService =
                       serviceState[tab.key] || createServiceEntry();
-                    const sortedRates = getSortedRates(currentService.rates);
+                    const sortedRates = getSortedRates(
+                      currentService.rates,
+                      tab.key === SERVICE_TABS.EASYJET,
+                    );
                     const options = sortedRates.map((rate) => ({
                       value: getRateKey(rate),
                       label: `${rate.carrier || "-"} • ${
                         rate.serviceName || rate.serviceCode || "-"
-                      } ($${safeFormatAmount(rate.amount, "-")})  ${
+                      } ($${safeFormatAmount(
+                        getQuotedShippingPrice(rate, tab.key === SERVICE_TABS.EASYJET),
+                        "-",
+                      )})  ${
                         rate.deliveryDays
                           ? "• " +
                             tShipping("service.deliveryDaysLabelSelector", {
@@ -1233,7 +1249,10 @@ const ShippingRatesModal = ({
                                 <span className="text-base font-semibold text-gray-900">
                                   ${" "}
                                   {safeFormatAmount(
-                                    Number(currentSelected.amount),
+                                    getQuotedShippingPrice(
+                                      currentSelected,
+                                      tab.key === SERVICE_TABS.EASYJET,
+                                    ),
                                     tCommon("none"),
                                   )}
                                 </span>
