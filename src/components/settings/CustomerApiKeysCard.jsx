@@ -15,6 +15,8 @@ import {
   Typography,
 } from "antd";
 import { CopyOutlined, KeyOutlined, PlusOutlined, StopOutlined } from "@ant-design/icons";
+import Link from "next/link";
+import { useLocaleInfo } from "@/i18n/use-translations";
 import { CustomerApiCredentialsAPI } from "@/utils/api";
 
 const { Paragraph, Text, Title } = Typography;
@@ -22,6 +24,7 @@ const { Paragraph, Text, Title } = Typography;
 const dataOf = (response) => response?.data ?? response ?? [];
 
 export default function CustomerApiKeysCard() {
+  const { locale } = useLocaleInfo();
   const { message } = AntdApp.useApp();
   const [form] = Form.useForm();
   const [rows, setRows] = useState([]);
@@ -124,9 +127,14 @@ export default function CustomerApiKeysCard() {
               Server-to-server credentials for transfer order automation. Keys expire after 180 days.
             </Paragraph>
           </div>
-          <Button type="primary" icon={<PlusOutlined />} disabled={activeCount >= 2} onClick={() => setCreateOpen(true)}>
-            Create API key
-          </Button>
+          <Space wrap>
+            <Link href="/dashboard/settings/customer-api-docs">
+              <Button>{locale === "en" ? "Integration documentation" : "Entegrasyon dokümantasyonu"}</Button>
+            </Link>
+            <Button type="primary" icon={<PlusOutlined />} disabled={activeCount >= 2} onClick={() => setCreateOpen(true)}>
+              Create API key
+            </Button>
+          </Space>
         </div>
         {activeCount >= 2 ? <Alert className="mb-4" type="info" showIcon message="Revoke an active key before creating another." /> : null}
         <Table rowKey="id" loading={loading} columns={columns} dataSource={rows} pagination={false} scroll={{ x: 760 }} />
