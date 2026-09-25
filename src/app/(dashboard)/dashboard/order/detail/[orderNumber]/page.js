@@ -179,17 +179,7 @@ const LabelCard = ({
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
   const statusColor = LABEL_STATUS_COLORS[statusKey] || "default";
   const labelUrl = detail?.labelUrl || label?.label_url;
-  const providerRate = Number(detail?.providerRate);
-  const hasProviderRate = detail?.providerRate != null && Number.isFinite(providerRate);
-  const rateValue = hasProviderRate ? providerRate : detail?.rate;
-  const rateText =
-    rateValue == null
-      ? tOrders("common.none")
-      : `${formatAmount(rateValue)} ${detail?.currency || ""}`.trim();
-  const postageFee = Number(detail?.postageFee);
-  const hasPostageFee = source === "easyjet" && detail?.postageFee != null && Number.isFinite(postageFee);
   const currency = detail?.currency || "USD";
-  const providerTotal = hasProviderRate && hasPostageFee ? providerRate + postageFee : null;
   const createdAt = formatDateTime(
     detail?.createdAt || label?.created_at,
     tOrders("common.none"),
@@ -274,27 +264,13 @@ const LabelCard = ({
           value={source ? serviceValue : tOrders("common.none")}
         />
         <InfoField
-          label={tDesign(hasProviderRate ? "fields.labelProviderRate" : "fields.labelRate")}
-          value={rateText}
+          label={tDesign("fields.labelShippingCharged")}
+          value={
+            shipmentPrice == null
+              ? tOrders("common.none")
+              : `${formatAmount(shipmentPrice)} ${currency}`
+          }
         />
-        {hasPostageFee ? (
-          <InfoField
-            label={tDesign("fields.labelPostageFee")}
-            value={`${formatAmount(postageFee)} ${currency}`}
-          />
-        ) : null}
-        {providerTotal !== null ? (
-          <InfoField
-            label={tDesign("fields.labelProviderTotal")}
-            value={`${formatAmount(providerTotal)} ${currency}`}
-          />
-        ) : null}
-        {source === "easyjet" && shipmentPrice != null ? (
-          <InfoField
-            label={tDesign("fields.labelShippingCharged")}
-            value={`${formatAmount(shipmentPrice)} ${currency}`}
-          />
-        ) : null}
         <InfoField
           label={tDesign("fields.labelTracking")}
           value={trackingDisplayValue}
