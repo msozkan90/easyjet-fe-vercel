@@ -2823,6 +2823,10 @@
           "labelCarrier": "Carrier",
           "labelService": "Service",
           "labelRate": "Rate",
+          "labelProviderRate": "Provider rate",
+          "labelPostageFee": "Postage fee",
+          "labelProviderTotal": "Label cost",
+          "labelShippingCharged": "Shipping charged",
           "labelTracking": "Tracking Number",
           "labelCreatedAt": "Created At",
           "labels": "Labels"

@@ -166,6 +166,7 @@ const AddressBlock = ({ title, rows }) => (
 
 const LabelCard = ({
   label,
+  shipmentPrice,
   tDesign,
   tOrders,
   onVoid,
@@ -178,12 +179,7 @@ const LabelCard = ({
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
   const statusColor = LABEL_STATUS_COLORS[statusKey] || "default";
   const labelUrl = detail?.labelUrl || label?.label_url;
-  const rateValue =
-    detail?.rate === null || detail?.rate === undefined ? null : detail?.rate;
-  const rateText =
-    rateValue === null
-      ? tOrders("common.none")
-      : `${formatAmount(rateValue)} ${detail?.currency || ""}`.trim();
+  const currency = detail?.currency || "USD";
   const createdAt = formatDateTime(
     detail?.createdAt || label?.created_at,
     tOrders("common.none"),
@@ -267,7 +263,14 @@ const LabelCard = ({
           label={tDesign("fields.labelService")}
           value={source ? serviceValue : tOrders("common.none")}
         />
-        <InfoField label={tDesign("fields.labelRate")} value={rateText} />
+        <InfoField
+          label={tDesign("fields.labelShippingCharged")}
+          value={
+            shipmentPrice == null
+              ? tOrders("common.none")
+              : `${formatAmount(shipmentPrice)} ${currency}`
+          }
+        />
         <InfoField
           label={tDesign("fields.labelTracking")}
           value={trackingDisplayValue}
@@ -1614,6 +1617,7 @@ export default function OrderDetailPage() {
                   <LabelCard
                     key={label?.id || label?.label_url}
                     label={label}
+                    shipmentPrice={shipments.find((shipment) => shipment.id === label?.shipment_id)?.shipment_price}
                     tDesign={tDesign}
                     tOrders={tOrders}
                     onVoid={handleVoidLabel}

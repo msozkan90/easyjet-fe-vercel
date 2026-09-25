@@ -32,6 +32,11 @@ export const getQuotedShippingPrice = (rate, includePostageFee = false) => {
   const amount = Number(rate?.amount);
   if (!Number.isFinite(amount)) return 0;
 
+  const totalAmount = Number(rate?.totalAmount);
+  if (includePostageFee && rate?.totalAmount != null && Number.isFinite(totalAmount)) {
+    return Math.round((totalAmount + Number.EPSILON) * 100) / 100;
+  }
+
   const postageFee = includePostageFee ? Number(rate?.postageFee ?? 0) : 0;
   const fee = Number.isFinite(postageFee) && postageFee > 0 ? postageFee : 0;
   return Math.round((amount + fee + Number.EPSILON) * 100) / 100;

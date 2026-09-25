@@ -673,6 +673,11 @@ export default function TransferShippedPrinterSearchPage() {
                   tOrders("common.none")
                 )}
               </Descriptions.Item>
+              {transferLabel?.source === "easyjet" && transferLabel?.postage_fee != null ? (
+                <Descriptions.Item label={tOrders("detail.fields.labelPostageFee")}>
+                  {formatCurrency(transferLabel.postage_fee, orderSummary?.currency || "USD")}
+                </Descriptions.Item>
+              ) : null}
               <Descriptions.Item
                 label={tOrders("detail.fields.labelCreatedAt")}
               >
