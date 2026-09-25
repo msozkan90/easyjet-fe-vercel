@@ -2603,6 +2603,10 @@
           "labelCarrier": "Taşıyıcı",
           "labelService": "Servis",
           "labelRate": "Ücret",
+          "labelProviderRate": "Sağlayıcı ücreti",
+          "labelPostageFee": "Posta ücreti",
+          "labelProviderTotal": "Etiket maliyeti",
+          "labelShippingCharged": "Tahsil edilen kargo",
           "labelTracking": "Takip Numarası",
           "labelCreatedAt": "Oluşturma Tarihi",
           "labels": "Etiketler"
