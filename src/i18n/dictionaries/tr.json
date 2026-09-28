@@ -2854,7 +2854,8 @@
           "tabs": {
             "easyjet": "EasyJet Kargo Servisi",
             "company": "{name} Kargo Servisi",
-            "partner": "{name} Kargo Servisi"
+            "partner": "{name} Kargo Servisi",
+            "customer": "{name} Kargo Servisi"
           }
         },
         "summary": {
@@ -3026,7 +3027,8 @@
         "tabs": {
           "easyjet": "EasyJet",
           "company": "Company",
-          "partner": "Partner"
+          "partner": "Partner",
+          "customer": "Müşteri"
         },
         "actions": {
           "createLabel": "Label Oluştur"

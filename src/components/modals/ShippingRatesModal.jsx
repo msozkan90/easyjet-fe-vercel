@@ -213,6 +213,7 @@ const SERVICE_TABS = {
   EASYJET: "easyjet",
   COMPANY: "company",
   PARTNER: "partner",
+  CUSTOMER: "customer",
 };
 
 const LABEL_MODES = {
@@ -254,6 +255,7 @@ const createInitialServiceState = () => ({
   [SERVICE_TABS.EASYJET]: createServiceEntry(),
   [SERVICE_TABS.COMPANY]: createServiceEntry(),
   [SERVICE_TABS.PARTNER]: createServiceEntry(),
+  [SERVICE_TABS.CUSTOMER]: createServiceEntry(),
 });
 
 const ShippingRatesModal = ({
@@ -305,12 +307,16 @@ const ShippingRatesModal = ({
   const parentEntity = user?.parent_entity || {};
   const companyInfo = parentEntity?.company;
   const partnerInfo = parentEntity?.partner;
+  const customerInfo = user?.entity?.entity_type === "customer" ? user.entity : null;
   const hasCompanySSApi =
     Boolean(companyInfo?.has_shipstation_shipping) &&
     Boolean(companyInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasPartnerSSApi =
     Boolean(partnerInfo?.has_shipstation_shipping) &&
     Boolean(partnerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
+  const hasCustomerSSApi =
+    Boolean(customerInfo?.has_shipstation_shipping) &&
+    Boolean(customerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasSystemApi = Boolean(companyInfo?.permissions?.CAN_USE_NS_SHIPMENT);
 
   const serviceTabs = useMemo(() => {
@@ -338,11 +344,21 @@ const ShippingRatesModal = ({
         }),
       });
     }
+    if (hasCustomerSSApi) {
+      tabs.push({
+        key: SERVICE_TABS.CUSTOMER,
+        label: tShipping("service.tabs.customer", {
+          name: customerInfo?.entity_name || tCommon("none"),
+        }),
+      });
+    }
     return tabs;
   }, [
     companyInfo?.name,
     hasCompanySSApi,
     hasPartnerSSApi,
+    hasCustomerSSApi,
+    customerInfo?.entity_name,
     partnerInfo?.name,
     tCommon,
     tShipping,
@@ -703,6 +719,8 @@ const ShippingRatesModal = ({
               return "shipStationCompany";
             if (activeServiceTab === SERVICE_TABS.PARTNER)
               return "shipStationPartner";
+            if (activeServiceTab === SERVICE_TABS.CUSTOMER)
+              return "shipStationCustomer";
           })(),
         };
         await OrdersAPI.sendToProduction(payload);

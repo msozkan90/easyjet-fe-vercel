@@ -28,12 +28,14 @@ const SERVICE_TABS = {
   EASYJET: "easyjet",
   COMPANY: "company",
   PARTNER: "partner",
+  CUSTOMER: "customer",
 };
 
 const SOURCE_BY_TAB = {
   [SERVICE_TABS.EASYJET]: "easyjet",
   [SERVICE_TABS.COMPANY]: "shipStationCompany",
   [SERVICE_TABS.PARTNER]: "shipStationPartner",
+  [SERVICE_TABS.CUSTOMER]: "shipStationCustomer",
 };
 
 const getRateKey = (rate) =>
@@ -97,6 +99,7 @@ export default function TransferProductionLabelPurchaseModal({
     [SERVICE_TABS.EASYJET]: [],
     [SERVICE_TABS.COMPANY]: [],
     [SERVICE_TABS.PARTNER]: [],
+    [SERVICE_TABS.CUSTOMER]: [],
   });
   const [selectedRateKey, setSelectedRateKey] = useState(null);
   const [loadingRates, setLoadingRates] = useState(false);
@@ -109,12 +112,16 @@ export default function TransferProductionLabelPurchaseModal({
   const entity = user?.entity || {};
   const companyInfo = parentEntity?.company || entity;
   const partnerInfo = parentEntity?.partner;
+  const customerInfo = entity?.entity_type === "customer" ? entity : null;
   const hasCompanySSApi =
     Boolean(companyInfo?.has_shipstation_shipping) &&
     Boolean(companyInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasPartnerSSApi =
     Boolean(partnerInfo?.has_shipstation_shipping) &&
     Boolean(partnerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
+  const hasCustomerSSApi =
+    Boolean(customerInfo?.has_shipstation_shipping) &&
+    Boolean(customerInfo?.permissions?.CAN_USE_SS_SHIPMENT);
   const hasSystemApi = Boolean(companyInfo?.permissions?.CAN_USE_NS_SHIPMENT);
   const companyTabLabel =
     companyInfo?.company_name ||
@@ -143,13 +150,21 @@ export default function TransferProductionLabelPurchaseModal({
         label: partnerTabLabel,
       });
     }
+    if (hasCustomerSSApi) {
+      items.push({
+        key: SERVICE_TABS.CUSTOMER,
+        label: customerInfo?.entity_name || tShipping("tabs.customer"),
+      });
+    }
     return items;
   }, [
     companyTabLabel,
     hasCompanySSApi,
     hasPartnerSSApi,
+    hasCustomerSSApi,
     hasSystemApi,
     partnerTabLabel,
+    customerInfo?.entity_name,
     tShipping,
   ]);
 
@@ -167,6 +182,7 @@ export default function TransferProductionLabelPurchaseModal({
       [SERVICE_TABS.EASYJET]: [],
       [SERVICE_TABS.COMPANY]: [],
       [SERVICE_TABS.PARTNER]: [],
+      [SERVICE_TABS.CUSTOMER]: [],
     });
     setSelectedRateKey(null);
     setAddressEditorOpen(false);

@@ -3074,7 +3074,8 @@
           "tabs": {
             "easyjet": "EasyJet Shipping Service",
             "company": "{name} Shipping Service",
-            "partner": "{name} Shipping Service"
+            "partner": "{name} Shipping Service",
+            "customer": "{name} Shipping Service"
           }
         },
         "summary": {
@@ -3246,7 +3247,8 @@
         "tabs": {
           "easyjet": "EasyJet",
           "company": "Company",
-          "partner": "Partner"
+          "partner": "Partner",
+          "customer": "Customer"
         },
         "actions": {
           "createLabel": "Create Label"
