@@ -28,6 +28,7 @@ const SOURCES = {
   easyjet: "easyjet",
   company: "shipStationCompany",
   partner: "shipStationPartner",
+  customer: "shipStationCustomer",
 };
 const FILE_TYPES = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp"]);
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -67,6 +68,7 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
   const parent = user?.parent_entity || {};
   const company = parent?.company || user?.entity || {};
   const partner = parent?.partner || null;
+  const customer = user?.entity?.entity_type === "customer" ? user.entity : null;
   const tabs = useMemo(() => {
     const result = [];
     if (company?.permissions?.CAN_USE_NS_SHIPMENT) {
@@ -84,8 +86,16 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
         label: t("service.tabs.partner", { name: partner?.name || partner?.entity_name || "Partner" }),
       });
     }
+    if (customer?.has_shipstation_shipping && customer?.permissions?.CAN_USE_SS_SHIPMENT) {
+      result.push({
+        key: "customer",
+        label: t("service.tabs.customer", {
+          name: customer?.entity_name || "Customer",
+        }),
+      });
+    }
     return result;
-  }, [company, partner, t]);
+  }, [company, customer, partner, t]);
 
   useEffect(() => {
     if (!open) return;
@@ -140,7 +150,7 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
           ? await NestShipperAPI.quoteRates(payload)
           : await ShipStationAPI.quoteRates({
               ...payload,
-              entity_type: activeTab === "partner" ? "partner" : "company",
+              entity_type: activeTab,
             });
       const list = Array.isArray(response?.data?.rates)
         ? response.data.rates

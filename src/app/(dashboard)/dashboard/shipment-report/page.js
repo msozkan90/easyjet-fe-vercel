@@ -199,7 +199,12 @@ export default function ShipmentReportPage() {
       ...(isSystem ? [textColumn("company_name", "company")] : []),
       textColumn("label_id", "label", (value) => value ? <Text copyable={{ text: value }}>{value.slice(0, 8)}…</Text> : "—"),
       { title: t("source"), dataIndex: "source",
-        filters: ["easyjet", "shipStationCompany", "shipStationPartner"].map((value) => ({ text: value, value })),
+        filters: [
+          "easyjet",
+          "shipStationCompany",
+          "shipStationPartner",
+          "shipStationCustomer",
+        ].map((value) => ({ text: value, value })),
         onFilter: (value, row) => row.source === value,
         sorter: (a, b) => compareText(a.source, b.source) },
       textColumn("service", "service"),
