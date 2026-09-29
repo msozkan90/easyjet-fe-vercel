@@ -3089,13 +3089,55 @@
         }
       },
       "transferProductionLabelModal": {
-        "title": "Üretim İçin Label Satın Al",
+        "title": "Üretime Gönder",
+        "fields": {
+          "labelPurchaseOption": "Label Satın Alma Seçeneği"
+        },
+        "options": {
+          "labelPurchase": "Label Satın Al",
+          "hasLabel": "Label Yükle",
+          "noLabel": "Label Yok",
+          "localPickup": "Local Pickup"
+        },
+        "actions": {
+          "sendToProduction": "Üretime Gönder",
+          "uploadLabel": "Label Dosyası Yükle"
+        },
         "confirm": {
-          "createTitle": "Label oluşturulup bu transfer siparişi üretime gönderilsin mi?"
+          "createTitle": "Label oluşturulup bu transfer siparişi üretime gönderilsin mi?",
+          "createDescription": "Seçilen kargo servisi satın alınacak ve sipariş üretime alınacaktır.",
+          "productionTitle": "Bu transfer siparişi üretime gönderilsin mi?",
+          "has_labelDescription": "Yüklenen label kullanılarak sipariş üretime alınacaktır.",
+          "no_labelDescription": "Sipariş label olmadan üretime alınacaktır.",
+          "local_pickupDescription": "Sipariş local pickup olarak üretime alınacak ve kargo labelı oluşturulmayacaktır."
         },
         "messages": {
           "labelCreated": "Label oluşturuldu ve transfer siparişi üretime gönderildi.",
-          "labelCreateError": "Label oluşturulamadı."
+          "labelCreateError": "Label oluşturulamadı.",
+          "productionSuccess": "Transfer siparişi üretime gönderildi.",
+          "productionError": "Transfer siparişi üretime gönderilemedi."
+        },
+        "validation": {
+          "labelImageRequired": "Label yükleme seçildiğinde bir dosya zorunludur.",
+          "invalidLabelType": "Yalnızca PDF, PNG, JPEG veya WebP dosyaları yüklenebilir.",
+          "invalidLabelSize": "Label dosyası en fazla 20 MB olabilir."
+        },
+        "upload": {
+          "title": "Label Yükle",
+          "help": "Bu transfer siparişi için kullanılacak PDF veya görsel label dosyasını yükleyin."
+        },
+        "noLabel": {
+          "title": "Label Olmadan Üretime Gönder",
+          "description": "Bu seçenek shipment veya label oluşturmaz; siparişi mevcut transfer iş akışıyla doğrudan üretime alır."
+        },
+        "localPickup": {
+          "title": "Local Pickup",
+          "description": "Sipariş üretime alınır ve local pickup olarak işaretlenir. Kargo labelı oluşturulmaz."
+        },
+        "summary": {
+          "orderTotal": "Sipariş Toplamı",
+          "shippingTotal": "Kargo",
+          "grandTotal": "Genel Toplam"
         }
       },
       "transferUploadQueue": {
