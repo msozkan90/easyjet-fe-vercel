@@ -2516,7 +2516,7 @@
         },
         "fields": {
           "labelPurchaseOption": "Label Purchase Option",
-          "labelImage": "Label Image"
+          "labelImage": "Label File"
         },
         "options": {
           "localPickup": "Local Pickup",
@@ -2525,7 +2525,7 @@
           "labelPurchase": "Purchase Label For Production"
         },
         "actions": {
-          "uploadLabel": "Upload image",
+          "uploadLabel": "Upload image or PDF",
           "send": "Send to production"
         },
         "messages": {
@@ -2533,7 +2533,7 @@
           "error": "Transfer order could not be sent to production."
         },
         "validation": {
-          "labelImageRequired": "Label image is required when 'I Have Label' is selected."
+          "labelImageRequired": "A label image or PDF is required when 'I Have Label' is selected."
         }
       },
       "manualOrderModal": {
@@ -3309,13 +3309,55 @@
         }
       },
       "transferProductionLabelModal": {
-        "title": "Purchase Label For Production",
+        "title": "Send To Production",
+        "fields": {
+          "labelPurchaseOption": "Label Purchase Option"
+        },
+        "options": {
+          "labelPurchase": "Purchase Label",
+          "hasLabel": "Upload Label",
+          "noLabel": "No Label",
+          "localPickup": "Local Pickup"
+        },
+        "actions": {
+          "sendToProduction": "Send To Production",
+          "uploadLabel": "Upload Label File"
+        },
         "confirm": {
-          "createTitle": "Create label and send this transfer order to production?"
+          "createTitle": "Create label and send this transfer order to production?",
+          "createDescription": "The selected shipping service will be purchased and the order will move to production.",
+          "productionTitle": "Send this transfer order to production?",
+          "has_labelDescription": "The uploaded label will be used when the order moves to production.",
+          "no_labelDescription": "The order will move to production without a label.",
+          "local_pickupDescription": "The order will move to production as local pickup and no shipping label will be created."
         },
         "messages": {
           "labelCreated": "Label created and transfer order sent to production.",
-          "labelCreateError": "Label could not be created."
+          "labelCreateError": "Label could not be created.",
+          "productionSuccess": "Transfer order sent to production.",
+          "productionError": "Transfer order could not be sent to production."
+        },
+        "validation": {
+          "labelImageRequired": "A label file is required when Upload Label is selected.",
+          "invalidLabelType": "Only PDF, PNG, JPEG, or WebP files can be uploaded.",
+          "invalidLabelSize": "The label file must be 20 MB or smaller."
+        },
+        "upload": {
+          "title": "Upload Label",
+          "help": "Upload the PDF or image label file to use for this transfer order."
+        },
+        "noLabel": {
+          "title": "Send Without Label",
+          "description": "This option creates no shipment or label and moves the order directly into the existing transfer production workflow."
+        },
+        "localPickup": {
+          "title": "Local Pickup",
+          "description": "The order moves to production and is marked as local pickup. No shipping label is created."
+        },
+        "summary": {
+          "orderTotal": "Order Total",
+          "shippingTotal": "Shipping",
+          "grandTotal": "Grand Total"
         }
       },
       "transferUploadQueue": {

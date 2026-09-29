@@ -14,7 +14,6 @@ import {
   Modal,
   Popconfirm,
   Popover,
-  Radio,
   Select,
   Space,
   Switch,
@@ -33,7 +32,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
-import TransferProductionLabelPurchaseModal from "@/components/modals/TransferProductionLabelPurchaseModal";
+import TransferProductionModal from "@/components/modals/TransferProductionModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { isValidOrderNumber } from "@/utils/orderNumberValidation";
 import {
@@ -62,7 +61,7 @@ const createDesignUploadEntry = () => ({
 });
 
 export default function TransferOrdersPage() {
-  const { message, modal } = AntdApp.useApp();
+  const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.orders");
   const { enqueueUploads, tasks: uploadTasks } = useTransferDesignUploadQueue();
   const searchParams = useSearchParams();
@@ -82,14 +81,7 @@ export default function TransferOrdersPage() {
     createDesignUploadEntry(),
   ]);
   const [productionModalOpen, setProductionModalOpen] = useState(false);
-  const [productionSubmitting, setProductionSubmitting] = useState(false);
   const [productionRecord, setProductionRecord] = useState(null);
-  const [productionOption, setProductionOption] = useState("has_label");
-  const [productionLabelFiles, setProductionLabelFiles] = useState([]);
-  const [productionLabelPurchaseOpen, setProductionLabelPurchaseOpen] =
-    useState(false);
-  const [productionLabelPurchaseOrder, setProductionLabelPurchaseOrder] =
-    useState(null);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [manualModalSubmitting, setManualModalSubmitting] = useState(false);
   const [manualAddressModalOpen, setManualAddressModalOpen] = useState(false);
@@ -184,7 +176,8 @@ export default function TransferOrdersPage() {
   );
 
   const handleAddressSave = useCallback(async () => {
-    const transferOrderId = editingDetail?.id ?? editingRecord?.transfer_order_id;
+    const transferOrderId =
+      editingDetail?.id ?? editingRecord?.transfer_order_id;
     if (!transferOrderId) {
       message.error(t("messages.addressMissingOrder"));
       return;
@@ -218,18 +211,29 @@ export default function TransferOrdersPage() {
     } finally {
       setEditModalSaving(false);
     }
-  }, [editForm, editingDetail, editingRecord, handleEditModalClose, message, t]);
+  }, [
+    editForm,
+    editingDetail,
+    editingRecord,
+    handleEditModalClose,
+    message,
+    t,
+  ]);
 
   const handleEditAddressSelect = useCallback(
     (payload) => {
       if (!payload) return;
       const updates = {};
-      if (payload.street1 !== undefined) updates.ship_to_street1 = payload.street1;
-      if (payload.street2 !== undefined) updates.ship_to_street2 = payload.street2;
+      if (payload.street1 !== undefined)
+        updates.ship_to_street1 = payload.street1;
+      if (payload.street2 !== undefined)
+        updates.ship_to_street2 = payload.street2;
       if (payload.city !== undefined) updates.ship_to_city = payload.city;
       if (payload.state !== undefined) updates.ship_to_state = payload.state;
-      if (payload.postalCode !== undefined) updates.ship_to_postal_code = payload.postalCode;
-      if (payload.country !== undefined) updates.ship_to_country = payload.country;
+      if (payload.postalCode !== undefined)
+        updates.ship_to_postal_code = payload.postalCode;
+      if (payload.country !== undefined)
+        updates.ship_to_country = payload.country;
       if (Object.keys(updates).length) {
         editForm.setFieldsValue(updates);
       }
@@ -274,20 +278,20 @@ export default function TransferOrdersPage() {
     [searchParams],
   );
 
-  const fixedFilters = useMemo(
-    () => {
-      if (withoutSubCategory) return { without_sub_category: true };
-      return subCategoryId ? { sub_category_id: subCategoryId } : undefined;
-    },
-    [subCategoryId, withoutSubCategory],
-  );
+  const fixedFilters = useMemo(() => {
+    if (withoutSubCategory) return { without_sub_category: true };
+    return subCategoryId ? { sub_category_id: subCategoryId } : undefined;
+  }, [subCategoryId, withoutSubCategory]);
   const manualShipToName = Form.useWatch("ship_to_name", manualOrderForm);
   const manualShipToCompany = Form.useWatch("ship_to_company", manualOrderForm);
   const manualShipToStreet1 = Form.useWatch("ship_to_street1", manualOrderForm);
   const manualShipToStreet2 = Form.useWatch("ship_to_street2", manualOrderForm);
   const manualShipToCity = Form.useWatch("ship_to_city", manualOrderForm);
   const manualShipToState = Form.useWatch("ship_to_state", manualOrderForm);
-  const manualShipToPostalCode = Form.useWatch("ship_to_postal_code", manualOrderForm);
+  const manualShipToPostalCode = Form.useWatch(
+    "ship_to_postal_code",
+    manualOrderForm,
+  );
   const manualShipToCountry = Form.useWatch("ship_to_country", manualOrderForm);
   const manualShipToPhone = Form.useWatch("ship_to_phone", manualOrderForm);
 
@@ -319,7 +323,8 @@ export default function TransferOrdersPage() {
     } catch (error) {
       setManualProducts([]);
       message.error(
-        error?.response?.data?.error?.message || t("messages.loadVariationsError"),
+        error?.response?.data?.error?.message ||
+          t("messages.loadVariationsError"),
       );
     } finally {
       setManualProductsLoading(false);
@@ -365,7 +370,9 @@ export default function TransferOrdersPage() {
   const handleDesignUploadFileChange = useCallback((entryId, fileList) => {
     setDesignUploadEntries((prev) =>
       prev.map((entry) =>
-        entry.id === entryId ? { ...entry, fileList: fileList.slice(-1) } : entry,
+        entry.id === entryId
+          ? { ...entry, fileList: fileList.slice(-1) }
+          : entry,
       ),
     );
   }, []);
@@ -396,7 +403,10 @@ export default function TransferOrdersPage() {
       }))
       .filter((entry) => entry.file instanceof File);
 
-    if (!uploadEntries.length || uploadEntries.length !== designUploadEntries.length) {
+    if (
+      !uploadEntries.length ||
+      uploadEntries.length !== designUploadEntries.length
+    ) {
       message.error(t("designUploadModal.validation.fileRequired"));
       return;
     }
@@ -421,7 +431,9 @@ export default function TransferOrdersPage() {
       subCategoryId,
       files: uploadEntries,
     });
-    message.success(t("messages.uploadQueued", { count: uploadEntries.length }));
+    message.success(
+      t("messages.uploadQueued", { count: uploadEntries.length }),
+    );
     handleCloseDesignUploadModal();
   }, [
     designUploadEntries,
@@ -518,24 +530,32 @@ export default function TransferOrdersPage() {
         fixed: "right",
         width: 220,
         render: (_, record) => {
-          const isParentRow = Boolean(record?.__hasChildren) && !record?.__isChild;
+          const isParentRow =
+            Boolean(record?.__hasChildren) && !record?.__isChild;
           const rowId = record?.id;
           const cancelLoading = isRowActionLoading(rowId, "cancel");
           const waitingLoading = isRowActionLoading(rowId, "waitingForDesign");
           const newOrderLoading = isRowActionLoading(rowId, "newOrder");
           const canUpdateItem = !isParentRow && Boolean(rowId);
           const disableActions =
-            !canUpdateItem || cancelLoading || waitingLoading || newOrderLoading;
-          const showWaitingAction = canUpdateItem && record?.status === "newOrder";
-          const showNewOrderAction = canUpdateItem && record?.status === "waitingForDesign";
+            !canUpdateItem ||
+            cancelLoading ||
+            waitingLoading ||
+            newOrderLoading;
+          const showWaitingAction =
+            canUpdateItem && record?.status === "newOrder";
+          const showNewOrderAction =
+            canUpdateItem && record?.status === "waitingForDesign";
           const canEditRecord = Boolean(record?.transfer_order_id);
           const canUploadDesign = Boolean(
             isParentRow &&
-              record?.transfer_order_id &&
-              subCategoryId &&
-              !withoutSubCategory,
+            record?.transfer_order_id &&
+            subCategoryId &&
+            !withoutSubCategory,
           );
-          const canSendToProduction = Boolean(isParentRow && record?.transfer_order_id);
+          const canSendToProduction = Boolean(
+            isParentRow && record?.transfer_order_id,
+          );
           const orderNumber = record?.order_number;
           const canViewDetail = Boolean(orderNumber);
           const detailHref = canViewDetail
@@ -579,12 +599,32 @@ export default function TransferOrdersPage() {
                     icon={<CheckCircleOutlined />}
                     type="primary"
                     disabled={!canSendToProduction}
-                    onClick={() => {
+                    loading={isRowActionLoading(record.id, "production")}
+                    onClick={async () => {
                       if (!canSendToProduction) return;
-                      setProductionRecord(record);
-                      setProductionOption("has_label");
-                      setProductionLabelFiles([]);
-                      setProductionModalOpen(true);
+                      setRowActionLoadingState(record.id, "production", true);
+                      try {
+                        await TransferOrdersAPI.validateProduction({
+                          transfer_order_id: record.transfer_order_id,
+                          label_purchase_option: "label_purchase",
+                        });
+                        const response = await TransferOrdersAPI.detail(
+                          record.order_number,
+                        );
+                        setProductionRecord(response?.data || record);
+                        setProductionModalOpen(true);
+                      } catch (error) {
+                        message.error(
+                          error?.response?.data?.error?.message ||
+                            t("productionModal.messages.error"),
+                        );
+                      } finally {
+                        setRowActionLoadingState(
+                          record.id,
+                          "production",
+                          false,
+                        );
+                      }
                     }}
                   />
                 </Popover>
@@ -633,7 +673,10 @@ export default function TransferOrdersPage() {
                   <Popconfirm
                     title={t("actions.confirmNewOrderTitle")}
                     okText={t("actions.confirmNewOrderOk")}
-                    okButtonProps={{ type: "primary", loading: newOrderLoading }}
+                    okButtonProps={{
+                      type: "primary",
+                      loading: newOrderLoading,
+                    }}
                     disabled={disableActions}
                     onConfirm={() => handleStatusUpdate(record, "newOrder")}
                   >
@@ -657,7 +700,9 @@ export default function TransferOrdersPage() {
       handlePreparedDesignChange,
       handleStatusUpdate,
       isRowActionLoading,
+      message,
       preparedDesignItemIds,
+      setRowActionLoadingState,
       subCategoryId,
       withoutSubCategory,
       t,
@@ -666,15 +711,7 @@ export default function TransferOrdersPage() {
 
   const handleProductionModalClose = useCallback(() => {
     setProductionModalOpen(false);
-    setProductionSubmitting(false);
     setProductionRecord(null);
-    setProductionOption("has_label");
-    setProductionLabelFiles([]);
-  }, []);
-
-  const handleProductionLabelPurchaseClose = useCallback(() => {
-    setProductionLabelPurchaseOpen(false);
-    setProductionLabelPurchaseOrder(null);
   }, []);
 
   const handleOpenManualModal = useCallback(async () => {
@@ -736,12 +773,16 @@ export default function TransferOrdersPage() {
     (payload) => {
       if (!payload) return;
       const updates = {};
-      if (payload.street1 !== undefined) updates.ship_to_street1 = payload.street1;
-      if (payload.street2 !== undefined) updates.ship_to_street2 = payload.street2;
+      if (payload.street1 !== undefined)
+        updates.ship_to_street1 = payload.street1;
+      if (payload.street2 !== undefined)
+        updates.ship_to_street2 = payload.street2;
       if (payload.city !== undefined) updates.ship_to_city = payload.city;
       if (payload.state !== undefined) updates.ship_to_state = payload.state;
-      if (payload.postalCode !== undefined) updates.ship_to_postal_code = payload.postalCode;
-      if (payload.country !== undefined) updates.ship_to_country = payload.country;
+      if (payload.postalCode !== undefined)
+        updates.ship_to_postal_code = payload.postalCode;
+      if (payload.country !== undefined)
+        updates.ship_to_country = payload.country;
       if (Object.keys(updates).length) {
         manualAddressForm.setFieldsValue(updates);
       }
@@ -810,7 +851,8 @@ export default function TransferOrdersPage() {
 
     const payload = {
       order_number: String(values.order_number || "").trim(),
-      order_date: values.order_date?.toISOString?.() || new Date().toISOString(),
+      order_date:
+        values.order_date?.toISOString?.() || new Date().toISOString(),
       ship_to_name: toNullableField(values.ship_to_name),
       ship_to_company: toNullableField(values.ship_to_company),
       local_pickup: Boolean(values.local_pickup),
@@ -837,97 +879,18 @@ export default function TransferOrdersPage() {
       tableRef.current?.reload?.();
     } catch (error) {
       message.error(
-        error?.response?.data?.error?.message || t("manualOrderModal.messages.error"),
+        error?.response?.data?.error?.message ||
+          t("manualOrderModal.messages.error"),
       );
     } finally {
       setManualModalSubmitting(false);
     }
   }, [handleCloseManualModal, manualOrderForm, message, subCategoryId, t]);
 
-  const handleSendToProduction = useCallback(async () => {
-    const transferOrderId = productionRecord?.transfer_order_id;
-    if (!transferOrderId) return;
-
-    if (productionOption === "label_purchase") {
-      setProductionSubmitting(true);
-      try {
-        await TransferOrdersAPI.validateProduction({
-          transfer_order_id: transferOrderId,
-          label_purchase_option: productionOption,
-        });
-        const detailResponse = await TransferOrdersAPI.detail(
-          productionRecord?.order_number,
-        );
-        setProductionLabelPurchaseOrder(detailResponse?.data || null);
-        setProductionModalOpen(false);
-        setProductionLabelPurchaseOpen(true);
-      } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message ||
-            t("productionModal.messages.error"),
-        );
-      } finally {
-        setProductionSubmitting(false);
-      }
-      return;
-    }
-
-    if (productionOption === "has_label" && productionLabelFiles.length === 0) {
-      message.error(t("productionModal.validation.labelImageRequired"));
-      return;
-    }
-
-    const payload = new FormData();
-    payload.append("transfer_order_id", String(transferOrderId));
-    payload.append("label_purchase_option", productionOption);
-    if (productionOption === "has_label" && productionLabelFiles[0]?.originFileObj) {
-      payload.append("label_image", productionLabelFiles[0].originFileObj);
-    }
-
-    setProductionSubmitting(true);
-    try {
-      await TransferOrdersAPI.sendToProduction(payload);
-      message.success(t("productionModal.messages.success"));
-      handleProductionModalClose();
-      tableRef.current?.reload?.();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message ||
-          t("productionModal.messages.error"),
-      );
-    } finally {
-      setProductionSubmitting(false);
-    }
-  }, [
-    handleProductionModalClose,
-    message,
-    productionLabelFiles,
-    productionOption,
-    productionRecord,
-    t,
-  ]);
-
-  const handleProductionLabelCreated = useCallback(() => {
-    message.success(t("productionModal.messages.success"));
-    handleProductionLabelPurchaseClose();
+  const handleProductionSuccess = useCallback(() => {
     handleProductionModalClose();
     tableRef.current?.reload?.();
-  }, [
-    handleProductionLabelPurchaseClose,
-    handleProductionModalClose,
-    message,
-    t,
-  ]);
-
-  const handleConfirmSendToProduction = useCallback(() => {
-    modal.confirm({
-      title: t("shippingRates.actions.confirmSendTitle"),
-      content: t("shippingRates.actions.confirmSendDescription"),
-      okText: t("shippingRates.actions.confirmSendOk"),
-      cancelText: "Cancel",
-      onOk: handleSendToProduction,
-    });
-  }, [handleSendToProduction, modal, t]);
+  }, [handleProductionModalClose]);
 
   return (
     <>
@@ -980,7 +943,9 @@ export default function TransferOrdersPage() {
         editingOrder={{
           order_number: manualOrderForm.getFieldValue("order_number") || "-",
           order_date: manualOrderForm.getFieldValue("order_date")
-            ? dayjs(manualOrderForm.getFieldValue("order_date")).format("YYYY-MM-DD HH:mm:ss")
+            ? dayjs(manualOrderForm.getFieldValue("order_date")).format(
+                "YYYY-MM-DD HH:mm:ss",
+              )
             : "-",
           bill_to_name: "-",
         }}
@@ -1021,11 +986,7 @@ export default function TransferOrdersPage() {
                   padding: 12,
                 }}
               >
-                <Space
-                  direction="vertical"
-                  size={12}
-                  style={{ width: "100%" }}
-                >
+                <Space direction="vertical" size={12} style={{ width: "100%" }}>
                   <div
                     style={{
                       display: "flex",
@@ -1085,96 +1046,11 @@ export default function TransferOrdersPage() {
           </Button>
         </Space>
       </Modal>
-      <Modal
+      <TransferProductionModal
         open={productionModalOpen}
-        onCancel={handleProductionModalClose}
-        title={t("productionModal.title")}
-        onOk={handleConfirmSendToProduction}
-        okText={t("productionModal.actions.send")}
-        confirmLoading={productionSubmitting}
-        destroyOnHidden
-      >
-        <Descriptions
-          size="small"
-          bordered
-          column={1}
-          items={[
-            {
-              key: "order_number",
-              label: t("productionModal.summary.orderNumber"),
-              children: productionRecord?.order_number || "-",
-            },
-            {
-              key: "customer_name",
-              label: t("productionModal.summary.customerName"),
-              children: productionRecord?.bill_to_name || "-",
-            },
-            {
-              key: "item_count",
-              label: t("productionModal.summary.itemCount"),
-              children:
-                productionRecord?.item_count ??
-                productionRecord?.children?.length ??
-                "-",
-            },
-          ]}
-        />
-
-        <div className="mt-4">
-          <div className="mb-2 font-medium">
-            {t("productionModal.fields.labelPurchaseOption")}
-          </div>
-          <Radio.Group
-            value={productionOption}
-            onChange={(event) => {
-              const next = event?.target?.value;
-              setProductionOption(next);
-              if (next !== "has_label") {
-                setProductionLabelFiles([]);
-              }
-            }}
-          >
-            <Space direction="vertical">
-              <Radio value="has_label">
-                {t("productionModal.options.hasLabel")}
-              </Radio>
-              <Radio value="no_label">
-                {t("productionModal.options.noLabel")}
-              </Radio>
-              <Radio value="label_purchase">
-                {t("productionModal.options.labelPurchase")}
-              </Radio>
-              <Radio value="local_pickup">
-                {t("productionModal.options.localPickup")}
-              </Radio>
-            </Space>
-          </Radio.Group>
-        </div>
-
-        {productionOption === "has_label" ? (
-          <div className="mt-4">
-            <div className="mb-2 font-medium">
-              {t("productionModal.fields.labelImage")}
-            </div>
-            <Upload
-              accept="image/*"
-              maxCount={1}
-              fileList={productionLabelFiles}
-              beforeUpload={() => false}
-              onChange={({ fileList }) => setProductionLabelFiles(fileList)}
-            >
-              <Button icon={<UploadOutlined />}>
-                {t("productionModal.actions.uploadLabel")}
-              </Button>
-            </Upload>
-          </div>
-        ) : null}
-      </Modal>
-      <TransferProductionLabelPurchaseModal
-        open={productionLabelPurchaseOpen}
-        transferOrder={productionLabelPurchaseOrder}
-        onClose={handleProductionLabelPurchaseClose}
-        onLabelCreated={handleProductionLabelCreated}
+        transferOrder={productionRecord}
+        onClose={handleProductionModalClose}
+        onSuccess={handleProductionSuccess}
       />
       <Modal
         open={manualModalOpen}
@@ -1192,21 +1068,37 @@ export default function TransferOrdersPage() {
               name="order_number"
               label={t("manualOrderModal.fields.orderNumber")}
               rules={[
-                { required: true, message: t("manualOrderModal.validation.orderNumberRequired") },
+                {
+                  required: true,
+                  message: t("manualOrderModal.validation.orderNumberRequired"),
+                },
                 {
                   validator: (_, value) =>
                     !value || isValidOrderNumber(value)
                       ? Promise.resolve()
-                      : Promise.reject(new Error(t("manualOrderModal.validation.orderNumberWhitespace"))),
+                      : Promise.reject(
+                          new Error(
+                            t(
+                              "manualOrderModal.validation.orderNumberWhitespace",
+                            ),
+                          ),
+                        ),
                 },
               ]}
             >
-              <Input placeholder={t("manualOrderModal.placeholders.orderNumber")} />
+              <Input
+                placeholder={t("manualOrderModal.placeholders.orderNumber")}
+              />
             </Form.Item>
             <Form.Item
               name="order_date"
               label={t("manualOrderModal.fields.orderDate")}
-              rules={[{ required: true, message: t("manualOrderModal.validation.orderDateRequired") }]}
+              rules={[
+                {
+                  required: true,
+                  message: t("manualOrderModal.validation.orderDateRequired"),
+                },
+              ]}
             >
               <DatePicker
                 showTime
@@ -1224,16 +1116,16 @@ export default function TransferOrdersPage() {
           </div>
           <div className="mb-3 rounded border border-slate-200 p-3">
             <div className="mb-2 flex items-center justify-between">
-              <div className="font-medium">{t("manualOrderModal.fields.address")}</div>
+              <div className="font-medium">
+                {t("manualOrderModal.fields.address")}
+              </div>
               <Button onClick={handleOpenManualAddressModal}>
                 {t("actions.editAddress")}
               </Button>
             </div>
             <div className="text-sm text-slate-600">
               {manualShipToName || "-"}{" "}
-              {manualShipToCompany
-                ? `(${manualShipToCompany})`
-                : ""}
+              {manualShipToCompany ? `(${manualShipToCompany})` : ""}
             </div>
             <div className="text-sm text-slate-600">
               {[
@@ -1286,18 +1178,34 @@ export default function TransferOrdersPage() {
             {(fields, { add, remove }) => (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="font-medium">{t("manualOrderModal.fields.items")}</div>
-                  <Button onClick={() => add({ name: "", transfer_product_id: undefined })}>
+                  <div className="font-medium">
+                    {t("manualOrderModal.fields.items")}
+                  </div>
+                  <Button
+                    onClick={() =>
+                      add({ name: "", transfer_product_id: undefined })
+                    }
+                  >
                     {t("manualOrderModal.actions.addItem")}
                   </Button>
                 </div>
                 {fields.map((field) => (
-                  <div key={field.key} className="grid grid-cols-1 gap-3 rounded border border-slate-200 p-3 md:grid-cols-[1fr_1fr_auto]">
+                  <div
+                    key={field.key}
+                    className="grid grid-cols-1 gap-3 rounded border border-slate-200 p-3 md:grid-cols-[1fr_1fr_auto]"
+                  >
                     <Form.Item
                       {...field}
                       name={[field.name, "name"]}
                       label={t("manualOrderModal.fields.itemName")}
-                      rules={[{ required: true, message: t("manualOrderModal.validation.itemNameRequired") }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: t(
+                            "manualOrderModal.validation.itemNameRequired",
+                          ),
+                        },
+                      ]}
                       style={{ marginBottom: 0 }}
                     >
                       <Input />
@@ -1306,7 +1214,14 @@ export default function TransferOrdersPage() {
                       {...field}
                       name={[field.name, "transfer_product_id"]}
                       label={t("manualOrderModal.fields.transferProduct")}
-                      rules={[{ required: true, message: t("manualOrderModal.validation.transferProductRequired") }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: t(
+                            "manualOrderModal.validation.transferProductRequired",
+                          ),
+                        },
+                      ]}
                       style={{ marginBottom: 0 }}
                     >
                       <Select
@@ -1314,7 +1229,9 @@ export default function TransferOrdersPage() {
                         allowClear
                         loading={manualProductsLoading}
                         options={manualProductOptions}
-                        placeholder={t("manualOrderModal.placeholders.transferProduct")}
+                        placeholder={t(
+                          "manualOrderModal.placeholders.transferProduct",
+                        )}
                         optionFilterProp="label"
                       />
                     </Form.Item>
