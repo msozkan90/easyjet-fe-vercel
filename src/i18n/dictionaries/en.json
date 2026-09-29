@@ -2516,7 +2516,7 @@
         },
         "fields": {
           "labelPurchaseOption": "Label Purchase Option",
-          "labelImage": "Label Image"
+          "labelImage": "Label File"
         },
         "options": {
           "localPickup": "Local Pickup",
@@ -2525,7 +2525,7 @@
           "labelPurchase": "Purchase Label For Production"
         },
         "actions": {
-          "uploadLabel": "Upload image",
+          "uploadLabel": "Upload image or PDF",
           "send": "Send to production"
         },
         "messages": {
@@ -2533,7 +2533,7 @@
           "error": "Transfer order could not be sent to production."
         },
         "validation": {
-          "labelImageRequired": "Label image is required when 'I Have Label' is selected."
+          "labelImageRequired": "A label image or PDF is required when 'I Have Label' is selected."
         }
       },
       "manualOrderModal": {

@@ -1157,7 +1157,7 @@ export default function TransferOrdersPage() {
               {t("productionModal.fields.labelImage")}
             </div>
             <Upload
-              accept="image/*"
+              accept="image/*,.pdf,application/pdf"
               maxCount={1}
               fileList={productionLabelFiles}
               beforeUpload={() => false}

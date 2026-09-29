@@ -2296,7 +2296,7 @@
         },
         "fields": {
           "labelPurchaseOption": "Label Satın Alma Seçeneği",
-          "labelImage": "Label Görseli"
+          "labelImage": "Label Dosyası"
         },
         "options": {
           "localPickup": "Local Pickup",
@@ -2305,7 +2305,7 @@
           "labelPurchase": "Purchase Label For Production"
         },
         "actions": {
-          "uploadLabel": "Görsel Yükle",
+          "uploadLabel": "Görsel veya PDF Yükle",
           "send": "Üretime Gönder"
         },
         "messages": {
@@ -2313,7 +2313,7 @@
           "error": "Transfer siparişi üretime gönderilemedi."
         },
         "validation": {
-          "labelImageRequired": "'I Have Label' seçildiğinde label görseli zorunludur."
+          "labelImageRequired": "'I Have Label' seçildiğinde label görseli veya PDF dosyası zorunludur."
         }
       },
       "manualOrderModal": {
