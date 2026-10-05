@@ -2,19 +2,15 @@
 
 ## Pull request quality gates
 
-All frontend pull requests target `dev`. `Frontend CI` runs:
+All frontend pull requests target `dev`. `Frontend CI` runs one required `quality` job so a single hosted runner executes every gate:
 
-- `quality`: frozen dependency install, lint, and a production Next.js build.
-- `dependency-audit`: reports the reviewed vulnerability baseline and fails on a newly reported high or critical production advisory.
-- `secret-scan`: scans full Git history with Gitleaks. Only reviewed idempotency-key documentation examples are fingerprint-ignored.
+- Frozen dependency install, lint, and a production Next.js build.
+- Dependency audit that reports the reviewed vulnerability baseline and fails on a newly reported high or critical production advisory.
+- Full Git history secret scan with Gitleaks. Only reviewed idempotency-key documentation examples are fingerprint-ignored.
 
 The dependency baseline keeps existing security debt visible; it does not mark those findings as fixed or risk-free.
 
-Require these exact checks on the protected `dev` branch before merging:
-
-- `quality`
-- `dependency-audit`
-- `secret-scan`
+Require the `quality` check on the protected `dev` branch before merging. Any failed sub-step fails that single check.
 
 ## Vercel environments
 
