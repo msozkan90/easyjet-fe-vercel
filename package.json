@@ -29,6 +29,11 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "typescript": "^5.9.2"
+  },
+  "resolutions": {
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   }
 }
