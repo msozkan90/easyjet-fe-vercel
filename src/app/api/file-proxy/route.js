@@ -77,9 +77,9 @@ export async function GET(request) {
       status: 200,
       headers,
     });
-  } catch (error) {
+  } catch {
     return getErrorResponse(
-      error instanceof Error ? error.message : "Download request failed.",
+      "Download request failed.",
       502,
     );
   }

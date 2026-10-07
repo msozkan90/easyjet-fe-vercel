@@ -146,7 +146,7 @@ export default function ProductPriceForm({
         }
       } catch (error) {
         if (!alive) return;
-        console.error("Failed to load product sizes/colors", error);
+        console.error("Failed to load product sizes/colors");
         setSizeOptions([]);
         setColorOptions([]);
         form.setFieldsValue({
