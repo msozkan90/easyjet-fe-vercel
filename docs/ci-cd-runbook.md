@@ -10,6 +10,8 @@ All frontend pull requests target `dev`. `Frontend CI` runs one required `qualit
 
 The dependency baseline keeps existing security debt visible; it does not mark those findings as fixed or risk-free.
 
+The workflow pins `ubuntu-24.04` instead of following the moving `ubuntu-latest` alias. All gates are sequential steps in the same job; they do not allocate separate runners.
+
 Require the `quality` check on the protected `dev` branch before merging. Any failed sub-step fails that single check.
 
 ## Vercel environments
@@ -23,7 +25,7 @@ Keep Vercel's Git integration as the deployment mechanism; no long-lived Vercel 
 
 A `dev -> main` merge is a release operation and still requires explicit approval under the repository development rules. Vercel records the Git commit for every deployment, so the release remains traceable to its SHA.
 
-`Verify Vercel Production` listens for a successful Vercel Production deployment and performs an HTTPS smoke request against the deployment URL. Vercel's own deployment check remains the source for build failures.
+Vercel's own deployment status remains the source for deployment build and availability failures. GitHub does not start a second workflow for every preview deployment, which keeps the Actions history and runner usage minimal.
 
 ## Rollback
 
