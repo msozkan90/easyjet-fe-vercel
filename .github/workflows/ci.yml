@@ -31,7 +31,10 @@ jobs:
           node-version: 20
           cache: yarn
 
-      - name: Check high and critical vulnerability delta
+      - name: Test dependency security policy
+        run: node --test .github/scripts/*.test.mjs
+
+      - name: Check production dependency security
         run: node .github/scripts/check-dependency-audit.mjs
 
       - name: Scan repository history for secrets
@@ -46,6 +49,9 @@ jobs:
 
       - name: Lint
         run: yarn lint
+
+      - name: Security and API client regression tests
+        run: yarn test:security
 
       - name: Production build
         env:

@@ -1,75 +1,42 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, appendFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { parseAudit, assessAdvisories } from './dependency-security-policy.mjs';
 
-const baselinePath = new URL('../dependency-audit-baseline.json', import.meta.url);
-const projectRoot = fileURLToPath(new URL('../..', import.meta.url));
-const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
-const allowed = new Set(baseline.allowedHighAndCriticalAdvisoryIds.map(String));
-
-const audit = spawnSync('yarn', ['audit', '--groups', 'dependencies', '--json'], {
-  cwd: projectRoot,
-  encoding: 'utf8',
-  maxBuffer: 50 * 1024 * 1024,
-});
-
-if (audit.error) {
-  console.error(`Dependency audit could not start: ${audit.error.message}`);
-  process.exit(1);
-}
-
-const records = audit.stdout
-  .split('\n')
-  .filter(Boolean)
-  .flatMap((line) => {
-    try {
-      return [JSON.parse(line)];
-    } catch {
-      return [];
-    }
-  });
-
-const advisories = new Map();
-for (const record of records) {
-  if (record.type !== 'auditAdvisory') continue;
-  const advisory = record.data?.advisory;
-  if (advisory?.id) advisories.set(String(advisory.id), advisory);
-}
-
-if (advisories.size === 0 && audit.status !== 0) {
-  console.error(audit.stderr || 'Dependency audit failed without a readable advisory report.');
-  process.exit(1);
-}
-
-const blocking = [...advisories.values()].filter(
-  (advisory) =>
-    ['high', 'critical'].includes(advisory.severity) && !allowed.has(String(advisory.id)),
-);
-const known = [...advisories.values()].filter(
-  (advisory) =>
-    ['high', 'critical'].includes(advisory.severity) && allowed.has(String(advisory.id)),
-);
-
-const summary = [
-  '## Dependency audit',
-  '',
-  `- Known high/critical advisories in the reviewed baseline: ${known.length}`,
-  `- New high/critical advisories: ${blocking.length}`,
-  `- Baseline reviewed at: ${baseline.reviewedAt}`,
-  '',
-  'Existing advisories remain visible technical debt; this gate prevents adding newly reported high/critical advisories.',
-].join('\n');
-
-console.log(summary);
-if (process.env.GITHUB_STEP_SUMMARY) {
-  const { appendFileSync } = await import('node:fs');
-  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`);
-}
-
-for (const advisory of blocking) {
-  console.error(
-    `::error title=New ${advisory.severity} dependency advisory::${advisory.module_name} - advisory ${advisory.id}`,
+try {
+  const policy = JSON.parse(
+    readFileSync(new URL('../dependency-security-policy.json', import.meta.url), 'utf8'),
   );
+  const audit = spawnSync('yarn', ['audit', '--groups', 'dependencies', '--json'], {
+    cwd: fileURLToPath(new URL('../..', import.meta.url)),
+    encoding: 'utf8',
+    maxBuffer: 50 * 1024 * 1024,
+    timeout: 120000,
+  });
+  if (audit.error || audit.signal) throw new Error('Dependency audit could not complete');
+  const { advisories, summary } = parseAudit(audit.stdout, audit.status);
+  const { blocking, accepted } = assessAdvisories(advisories, policy);
+  const report = [
+    '## Production dependency security',
+    '- High/critical blocking advisories: ' + blocking.length,
+    '- Explicit, unexpired exceptions: ' + accepted.length,
+    '- Moderate advisories: ' + summary.vulnerabilities.moderate,
+  ].join('\n');
+  console.log(report);
+  if (process.env.GITHUB_STEP_SUMMARY)
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, report + '\n');
+  for (const advisory of blocking)
+    console.error(
+      'Blocked dependency: ' +
+        advisory.module_name +
+        ' / advisory ' +
+        advisory.id +
+        ' / ' +
+        advisory.severity,
+    );
+  process.exitCode = blocking.length ? 1 : 0;
+} catch (error) {
+  // Registry stderr/response bodies may contain credentials.
+  console.error('Dependency security gate failed: ' + error.message);
+  process.exitCode = 1;
 }
-
-process.exit(blocking.length > 0 ? 1 : 0);

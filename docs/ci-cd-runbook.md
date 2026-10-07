@@ -5,10 +5,10 @@
 All frontend pull requests target `dev`. `Frontend CI` runs one required `quality` job so a single hosted runner executes every gate:
 
 - Frozen dependency install, lint, and a production Next.js build.
-- Dependency audit that reports the reviewed vulnerability baseline and fails on a newly reported high or critical production advisory.
+- Production dependency audit that blocks all high/critical advisories unless an explicit, reviewed, unexpired exception exists.
 - Full Git history secret scan with Gitleaks. Only reviewed idempotency-key documentation examples are fingerprint-ignored.
 
-The dependency baseline keeps existing security debt visible; it does not mark those findings as fixed or risk-free.
+The old blanket baseline has been removed. See [security maintenance](security-runbook.md) for exception review, dev-targeted dependency updates and secret/log handling.
 
 The workflow pins `ubuntu-24.04` instead of following the moving `ubuntu-latest` alias. All gates are sequential steps in the same job; they do not allocate separate runners.
 
