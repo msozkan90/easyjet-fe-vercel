@@ -1,4 +1,5 @@
 "use client";
+import { uploadIdempotencyKey } from "@/utils/uploadIdempotency";
 
 import axios from "axios";
 import {
@@ -97,6 +98,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
           sub_category_id: currentTask.subCategoryId,
           quantity: Number(currentTask.quantity || 1),
           file_name: currentTask.fileName,
+          idempotency_key: uploadIdempotencyKey(currentTask.id),
           file_size: Number(
             currentTask.fileSize || currentTask.file?.size || 0,
           ),
@@ -384,6 +386,7 @@ export function TransferDesignUploadQueueProvider({ children }) {
       }
       updateTask(taskId, {
         status: "queued",
+        id: createTaskId(),
         progress: 0,
         preparationProgress: 0,
         uploadedBytes: 0,
