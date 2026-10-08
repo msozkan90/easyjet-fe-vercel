@@ -34,9 +34,12 @@ function getCookie(name) {
 
 // --- NEW: request interceptor -> mutating isteklerde x-csrf-token ekle
 const MUTATING = new Set(["post", "put", "patch", "delete"]);
-http.interceptors.request.use((config) => {
+let csrfToken = "";
+let csrfSeedPromise;
+http.interceptors.request.use(async (config) => {
   if (isBrowser && MUTATING.has((config.method || "get").toLowerCase())) {
-    const csrf = getCookie("csrf_token");
+    // Seed before the first write, also when the API cookie is on another domain.
+    const csrf = csrfToken || getCookie("csrf_token") || await ensureCsrfSeed();
     if (csrf) {
       config.headers = {
         ...(config.headers || {}),
@@ -88,13 +91,25 @@ const redirectToLogin = () => {
 };
 
 http.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    const token = res.headers?.get?.("x-csrf-token") || res.headers?.["x-csrf-token"];
+    if (token) csrfToken = token;
+    if (getRequestPath(res.config).endsWith("/auth/logout")) csrfToken = "";
+    return res;
+  },
   async (error) => {
     const { config, response } = error || {};
     if (!response) return Promise.reject(error);
     const requestPath = getRequestPath(config);
 
     if (response.status === 403) {
+      // This exact code is returned before any business handler executes.
+      // Never retry generic authorization failures or arbitrary failed writes.
+      if (isBrowser && MUTATING.has((config?.method || "get").toLowerCase()) && response.data?.error?.code === "CSRF_INVALID" && !config?._csrfRetry) {
+        config._csrfRetry = true;
+        await ensureCsrfSeed(true);
+        return http(config);
+      }
       return Promise.reject(error);
     }
 
@@ -131,12 +146,23 @@ http.interceptors.response.use(
 );
 
 // --- NEW: CSRF seed helper (ilk GET'te cookie üretmek için opsiyonel)
-export async function ensureCsrfSeed() {
-  try {
-    // Backend GET isteklerinde csrf cookie’si yoksa üretir
-    // (ör: /auth/me 401 dönebilir; /health daha risksiz)
-    await http.get("/health").catch(() => {});
-  } catch {}
+export async function ensureCsrfSeed(force = false) {
+  if (!isBrowser) return "";
+  if (!force && csrfToken) return csrfToken;
+  csrfSeedPromise ||= http.get("/auth/csrf").then((res) => {
+    if (typeof res.data?.csrfToken !== "string" || !res.data.csrfToken) {
+      throw new Error("CSRF initialization failed");
+    }
+    csrfToken = res.data.csrfToken;
+    return csrfToken;
+  }).catch((error) => {
+    // Transitional compatibility: the previous backend has no seed route and
+    // does not enforce CSRF. A new backend still rejects any tokenless write.
+    // Never downgrade on network errors, 401/403/429/503 or malformed 200s.
+    if (error.response?.status === 404) return getCookie("csrf_token");
+    throw error;
+  }).finally(() => { csrfSeedPromise = undefined; });
+  return csrfSeedPromise;
 }
 
 export default http;

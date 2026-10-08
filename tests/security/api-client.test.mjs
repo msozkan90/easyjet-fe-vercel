@@ -55,3 +55,82 @@ test('login 401 does not create an infinite refresh loop', async (t) => {
   await assert.rejects(http.post('/auth/login', {}));
   assert.equal(calls, 1);
 });
+
+test('concurrent first writes seed once and support API-domain-only cookies', async (t) => {
+  const http = await loadClient(t);
+  globalThis.document.cookie = '';
+  let seeds = 0;
+  const writes = [];
+  http.defaults.adapter = async (config) => {
+    if (config.url === '/auth/csrf') {
+      seeds++;
+      return { ...ok(config), data: { csrfToken: 'signed-test-token' } };
+    }
+    writes.push(config);
+    return ok(config);
+  };
+  await Promise.all([http.post('/orders', {}), http.post('/auth/login', {})]);
+  assert.equal(seeds, 1);
+  assert.equal(writes.length, 2);
+  assert.ok(writes.every((request) => request.headers.get('x-csrf-token') === 'signed-test-token'));
+});
+
+test('a rejected seed prevents the original write from being sent', async (t) => {
+  const http = await loadClient(t);
+  globalThis.document.cookie = '';
+  let writes = 0;
+  http.defaults.adapter = async (config) => {
+    if (config.url === '/auth/csrf') throw { config, response: { status: 503 } };
+    writes++;
+    return ok(config);
+  };
+  await assert.rejects(http.post('/orders', {}));
+  assert.equal(writes, 0);
+});
+
+test('only a missing legacy seed route permits frontend-first backward compatibility', async (t) => {
+  const http = await loadClient(t);
+  globalThis.document.cookie = '';
+  let writes = 0;
+  http.defaults.adapter = async (config) => {
+    if (config.url === '/auth/csrf') throw { config, response: { status: 404 } };
+    writes++;
+    return ok(config);
+  };
+  await http.post('/auth/login', {});
+  assert.equal(writes, 1);
+});
+
+test('rotated authentication tokens are used on refresh retry without persistent storage', async (t) => {
+  const http = await loadClient(t);
+  let finalRequest;
+  http.defaults.adapter = async (config) => {
+    if (config.url === '/auth/refresh') return { ...ok(config), headers: { 'x-csrf-token': 'rotated-test-token' } };
+    if (!config._retry) throw { config, response: { status: 401 } };
+    finalRequest = config;
+    return ok(config);
+  };
+  await http.post('/orders', {});
+  assert.equal(finalRequest.headers.get('x-csrf-token'), 'rotated-test-token');
+});
+
+test('only the pre-business CSRF_INVALID code can reseed and retry a write once', async (t) => {
+  const http = await loadClient(t);
+  let seeds = 0;
+  let writes = 0;
+  http.defaults.adapter = async (config) => {
+    if (config.url === '/auth/csrf') {
+      seeds++;
+      return { ...ok(config), data: { csrfToken: 'upgraded-test-token' } };
+    }
+    writes++;
+    if (!config._csrfRetry) throw { config, response: { status: 403, data: { error: { code: 'CSRF_INVALID' } } } };
+    assert.equal(config.headers.get('x-csrf-token'), 'upgraded-test-token');
+    return ok(config);
+  };
+  await http.post('/orders', {});
+  assert.equal(seeds, 1);
+  assert.equal(writes, 2);
+  http.defaults.adapter = async (config) => { throw { config, response: { status: 403, data: { error: { code: 'CSRF_INVALID' } } } }; };
+  await assert.rejects(http.post('/orders', {}));
+});
