@@ -1,4 +1,5 @@
 "use client";
+import { uploadIdempotencyKey } from "@/utils/uploadIdempotency";
 
 import {
   createContext,
@@ -106,6 +107,7 @@ export function OrderDesignUploadQueueProvider({ children }) {
                 order_item_id: currentTask.orderItemId,
                 position_id: entry.positionId,
                 client_id: entry.clientId,
+                idempotency_key: uploadIdempotencyKey(currentTask.id, completedPartsBySession.length),
                 file_name: entry.file.name || "untitled",
                 file_size: entry.file.size,
                 content_type: entry.file.type || "application/octet-stream",

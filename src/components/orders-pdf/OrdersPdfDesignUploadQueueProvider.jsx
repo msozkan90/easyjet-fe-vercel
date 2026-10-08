@@ -1,4 +1,5 @@
 "use client";
+import { uploadIdempotencyKey } from "@/utils/uploadIdempotency";
 
 import {
   createContext,
@@ -104,6 +105,7 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
                 ? "orders_design_flaw_id"
                 : "orders_pdf_id"]: currentTask.parentId,
               file_name: currentTask.fileName,
+              idempotency_key: uploadIdempotencyKey(currentTask.id),
               file_size: currentTask.fileSize,
               content_type:
                 currentTask.file?.type || "application/octet-stream",
