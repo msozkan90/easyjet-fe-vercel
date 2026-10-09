@@ -20,7 +20,13 @@ import {
   setListWithSubCategories,
 } from "@/redux/features/categoriesSlice";
 import { ensureCsrfSeed } from "@/utils/http";
+import { installErrorMonitoring } from "@/utils/telemetry.mjs";
 import { RoleEnum } from "@/utils/consts";
+
+function ErrorMonitoring() {
+  useEffect(() => installErrorMonitoring(), []);
+  return null;
+}
 
 function AuthBootstrap() {
   const dispatch = useDispatch();
@@ -87,6 +93,7 @@ export function Providers({ children }) {
             <OrdersPdfDesignUploadQueueProvider>
               <DownloadQueueProvider>
                 <AuthBootstrap />
+                <ErrorMonitoring />
                 {children}
               </DownloadQueueProvider>
             </OrdersPdfDesignUploadQueueProvider>

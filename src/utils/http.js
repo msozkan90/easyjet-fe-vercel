@@ -1,4 +1,5 @@
 import axios from "axios";
+import { createRequestContext, reportError, setTelemetryTransport } from "./telemetry.mjs";
 
 const serializeParamsRepeat = (params) => {
   const search = new URLSearchParams();
@@ -38,12 +39,27 @@ let csrfToken = "";
 let csrfSeedPromise;
 http.interceptors.request.use(async (config) => {
   if (isBrowser && MUTATING.has((config.method || "get").toLowerCase())) {
+    if (config._telemetryReport && !csrfToken && !getCookie("csrf_token")) {
+      return Promise.reject(new Error("Telemetry requires an initialized session"));
+    }
     // Seed before the first write, also when the API cookie is on another domain.
     const csrf = csrfToken || getCookie("csrf_token") || await ensureCsrfSeed();
     if (csrf) {
       config.headers = {
         ...(config.headers || {}),
         "x-csrf-token": csrf,
+      };
+    }
+  }
+  if (isBrowser) {
+    const base = new URL(http.defaults.baseURL, window.location.origin);
+    const target = new URL(config.url || "", base.href.replace(/\/?$/, "/"));
+    if (target.origin === base.origin) {
+      config._telemetryContext = createRequestContext(config._telemetryContext);
+      config.headers = {
+        ...(config.headers || {}),
+        "x-request-id": config._telemetryContext.requestId,
+        traceparent: config._telemetryContext.traceparent,
       };
     }
   }
@@ -99,6 +115,14 @@ http.interceptors.response.use(
   },
   async (error) => {
     const { config, response } = error || {};
+    if (!config?._telemetryReport && (!response || response.status >= 500)) {
+      reportError("http", {
+        requestId: response?.headers?.["x-request-id"] || config?._telemetryContext?.requestId,
+        traceparent: response?.headers?.traceparent || config?._telemetryContext?.traceparent,
+        status: response?.status || 0,
+      });
+    }
+    if (config?._telemetryReport) return Promise.reject(error);
     if (!response) return Promise.reject(error);
     const requestPath = getRequestPath(config);
 
@@ -164,5 +188,10 @@ export async function ensureCsrfSeed(force = false) {
   }).finally(() => { csrfSeedPromise = undefined; });
   return csrfSeedPromise;
 }
+
+setTelemetryTransport((report) => http.post("/telemetry/frontend", report, {
+  _telemetryReport: true,
+  timeout: 5000,
+}));
 
 export default http;
