@@ -122,7 +122,7 @@ export default function GooglePlacesAutocomplete({
       })
       .catch((error) => {
         if (!isMounted) return;
-        console.error(error);
+        console.error("Address lookup failed");
       });
 
     return () => {

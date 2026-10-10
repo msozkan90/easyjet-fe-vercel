@@ -1,0 +1,34 @@
+# Frontend CI/CD Runbook
+
+## Pull request quality gates
+
+All frontend pull requests target `dev`. `Frontend CI` runs one required `quality` job so a single hosted runner executes every gate:
+
+- Frozen dependency install, lint, and a production Next.js build.
+- Production dependency audit that blocks all high/critical advisories unless an explicit, reviewed, unexpired exception exists.
+- Full Git history secret scan with Gitleaks. Only reviewed idempotency-key documentation examples are fingerprint-ignored.
+
+The old blanket baseline has been removed. See [security maintenance](security-runbook.md) for exception review, dev-targeted dependency updates and secret/log handling.
+
+The workflow pins `ubuntu-24.04` instead of following the moving `ubuntu-latest` alias. All gates are sequential steps in the same job; they do not allocate separate runners.
+
+Require the `quality` check on the protected `dev` branch before merging. Any failed sub-step fails that single check.
+
+## Vercel environments
+
+Keep Vercel's Git integration as the deployment mechanism; no long-lived Vercel token is added to GitHub Actions.
+
+- Vercel Production Branch: `main`
+- `dev` and feature branches: Preview deployments only
+- Production environment variables: configured only in Vercel Production
+- Preview environment variables: configured independently in Vercel Preview
+
+A `dev -> main` merge is a release operation and still requires explicit approval under the repository development rules. Vercel records the Git commit for every deployment, so the release remains traceable to its SHA.
+
+Vercel's own deployment status remains the source for deployment build and availability failures. GitHub does not start a second workflow for every preview deployment, which keeps the Actions history and runner usage minimal.
+
+## Rollback
+
+In Vercel, open the project's Deployments page, select the last known-good Production deployment, and use the rollback/promote action to reassign the production domain. Record the restored deployment URL and Git SHA in the release Jira issue.
+
+Do not solve a frontend rollback by force-pushing or committing directly to `main`.

@@ -543,7 +543,7 @@ export default function SettingsPage() {
         await loadShipStation();
         await refreshUser();
       } catch (error) {
-        console.log("error", error);
+        console.error("Settings update failed");
         const fallbackMessage =
           error?.response?.data?.error?.message ||
           error?.response?.data?.error?.message ||

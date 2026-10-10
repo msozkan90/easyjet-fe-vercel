@@ -6,7 +6,8 @@
     "dev": "next dev -p 3001 --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:security": "node --test tests/security/*.test.mjs"
   },
   "dependencies": {
     "@ant-design/charts": "^2.6.7",
@@ -14,10 +15,10 @@
     "@ant-design/nextjs-registry": "^1.1.0",
     "@reduxjs/toolkit": "^2.8.2",
     "antd": "^5.27.2",
-    "axios": "^1.11.0",
+    "axios": "1.20.0",
     "dayjs": "^1.11.21",
-    "moment": "^2.30.1",
-    "next": "15.5.9",
+    "moment": "2.31.0",
+    "next": "15.5.27",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-redux": "^9.2.0",
@@ -28,7 +29,14 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.2",
-    "tailwindcss": "^4"
+    "eslint-config-next": "15.5.27",
+    "tailwindcss": "^4",
+    "typescript": "^5.9.2"
+  },
+  "resolutions": {
+    "postcss": "8.5.29",
+    "nanoid": "3.3.19",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   }
 }

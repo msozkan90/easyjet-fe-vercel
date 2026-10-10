@@ -221,7 +221,7 @@ export default function ProductPositionsPage() {
       setOpen(false);
       setEditingRow(null);
     } catch (error) {
-      console.log(error, "error");
+      console.error("Product position update failed");
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
