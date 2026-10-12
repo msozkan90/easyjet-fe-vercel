@@ -1,10 +1,15 @@
 "use client";
 
-import { Select, Space, Typography, message } from "antd";
+import { App as AntdApp, Select, Space, Typography } from "antd";
 import { locales, localeLabels } from "@/i18n/settings";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 
-export function LanguageSwitcher({ size = "middle", textColor = "#ffffffd9" }) {
+export function LanguageSwitcher({
+  size = "middle",
+  textColor,
+  showLabel = true,
+}) {
+  const { message } = AntdApp.useApp();
   const t = useTranslations("common");
   const { locale, changeLocale, isChangingLocale } = useLocaleInfo();
 
@@ -17,7 +22,7 @@ export function LanguageSwitcher({ size = "middle", textColor = "#ffffffd9" }) {
     try {
       await changeLocale(value);
       message.success(
-        t("languageChanged", { language: localeLabels[value] || value })
+        t("languageChanged", { language: localeLabels[value] || value }),
       );
     } catch {
       message.error(t("languageChangeError"));
@@ -26,17 +31,20 @@ export function LanguageSwitcher({ size = "middle", textColor = "#ffffffd9" }) {
 
   return (
     <Space size={8} align="center">
-      <Typography.Text style={{ color: textColor }}>
-        {t("language")}
-      </Typography.Text>
+      {showLabel ? (
+        <Typography.Text type="secondary" style={{ color: textColor }}>
+          {t("language")}
+        </Typography.Text>
+      ) : null}
       <Select
         value={locale}
         options={options}
         onChange={onSelect}
         disabled={isChangingLocale}
         size={size}
-        style={{ width: 140 }}
+        style={{ width: showLabel ? 140 : 112 }}
         popupMatchSelectWidth={false}
+        aria-label={t("language")}
       />
     </Space>
   );

@@ -1,37 +1,79 @@
 "use client";
 
-import { Layout, theme } from "antd";
+import { Drawer, Grid, Layout } from "antd";
 import HeaderBar from "@/components/layout/HeaderBar";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar, { SIDEBAR_WIDTH } from "@/components/layout/Sidebar";
 import PageContainer from "@/components/layout/PageContainer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
+import { setMobileNavOpen } from "@/redux/features/uiSlice";
+import { palette } from "@/theme/tokens";
 
 const { Content } = Layout;
 
 export default function DashboardLayout({ children }) {
+  const dispatch = useDispatch();
   const collapsed = useSelector((s) => s.ui.sidebarCollapsed);
+  const mobileNavOpen = useSelector((s) => s.ui.mobileNavOpen);
   const pathname = usePathname();
-  const { token } = theme.useToken();
+  const screens = Grid.useBreakpoint();
+  // Breakpoints are unknown until mount; treat that as desktop to avoid a flash.
+  const isMobile = screens.lg === false;
   const contentRef = useRef(null);
 
+  useEffect(() => {
+    dispatch(setMobileNavOpen(false));
+  }, [dispatch, pathname]);
+
+  const closeMobileNav = () => dispatch(setMobileNavOpen(false));
+
   return (
-    <Layout hasSider style={{ height: "100vh" }}>
-      <Sidebar collapsed={collapsed} />
+    <Layout hasSider={!isMobile} style={{ height: "100vh" }}>
+      {isMobile ? (
+        <Drawer
+          placement="left"
+          open={mobileNavOpen}
+          onClose={closeMobileNav}
+          width={SIDEBAR_WIDTH + 16}
+          closable={false}
+          styles={{
+            body: { padding: 0, background: palette.ink900 },
+            content: { background: palette.ink900 },
+          }}
+        >
+          <Suspense fallback={null}>
+            <Sidebar variant="drawer" onNavigate={closeMobileNav} />
+          </Suspense>
+        </Drawer>
+      ) : (
+        <Suspense
+          fallback={
+            <div
+              style={{
+                width: SIDEBAR_WIDTH,
+                flexShrink: 0,
+                background: palette.ink900,
+              }}
+            />
+          }
+        >
+          <Sidebar collapsed={collapsed} />
+        </Suspense>
+      )}
       <Layout
         style={{ minHeight: 0, display: "flex", flexDirection: "column" }}
       >
-        <HeaderBar pathname={pathname} />
+        <HeaderBar isMobile={isMobile} />
         <Content
           ref={contentRef}
           style={{
             minHeight: 0,
             flex: 1,
             overflow: "auto",
-            padding: 24,
-            background: token.colorBgLayout,
+            padding: isMobile ? 12 : 24,
+            background: palette.canvas,
           }}
         >
           <PageContainer>{children}</PageContainer>

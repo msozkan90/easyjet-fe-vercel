@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Layout, Menu, theme, Tooltip } from "antd";
+import { Avatar, Layout, Menu, Tooltip } from "antd";
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
@@ -25,13 +25,24 @@ import {
 } from "@ant-design/icons";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import { useTranslations } from "@/i18n/use-translations";
+import { palette } from "@/theme/tokens";
+import { findActiveNavItem } from "./navMatching";
 
 const { Sider } = Layout;
 
-export default function Sidebar({ collapsed }) {
+export const SIDEBAR_WIDTH = 248;
+export const SIDEBAR_COLLAPSED_WIDTH = 68;
+
+export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
+  const isDrawer = variant === "drawer";
+  const isCollapsed = !isDrawer && collapsed;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = useSelector((s) => s.auth.user);
   const roles = user?.roles || [];
   const isSystemAdmin = roles.includes("systemadmin");
@@ -73,7 +84,6 @@ export default function Sidebar({ collapsed }) {
 
     return s?.categories?.listWithSubCategories;
   });
-  const { token } = theme.useToken();
   const tSidebar = useTranslations("dashboard.sidebar");
   const tProfileRoles = useTranslations("dashboard.profile.roles");
 
@@ -1308,76 +1318,62 @@ export default function Sidebar({ collapsed }) {
       : []),
   ];
 
+  const { selectedKey, ancestorKeys } = findActiveNavItem(
+    items,
+    pathname,
+    searchParams,
+  );
+  const ancestorSignature = ancestorKeys.join("|");
+  const [openKeys, setOpenKeys] = useState(ancestorKeys);
+
+  useEffect(() => {
+    if (!ancestorSignature) return;
+    const required = ancestorSignature.split("|");
+    setOpenKeys((current) => Array.from(new Set([...current, ...required])));
+  }, [ancestorSignature]);
+
   const userSummary = (
     <Link
       href="/dashboard/profile"
+      onClick={onNavigate}
       aria-label={[userDisplayName, userEntityName, userRoleLabel]
         .filter(Boolean)
         .join(" - ")}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: collapsed ? "center" : "flex-start",
-        gap: 10,
-        minWidth: 0,
-        color: "inherit",
-        textDecoration: "none",
-      }}
+      className="flex min-w-0 items-center gap-2.5 rounded-lg p-1.5 text-inherit no-underline transition-colors hover:bg-ink-800"
+      style={{ justifyContent: isCollapsed ? "center" : "flex-start" }}
     >
       <Avatar
-        size={36}
+        size={34}
         src={user?.avatar_url || undefined}
         icon={!userInitials ? <UserOutlined /> : undefined}
         style={{
           flexShrink: 0,
-          background: "#ff7a1a",
-          color: "#ffffff",
+          background: palette.orange500,
+          color: palette.ink900,
           fontWeight: 700,
         }}
       >
         {!user?.avatar_url ? userInitials : null}
       </Avatar>
-      {!collapsed ? (
-        <div style={{ minWidth: 0, lineHeight: 1.25 }}>
+      {!isCollapsed ? (
+        <div className="min-w-0 leading-tight">
           <div
             title={userDisplayName}
-            style={{
-              overflow: "hidden",
-              color: "#0f172a",
-              fontSize: 14,
-              fontWeight: 650,
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            className="truncate text-sm font-semibold text-white"
           >
             {userDisplayName}
           </div>
           {userEntityName ? (
             <div
               title={userEntityName}
-              style={{
-                marginTop: 3,
-                overflow: "hidden",
-                color: "#334155",
-                fontSize: 12,
-                fontWeight: 600,
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+              className="mt-0.5 truncate text-xs font-medium text-ink-100"
             >
               {userEntityName}
             </div>
           ) : null}
           <div
             title={userRoleLabel}
-            style={{
-              marginTop: 3,
-              overflow: "hidden",
-              color: "#64748b",
-              fontSize: 12,
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            className="mt-0.5 truncate text-xs text-ink-300"
           >
             {userRoleLabel}
           </div>
@@ -1386,102 +1382,95 @@ export default function Sidebar({ collapsed }) {
     </Link>
   );
 
+  const content = (
+    <div className="flex h-full flex-col bg-ink-900">
+      <div className="flex h-[60px] shrink-0 items-center border-b border-ink-800 px-4">
+        <Link
+          href="/dashboard"
+          onClick={onNavigate}
+          aria-label={tSidebar("dashboard")}
+          className="flex items-center"
+          style={{ margin: isCollapsed ? "0 auto" : undefined }}
+        >
+          {isCollapsed ? (
+            <Image src="/logo.png" alt="EasyJet" width={30} height={30} />
+          ) : (
+            <Image
+              src="/white_text_logo.png"
+              alt="EasyJet"
+              height={30}
+              width={128}
+              priority
+            />
+          )}
+        </Link>
+      </div>
+
+      <Menu
+        className="sidebar-navigation"
+        theme="dark"
+        mode="inline"
+        items={items}
+        selectedKeys={selectedKey ? [selectedKey] : []}
+        openKeys={isCollapsed ? undefined : openKeys}
+        onOpenChange={setOpenKeys}
+        onClick={onNavigate}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          padding: "10px 0",
+          borderInlineEnd: 0,
+        }}
+      />
+      <div
+        className="shrink-0 border-t border-ink-800"
+        style={{ padding: isCollapsed ? "10px 8px" : "10px 10px" }}
+      >
+        {isCollapsed ? (
+          <Tooltip
+            placement="right"
+            title={
+              <div>
+                <div style={{ fontWeight: 600 }}>{userDisplayName}</div>
+                {userEntityName ? (
+                  <div style={{ opacity: 0.75, fontSize: 12 }}>
+                    {userEntityName}
+                  </div>
+                ) : null}
+                <div style={{ opacity: 0.75, fontSize: 12 }}>
+                  {userRoleLabel}
+                </div>
+              </div>
+            }
+          >
+            {userSummary}
+          </Tooltip>
+        ) : (
+          userSummary
+        )}
+      </div>
+    </div>
+  );
+
+  if (isDrawer) return content;
+
   return (
     <Sider
       collapsible
-      collapsed={collapsed}
+      collapsed={isCollapsed}
       trigger={null}
-      width={240}
-      collapsedWidth={64}
-      breakpoint="lg"
+      width={SIDEBAR_WIDTH}
+      collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
       style={{
-        // background: token.colorBgContainer,
-        borderRight: `0px solid ${token.colorSplit}`,
         position: "sticky",
         top: 0,
         height: "100vh",
-        background: token.Layout?.headerBg || "#04314b",
+        background: palette.ink900,
       }}
     >
-      <div
-        style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          style={{
-            height: token.Layout?.headerHeight || 56,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderBottom: `1px solid ${token.colorSplit}`,
-            fontWeight: 600,
-            flexShrink: 0,
-          }}
-        >
-          <Link
-            href="/dashboard"
-            aria-label={tSidebar("dashboard")}
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            {collapsed ? (
-              <Image src="/logo.png" alt="Logo small" width={32} height={32} />
-            ) : (
-              <Image
-                src="/white_text_logo.png"
-                alt="Logo"
-                height={35}
-                width={150}
-              />
-            )}
-          </Link>
-        </div>
-
-        <Menu
-          className="sidebar-navigation"
-          mode="inline"
-          items={items}
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflow: "auto",
-            padding: 8,
-          }}
-        />
-        <div
-          style={{
-            flexShrink: 0,
-            padding: collapsed ? "10px 8px" : "12px 14px",
-            borderTop: `1px solid ${token.colorSplit}`,
-            background: "#ffffff",
-          }}
-        >
-          {collapsed ? (
-            <Tooltip
-              placement="right"
-              title={
-                <div>
-                  <div style={{ fontWeight: 600 }}>{userDisplayName}</div>
-                  {userEntityName ? (
-                    <div style={{ opacity: 0.75, fontSize: 12 }}>
-                      {userEntityName}
-                    </div>
-                  ) : null}
-                  <div style={{ opacity: 0.75, fontSize: 12 }}>
-                    {userRoleLabel}
-                  </div>
-                </div>
-              }
-            >
-              {userSummary}
-            </Tooltip>
-          ) : (
-            userSummary
-          )}
-        </div>
-      </div>
+      {content}
     </Sider>
   );
 }

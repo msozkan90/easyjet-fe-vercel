@@ -3,7 +3,7 @@
 
 import { Provider, useDispatch } from "react-redux";
 import { store } from "../redux/store";
-import { ConfigProvider, theme } from "antd";
+import { App as AntdApp, ConfigProvider, theme } from "antd";
 import "@ant-design/v5-patch-for-react-19";
 import { useEffect } from "react";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
@@ -22,6 +22,9 @@ import {
 import { ensureCsrfSeed } from "@/utils/http";
 import { installErrorMonitoring } from "@/utils/telemetry.mjs";
 import { RoleEnum } from "@/utils/consts";
+import { getAntdTheme } from "@/theme/tokens";
+
+const antdTheme = getAntdTheme(theme);
 
 function ErrorMonitoring() {
   useEffect(() => installErrorMonitoring(), []);
@@ -82,23 +85,20 @@ function AuthBootstrap() {
 export function Providers({ children }) {
   return (
     <Provider store={store}>
-      <ConfigProvider
-        theme={{
-          algorithm: theme.defaultAlgorithm,
-          token: { borderRadius: 8 },
-        }}
-      >
-        <TransferDesignUploadQueueProvider>
-          <OrderDesignUploadQueueProvider>
-            <OrdersPdfDesignUploadQueueProvider>
-              <DownloadQueueProvider>
-                <AuthBootstrap />
-                <ErrorMonitoring />
-                {children}
-              </DownloadQueueProvider>
-            </OrdersPdfDesignUploadQueueProvider>
-          </OrderDesignUploadQueueProvider>
-        </TransferDesignUploadQueueProvider>
+      <ConfigProvider theme={antdTheme}>
+        <AntdApp>
+          <TransferDesignUploadQueueProvider>
+            <OrderDesignUploadQueueProvider>
+              <OrdersPdfDesignUploadQueueProvider>
+                <DownloadQueueProvider>
+                  <AuthBootstrap />
+                  <ErrorMonitoring />
+                  {children}
+                </DownloadQueueProvider>
+              </OrdersPdfDesignUploadQueueProvider>
+            </OrderDesignUploadQueueProvider>
+          </TransferDesignUploadQueueProvider>
+        </AntdApp>
       </ConfigProvider>
     </Provider>
   );

@@ -25,7 +25,12 @@
       "orderTypes": {
         "order": "Order",
         "transferOrder": "Transfer Order"
-      }
+      },
+      "toggleSidebar": "Collapse / expand menu",
+      "openNavigation": "Open menu",
+      "balance": "Balance",
+      "userMenu": "User menu",
+      "search": "Search"
     },
     "actions": {
       "search": "Search",

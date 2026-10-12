@@ -25,7 +25,12 @@
       "orderTypes": {
         "order": "Sipariş",
         "transferOrder": "Transfer Sipariş"
-      }
+      },
+      "toggleSidebar": "Menüyü daralt / genişlet",
+      "openNavigation": "Menüyü aç",
+      "balance": "Bakiye",
+      "userMenu": "Kullanıcı menüsü",
+      "search": "Ara"
     },
     "actions": {
       "search": "Ara",

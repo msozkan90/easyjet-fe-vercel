@@ -2,10 +2,10 @@
 
 import {
   App as AntdApp,
+  Avatar,
   Layout,
   Button,
   Dropdown,
-  theme,
   Space,
   Input,
   Modal,
@@ -13,16 +13,17 @@ import {
   Tag,
 } from "antd";
 import {
+  DownOutlined,
   MenuFoldOutlined,
+  MenuOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
   LogoutOutlined,
   SettingOutlined,
-  DollarCircleOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSidebar } from "@/redux/features/uiSlice";
+import { toggleMobileNav, toggleSidebar } from "@/redux/features/uiSlice";
 import { AuthAPI, OrderSearchAPI, WalletAPI } from "@/utils/api";
 import { logoutLocal } from "@/redux/features/authSlice";
 import { setBalance } from "@/redux/features/balanceSlice";
@@ -32,10 +33,11 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { useTranslations } from "@/i18n/use-translations";
+import { palette } from "@/theme/tokens";
 
 const { Header } = Layout;
 
-export default function HeaderBar({ pathname }) {
+export default function HeaderBar({ isMobile = false }) {
   const { message } = AntdApp.useApp();
   const tNavbar = useTranslations("common.navbar");
   const dispatch = useDispatch();
@@ -43,7 +45,6 @@ export default function HeaderBar({ pathname }) {
   const collapsed = useSelector((s) => s.ui.sidebarCollapsed);
   const user = useSelector((s) => s.auth.user);
   const balance = useSelector((s) => s.balance.value);
-  const { token } = theme.useToken();
   const [orderSearch, setOrderSearch] = useState("");
   const [orderSearchLoading, setOrderSearchLoading] = useState(false);
   const [orderSearchMatches, setOrderSearchMatches] = useState([]);
@@ -94,12 +95,21 @@ export default function HeaderBar({ pathname }) {
     const onKey = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
         event.preventDefault();
-        dispatch(toggleSidebar());
+        dispatch(isMobile ? toggleMobileNav() : toggleSidebar());
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [dispatch]);
+  }, [dispatch, isMobile]);
+
+  const userDisplayName = user?.displayName || tNavbar("unknownUser");
+  const userInitials =
+    [user?.first_name, user?.last_name]
+      .filter(Boolean)
+      .map((part) => String(part).trim().charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || userDisplayName.charAt(0).toUpperCase();
 
   useEffect(() => {
     if (!user?.id) return;
@@ -174,43 +184,61 @@ export default function HeaderBar({ pathname }) {
   return (
     <Header
       style={{
-        background: token.Layout?.headerBg || "#04314b",
-        height: token.Layout?.headerHeight || 56,
+        background: palette.surface,
+        height: 60,
+        lineHeight: "normal",
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 16px",
+        gap: isMobile ? 8 : 12,
+        padding: isMobile ? "0 12px" : "0 24px",
+        borderBottom: `1px solid ${palette.border}`,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Button
-          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={() => dispatch(toggleSidebar())}
-          shape="circle"
-        />
-        {/* <Typography.Text type="secondary" style={{ color: "#ffffffb3" }}>
-          {pathname}
-        </Typography.Text> */}
-      </div>
+      <Button
+        type="text"
+        icon={
+          isMobile ? (
+            <MenuOutlined />
+          ) : collapsed ? (
+            <MenuUnfoldOutlined />
+          ) : (
+            <MenuFoldOutlined />
+          )
+        }
+        onClick={() => dispatch(isMobile ? toggleMobileNav() : toggleSidebar())}
+        aria-label={
+          isMobile ? tNavbar("openNavigation") : tNavbar("toggleSidebar")
+        }
+        title={isMobile ? tNavbar("openNavigation") : tNavbar("toggleSidebar")}
+      />
 
-      <Space size={8} align="center">
-        <Space.Compact className="mt-2.5">
+      <div className="min-w-0 flex-1" style={{ maxWidth: 440 }}>
+        <Space.Compact block>
           <Input
             value={orderSearch}
             onChange={(event) => setOrderSearch(event.target.value)}
             onPressEnter={() => handleOrderSearch(orderSearch)}
             allowClear
             disabled={orderSearchLoading}
+            prefix={<SearchOutlined className="text-ink-400" />}
             placeholder={tNavbar("orderSearchPlaceholder")}
             aria-label={tNavbar("orderSearchAria")}
           />
           <Button
-            icon={<SearchOutlined />}
             loading={orderSearchLoading}
             onClick={() => handleOrderSearch(orderSearch)}
             aria-label={tNavbar("orderSearchAria")}
-          />
+            icon={isMobile ? <SearchOutlined /> : undefined}
+          >
+            {isMobile ? null : tNavbar("search")}
+          </Button>
         </Space.Compact>
+      </div>
+
+      <div
+        className="flex shrink-0 items-center gap-2"
+        style={{ marginInlineStart: "auto" }}
+      >
         <Modal
           title={tNavbar("orderSearchMultipleTitle")}
           open={orderSearchModalOpen}
@@ -242,7 +270,11 @@ export default function HeaderBar({ pathname }) {
                     title={
                       <Space>
                         <span>{item?.order_number || "-"}</span>
-                        <Tag color={item?.type === "transfer_order" ? "blue" : "green"}>
+                        <Tag
+                          color={
+                            item?.type === "transfer_order" ? "blue" : "green"
+                          }
+                        >
                           {typeLabel}
                         </Tag>
                       </Space>
@@ -261,26 +293,52 @@ export default function HeaderBar({ pathname }) {
             }}
           />
         </Modal>
-        <LanguageSwitcher size="small" />
+        {!isMobile ? <LanguageSwitcher size="small" showLabel={false} /> : null}
         <Link
           href="/dashboard/wallet-transactions"
-          className="hidden items-center justify-center rounded-3xl px-2 py-1 bg-white sm:flex"
-          aria-label={tNavbar("walletTransactions")}
+          className="flex h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100"
+          aria-label={`${tNavbar("walletTransactions")}: ${formattedBalance}`}
           title={tNavbar("walletTransactions")}
         >
-          <DollarCircleOutlined className="text-lg mr-2" />
-          <div className="flex flex-col leading-tight">
-            <span className="text-base ">{formattedBalance}</span>
-          </div>
+          {!isMobile ? <span>{tNavbar("balance")}</span> : null}
+          <span className="ej-mono font-semibold">{formattedBalance}</span>
         </Link>
         <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-          <Button shape="round" icon={<UserOutlined className="text-md" />}>
-            <span className="text-base">
-              {user?.displayName || tNavbar("unknownUser")}
-            </span>
+          <Button
+            type="text"
+            aria-label={`${tNavbar("userMenu")}: ${userDisplayName}`}
+            style={{
+              height: 40,
+              paddingInline: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Avatar
+              size={32}
+              src={user?.avatar_url || undefined}
+              icon={!userInitials ? <UserOutlined /> : undefined}
+              style={{
+                background: palette.ink900,
+                color: "#FFFFFF",
+                fontWeight: 600,
+                fontSize: 13,
+              }}
+            >
+              {!user?.avatar_url ? userInitials : null}
+            </Avatar>
+            {!isMobile ? (
+              <>
+                <span className="max-w-[160px] truncate text-sm font-medium">
+                  {userDisplayName}
+                </span>
+                <DownOutlined className="text-xs text-ink-400" />
+              </>
+            ) : null}
           </Button>
         </Dropdown>
-      </Space>
+      </div>
     </Header>
   );
 }
