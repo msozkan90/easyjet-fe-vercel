@@ -7,7 +7,6 @@ import {
   Card,
   Descriptions,
   Space,
-  Tag,
   Typography,
   App as AntdApp,
   Popconfirm,
@@ -16,15 +15,10 @@ import { useParams } from "next/navigation";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { WalletTopupsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
 
-const { Title, Text } = Typography;
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
+const { Text } = Typography;
 
 const formatPerson = (person, fallbackId) => {
   if (person) {
@@ -110,18 +104,23 @@ export default function WalletTopupDetailPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("topupDetail.title")}
-        </Title>
+        <PageHeader
+          className=""
+          breadcrumb={[
+            { title: t("topupList.title"), href: "/dashboard/financial/topups" },
+            { title: t("topupDetail.title") },
+          ]}
+          title={t("topupDetail.title")}
+        />
         <Card loading={loading} className="shadow-sm">
           <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
             <Descriptions.Item label={t("columns.id")}>
               {record?.id || "-"}
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.status")}>
-              <Tag color={statusColor[record?.status] || "default"}>
+              <StatusTag status={record?.status}>
                 {record?.status ? tStatus(record.status) : "-"}
-              </Tag>
+              </StatusTag>
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.ownerType")}>
               {record?.owner_type

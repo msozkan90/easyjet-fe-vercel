@@ -10,8 +10,6 @@ import {
   Input,
   InputNumber,
   Space,
-  Tag,
-  Typography,
   App as AntdApp,
 } from "antd";
 import { useParams } from "next/navigation";
@@ -20,15 +18,9 @@ import RequireRole from "@/components/common/Access/RequireRole";
 import { WalletTopupsAPI } from "@/utils/api";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
 
-const { Title } = Typography;
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
 
 const formatPerson = (person, fallbackId) => {
   if (person) {
@@ -69,7 +61,7 @@ const resolveOwnerName = (record) => {
 };
 
 export default function WalletTopupAdminDetailPage() {
-  const { message } = AntdApp.useApp();
+  const { message, modal } = AntdApp.useApp();
   const params = useParams();
   const t = useTranslations("dashboard.financial");
   const tStatus = useTranslations("common.status");
@@ -103,8 +95,23 @@ export default function WalletTopupAdminDetailPage() {
   }, [fetchDetail]);
 
   const handleApprove = async () => {
+    let values;
     try {
-      const values = await approveForm.validateFields();
+      values = await approveForm.validateFields();
+    } catch {
+      return;
+    }
+    modal.confirm({
+      title: t("actions.confirmApproveTitle"),
+      content: t("actions.confirmApproveBody"),
+      okText: t("actions.approve"),
+      cancelText: tCommon("cancel"),
+      onOk: () => submitApprove(values),
+    });
+  };
+
+  const submitApprove = async (values) => {
+    try {
       setActionLoading(true);
       await WalletTopupsAPI.approve(params.id, {
         approved_amount: values.approved_amount || undefined,
@@ -123,8 +130,24 @@ export default function WalletTopupAdminDetailPage() {
   };
 
   const handleReject = async () => {
+    let values;
     try {
-      const values = await rejectForm.validateFields();
+      values = await rejectForm.validateFields();
+    } catch {
+      return;
+    }
+    modal.confirm({
+      title: t("actions.confirmRejectTitle"),
+      content: t("actions.confirmRejectBody"),
+      okText: t("actions.reject"),
+      okButtonProps: { danger: true },
+      cancelText: tCommon("cancel"),
+      onOk: () => submitReject(values),
+    });
+  };
+
+  const submitReject = async (values) => {
+    try {
       setActionLoading(true);
       await WalletTopupsAPI.reject(params.id, {
         reject_reason: values.reject_reason,
@@ -144,18 +167,26 @@ export default function WalletTopupAdminDetailPage() {
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("topupDetail.adminTitle")}
-        </Title>
+        <PageHeader
+          className=""
+          breadcrumb={[
+            {
+              title: t("adminTopups.title"),
+              href: "/dashboard/financial/admin/topups",
+            },
+            { title: t("topupDetail.adminTitle") },
+          ]}
+          title={t("topupDetail.adminTitle")}
+        />
         <Card loading={loading} className="shadow-sm">
           <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
             <Descriptions.Item label={t("columns.id")}>
               {record?.id || "-"}
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.status")}>
-              <Tag color={statusColor[record?.status] || "default"}>
+              <StatusTag status={record?.status}>
                 {record?.status ? tStatus(record.status) : "-"}
-              </Tag>
+              </StatusTag>
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.ownerType")}>
               {record?.owner_type
@@ -240,7 +271,7 @@ export default function WalletTopupAdminDetailPage() {
                   onClick={handleApprove}
                   loading={actionLoading}
                 >
-                  {tCommon("save")}
+                  {t("actions.approve")}
                 </Button>
               </Form>
             </Card>

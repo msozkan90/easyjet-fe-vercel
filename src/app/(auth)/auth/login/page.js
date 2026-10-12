@@ -2,16 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Form,
-  Input,
-  Button,
-  Typography,
-  Card,
-  App as AntdApp,
-  Row,
-  Col,
-} from "antd";
+import Image from "next/image";
+import { Alert, Form, Input, Button, App as AntdApp } from "antd";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
 import { useDispatch } from "react-redux";
 import {
@@ -33,12 +25,14 @@ export default function LoginPage() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("auth.login");
   const [loading, setLoading] = useState(false);
+  const [errorText, setErrorText] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
 
   const onFinish = async (values) => {
     try {
       setLoading(true);
+      setErrorText("");
       dispatch(setAuthLoading());
       await AuthAPI.login(values); // http-only cookie set
       const me = await AuthAPI.me();
@@ -71,69 +65,99 @@ export default function LoginPage() {
             t("messages.loginFailed"),
         ),
       );
-      message.error(t("messages.invalidCredentials"));
+      setErrorText(t("messages.invalidCredentials"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Row
-      align="middle"
-      justify="center"
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7fa",
-        padding: "56px 16px 16px",
-        position: "relative",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-        }}
-      >
-        <LanguageSwitcher size="small" textColor="#344054" />
-      </div>
-      <Col xs={22} sm={18} md={12} lg={8}>
-        <Card>
-          <Typography.Title
-            level={3}
-            style={{ textAlign: "center", marginBottom: 8 }}
-          >
-            {t("title")}
-          </Typography.Title>
-          <Typography.Paragraph
-            style={{ textAlign: "center", color: "#667085", marginBottom: 24 }}
-          >
-            {t("subtitle")}
-          </Typography.Paragraph>
+    <div className="flex min-h-screen flex-wrap bg-surface">
+      <section className="relative flex flex-[1_1_420px] flex-col justify-between gap-12 overflow-hidden bg-ink-900 px-6 py-5 text-white md:px-14 md:py-12">
+        <Image
+          src="/white_text_logo.png"
+          alt="EasyJet"
+          width={168}
+          height={39}
+          priority
+          className="relative h-auto w-[168px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-28 bottom-56 hidden h-28 w-[520px] -skew-y-[27deg] bg-ink-800 md:block"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-28 bottom-24 hidden h-28 w-[520px] -skew-y-[27deg] bg-brand-500 opacity-90 md:block"
+        />
+        <div className="relative hidden max-w-md flex-col gap-4 md:flex">
+          <h1 className="m-0 text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+            {t("brand.headline")}
+          </h1>
+          <p className="m-0 text-base leading-relaxed text-ink-200">
+            {t("brand.body")}
+          </p>
+        </div>
+        <div className="relative hidden text-[13px] text-ink-300 md:block">
+          © {new Date().getFullYear()} EasyJet
+        </div>
+      </section>
 
-          <Form layout="vertical" onFinish={onFinish}>
-            <Form.Item
-              name="email"
-              label={t("fields.email.label")}
-              rules={[{ required: true, message: t("validation.emailRequired") }]}
+      <section className="flex flex-[1_1_480px] flex-col p-6 md:p-8">
+        <div className="flex justify-end">
+          <LanguageSwitcher size="small" />
+        </div>
+        <div className="flex flex-1 items-center justify-center py-8">
+          <div className="flex w-full max-w-[380px] flex-col gap-6">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="m-0 text-[26px] font-semibold leading-9 tracking-tight text-text">
+                {t("title")}
+              </h2>
+              <p className="m-0 text-text-secondary">{t("subtitle")}</p>
+            </div>
+
+            {errorText ? (
+              <Alert type="error" showIcon message={errorText} role="alert" />
+            ) : null}
+
+            <Form
+              layout="vertical"
+              onFinish={onFinish}
+              requiredMark={false}
+              size="large"
             >
-              <Input placeholder={t("fields.email.placeholder")} />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              label={t("fields.password.label")}
-              rules={[
-                { required: true, message: t("validation.passwordRequired") },
-              ]}
-            >
-              <Input.Password placeholder={t("fields.password.placeholder")} />
-            </Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
-              {t("actions.submit")}
-            </Button>
-          </Form>
-        </Card>
-      </Col>
-    </Row>
+              <Form.Item
+                name="email"
+                label={t("fields.email.label")}
+                rules={[
+                  { required: true, message: t("validation.emailRequired") },
+                ]}
+              >
+                <Input
+                  type="email"
+                  autoComplete="username"
+                  placeholder={t("fields.email.placeholder")}
+                />
+              </Form.Item>
+              <Form.Item
+                name="password"
+                label={t("fields.password.label")}
+                rules={[
+                  { required: true, message: t("validation.passwordRequired") },
+                ]}
+              >
+                <Input.Password
+                  autoComplete="current-password"
+                  placeholder={t("fields.password.placeholder")}
+                />
+              </Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading} block>
+                {t("actions.submit")}
+              </Button>
+            </Form>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

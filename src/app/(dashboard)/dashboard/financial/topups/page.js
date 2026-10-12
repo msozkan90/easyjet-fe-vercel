@@ -29,6 +29,7 @@ import { refreshWalletBalance } from "@/utils/walletBalance";
 import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
+import MoneyText from "@/components/ui/MoneyText";
 
 const statusColor = {
   pending: "gold",
@@ -172,11 +173,18 @@ export default function WalletTopupsListPage() {
         title: t("columns.amount"),
         dataIndex: "amount",
         sorter: true,
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.approvedAmount"),
         dataIndex: "approved_amount",
-        render: (value) => (value ?? "-"),
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.currency"),

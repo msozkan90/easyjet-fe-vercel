@@ -8,12 +8,9 @@ import {
   Popconfirm,
   Select,
   Space,
-  Tag,
-  Tooltip,
   Typography,
 } from "antd";
 import { DollarOutlined, FileSearchOutlined } from "@ant-design/icons";
-import Link from "next/link";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import {
@@ -24,6 +21,9 @@ import {
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import PageHeader from "@/components/ui/PageHeader";
+import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const { Text } = Typography;
 
@@ -47,6 +47,9 @@ const listAll = async (apiFn) => {
 };
 
 export default function TransferPaymentManagementPage() {
+  const t = useTranslations("dashboard.paymentManagement");
+  const tStatus = useTranslations("common.status");
+  const tCommon = useTranslations("common.actions");
   const { message } = AntdApp.useApp();
   const tableRef = useRef(null);
   const [selectedRowMap, setSelectedRowMap] = useState({});
@@ -71,13 +74,13 @@ export default function TransferPaymentManagementPage() {
           partners.map((row) => ({ value: row.id, label: row.name || row.id })),
         );
       } catch {
-        if (alive) message.error("Filter options could not be loaded");
+        if (alive) message.error(t("filterLoadError"));
       }
     })();
     return () => {
       alive = false;
     };
-  }, [message]);
+  }, [message, t]);
 
   const listRequest = useMemo(
     () =>
@@ -190,14 +193,14 @@ export default function TransferPaymentManagementPage() {
 
   const handleCreatePaymentRequest = async () => {
     if (!entityFilter) {
-      message.warning("Select one customer or partner");
+      message.warning(t("selectEntity"));
       return;
     }
     const transferOrderIds = selectedRows
       .map((row) => row?.transfer_order_id)
       .filter(Boolean);
     if (!transferOrderIds.length) {
-      message.warning("Select at least one transfer order");
+      message.warning(t("selectOrders"));
       return;
     }
 
@@ -207,14 +210,14 @@ export default function TransferPaymentManagementPage() {
         transfer_order_ids: transferOrderIds,
       });
       message.success(
-        `Payment request created. Group: ${resp?.data?.group_id || "-"}`,
+        t("createSuccess", { group: resp?.data?.group_id || "-" }),
       );
       setSelectedRowMap({});
       tableRef.current?.reload();
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message ||
-          "Payment request could not be created",
+          t("createError"),
       );
     } finally {
       setSubmitting(false);
@@ -224,72 +227,77 @@ export default function TransferPaymentManagementPage() {
   const columns = useMemo(
     () => [
       {
-        title: "Order",
+        title: t("columns.order"),
         dataIndex: "order_number",
-        filter: { type: "text", placeholder: "Search order/customer" },
+        filter: { type: "text", placeholder: t("filters.orderSearch") },
         render: (value, record) => {
           if (record?.__isChild) return null;
           return value || record?.transfer_order_id || "-";
         },
       },
       {
-        title: "Item",
+        title: t("columns.item"),
         dataIndex: "item_name",
         render: (value, record) => {
           if (!record?.__isChild) {
-            return record?.item_count ? `${record.item_count} items` : "-";
+            return record?.item_count ? t("itemCount", { count: record.item_count }) : "-";
           }
           return value || "-";
         },
       },
       {
-        title: "Product",
+        title: t("columns.product"),
         dataIndex: "product_name",
         render: (value, record) => (record?.__isChild ? value || "-" : null),
       },
       {
-        title: "Qty",
+        title: t("columns.quantity"),
         dataIndex: "quantity",
         width: 80,
         render: (value, record) => (record?.__isChild ? value ?? "-" : null),
       },
       {
-        title: "Customer",
+        title: t("columns.customer"),
         dataIndex: "customer_id",
         render: (_, record) => (record?.__isChild ? null : record?.customer?.name || "-"),
       },
       {
-        title: "Partner",
+        title: t("columns.partner"),
         dataIndex: "partner_id",
         render: (_, record) => (record?.__isChild ? null : record?.partner?.name || "-"),
       },
       {
-        title: "Order Price",
+        title: t("columns.orderPrice"),
         dataIndex: "total_transfer_order_price",
         width: 140,
         render: (value, record) => (record?.__isChild ? null : formatMoney(value)),
       },
       {
-        title: "Shipment Price",
+        title: t("columns.shipmentPrice"),
         dataIndex: "shipment_price",
         width: 140,
         render: (value, record) => (record?.__isChild ? null : formatMoney(value)),
       },
       {
-        title: "Status",
+        title: t("columns.status"),
         dataIndex: "status",
         width: 120,
         render: (value, record) => {
           if (record?.__isChild) return null;
           if (!value) return "-";
-          return <Tag color="gold">{value}</Tag>;
+          const label = tStatus(value);
+          return (
+            <StatusTag status={value}>
+              {label.startsWith("common.status.") ? value : label}
+            </StatusTag>
+          );
         },
       },
       {
-        title: "Order Date",
+        title: t("columns.orderDate"),
         dataIndex: "order_date",
         sorter: true,
-        filter: { type: "dateRange", placeholder: "Order date" },
+        filter: { type: "dateRange", placeholder: t("filters.orderDate") },
         render: (value, record) =>
           record?.__isChild
             ? null
@@ -298,7 +306,7 @@ export default function TransferPaymentManagementPage() {
               : "-",
       },
       {
-        title: "Actions",
+        title: t("columns.actions"),
         key: "actions",
         width: 100,
         render: (_, record) => {
@@ -306,20 +314,24 @@ export default function TransferPaymentManagementPage() {
           const transferOrderId = record?.transfer_order_id;
           if (!transferOrderId) return null;
           return (
-            <Tooltip title="Detail">
-              <Link
-                href={`/dashboard/transfer-orders/orders/${encodeURIComponent(
-                  transferOrderId,
-                )}`}
-              >
-                <Button icon={<FileSearchOutlined />} />
-              </Link>
-            </Tooltip>
+            <RowActions
+              actions={[
+                {
+                  key: "detail",
+                  iconOnly: true,
+                  label: t("detail"),
+                  icon: <FileSearchOutlined />,
+                  href: `/dashboard/transfer-orders/orders/${encodeURIComponent(
+                    transferOrderId,
+                  )}`,
+                },
+              ]}
+            />
           );
         },
       },
     ],
-    [],
+    [t, tStatus],
   );
 
   return (
@@ -327,10 +339,13 @@ export default function TransferPaymentManagementPage() {
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <PageHeader
           className=""
-          title="Transfer Payment Management"
+          title={t("title")}
           extra={
             <Text type="secondary">
-              Selected: {selectedRows.length} / {formatMoney(selectedTotal)}
+              {t("selectedSummary", {
+                count: selectedRows.length,
+                total: formatMoney(selectedTotal),
+              })}
             </Text>
           }
         />
@@ -381,7 +396,7 @@ export default function TransferPaymentManagementPage() {
               allowClear
               showSearch
               value={entityFilter}
-              placeholder="Select customer or partner"
+              placeholder={t("entityPlaceholder")}
               options={entityOptions}
               optionFilterProp="label"
               onChange={handleEntityFilterChange}
@@ -390,9 +405,9 @@ export default function TransferPaymentManagementPage() {
           }
           toolbarRight={
             <Popconfirm
-              title="Create payment request for selected transfer orders?"
-              okText="Create"
-              cancelText="Cancel"
+              title={t("confirmCreate")}
+              okText={t("confirmOk")}
+              cancelText={tCommon("cancel")}
               okButtonProps={{ type: "primary", loading: submitting }}
               disabled={!entityFilter || !selectedRows.length || submitting}
               onConfirm={handleCreatePaymentRequest}
@@ -403,7 +418,7 @@ export default function TransferPaymentManagementPage() {
                 disabled={!entityFilter || !selectedRows.length}
                 loading={submitting}
               >
-                Create Payment Request
+                {t("createButton")}
               </Button>
             </Popconfirm>
           }

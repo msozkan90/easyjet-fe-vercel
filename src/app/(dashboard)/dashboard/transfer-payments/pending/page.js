@@ -49,6 +49,8 @@ const shortId = (value) => {
 export default function CustomerTransferPaymentProcessingPage({
   status = "processing",
 }) {
+  const tPm = useTranslations("dashboard.paymentManagement");
+  const tCols = useTranslations("dashboard.paymentManagement.columns");
   const { message } = AntdApp.useApp();
   const dispatch = useDispatch();
   const { locale } = useLocaleInfo();
@@ -185,7 +187,7 @@ export default function CustomerTransferPaymentProcessingPage({
   const columns = useMemo(
     () => [
       {
-        title: "Group",
+        title: tCols("group"),
         dataIndex: "group_id",
         width: 150,
         render: (value, record) => {
@@ -195,7 +197,7 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
       {
-        title: "Item",
+        title: tCols("item"),
         dataIndex: "item_name",
         render: (value, record) => {
           if (record.__rowType === "group") {
@@ -208,20 +210,20 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
       {
-        title: "Product",
+        title: tCols("product"),
         dataIndex: "product_name",
         render: (value, record) =>
           record.__rowType === "item" ? value || "-" : null,
       },
       {
-        title: "Qty",
+        title: tCols("quantity"),
         dataIndex: "quantity",
         width: 80,
         render: (value, record) =>
           record.__rowType === "item" ? (value ?? "-") : null,
       },
       {
-        title: "Order Price",
+        title: tCols("orderPrice"),
         dataIndex: "total_transfer_order_price",
         width: 140,
         render: (value, record) => {
@@ -231,7 +233,7 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
       {
-        title: "Shipment Price",
+        title: tCols("shipmentPrice"),
         dataIndex: "total_shipment_price",
         width: 150,
         render: (value, record) => {
@@ -241,7 +243,7 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
       {
-        title: "Status",
+        title: tCols("status"),
         dataIndex: "status",
         width: 120,
         render: (value, record) => {
@@ -250,7 +252,7 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
       {
-        title: "Created",
+        title: tCols("created"),
         dataIndex: "created_at",
         sorter: true,
         filter: { type: "dateRange", placeholder: "Created date" },
@@ -262,7 +264,7 @@ export default function CustomerTransferPaymentProcessingPage({
               : "-",
       },
       {
-        title: "Actions",
+        title: tCols("actions"),
         key: "actions",
         width: 140,
         render: (_, record) => {
@@ -297,7 +299,7 @@ export default function CustomerTransferPaymentProcessingPage({
           if (record.__rowType !== "order" || !record.transfer_order_id)
             return null;
           return (
-            <Tooltip title="Detail">
+            <Tooltip title={tPm("detail")}>
               <Link
                 href={`/dashboard/transfer-orders/orders/${encodeURIComponent(
                   record.transfer_order_id,
@@ -310,7 +312,7 @@ export default function CustomerTransferPaymentProcessingPage({
         },
       },
     ],
-    [downloadingGroupId, handleDownloadReceipt, isCompleted, t],
+    [downloadingGroupId, handleDownloadReceipt, isCompleted, t, tCols, tPm],
   );
 
   return (

@@ -81,6 +81,12 @@
       "emptyDescription": "Filtreleri değiştirerek tekrar deneyin.",
       "errorTitle": "Liste yüklenemedi",
       "errorDescription": "Bağlantıyı kontrol edip tekrar deneyin. Filtreleriniz korunuyor."
+    },
+    "errorPage": {
+      "title": "Beklenmeyen bir hata oluştu",
+      "body": "Sayfa yüklenirken bir sorun çıktı. Tekrar deneyebilir ya da panele dönebilirsiniz.",
+      "retry": "Tekrar dene",
+      "home": "Panele dön"
     }
   },
   "home": {
@@ -93,7 +99,7 @@
       "subtitle": "Siparişlerinizi yönetin, takip edin.",
       "fields": {
         "email": {
-          "label": "Kullanıcı Adı",
+          "label": "E-posta",
           "placeholder": "kullanici@ornek.com"
         },
         "password": {
@@ -102,7 +108,7 @@
         }
       },
       "validation": {
-        "emailRequired": "Lütfen kullanıcı adınızı girin.",
+        "emailRequired": "Lütfen e-posta adresinizi girin.",
         "passwordRequired": "Lütfen şifrenizi girin."
       },
       "actions": {
@@ -111,8 +117,25 @@
       "messages": {
         "welcome": "Hoş geldiniz!",
         "loginFailed": "Giriş başarısız",
-        "invalidCredentials": "Kullanıcı adı veya şifre hatalı"
+        "invalidCredentials": "E-posta veya şifre hatalı. Lütfen tekrar deneyin."
+      },
+      "brand": {
+        "headline": "Siparişten kargoya, tek panel.",
+        "body": "Tasarım, üretim, kargo ve bakiye işlemlerinizi tek yerden takip edin."
       }
+    },
+    "verify": {
+      "successTitle": "E-posta doğrulandı",
+      "successBody": "Hesabınız aktif; şimdi giriş yapabilirsiniz.",
+      "successBodyWithEmail": "{email} adresi doğrulandı. Hesabınız aktif; şimdi giriş yapabilirsiniz.",
+      "failedTitle": "Doğrulama başarısız",
+      "expiredBody": "Doğrulama bağlantısının süresi dolmuş. Lütfen yeni bir doğrulama isteyin.",
+      "expiredBodyWithEmail": "Doğrulama bağlantısının süresi dolmuş. {email} için yeni bir doğrulama isteyin.",
+      "invalidBody": "Doğrulama bağlantısı geçersiz veya daha önce kullanılmış olabilir.",
+      "invalidBodyWithEmail": "Doğrulama bağlantısı geçersiz veya daha önce kullanılmış olabilir. {email} için yeni bir doğrulama isteyin.",
+      "goToLogin": "Girişe git",
+      "home": "Ana sayfa",
+      "redirectNote": "Birkaç saniye içinde giriş sayfasına yönlendirileceksiniz."
     }
   },
   "dashboard": {
@@ -364,7 +387,12 @@
         "rejectTitle": "Reddet",
         "approvedAmount": "Onaylanan Tutar",
         "rejectReason": "Red Sebebi",
-        "reject": "Reddet"
+        "reject": "Reddet",
+        "approve": "Onayla",
+        "confirmApproveTitle": "Bakiye yüklemesi onaylansın mı?",
+        "confirmApproveBody": "Onaylanan tutar talep sahibinin bakiyesine eklenecek.",
+        "confirmRejectTitle": "Bakiye yüklemesi reddedilsin mi?",
+        "confirmRejectBody": "Talep sahibi red sebebini görecek. Bu işlem geri alınamaz."
       },
       "messages": {
         "loadFundingError": "Hesaplar yüklenemedi.",
@@ -4113,6 +4141,46 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "paymentManagement": {
+      "title": "Transfer Ödeme Yönetimi",
+      "selectedSummary": "Seçili: {count} / {total}",
+      "filterLoadError": "Filtre seçenekleri yüklenemedi",
+      "selectEntity": "Bir müşteri veya partner seçin",
+      "selectOrders": "En az bir transfer siparişi seçin",
+      "createSuccess": "Ödeme talebi oluşturuldu. Grup: {group}",
+      "createError": "Ödeme talebi oluşturulamadı",
+      "entityPlaceholder": "Müşteri veya partner seçin",
+      "confirmCreate": "Seçili transfer siparişleri için ödeme talebi oluşturulsun mu?",
+      "confirmOk": "Oluştur",
+      "createButton": "Ödeme talebi oluştur",
+      "itemCount": "{count} kalem",
+      "detail": "Detay",
+      "columns": {
+        "order": "Sipariş",
+        "item": "Kalem",
+        "product": "Ürün",
+        "quantity": "Adet",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "orderPrice": "Sipariş tutarı",
+        "shipmentPrice": "Kargo tutarı",
+        "status": "Durum",
+        "orderDate": "Sipariş tarihi",
+        "actions": "İşlemler",
+        "group": "Grup",
+        "shipment": "Kargo",
+        "created": "Oluşturulma",
+        "basePrice": "Baz fiyat",
+        "multiplier": "Çarpan",
+        "customerPrice": "Müşteri fiyatı",
+        "partnerCredit": "Partner alacağı",
+        "price": "Fiyat"
+      },
+      "filters": {
+        "orderSearch": "Sipariş / müşteri ara",
+        "orderDate": "Sipariş tarihi"
       }
     }
   },

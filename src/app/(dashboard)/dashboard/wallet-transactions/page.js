@@ -12,6 +12,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
+import MoneyText from "@/components/ui/MoneyText";
 
 const directionColors = {
   credit: "green",
@@ -114,7 +115,8 @@ export default function WalletTransactionsPage() {
         title: t("columns.amount"),
         dataIndex: "amount",
         sorter: true,
-        render: (value) => (value ?? "-"),
+        align: "right",
+        render: (value) => <MoneyText value={value} />,
       },
       {
         title: t("columns.status"),

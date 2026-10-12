@@ -81,6 +81,12 @@
       "emptyDescription": "Try adjusting your filters.",
       "errorTitle": "Could not load the list",
       "errorDescription": "Check your connection and try again. Your filters are kept."
+    },
+    "errorPage": {
+      "title": "Something went wrong",
+      "body": "There was a problem loading this page. You can try again or go back to the panel.",
+      "retry": "Try again",
+      "home": "Back to panel"
     }
   },
   "home": {
@@ -111,8 +117,25 @@
       "messages": {
         "welcome": "Welcome!",
         "loginFailed": "Login failed",
-        "invalidCredentials": "Invalid username or password"
+        "invalidCredentials": "Incorrect email or password. Please try again."
+      },
+      "brand": {
+        "headline": "From order to shipment, one panel.",
+        "body": "Track design, production, shipping and balance in one place."
       }
+    },
+    "verify": {
+      "successTitle": "Email verified",
+      "successBody": "Your account is active; you can sign in now.",
+      "successBodyWithEmail": "{email} has been verified. Your account is active; you can sign in now.",
+      "failedTitle": "Verification failed",
+      "expiredBody": "The verification link has expired. Please request a new one.",
+      "expiredBodyWithEmail": "The verification link has expired. Request a new one for {email}.",
+      "invalidBody": "The verification link is invalid or has already been used.",
+      "invalidBodyWithEmail": "The verification link is invalid or has already been used. Request a new one for {email}.",
+      "goToLogin": "Go to sign in",
+      "home": "Home",
+      "redirectNote": "You will be redirected to the sign-in page in a few seconds."
     }
   },
   "dashboard": {
@@ -364,7 +387,12 @@
         "rejectTitle": "Reject Top-Up",
         "approvedAmount": "Approved Amount",
         "rejectReason": "Reject Reason",
-        "reject": "Reject"
+        "reject": "Reject",
+        "approve": "Approve",
+        "confirmApproveTitle": "Approve this top-up?",
+        "confirmApproveBody": "The approved amount will be added to the requester’s balance.",
+        "confirmRejectTitle": "Reject this top-up?",
+        "confirmRejectBody": "The requester will see the reason. This cannot be undone."
       },
       "messages": {
         "loadFundingError": "Funding accounts could not be loaded.",
@@ -4113,6 +4141,46 @@
         "verificationMissing": "Provide both API Key and API Secret to verify.",
         "verificationSuccess": "API Key and API Secret verified.",
         "verificationError": "Verification failed."
+      }
+    },
+    "paymentManagement": {
+      "title": "Transfer Payment Management",
+      "selectedSummary": "Selected: {count} / {total}",
+      "filterLoadError": "Filter options could not be loaded",
+      "selectEntity": "Select one customer or partner",
+      "selectOrders": "Select at least one transfer order",
+      "createSuccess": "Payment request created. Group: {group}",
+      "createError": "Payment request could not be created",
+      "entityPlaceholder": "Select customer or partner",
+      "confirmCreate": "Create payment request for selected transfer orders?",
+      "confirmOk": "Create",
+      "createButton": "Create payment request",
+      "itemCount": "{count} items",
+      "detail": "Detail",
+      "columns": {
+        "order": "Order",
+        "item": "Item",
+        "product": "Product",
+        "quantity": "Qty",
+        "customer": "Customer",
+        "partner": "Partner",
+        "orderPrice": "Order Price",
+        "shipmentPrice": "Shipment Price",
+        "status": "Status",
+        "orderDate": "Order Date",
+        "actions": "Actions",
+        "group": "Group",
+        "shipment": "Shipment",
+        "created": "Created",
+        "basePrice": "Base Price",
+        "multiplier": "Multiplier",
+        "customerPrice": "Customer Price",
+        "partnerCredit": "Partner Credit",
+        "price": "Price"
+      },
+      "filters": {
+        "orderSearch": "Search order/customer",
+        "orderDate": "Order date"
       }
     }
   },
