@@ -9,7 +9,7 @@ import {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Table, Card, Space, Button, Input, Select, DatePicker } from "antd";
+import { Table, Space, Button, Input, Select, DatePicker } from "antd";
 import {
   SearchOutlined,
   FilterFilled,
@@ -17,6 +17,8 @@ import {
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import dayjs from "dayjs";
+import { palette } from "@/theme/tokens";
+import { EmptyState, ErrorState } from "@/components/ui/StateView";
 
 const { RangePicker } = DatePicker;
 
@@ -227,6 +229,7 @@ const CrudTable = forwardRef(function CrudTable(
   const tTable = useTranslations("common.table");
   const tActions = useTranslations("common.actions");
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [pageState, setPageState] = useState({
@@ -265,6 +268,9 @@ const CrudTable = forwardRef(function CrudTable(
 
       setRows(list || []);
       setTotal(nextTotal);
+      setLoadError(null);
+    } catch (error) {
+      setLoadError(error || new Error("load failed"));
     } finally {
       setLoading(false);
     }
@@ -410,7 +416,9 @@ const CrudTable = forwardRef(function CrudTable(
           : {}),
         filterDropdown,
         filterIcon: (filtered) => (
-          <FilterFilled style={{ color: filtered ? "#1677ff" : undefined }} />
+          <FilterFilled
+            style={{ color: filtered ? palette.orange600 : undefined }}
+          />
         ),
         filteredValue,
         sortOrder:
@@ -464,28 +472,44 @@ const CrudTable = forwardRef(function CrudTable(
     setFilters(next);
   };
 
+  const { locale: tableLocale, ...restTableProps } = tableProps || {};
+  const customEmpty = tableLocale?.emptyText;
+  const emptyText =
+    customEmpty === undefined ||
+    typeof customEmpty === "string" ||
+    typeof customEmpty === "number" ? (
+      <EmptyState compact title={customEmpty} />
+    ) : (
+      customEmpty
+    );
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Toolbar */}
       {showRefresh || toolbarLeft || toolbarRight ? (
-        <Card className="shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              {toolbarLeft}
-            </div>
-            <Space wrap>
-              {showRefresh ? (
-                <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
-                  {tActions("refresh")}
-                </Button>
-              ) : null}
-              {toolbarRight}
-            </Space>
-          </div>
-        </Card>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">{toolbarLeft}</div>
+          <Space wrap>
+            {showRefresh ? (
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => fetchData()}
+                loading={loading}
+              >
+                {tActions("refresh")}
+              </Button>
+            ) : null}
+            {toolbarRight}
+          </Space>
+        </div>
       ) : null}
       {/* Table */}
-      <Card className="shadow-sm">
+      <div className="ej-table-surface">
+        {loadError && !loading ? (
+          <div className="border-b border-line">
+            <ErrorState compact onRetry={() => fetchData()} />
+          </div>
+        ) : null}
         <Table
           rowKey={rowKey}
           loading={loading}
@@ -500,12 +524,13 @@ const CrudTable = forwardRef(function CrudTable(
             showSizeChanger: true,
             responsive: true,
             showTotal: (count) => tTable("totalItems", { count }),
-            pageSizeOptions: [2, 10, 20, 50, 100],
+            pageSizeOptions: [10, 20, 50, 100],
           }}
           scroll={{ x: true }}
-          {...tableProps}
+          {...restTableProps}
+          locale={{ ...(tableLocale || {}), emptyText }}
         />
-      </Card>
+      </div>
     </div>
   );
 });

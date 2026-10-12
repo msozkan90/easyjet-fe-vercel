@@ -122,6 +122,88 @@ body {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+/* Status pill (src/components/ui/StatusTag.jsx) */
+.ej-status {
+  --ej-status-fg: var(--ej-ink-500);
+  --ej-status-bg: var(--ej-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--ej-status-bg);
+  color: var(--ej-status-fg);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ej-status--sm {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.ej-status__dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ej-status--info {
+  --ej-status-fg: #1f5f99;
+  --ej-status-bg: #e8f1fa;
+}
+.ej-status--waiting {
+  --ej-status-fg: #8a5300;
+  --ej-status-bg: #fff4db;
+}
+.ej-status--production {
+  --ej-status-fg: #5b3fb0;
+  --ej-status-bg: #f1edfc;
+}
+.ej-status--printed {
+  --ej-status-fg: #3d4fa8;
+  --ej-status-bg: #eceffb;
+}
+.ej-status--success {
+  --ej-status-fg: #1e7a4c;
+  --ej-status-bg: #e8f5ee;
+}
+.ej-status--shipped {
+  --ej-status-fg: #0f6e73;
+  --ej-status-bg: #e3f4f4;
+}
+.ej-status--danger {
+  --ej-status-fg: #b42318;
+  --ej-status-bg: #fdecea;
+}
+.ej-status--refund {
+  --ej-status-fg: #a3305f;
+  --ej-status-bg: #fbeaf1;
+}
+.ej-status--neutral {
+  --ej-status-fg: #4e6373;
+  --ej-status-bg: #eef1f3;
+}
+
+/* CrudTable surface */
+.ej-table-surface {
+  border: 1px solid var(--ej-border);
+  border-radius: var(--ej-radius-card);
+  overflow: hidden;
+  background: var(--ej-surface);
+}
+
+.ej-table-surface .ant-table-wrapper .ant-table-pagination.ant-pagination {
+  margin: 12px 16px;
+}
+
 a:focus-visible,
 [role="button"]:focus-visible {
   outline: 2px solid var(--ej-orange-600);

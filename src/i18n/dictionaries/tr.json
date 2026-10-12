@@ -41,12 +41,14 @@
       "downloadPdf": "PDF indir",
       "add": "Ekle",
       "save": "Kaydet",
-      "cancel": "İptal",
+      "cancel": "Vazgeç",
       "edit": "Düzenle",
       "delete": "Sil",
       "detail": "Detay",
       "open": "Aç",
-      "backToTop": "En üste çık"
+      "backToTop": "En üste çık",
+      "moreActions": "Diğer işlemler",
+      "retry": "Tekrar dene"
     },
     "status": {
       "active": "Aktif",
@@ -73,7 +75,13 @@
       "empty": "Önizleme yok",
       "openOriginal": "Orijinali indir"
     },
-    "none": "-"
+    "none": "-",
+    "states": {
+      "emptyTitle": "Kayıt bulunamadı",
+      "emptyDescription": "Filtreleri değiştirerek tekrar deneyin.",
+      "errorTitle": "Liste yüklenemedi",
+      "errorDescription": "Bağlantıyı kontrol edip tekrar deneyin. Filtreleriniz korunuyor."
+    }
   },
   "home": {
     "title": "EasyJet'e Hoş Geldiniz",

@@ -46,7 +46,9 @@
       "delete": "Delete",
       "detail": "Detail",
       "open": "Open",
-      "backToTop": "Back to top"
+      "backToTop": "Back to top",
+      "moreActions": "More actions",
+      "retry": "Try again"
     },
     "status": {
       "active": "Active",
@@ -73,7 +75,13 @@
       "empty": "No preview",
       "openOriginal": "Download original"
     },
-    "none": "-"
+    "none": "-",
+    "states": {
+      "emptyTitle": "No records found",
+      "emptyDescription": "Try adjusting your filters.",
+      "errorTitle": "Could not load the list",
+      "errorDescription": "Check your connection and try again. Your filters are kept."
+    }
   },
   "home": {
     "title": "Welcome to EasyJet",
