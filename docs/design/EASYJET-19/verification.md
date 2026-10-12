@@ -1,6 +1,6 @@
 # EASYJET-19 — Tasarım paketi doğrulaması
 
-12 Ekim 2026. Kapsam yalnız tasarım/doküman/DEMO wireframe; gerçek uygulama acceptance testi değildir.
+12 Ekim 2026. Kapsam yalnız tasarım/doküman/DEMO wireframe; gerçek uygulama acceptance testi değildir. **Bu dosyadaki 5 ekran/15 PNG/teal kontrast sonuçları reddedilen v0.1'e aittir; v0.2 kabul kanıtı olarak kullanılmaz.** Yeni tek ekran kontrolleri visual-direction-v2.md içinde ayrı kaydedilir.
 
 ## Kaynak ve scope
 

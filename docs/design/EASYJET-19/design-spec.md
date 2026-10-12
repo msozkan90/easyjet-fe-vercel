@@ -1,6 +1,6 @@
 # EASYJET-19 — EasyJet Connect tasarım önerisi v0.1
 
-Durum: **taslak; kullanıcı onayı bekliyor**. Uygulama kodu/API/veritabanı değişmedi.
+Durum: **v0.1 görsel yönü kullanıcı tarafından reddedildi; görsel uygulama referansı değildir**. Uygulama kodu/API/veritabanı değişmedi. Yeni tek ekran önerisi [visual-direction-v2.md](visual-direction-v2.md) içinde; renk/token kararı onaydan sonra yeniden tamamlanacak. Aşağıdaki business-contract ve kaynak matrisi bilgileri korunur, görsel kararlar onaylanmış sayılmaz.
 Epic: [EASYJET-18](https://easyjetconnect.atlassian.net/browse/EASYJET-18).
 Görev: [EASYJET-19](https://easyjetconnect.atlassian.net/browse/EASYJET-19).
 Kaynak snapshot: origin/dev fa2e8847c719a19e7be69f6bad1753d3c61c1790.

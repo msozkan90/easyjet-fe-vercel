@@ -1,6 +1,6 @@
 # EASYJET-19 — Beş ekran / üç genişlik taslağı
 
-Durum: tasarım önerisi, uygulama değil. DEMO veriler; gerçek dosya/API/işlem bağlantısı yok. [Tasarım kararları](design-spec.md) ve [rol/kategori/route kanıtı](role-route-matrix.md).
+Durum: **v0.1 kullanıcı tarafından reddedildi. Aşağıdaki eski görseller uygulama referansı değildir; yalnız önceki inceleme kaydıdır.** Yeni tek ekran önerisi [visual-direction-v2.md](visual-direction-v2.md) içinde. DEMO veriler; gerçek dosya/API/işlem bağlantısı yok. [Tasarım kararları](design-spec.md) ve [rol/kategori/route kanıtı](role-route-matrix.md).
 
 Ekran seçimi ve durum önizlemesi workspace reports/easyjet19-preview.html içinde yerel fixture'dır; PR'daki PNG'ler kullanıcı incelemesi için portable tasarım kanıtıdır. Form/kargo/production/modallarının nihai AntD davranışı sonradan uygulanır. Prototype bütün gerçek ekranların yerine geçmez. Satırdan detay geçişi temsilî DEMO-1042 örneğini gösterir; gerçek sipariş yönlendirmesi uygulama aşamasında korunacak.
 
