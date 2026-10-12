@@ -14,6 +14,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
+import StatusTag from "@/components/ui/StatusTag";
 
 const ROLE_FILTERS = [
   RoleEnum.COMPANY_ADMIN,
@@ -165,9 +166,9 @@ export default function CompanyUsersPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

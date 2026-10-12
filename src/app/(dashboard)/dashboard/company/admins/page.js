@@ -13,6 +13,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function CompanyAdminsPage() {
   const { message } = AntdApp.useApp();
@@ -168,9 +169,9 @@ export default function CompanyAdminsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{t("status.active")}</Tag>
+            <StatusTag status="active">{t("status.active")}</StatusTag>
           ) : (
-            <Tag color="red">{t("status.inactive")}</Tag>
+            <StatusTag status="inactive">{t("status.inactive")}</StatusTag>
           ),
       },
       {

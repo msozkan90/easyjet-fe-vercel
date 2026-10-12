@@ -872,9 +872,9 @@ export default function TransferOrdersStatusListPage({
               render: (value, record) => {
                 if (record?.__isChild) return null;
                 return Boolean(value) ? (
-                  <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
+                  <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
                 ) : (
-                  <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
+                  <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
                 );
               },
             },
@@ -887,9 +887,9 @@ export default function TransferOrdersStatusListPage({
               dataIndex: "has_design",
               render: (value) => {
                 return value ? (
-                  <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
+                  <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
                 ) : (
-                  <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
+                  <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
                 );
               },
             },

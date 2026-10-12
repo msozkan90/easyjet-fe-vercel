@@ -39,8 +39,8 @@ const buildFrameStyle = ({ width, height, style = {}, aspectRatio }) => {
     aspectRatio: style?.aspectRatio ?? aspectRatio,
     borderRadius: style?.borderRadius ?? 8,
     overflow: "hidden",
-    background: "#f5f5f5",
-    border: style?.border ?? "1px solid #f0f0f0",
+    background: "#F3F5F6",
+    border: style?.border ?? "1px solid #E3E8EC",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -207,7 +207,7 @@ export function GuardedPreviewImage({
 
   if (!src) {
     return emptyText ? (
-      <span style={{ color: "#8c8c8c", fontSize: 12 }}>{emptyText}</span>
+      <span style={{ color: "#6F8494", fontSize: 12 }}>{emptyText}</span>
     ) : null;
   }
 

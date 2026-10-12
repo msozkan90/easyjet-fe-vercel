@@ -22,6 +22,7 @@ import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function ProductsPage() {
   const { message } = AntdApp.useApp();
@@ -128,9 +129,9 @@ export default function ProductsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

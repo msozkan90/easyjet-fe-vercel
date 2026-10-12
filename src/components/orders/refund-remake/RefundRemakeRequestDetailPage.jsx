@@ -422,9 +422,9 @@ export default function RefundRemakeRequestDetailPage({
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #f0f0f0;
+          border: 1px solid #E3E8EC;
           border-radius: 6px;
-          color: #8c8c8c;
+          color: #6F8494;
           font-size: 11px;
           text-align: center;
         }

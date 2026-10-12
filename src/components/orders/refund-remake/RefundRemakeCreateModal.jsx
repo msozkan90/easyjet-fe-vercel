@@ -218,7 +218,7 @@ export default function RefundRemakeCreateModal({
               style={{ borderRadius: 8, objectFit: "cover" }}
             />
           ) : (
-            <span style={{ color: "#8c8c8c", fontSize: 12 }}>{t("common.none")}</span>
+            <span style={{ color: "#6F8494", fontSize: 12 }}>{t("common.none")}</span>
           ),
       },
       {
@@ -227,7 +227,7 @@ export default function RefundRemakeCreateModal({
         render: (_, record) => (
           <Space direction="vertical" size={0}>
             <span>{record?.productName || t("common.none")}</span>
-            <span style={{ color: "#8c8c8c", fontSize: 12 }}>
+            <span style={{ color: "#6F8494", fontSize: 12 }}>
               {record?.sku || record?.orderItemId}
             </span>
           </Space>
@@ -669,9 +669,9 @@ export default function RefundRemakeCreateModal({
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #f0f0f0;
+          border: 1px solid #E3E8EC;
           border-radius: 6px;
-          color: #8c8c8c;
+          color: #6F8494;
           font-size: 11px;
           text-align: center;
         }

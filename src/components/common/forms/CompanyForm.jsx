@@ -158,7 +158,7 @@ export default function CompanyForm({
           </Form.Item>
         </div>
 
-        <div className="hidden w-px bg-gray-200 md:block" />
+        <div className="hidden w-px bg-muted md:block" />
 
         <div className="flex-1 space-y-4">
           <div className="text-lg font-semibold">

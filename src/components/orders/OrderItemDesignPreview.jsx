@@ -97,7 +97,7 @@ const PositionDesignCard = ({
           </Tag>
         ) : null
       }
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{
         body: {
           display: "flex",
@@ -108,13 +108,13 @@ const PositionDesignCard = ({
         },
       }}
     >
-      <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
         {previewImageUrl ? (
           <div className="relative w-full">
             <img
               src={previewImageUrl}
               alt={positionName}
-              className="block w-full rounded-2xl object-contain"
+              className="block w-full rounded-xl object-contain"
               style={{ backgroundColor: item?.color?.hex_code || undefined }}
             />
             <div className="absolute inset-0">
@@ -138,7 +138,7 @@ const PositionDesignCard = ({
                       style={{ objectFit: "contain", borderRadius: 8 }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                    <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                       {thumbnailFallbackText}
                     </div>
                   )}
@@ -229,7 +229,7 @@ export default function OrderItemDesignPreview({
               })}
             </Tag>
           }
-          className="rounded-2xl border border-slate-200 bg-slate-50/40"
+          className="rounded-xl border border-line bg-subtle"
           styles={{ body: { padding: 16 } }}
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">

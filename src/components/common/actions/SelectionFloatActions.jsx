@@ -74,7 +74,7 @@ export default function SelectionFloatActions({
                 : token.colorPrimary,
               boxShadow: busy
                 ? token.boxShadowSecondary
-                : "0 12px 24px rgba(22, 119, 255, 0.32)",
+                : "0 12px 24px rgba(196, 86, 11, 0.32)",
               color: "#fff",
               border: `1px solid ${busy ? token.colorBorder : token.colorPrimaryHover}`,
               opacity: busy ? 0.72 : 1,
@@ -104,7 +104,7 @@ export default function SelectionFloatActions({
                 : token.colorError,
               boxShadow: busy
                 ? token.boxShadowSecondary
-                : "0 12px 24px rgba(255, 77, 79, 0.28)",
+                : "0 12px 24px rgba(180, 35, 24, 0.28)",
               color: "#fff",
               border: `1px solid ${busy ? token.colorBorder : token.colorErrorHover}`,
               opacity: busy ? 0.72 : 1,

@@ -486,7 +486,7 @@ export default function TransferOrdersPage() {
             return (
               <span
                 style={{
-                  color: allPrepared ? "#16a34a" : "#64748b",
+                  color: allPrepared ? "#1E7A4C" : "#4E6373",
                   fontWeight: 600,
                 }}
               >
@@ -988,7 +988,7 @@ export default function TransferOrdersPage() {
               <div
                 key={entry.id}
                 style={{
-                  border: "1px solid #f0f0f0",
+                  border: "1px solid #E3E8EC",
                   borderRadius: 8,
                   padding: 12,
                 }}
@@ -1121,7 +1121,7 @@ export default function TransferOrdersPage() {
               <Switch />
             </Form.Item>
           </div>
-          <div className="mb-3 rounded border border-slate-200 p-3">
+          <div className="mb-3 rounded border border-line p-3">
             <div className="mb-2 flex items-center justify-between">
               <div className="font-medium">
                 {t("manualOrderModal.fields.address")}
@@ -1130,11 +1130,11 @@ export default function TransferOrdersPage() {
                 {t("actions.editAddress")}
               </Button>
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {manualShipToName || "-"}{" "}
               {manualShipToCompany ? `(${manualShipToCompany})` : ""}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {[
                 manualShipToStreet1,
                 manualShipToStreet2,
@@ -1146,7 +1146,7 @@ export default function TransferOrdersPage() {
                 .filter(Boolean)
                 .join(", ") || "-"}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {manualShipToPhone || "-"}
             </div>
           </div>
@@ -1199,7 +1199,7 @@ export default function TransferOrdersPage() {
                 {fields.map((field) => (
                   <div
                     key={field.key}
-                    className="grid grid-cols-1 gap-3 rounded border border-slate-200 p-3 md:grid-cols-[1fr_1fr_auto]"
+                    className="grid grid-cols-1 gap-3 rounded border border-line p-3 md:grid-cols-[1fr_1fr_auto]"
                   >
                     <Form.Item
                       {...field}

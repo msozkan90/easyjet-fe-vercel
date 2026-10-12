@@ -418,8 +418,8 @@ export default function TransferShippingRatesModal({
     ].filter(Boolean);
 
     return (
-      <div className="space-y-1 text-sm text-gray-700">
-        <div className="font-semibold text-gray-900">
+      <div className="space-y-1 text-sm text-text-secondary">
+        <div className="font-semibold text-text">
           {addressInfo?.ship_to_name ||
             addressInfo?.bill_to_name ||
             transferOrder?.bill_to_name ||
@@ -597,7 +597,7 @@ export default function TransferShippingRatesModal({
             </div>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+            <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tModal("package.title")}
@@ -614,7 +614,7 @@ export default function TransferShippingRatesModal({
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tModal("package.weightLb")}
                   </div>
                   <InputNumber
@@ -626,7 +626,7 @@ export default function TransferShippingRatesModal({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tModal("package.weightOz")}
                   </div>
                   <InputNumber
@@ -640,7 +640,7 @@ export default function TransferShippingRatesModal({
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tModal("package.lengthIn")}
                   </div>
                   <InputNumber
@@ -652,7 +652,7 @@ export default function TransferShippingRatesModal({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tModal("package.widthIn")}
                   </div>
                   <InputNumber
@@ -664,7 +664,7 @@ export default function TransferShippingRatesModal({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tModal("package.heightIn")}
                   </div>
                   <InputNumber
@@ -678,7 +678,7 @@ export default function TransferShippingRatesModal({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+            <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tModal("service.title")}
@@ -710,23 +710,23 @@ export default function TransferShippingRatesModal({
                 />
               </Spin>
               {selectedRate ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                <div className="rounded-xl border border-dashed border-line bg-subtle p-4 text-sm text-text-secondary">
                   <div className="flex flex-wrap justify-between gap-2">
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-text">
                       {selectedRate.carrier} •{" "}
                       {selectedRate.serviceName || selectedRate.serviceCode}
                     </span>
-                    <span className="text-base font-semibold text-gray-900">
+                    <span className="text-base font-semibold text-text">
                       $ {formatAmount(shippingAmount, "0.00")}
                     </span>
                   </div>
                   {selectedRate.zone ? (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-secondary">
                       {tModal("service.zoneLabel")}: {selectedRate.zone}
                     </div>
                   ) : null}
                   {selectedRate.deliveryDays ? (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-secondary">
                       {tModal("service.deliveryDaysLabel")}:{" "}
                       {selectedRate.deliveryDays}
                     </div>
@@ -737,7 +737,7 @@ export default function TransferShippingRatesModal({
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
+            <div className="rounded-xl border border-line bg-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tModal("address.title")}
@@ -754,12 +754,12 @@ export default function TransferShippingRatesModal({
               {renderAddress()}
             </div>
 
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
+            <div className="rounded-xl border border-line p-4 shadow-inner space-y-4 bg-subtle">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-text-secondary">
                   {tModal("summary.selectedShippingRate")}
                 </span>
-                <span className="text-base font-semibold text-gray-900">
+                <span className="text-base font-semibold text-text">
                   $ {formatAmount(shippingAmount, "0.00")}
                 </span>
               </div>
@@ -771,7 +771,7 @@ export default function TransferShippingRatesModal({
               </Typography.Text>
             </div>
           </div>
-          <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+          <div className="rounded-xl border border-line bg-surface p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-start gap-1">
                 <div>
@@ -808,24 +808,24 @@ export default function TransferShippingRatesModal({
               {items.map((item, index) => (
                 <div
                   key={item?.id ?? `transfer-item-${index}`}
-                  className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4 shadow-sm"
+                  className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-subtle p-4"
                 >
                   <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-text">
                       {item?.name || "-"}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-secondary">
                       {tOrders("columns.product")}:{" "}
                       {item?.transfer_product?.name || "-"}
                     </div>
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-text">
                       {tOrders("columns.quantity")}: {item?.quantity ?? "-"}
                     </div>
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-text">
                       {tOrders("columns.status")}:{" "}
                       <StatusTag status={item?.status}>
                         {item?.status
@@ -841,7 +841,7 @@ export default function TransferShippingRatesModal({
           </div>
 
           {designGroups.length ? (
-            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+            <div className="rounded-xl border border-line bg-surface p-6">
               <Typography.Title
                 level={4}
                 style={{ marginTop: 0, marginBottom: 8 }}

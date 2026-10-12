@@ -9,7 +9,6 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
@@ -23,6 +22,7 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -115,7 +115,7 @@ export default function ProductColorsPage() {
                   width: 16,
                   height: 16,
                   borderRadius: 4,
-                  border: "1px solid #d9d9d9",
+                  border: "1px solid #C9D2D9",
                   backgroundColor: normalizedHex,
                 }}
               />
@@ -140,9 +140,9 @@ export default function ProductColorsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

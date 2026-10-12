@@ -105,7 +105,7 @@ export default function ProductPositionForm({
   const uploadButton = (
     <button
       type="button"
-      className="flex flex-col items-center justify-center text-blue-600 hover:text-blue-700"
+      className="flex flex-col items-center justify-center text-brand-700 hover:text-brand-800"
     >
       <PlusOutlined />
       <span className="mt-1 text-xs font-medium">

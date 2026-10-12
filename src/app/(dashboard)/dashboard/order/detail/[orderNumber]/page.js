@@ -106,11 +106,11 @@ const extractPositionList = (response) => {
 
 const InfoField = ({ label, value, className, valueClassName }) => (
   <div className={`flex flex-col gap-1 ${className || ""}`}>
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+    <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
       {label}
     </span>
     <span
-      className={`text-sm font-semibold text-slate-900 ${valueClassName || ""}`}
+      className={`text-sm font-semibold text-text ${valueClassName || ""}`}
     >
       {value}
     </span>
@@ -204,7 +204,7 @@ const LabelCard = ({
         href={trackingUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all text-blue-600 underline decoration-blue-300 underline-offset-2 transition hover:text-blue-800"
+        className="break-all text-brand-700 underline decoration-blue-300 underline-offset-2 transition hover:text-brand-800"
       >
         {trackingValue}
       </a>
@@ -262,7 +262,7 @@ const LabelCard = ({
               href={labelUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+              className="inline-flex items-center rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-text-secondary transition hover:border-line-strong hover:text-text"
             >
               {tDesign("actions.viewLabel")}
             </a>
@@ -481,7 +481,7 @@ const ProductionRecoveryCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-amber-200 bg-amber-50/40 shadow-sm"
+      className="rounded-xl border border-amber-200 bg-amber-50/40"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -600,7 +600,7 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
         <Typography.Text type="secondary">
           {tDesign("scrap.fields.note")}
         </Typography.Text>
-        <div className="mt-1 text-sm text-slate-700">
+        <div className="mt-1 text-sm text-text-secondary">
           {movement?.note || tOrders("common.none")}
         </div>
       </div>
@@ -668,13 +668,13 @@ const ItemDesignPreview = ({
               },
             }}
           >
-            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
               {previewImageUrl ? (
                 <div className="relative w-full">
                   <img
                     src={previewImageUrl}
                     alt={positionName}
-                    className="block w-full rounded-2xl object-contain"
+                    className="block w-full rounded-xl object-contain"
                     style={{
                       backgroundColor: item?.color?.hex_code || undefined,
                     }}
@@ -700,7 +700,7 @@ const ItemDesignPreview = ({
                             style={{ objectFit: "contain", borderRadius: 8 }}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                             {thumbnailFallbackText}
                           </div>
                         )}
@@ -794,8 +794,8 @@ const OrderItemCard = ({
       styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <div className="w-full max-w-[260px] rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50">
+        <div className="w-full max-w-[260px] rounded-xl border border-line bg-surface p-4">
+          <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-line bg-subtle">
             {item?.image_url ? (
               <GuardedPreviewImage
                 src={item.image_url}
@@ -853,7 +853,7 @@ const OrderItemCard = ({
                 {options.map((option, index) => (
                   <span
                     key={`${option?.name || "option"}-${index}`}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-text-secondary"
                   >
                     {option?.name || tOrders("common.none")}:{" "}
                     {option?.value || tOrders("common.none")}
@@ -870,7 +870,7 @@ const OrderItemCard = ({
             </Typography.Text>
 
             <div className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700">
+              <span className="rounded-full border border-line bg-surface px-3 py-1 text-text-secondary">
                 {item?.notes || tOrders("common.none")}
               </span>
             </div>
@@ -1565,7 +1565,7 @@ export default function OrderDetailPage() {
                 {shipments.map((shipment) => (
                   <div
                     key={shipment.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-line bg-surface p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
@@ -1575,7 +1575,7 @@ export default function OrderDetailPage() {
                         {shipment.fulfillment_status}
                       </Tag>
                     </div>
-                    <div className="mt-2 text-sm text-slate-600">
+                    <div className="mt-2 text-sm text-text-secondary">
                       {shipment.items?.filter((item) => item.status !== "cancel").length || 0} items • ${formatAmount(
                         shipment.shipment_price,
                       )}
@@ -1590,14 +1590,14 @@ export default function OrderDetailPage() {
               <SectionHeader title="Canceled shipment history" />
               <div className="grid gap-4 lg:grid-cols-2">
                 {canceledShipments.map((shipment) => (
-                  <div key={shipment.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div key={shipment.id} className="rounded-xl border border-line bg-subtle p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
                         {shipment.shipment_number || `Shipment ${shipment.sequence}`}
                       </Typography.Text>
                       <Tag>canceled</Tag>
                     </div>
-                    <div className="mt-2 text-sm text-slate-600">
+                    <div className="mt-2 text-sm text-text-secondary">
                       {shipment.labels?.length || 0} labels • {shipment.label_voids?.length || 0} voids
                     </div>
                   </div>
@@ -1814,7 +1814,7 @@ export default function OrderDetailPage() {
                     <Card
                       key={field.key}
                       size="small"
-                      className="rounded-2xl border border-slate-100"
+                      className="rounded-xl border border-line"
                     >
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <Typography.Text strong>

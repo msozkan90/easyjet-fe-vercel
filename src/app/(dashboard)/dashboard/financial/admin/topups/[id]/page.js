@@ -178,7 +178,7 @@ export default function WalletTopupAdminDetailPage() {
           ]}
           title={t("topupDetail.adminTitle")}
         />
-        <Card loading={loading} className="shadow-sm">
+        <Card loading={loading} className="">
           <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
             <Descriptions.Item label={t("columns.id")}>
               {record?.id || "-"}
@@ -258,7 +258,7 @@ export default function WalletTopupAdminDetailPage() {
         </Card>
         {record?.status === "pending" ? (
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Card className="shadow-sm" title={t("actions.approveTitle")}>
+            <Card className="" title={t("actions.approveTitle")}>
               <Form form={approveForm} layout="vertical">
                 <Form.Item
                   label={t("actions.approvedAmount")}
@@ -275,7 +275,7 @@ export default function WalletTopupAdminDetailPage() {
                 </Button>
               </Form>
             </Card>
-            <Card className="shadow-sm" title={t("actions.rejectTitle")}>
+            <Card className="" title={t("actions.rejectTitle")}>
               <Form form={rejectForm} layout="vertical">
                 <Form.Item
                   label={t("actions.rejectReason")}

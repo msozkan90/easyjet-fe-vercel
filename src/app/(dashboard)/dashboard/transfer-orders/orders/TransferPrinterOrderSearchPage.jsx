@@ -63,7 +63,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
     item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card className="rounded-xl border border-line" bodyStyle={{ padding: 20 }}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
@@ -96,7 +96,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
               {options.map((option, index) => (
                 <span
                   key={`${option?.name || "option"}-${index}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                  className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                 >
                   {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
                 </span>
@@ -221,7 +221,7 @@ export default function TransferPrinterOrderSearchPage({
       <div className="space-y-4">
         <PageHeader className="" title={tOrders("workerPrinter.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <Input.Search
             allowClear
             enterButton={
@@ -258,7 +258,7 @@ export default function TransferPrinterOrderSearchPage({
         ) : null}
 
         {orderSummary ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <Typography.Title level={5} style={{ margin: 0 }}>
@@ -292,7 +292,7 @@ export default function TransferPrinterOrderSearchPage({
         ) : null}
 
         {designGroups.length ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <Descriptions
               size="small"
               bordered
@@ -327,7 +327,7 @@ export default function TransferPrinterOrderSearchPage({
                                           maxHeight: 220,
                                           objectFit: "cover",
                                           borderRadius: 8,
-                                          border: "1px solid #f1f5f9",
+                                          border: "1px solid #EEF1F3",
                                         }}
                                         preview
                                       />

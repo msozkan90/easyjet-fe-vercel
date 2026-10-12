@@ -23,6 +23,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { formatPrice, pickBasePrice, toNumeric } from "@/utils/priceHelpers";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 const resolveBasePrice = (record) => {
   if (!record || typeof record !== "object") {
@@ -80,10 +81,10 @@ const resolveBasePrice = (record) => {
 
 const formatStatusTag = (value, tStatus) => {
   if (value === "active") {
-    return <Tag color="green">{tStatus("active")}</Tag>;
+    return <StatusTag status="active">{tStatus("active")}</StatusTag>;
   }
   if (value === "inactive") {
-    return <Tag color="red">{tStatus("inactive")}</Tag>;
+    return <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>;
   }
   return <Tag>{value || "-"}</Tag>;
 };

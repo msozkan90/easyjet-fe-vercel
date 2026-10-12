@@ -131,7 +131,7 @@ export default function DesignAreaSelector({
   }, [onChange]);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+    <div className="rounded-xl border border-line bg-subtle p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Typography.Text strong>
@@ -167,13 +167,13 @@ export default function DesignAreaSelector({
           </Button>
         </Space>
       </div>
-      <div className="mt-4 min-h-[240px] rounded-xl border border-dashed border-gray-300 bg-white/70 p-3">
+      <div className="mt-4 min-h-[240px] rounded-xl border border-dashed border-line-strong bg-white/70 p-3">
         {hasImage ? (
           <div className="relative rounded-lg">
             <img
               src={previewSrc}
               alt="position preview"
-              className="block w-full rounded-lg bg-gray-200"
+              className="block w-full rounded-lg bg-muted"
               onLoad={measureOverlay}
             />
             <div ref={overlayRef} className="absolute inset-0">
@@ -233,7 +233,7 @@ export default function DesignAreaSelector({
                   }}
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center rounded-lg text-sm text-gray-500">
+                <div className="absolute inset-0 flex items-center justify-center rounded-lg text-sm text-text-secondary">
                   {tForm("designArea.noSelection")}
                 </div>
               )}

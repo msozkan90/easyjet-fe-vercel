@@ -1022,7 +1022,7 @@ export default function OrderDesignModal({
           return (
             <div
               key={key}
-              className="flex flex-wrap gap-1 text-sm text-gray-700 "
+              className="flex flex-wrap gap-1 text-sm text-text-secondary"
             >
               <span className="font-semibold">{option?.name || "-"}</span>
               <span>:</span>
@@ -1118,13 +1118,13 @@ export default function OrderDesignModal({
           flex: 1,
         }}
       >
-        <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm">
+        <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
           {previewImageUrl ? (
             <div className="relative  w-full">
               <img
                 src={previewImageUrl}
                 alt={position?.name || "position"}
-                className={`block w-full rounded-2xl 
+                className={`block w-full rounded-xl 
                     object-contain`}
                 style={{ backgroundColor: orderDetail?.color?.hex_code }}
               />
@@ -1149,7 +1149,7 @@ export default function OrderDesignModal({
                         style={{ objectFit: "contain", borderRadius: 8 }}
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                      <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                         {designPreviewFallback}
                       </div>
                     )}
@@ -1209,7 +1209,7 @@ export default function OrderDesignModal({
     return (
       <Card key={design.id} title={position?.name || t("positions.untitled")}>
         <div className="flex flex-col gap-4">
-          <div className="relative flex min-h-36 w-full items-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+          <div className="relative flex min-h-36 w-full items-center overflow-hidden rounded-lg border border-line bg-subtle">
             {positionImageUrl ? (
               <div className="relative w-full">
                 <img
@@ -1239,7 +1239,7 @@ export default function OrderDesignModal({
                           style={{ objectFit: "contain", borderRadius: 8 }}
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                           {designPreviewFallback}
                         </div>
                       )}
@@ -1447,19 +1447,19 @@ export default function OrderDesignModal({
             <Card
               title={t("orderInfo.title")}
               bodyStyle={{ padding: 24 }}
-              className="shadow-md w-full"
+              className="w-full"
             >
               <div className="mx-auto flex w-full flex-col gap-6">
                 <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-                  <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="rounded-xl border border-line bg-surface p-5">
+                    <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                       <span>{t("orderInfo.preview")}</span>
-                      <span className="text-gray-400">
+                      <span className="text-ink-400">
                         {t("orderInfo.imageHint")}
                       </span>
                     </div>
 
-                    <div className="mt-4 flex aspect-[3/4] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-3">
+                    <div className="mt-4 flex aspect-[3/4] items-center justify-center rounded-xl border border-dashed border-line bg-subtle p-3">
                       {orderDetail?.image_url ? (
                         <GuardedPreviewImage
                           src={orderDetail.image_url}
@@ -1479,14 +1479,14 @@ export default function OrderDesignModal({
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-gray-100 bg-white p-5  shadow-sm">
+                  <div className="rounded-xl border border-line bg-surface p-5">
                     <div className="flex flex-col gap-3">
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                             {tOrders("columns.orderNumber")}
                           </span>
-                          <span className="text-lg font-semibold text-gray-900">
+                          <span className="text-lg font-semibold text-text">
                             {orderDetail?.order?.order_number ||
                               orderDetail?.order_number ||
                               tOrders("common.none")}
@@ -1494,51 +1494,51 @@ export default function OrderDesignModal({
                         </div>
 
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                             {tOrders("columns.sku")}
                           </span>
-                          <span className="text-lg font-semibold text-gray-900">
+                          <span className="text-lg font-semibold text-text">
                             {orderDetail?.sku || tOrders("common.none")}
                           </span>
                         </div>
 
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                             {tOrders("columns.price")}
                           </span>
-                          <span className="text-lg font-semibold text-gray-900">
+                          <span className="text-lg font-semibold text-text">
                             {formatAmount(orderDetail?.price)}
                           </span>
                         </div>
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-3">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                           {tOrders("columns.product")}
                         </span>
-                        <p className="mt-1 text-base font-semibold text-gray-900">
+                        <p className="mt-1 text-base font-semibold text-text">
                           {orderDetail?.product?.name || tOrders("common.none")}
                         </p>
 
-                        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                           {tOrders("columns.size")}
                         </span>
-                        <p className="mt-1 text-base font-semibold text-gray-900">
+                        <p className="mt-1 text-base font-semibold text-text">
                           {orderDetail?.size?.name || tOrders("common.none")}
                         </p>
 
-                        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                           {tOrders("columns.color")}
                         </span>
-                        <p className="mt-1 text-base font-semibold text-gray-900">
+                        <p className="mt-1 text-base font-semibold text-text">
                           {orderDetail?.color?.name || tOrders("common.none")}
                         </p>
                       </div>
 
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
                         {tOrders("columns.options")}
                       </span>
-                      <div className="mt-2 text-base font-semibold text-gray-900">
+                      <div className="mt-2 text-base font-semibold text-text">
                         {renderOptions(orderDetail?.options)}
                       </div>
 
@@ -1550,7 +1550,7 @@ export default function OrderDesignModal({
                         rows={4}
                         value={note}
                         onChange={(event) => setNote(event.target.value)}
-                        className="rounded-2xl border-none bg-white shadow-sm"
+                        className="rounded-xl border-none bg-surface"
                       />
                     </div>
                   </div>
@@ -1560,7 +1560,7 @@ export default function OrderDesignModal({
 
             <Card title={t("fields.positions")}>
               {requiresProductSubCategoryRouting ? (
-                <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                <div className="mb-4 rounded-lg border border-line bg-info-bg p-3">
                   <Typography.Text strong>
                     {t("fields.productSubCategoryRouting")}
                   </Typography.Text>
@@ -1588,7 +1588,7 @@ export default function OrderDesignModal({
                 </div>
               ) : null}
               {canRouteToPrint ? (
-                <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <div className="mb-4 rounded-lg border border-line bg-subtle p-3">
                   <Typography.Text strong>
                     {t("fields.printRouting")}
                   </Typography.Text>

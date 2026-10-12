@@ -8,7 +8,6 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
@@ -25,6 +24,7 @@ import { CategoriesAPI, TransferProductsAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function TransferProductsPage() {
   const { message } = AntdApp.useApp();
@@ -121,9 +121,9 @@ export default function TransferProductsPage() {
         },
         render: (value) =>
           value ? (
-            <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
+            <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
           ) : (
-            <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
+            <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
           ),
       },
       {
@@ -141,9 +141,9 @@ export default function TransferProductsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

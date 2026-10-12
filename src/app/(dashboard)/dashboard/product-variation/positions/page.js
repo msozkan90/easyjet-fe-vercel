@@ -8,7 +8,6 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
@@ -31,6 +30,7 @@ import {
   extractDesignAreaFromRecord,
   serializeDesignArea,
 } from "@/utils/designArea";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function ProductPositionsPage() {
   const { message } = AntdApp.useApp();
@@ -123,7 +123,7 @@ export default function ProductPositionsPage() {
               loading="lazy"
               openLabel={tCommonActions("open")}
               emptyText={t("common.none")}
-              style={{ objectFit: "cover", borderRadius: 8, background: "#b2b2b2" }}
+              style={{ objectFit: "cover", borderRadius: 8, background: "#8696A2" }}
               preview={{ mask: <EyeOutlined /> }}
             />
           ) : (
@@ -147,9 +147,9 @@ export default function ProductPositionsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

@@ -48,7 +48,7 @@ function TextFilterDropdown({ selectedKeys, setSelectedKeys, confirm, clearFilte
 
 const textFilter = (title, accessor, t) => ({
   filterDropdown: (props) => <TextFilterDropdown {...props} title={title} t={t} />,
-  filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />,
+  filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#C4560B" : undefined }} />,
   onFilter: (value, row) => textValue(accessor(row)).includes(textValue(value)),
 });
 

@@ -22,6 +22,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
+import StatusTag from "@/components/ui/StatusTag";
 
 const extractList = (resp) => {
   const payload = resp?.data ?? resp;
@@ -392,11 +393,13 @@ export default function NotificationSettingsTable({ tSettings }) {
         render: (value) => {
           const normalized = String(value || "").toLowerCase();
           return normalized === "active" ? (
-            <Tag color="green">{translateOrFallback(tCommonStatus, "active", "Active")}</Tag>
+            <StatusTag status="active">
+              {translateOrFallback(tCommonStatus, "active", "Active")}
+            </StatusTag>
           ) : (
-            <Tag color="red">
+            <StatusTag status="inactive">
               {translateOrFallback(tCommonStatus, "inactive", "Inactive")}
-            </Tag>
+            </StatusTag>
           );
         },
       },

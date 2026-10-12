@@ -110,7 +110,7 @@ const TransferOrderItemCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       bodyStyle={{ padding: 20 }}
     >
       <div className="flex flex-col gap-4">
@@ -156,7 +156,7 @@ const TransferOrderItemCard = ({
               {options.map((option, index) => (
                 <span
                   key={`${option?.name || "option"}-${index}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                  className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                 >
                   {option?.name || tOrders("common.none")}:{" "}
                   {option?.value || tOrders("common.none")}
@@ -540,7 +540,7 @@ export default function TransferShippedPrinterSearchPage() {
       <div className="space-y-4">
         <PageHeader className="" title={tOrders("workerShipmentPrinter.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <Input.Search
             allowClear
             enterButton={
@@ -583,7 +583,7 @@ export default function TransferShippedPrinterSearchPage() {
         ) : null}
 
         {orderSummary ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <Typography.Title level={5} style={{ margin: 0 }}>
@@ -620,7 +620,7 @@ export default function TransferShippedPrinterSearchPage() {
 
         {transferLabel ? (
           <Card
-            className="rounded-2xl border border-slate-100"
+            className="rounded-xl border border-line"
             title={tOrders("detail.fields.labels")}
           >
             <Descriptions
@@ -780,7 +780,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Designs
                 </Typography.Title>
                 {shippingChecklist.designs.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
                     {shippingChecklist.designs.map((design) => {
                       const designKey = `design:${design?.id}`;
                       return (
@@ -789,7 +789,7 @@ export default function TransferShippedPrinterSearchPage() {
                           className="flex items-center gap-3 px-3 py-2"
                         >
                           <Checkbox value={designKey} />
-                          <div className="h-14 w-14 flex-none overflow-hidden rounded border border-slate-100 bg-slate-50">
+                          <div className="h-14 w-14 flex-none overflow-hidden rounded border border-line bg-subtle">
                             {design?.design_url ? (
                               <DesignThumbnailImage
                                 design={design}
@@ -840,7 +840,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Without-design items
                 </Typography.Title>
                 {shippingChecklist.without_design_items.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
                     {shippingChecklist.without_design_items.map((item) => {
                       const itemKey = `without-design-item:${item?.id}`;
                       const optionText = getChecklistOptionText(item);

@@ -689,7 +689,7 @@ export default function ProductForm({
             {sortedSubCategories.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded border border-gray-200 px-2 py-1"
+                className="flex items-center justify-between rounded border border-line px-2 py-1"
               >
                 <Space size="small">
                   <Typography.Text>{item.name}</Typography.Text>

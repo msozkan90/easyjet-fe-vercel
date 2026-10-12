@@ -38,6 +38,7 @@ import {
 import { useTranslations } from "@/i18n/use-translations";
 import { hasAnyRole } from "@/utils/rbac";
 import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
 
 const formatAmount = (value) => {
   if (value === null || value === undefined || value === "") return "-";
@@ -876,14 +877,32 @@ export default function TransferOrderDetailPage() {
       ]}
       anyOfCategories={["Transfers"]}
     >
-      <div className="min-h-full bg-slate-50/70 p-4 md:p-6">
-        <div className="space-y-6">
-          <Card className="rounded-2xl border border-slate-100 shadow-sm">
-            <Typography.Title level={4} style={{ marginTop: 0 }}>
-              {tDetail("header.orderNumber", {
-                orderNumber: detail?.order_number || "-",
-              })}
-            </Typography.Title>
+      <div>
+        <div className="space-y-5">
+          <PageHeader
+            className=""
+            breadcrumb={[
+              { title: tOrders("title") },
+              { title: `#${detail?.order_number || "-"}` },
+            ]}
+            title={
+              <span className="ej-mono">#{detail?.order_number || "-"}</span>
+            }
+            meta={
+              detail?.order_status ? (
+                <StatusTag status={detail.order_status}>
+                  {tOrders(`status.values.${detail.order_status}`) ||
+                    detail.order_status}
+                </StatusTag>
+              ) : null
+            }
+            description={
+              detail?.order_date
+                ? `${tOrders("columns.orderDate")}: ${moment(detail.order_date).format("LLL")}`
+                : undefined
+            }
+          />
+          <Card className="rounded-xl border border-line">
             <Descriptions
               column={{ xs: 1, sm: 2, md: 3 }}
               bordered
@@ -925,16 +944,7 @@ export default function TransferOrderDetailPage() {
               </Descriptions.Item>
             </Descriptions>
           </Card>
-          <Card
-            className="rounded-2xl border border-slate-100 shadow-sm"
-            bodyStyle={{ padding: 20 }}
-          >
-            <Tabs
-              defaultActiveKey="overview"
-              items={detailTabs}
-              className="[&_.ant-tabs-nav]:mb-6 [&_.ant-tabs-tab]:rounded-full [&_.ant-tabs-tab]:px-4 [&_.ant-tabs-tab]:py-2"
-            />
-          </Card>
+          <Tabs defaultActiveKey="overview" items={detailTabs} />
         </div>
       </div>
     </RequireRole>

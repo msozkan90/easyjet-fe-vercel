@@ -544,8 +544,8 @@ export default function TransferProductionModal({
     ].filter(Boolean);
 
     return (
-      <div className="space-y-1 text-sm text-gray-700">
-        <div className="font-semibold text-gray-900">
+      <div className="space-y-1 text-sm text-text-secondary">
+        <div className="font-semibold text-text">
           {addressInfo?.ship_to_name || addressInfo?.bill_to_name || "-"}
         </div>
         {addressLines.length
@@ -643,7 +643,7 @@ export default function TransferProductionModal({
         ]}
       >
         <Space direction="vertical" style={{ width: "100%" }} size={16}>
-          <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+          <div className="rounded-xl border border-line bg-surface p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <Typography.Title level={4} style={{ margin: 0 }}>
@@ -705,18 +705,18 @@ export default function TransferProductionModal({
               {items.map((item, index) => (
                 <div
                   key={item?.id || `item-${index}`}
-                  className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4 shadow-sm"
+                  className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-subtle p-4"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-text">
                       {item?.name || "-"}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-secondary">
                       {tOrders("columns.product")}:{" "}
                       {item?.transfer_product?.name || "-"}
                     </div>
                   </div>
-                  <div className="text-sm font-semibold text-gray-900">
+                  <div className="text-sm font-semibold text-text">
                     {tOrders("columns.quantity")}: {item?.quantity ?? "-"}
                   </div>
                   {item?.status ? <Tag color="blue">{item.status}</Tag> : null}
@@ -725,7 +725,7 @@ export default function TransferProductionModal({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-blue-100 bg-blue-50/50 p-4 shadow-sm">
+          <div className="rounded-xl border border-line bg-info-bg p-4">
             <Typography.Title level={4} style={{ marginTop: 0 }}>
               {tModal("fields.labelPurchaseOption")}
             </Typography.Title>
@@ -766,7 +766,7 @@ export default function TransferProductionModal({
           {isPurchaseMode ? (
             <>
               <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+                <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <Typography.Title level={4} style={{ margin: 0 }}>
                       {tShipping("package.title")}
@@ -783,7 +783,7 @@ export default function TransferProductionModal({
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {tShipping("package.weightLb")}
                       </div>
                       <InputNumber
@@ -795,7 +795,7 @@ export default function TransferProductionModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {tShipping("package.weightOz")}
                       </div>
                       <InputNumber
@@ -809,7 +809,7 @@ export default function TransferProductionModal({
                   </div>
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {tShipping("package.lengthIn")}
                       </div>
                       <InputNumber
@@ -821,7 +821,7 @@ export default function TransferProductionModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {tShipping("package.widthIn")}
                       </div>
                       <InputNumber
@@ -833,7 +833,7 @@ export default function TransferProductionModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {tShipping("package.heightIn")}
                       </div>
                       <InputNumber
@@ -847,7 +847,7 @@ export default function TransferProductionModal({
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+                <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <Typography.Title level={4} style={{ margin: 0 }}>
                       {tShipping("service.title")}
@@ -878,7 +878,7 @@ export default function TransferProductionModal({
                       optionFilterProp="label"
                     />
                   </Spin>
-                  <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                  <div className="rounded-xl border border-dashed border-line bg-subtle p-4 text-sm text-text-secondary">
                     <div className="flex flex-wrap justify-between gap-2">
                       <span>{tShipping("summary.selectedShippingRate")}</span>
                       <strong>
@@ -905,7 +905,7 @@ export default function TransferProductionModal({
           ) : null}
 
           {productionOption === PRODUCTION_OPTIONS.HAS_LABEL ? (
-            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+            <div className="rounded-xl border border-line bg-surface p-6">
               <Typography.Title level={4} style={{ marginTop: 0 }}>
                 {tModal("upload.title")}
               </Typography.Title>
@@ -945,7 +945,7 @@ export default function TransferProductionModal({
           ) : null}
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
+            <div className="rounded-xl border border-line bg-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tShipping("address.title")}
@@ -962,29 +962,29 @@ export default function TransferProductionModal({
               {renderAddress()}
             </div>
 
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
+            <div className="rounded-xl border border-line p-4 shadow-inner space-y-4 bg-subtle">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-text-secondary">
                   {tModal("summary.orderTotal")}
                 </span>
-                <span className="text-base font-semibold text-gray-900">
+                <span className="text-base font-semibold text-text">
                   $ {formatAmount(orderPrice, "0.00")}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-text-secondary">
                   {tModal("summary.shippingTotal")}
                 </span>
-                <span className="text-base font-semibold text-gray-900">
+                <span className="text-base font-semibold text-text">
                   $ {formatAmount(displayedShippingPrice, "0.00")}
                 </span>
               </div>
               <Divider style={{ margin: "8px 0" }} />
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-lg font-semibold text-text">
                   {tModal("summary.grandTotal")}
                 </span>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-2xl font-bold text-text">
                   $ {formatAmount(orderPrice + displayedShippingPrice, "0.00")}
                 </span>
               </div>

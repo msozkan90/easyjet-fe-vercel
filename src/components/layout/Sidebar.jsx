@@ -1172,7 +1172,7 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
             type: "divider",
             key: "company-admin-divider",
             // kalınlaştır divider
-            style: { borderBottom: "1.4px solid #f0f0f0", margin: "18px 0" },
+            style: { borderBottom: "1px solid #1A3446", margin: "14px 0" },
           },
           {
             key: "my-company",

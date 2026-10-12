@@ -637,37 +637,37 @@ export default function CompanyUserMetricsPage() {
           {selectedUser ? (
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.total")}
                     value={detailSummary.total_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.completed")}
                     value={detailSummary.completed_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.shipped")}
                     value={detailSummary.shipped_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.scrap")}
                     value={detailSummary.scrap_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.remake")}
                     value={detailSummary.remake_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.refund")}
                     value={detailSummary.refund_count}
@@ -680,7 +680,7 @@ export default function CompanyUserMetricsPage() {
                   <Typography.Text strong>
                     {selectedUser.full_name || "-"}
                   </Typography.Text>
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-text-secondary">
                     {selectedUser.email || "-"}
                   </div>
                 </div>

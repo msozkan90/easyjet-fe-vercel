@@ -8,7 +8,6 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
@@ -25,6 +24,7 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 const TRANSFER_CATEGORIES = new Set(["transfer", "transfers"]);
 
@@ -257,9 +257,9 @@ export default function TransferProductPricesPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

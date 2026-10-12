@@ -14,6 +14,7 @@ import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function CustomerAdminsPage() {
   const { message } = AntdApp.useApp();
@@ -169,9 +170,9 @@ export default function CustomerAdminsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

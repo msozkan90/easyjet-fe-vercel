@@ -139,7 +139,7 @@ const ItemDesignPreview = ({
                 </Tag>
               ) : null
             }
-            className="rounded-2xl border border-slate-100 shadow-sm"
+            className="rounded-xl border border-line"
             bodyStyle={{
               display: "flex",
               flexDirection: "column",
@@ -148,13 +148,13 @@ const ItemDesignPreview = ({
               padding: 16,
             }}
           >
-            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
               {previewImageUrl ? (
                 <div className="relative w-full">
                   <img
                     src={previewImageUrl}
                     alt={positionName}
-                    className="block w-full rounded-2xl object-contain"
+                    className="block w-full rounded-xl object-contain"
                     style={{
                       backgroundColor: item?.color?.hex_code || undefined,
                     }}
@@ -180,7 +180,7 @@ const ItemDesignPreview = ({
                             style={{ objectFit: "contain", borderRadius: 8 }}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                             {thumbnailFallbackText}
                           </div>
                         )}
@@ -269,12 +269,12 @@ const OrderItemCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       bodyStyle={{ padding: 20 }}
     >
       <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
+        <div className="w-full max-w-[240px] rounded-xl border border-line bg-surface p-3">
+          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-line bg-subtle">
             {item?.image_url ? (
               <GuardedPreviewImage
                 src={item.image_url}
@@ -347,7 +347,7 @@ const OrderItemCard = ({
                 {options.map((option, index) => (
                   <span
                     key={`${option?.name || "option"}-${index}`}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                   >
                     {option?.name || tOrders("common.none")}:{" "}
                     {option?.value || tOrders("common.none")}
@@ -799,7 +799,7 @@ export default function PrinterOrderSearchPage({
       <div className="space-y-4">
         <PageHeader className="" title={isReportScrapeMode ? tOrders("reportScrape.title") : tOrders("scanner.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <div className="space-y-4">
             <Space.Compact style={{ width: "100%" }}>
               <Input
@@ -821,12 +821,12 @@ export default function PrinterOrderSearchPage({
             </Space.Compact>
 
             {orderSummary?.order_number ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-subtle px-4 py-3">
                 <div className="space-y-1">
                   <Typography.Text type="secondary">
                     {tOrders("columns.orderNumber")}
                   </Typography.Text>
-                  <div className="text-base font-semibold text-slate-900">
+                  <div className="text-base font-semibold text-text">
                     #{orderSummary.order_number}
                   </div>
                 </div>
@@ -918,7 +918,7 @@ export default function PrinterOrderSearchPage({
                       <Card
                         key={field.key}
                         size="small"
-                        className="rounded-2xl border border-slate-100"
+                        className="rounded-xl border border-line"
                       >
                         <div className="mb-3 flex items-center justify-between gap-3">
                           <Typography.Text strong>

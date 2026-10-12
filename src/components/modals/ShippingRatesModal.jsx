@@ -782,8 +782,8 @@ const ShippingRatesModal = ({
       order.ship_to_country,
     ].filter(Boolean);
     return (
-      <div className="space-y-1 text-sm text-gray-700">
-        <div className="font-semibold text-gray-900">
+      <div className="space-y-1 text-sm text-text-secondary">
+        <div className="font-semibold text-text">
           {order.bill_to_name || tCommon("none")}
         </div>
         {addressLines.length
@@ -836,12 +836,12 @@ const ShippingRatesModal = ({
         <Empty description={tShipping("empty")} />
       ) : (
         <div className="space-y-6">
-          <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+          <div className="rounded-xl border border-line bg-surface p-6">
             {requestedShippingService ? (
               <div className="mb-4">
                 <Tag
                   color="cyan"
-                  className="rounded-full font-semibold shadow-sm"
+                  className="rounded-full font-semibold"
                   style={{
                     margin: 0,
                     padding: "7px 16px",
@@ -931,9 +931,9 @@ const ShippingRatesModal = ({
                 return (
                   <div
                     key={key}
-                    className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4 shadow-sm"
+                    className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-subtle p-4"
                   >
-                    <div className="h-10 w-10 overflow-hidden rounded-xl bg-white">
+                    <div className="h-10 w-10 overflow-hidden rounded-xl bg-surface">
                       {imageUrl ? (
                         <GuardedPreviewImage
                           src={imageUrl}
@@ -949,40 +949,40 @@ const ShippingRatesModal = ({
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-gray-400">
+                        <div className="flex h-full items-center justify-center text-xs text-ink-400">
                           {tShipping("items.noImage")}
                         </div>
                       )}
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-text">
                         {item?.name || item?.sku || tCommon("none")}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-text-secondary">
                         SKU: {item?.sku || tCommon("none")}
                       </div>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-text">
                         {tShipping("items.quantity")} :{" "}
                         {item?.quantity || tCommon("none")}
                       </div>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-text">
                         {tShipping("items.size")} :{" "}
                         {sizeName || tCommon("none")}
                       </div>
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-text">
                         {tShipping("items.color")} :{" "}
                         {colorName || tCommon("none")}
                       </div>
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-text">
                         {tShipping("items.productName")}:{" "}
                         {productName || tCommon("none")}
                       </div>
                     </div>
-                    <div className="text-base font-semibold text-gray-900">
+                    <div className="text-base font-semibold text-text">
                       $ {safeFormatAmount(item?.price, tCommon("none"))}
                     </div>
                   </div>
@@ -991,7 +991,7 @@ const ShippingRatesModal = ({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-blue-100 bg-blue-50/50 p-5 shadow-sm space-y-4">
+          <div className="rounded-xl border border-line bg-info-bg p-5 space-y-4">
             <div>
               <Typography.Title level={4} style={{ margin: 0 }}>
                 {tShipping("fulfillment.title")}
@@ -1103,7 +1103,7 @@ const ShippingRatesModal = ({
                 label: tShipping("modes.purchase"),
                 children: (
                   <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+            <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tShipping("package.title")}
@@ -1125,7 +1125,7 @@ const ShippingRatesModal = ({
               )}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tShipping("package.labels.weightLb")}
                   </div>
                   <InputNumber
@@ -1136,7 +1136,7 @@ const ShippingRatesModal = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tShipping("package.labels.weightOz")}
                   </div>
                   <InputNumber
@@ -1149,7 +1149,7 @@ const ShippingRatesModal = ({
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tShipping("package.labels.lengthIn")}
                   </div>
                   <InputNumber
@@ -1160,7 +1160,7 @@ const ShippingRatesModal = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tShipping("package.labels.widthIn")}
                   </div>
                   <InputNumber
@@ -1171,7 +1171,7 @@ const ShippingRatesModal = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                     {tShipping("package.labels.heightIn")}
                   </div>
                   <InputNumber
@@ -1183,7 +1183,7 @@ const ShippingRatesModal = ({
                 </div>
               </div>
             </div>
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md space-y-4">
+            <div className="rounded-xl border border-line bg-surface p-4 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tShipping("service.title")}
@@ -1257,14 +1257,14 @@ const ShippingRatesModal = ({
                             />
                           </Spin>
                           {currentSelected ? (
-                            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                            <div className="rounded-xl border border-dashed border-line bg-subtle p-4 text-sm text-text-secondary">
                               <div className="flex flex-wrap justify-between gap-2">
-                                <span className="font-semibold text-gray-900">
+                                <span className="font-semibold text-text">
                                   {currentSelected.carrier} •{" "}
                                   {currentSelected.serviceName ||
                                     currentSelected.serviceCode}
                                 </span>
-                                <span className="text-base font-semibold text-gray-900">
+                                <span className="text-base font-semibold text-text">
                                   ${" "}
                                   {safeFormatAmount(
                                     getQuotedShippingPrice(
@@ -1276,14 +1276,14 @@ const ShippingRatesModal = ({
                                 </span>
                               </div>
                               {currentSelected.zone ? (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-text-secondary">
                                   {tShipping("service.zoneLabel", {
                                     zone: currentSelected.zone,
                                   })}
                                 </div>
                               ) : null}
                               {currentSelected.deliveryDays ? (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-text-secondary">
                                   {tShipping("service.deliveryDaysLabel", {
                                     days: currentSelected.deliveryDays,
                                   })}
@@ -1305,7 +1305,7 @@ const ShippingRatesModal = ({
                 key: LABEL_MODES.UPLOAD,
                 label: tShipping("modes.upload"),
                 children: (
-                  <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
+                  <div className="rounded-xl border border-line bg-surface p-6">
                     <Typography.Title level={4} style={{ marginTop: 0 }}>
                       {tShipping("upload.title")}
                     </Typography.Title>
@@ -1332,7 +1332,7 @@ const ShippingRatesModal = ({
           />
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-md">
+            <div className="rounded-xl border border-line bg-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   {tShipping("address.title")}
@@ -1351,20 +1351,20 @@ const ShippingRatesModal = ({
               {renderAddress()}
             </div>
 
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-inner space-y-4">
+            <div className="rounded-xl border border-line p-4 shadow-inner space-y-4 bg-subtle">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-text-secondary">
                   {tShipping("summary.orderTotal")}
                 </span>
-                <span className="text-base font-semibold text-gray-900">
+                <span className="text-base font-semibold text-text">
                   $ {safeFormatAmount(orderItemsTotal, tCommon("none"))}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-text-secondary">
                   {tShipping("summary.shipping")}
                 </span>
-                <span className="text-base font-semibold text-gray-900">
+                <span className="text-base font-semibold text-text">
                   ${" "}
                   {safeFormatAmount(
                     isUploadMode || isReuseMode ? 0 : selectedRateAmount,
@@ -1374,10 +1374,10 @@ const ShippingRatesModal = ({
               </div>
               <Divider style={{ margin: "8px 0" }} />
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-lg font-semibold text-text">
                   {tShipping("summary.grandTotal")}
                 </span>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-2xl font-bold text-text">
                   $ {safeFormatAmount(grandTotal, tCommon("none"))}
                 </span>
               </div>

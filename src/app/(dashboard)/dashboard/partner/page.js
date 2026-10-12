@@ -18,6 +18,7 @@ import {
   multiplierToPercent,
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function PartnersPage() {
   const { message } = AntdApp.useApp();
@@ -157,9 +158,9 @@ export default function PartnersPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {

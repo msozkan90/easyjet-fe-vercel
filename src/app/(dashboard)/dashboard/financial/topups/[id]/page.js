@@ -112,7 +112,7 @@ export default function WalletTopupDetailPage() {
           ]}
           title={t("topupDetail.title")}
         />
-        <Card loading={loading} className="shadow-sm">
+        <Card loading={loading} className="">
           <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
             <Descriptions.Item label={t("columns.id")}>
               {record?.id || "-"}

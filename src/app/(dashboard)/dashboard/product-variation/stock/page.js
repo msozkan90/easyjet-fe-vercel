@@ -11,7 +11,6 @@ import {
   Popconfirm,
   Popover,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
@@ -31,6 +30,7 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function ProductStockPage() {
   const { message } = AntdApp.useApp();
@@ -214,9 +214,9 @@ export default function ProductStockPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -286,7 +286,7 @@ export default function ProductStockPage() {
                   danger={record?.status === "active"}
                   style={
                     record?.status === "inactive"
-                      ? { color: "#389e0d", borderColor: "#b7eb8f" }
+                      ? { color: "#1E7A4C", borderColor: "#A7D8BC" }
                       : undefined
                   }
                 ></Button>
