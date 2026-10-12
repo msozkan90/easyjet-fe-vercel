@@ -585,7 +585,7 @@ export default function CompanyUserMetricsPage() {
           />
         </div>
 
-        <Card className="rounded-2xl">
+        <div>
           {error ? (
             <Alert type="error" showIcon message={error} className="mb-4" />
           ) : null}
@@ -609,11 +609,11 @@ export default function CompanyUserMetricsPage() {
               initialSort={{ orderBy: "total_count", orderDir: "desc" }}
               tableProps={{
                 locale: { emptyText: t("messages.empty") },
-                scroll: { x: 980 },
+                scroll: { x: 1180 },
               }}
             />
           ) : null}
-        </Card>
+        </div>
 
         <Modal
           open={Boolean(selectedUser)}

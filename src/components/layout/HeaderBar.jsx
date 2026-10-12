@@ -296,7 +296,7 @@ export default function HeaderBar({ isMobile = false }) {
         {!isMobile ? <LanguageSwitcher size="small" showLabel={false} /> : null}
         <Link
           href="/dashboard/wallet-transactions"
-          className="flex h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100"
+          className="hidden h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100 sm:flex"
           aria-label={`${tNavbar("walletTransactions")}: ${formattedBalance}`}
           title={tNavbar("walletTransactions")}
         >

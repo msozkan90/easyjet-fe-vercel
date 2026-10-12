@@ -290,11 +290,11 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       title: t("fields.pdfStatus"),
       dataIndex: "pdf_status",
       render: (value) => (
-        <Tag color={value === "pdf_downloaded" ? "success" : "processing"}>
+        <StatusTag tone={value === "pdf_downloaded" ? "success" : "info"}>
           {value === "pdf_downloaded"
             ? t("status.pdfDownloaded")
             : t("status.pdfReady")}
-        </Tag>
+        </StatusTag>
       ),
       width: 150,
     },
@@ -309,24 +309,28 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       title: t("fields.downloaded"),
       dataIndex: "is_downloaded",
       render: (value) => (
-        <Tag color={value ? "success" : "default"}>
+        <StatusTag tone={value ? "success" : "neutral"}>
           {value ? t("status.downloaded") : t("status.uploaded")}
-        </Tag>
+        </StatusTag>
       ),
       width: 140,
     },
     {
       title: t("fields.createdAt"),
       dataIndex: "created_at",
-      render: formatDate,
+      render: (value) => (
+        <span className="whitespace-nowrap">{formatDate(value)}</span>
+      ),
+      width: 180,
       responsive: ["lg"],
     },
     {
       title: t("fields.actions"),
       key: "actions",
-      width: 440,
+      fixed: "right",
+      width: 500,
       render: (_, row) => (
-        <Space wrap>
+        <Space wrap={false}>
           <Button
             icon={<EyeOutlined />}
             onClick={() => {
@@ -459,11 +463,13 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
         />
 
         <Table
+          className="ej-table-surface"
           rowKey="id"
           columns={columns}
           dataSource={rows}
           loading={loading}
           size="middle"
+          scroll={{ x: "max-content" }}
           locale={{ emptyText: t("empty.pdfs") }}
           pagination={{
             ...pagination,

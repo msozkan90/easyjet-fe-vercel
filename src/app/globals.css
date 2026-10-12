@@ -193,7 +193,7 @@ body {
 }
 
 /* Remaining antd tags share the pill shape of StatusTag */
-.ant-tag {
+.ant-tag.ant-tag {
   border-radius: 999px;
   border-color: transparent;
   padding-inline: 10px;
@@ -230,23 +230,24 @@ a:focus-visible,
   color: #ff4d4f;
 }
 
+/* Multi-item orders: opaque tints so fixed columns never show content behind */
 .ant-table-row.orders-nested-row > td {
-  background-color: rgba(24, 144, 255, 0.08);
+  background-color: #f5f9fc;
 }
 .ant-table-row.orders-nested-row:hover > td {
-  background-color: rgba(24, 144, 255, 0.1) !important;
+  background-color: #edf3f9 !important;
 }
 
 .ant-table-row.orders-parent-row > td {
-  background-color: rgba(43, 156, 255, 0.2) !important;
+  background-color: #eaf1f8 !important;
 }
 
 .ant-table-row.orders-parent-row:hover > td {
-  background-color: rgba(43, 156, 255, 0.2) !important;
+  background-color: #e2ecf6 !important;
 }
 
 .ant-table-row.orders-child-row > td {
-  background-color: rgba(24, 144, 255, 0.08);
+  background-color: #f5f9fc;
 }
 
 /* Sidebar taxonomy hierarchy: categories are primary groups, subcategories are secondary.
@@ -361,13 +362,13 @@ a:focus-visible,
 .ant-table-row.transfer-status-row > td,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.18) !important;
+  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 11%, #ffffff) !important;
 }
 
 .ant-table-row.transfer-status-row:hover > td,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.26) !important;
+  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 16%, #ffffff) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row > td,
@@ -375,7 +376,7 @@ a:focus-visible,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row
   > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.07) !important;
+  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 4%, #ffffff) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row:hover > td,
@@ -383,49 +384,49 @@ a:focus-visible,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row:hover
   > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.13) !important;
+  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 8%, #ffffff) !important;
 }
 
 .ant-table-row.transfer-status-newOrder {
-  --transfer-status-rgb: 22, 119, 255;
+  --transfer-status-rgb: 31, 95, 153;
 }
 
 .ant-table-row.transfer-status-waitingForDesign {
-  --transfer-status-rgb: 250, 173, 20;
+  --transfer-status-rgb: 185, 137, 0;
 }
 
 .ant-table-row.transfer-status-readyForProduction {
-  --transfer-status-rgb: 114, 46, 209;
+  --transfer-status-rgb: 91, 63, 176;
 }
 
 .ant-table-row.transfer-status-processing {
-  --transfer-status-rgb: 47, 84, 235;
+  --transfer-status-rgb: 91, 63, 176;
 }
 
 .ant-table-row.transfer-status-downloaded,
 .ant-table-row.transfer-status-pdf {
-  --transfer-status-rgb: 19, 194, 194;
+  --transfer-status-rgb: 61, 79, 168;
 }
 
 .ant-table-row.transfer-status-printed,
 .ant-table-row.transfer-status-completed {
-  --transfer-status-rgb: 82, 196, 26;
+  --transfer-status-rgb: 30, 122, 76;
 }
 
 .ant-table-row.transfer-status-shipped {
-  --transfer-status-rgb: 250, 84, 28;
+  --transfer-status-rgb: 15, 110, 115;
 }
 
 .ant-table-row.transfer-status-cancel {
-  --transfer-status-rgb: 255, 77, 79;
+  --transfer-status-rgb: 78, 99, 115;
 }
 
 .ant-table-row.transfer-status-refund {
-  --transfer-status-rgb: 235, 47, 150;
+  --transfer-status-rgb: 163, 48, 95;
 }
 
 .ant-table-row.transfer-status-remake {
-  --transfer-status-rgb: 250, 140, 22;
+  --transfer-status-rgb: 163, 48, 95;
 }
 
 .orders-cell-strong {

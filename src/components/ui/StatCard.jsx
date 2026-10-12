@@ -29,7 +29,7 @@ export default function StatCard({
         <span>{label}</span>
       </div>
       {loading ? (
-        <Skeleton.Input active size="small" style={{ width: 120 }} />
+        <Skeleton.Input active size="small" block />
       ) : (
         <div className="ej-mono text-[26px] font-semibold leading-9 text-text">
           {value}

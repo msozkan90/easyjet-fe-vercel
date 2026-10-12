@@ -232,7 +232,8 @@
           "refresh": "Refresh",
           "retry": "Retry"
         }
-      }
+      },
+      "welcomeDescription": "Use the menu on the left to get started."
     },
     "table": {
       "title": "Latest Orders",

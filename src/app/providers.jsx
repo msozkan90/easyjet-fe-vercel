@@ -23,6 +23,13 @@ import { ensureCsrfSeed } from "@/utils/http";
 import { installErrorMonitoring } from "@/utils/telemetry.mjs";
 import { RoleEnum } from "@/utils/consts";
 import { getAntdTheme } from "@/theme/tokens";
+import { useLocaleInfo } from "@/i18n/use-translations";
+import trTR from "antd/locale/tr_TR";
+import enUS from "antd/locale/en_US";
+import dayjs from "dayjs";
+import "dayjs/locale/tr";
+import moment from "moment";
+import "moment/locale/tr";
 
 const antdTheme = getAntdTheme(theme);
 
@@ -82,10 +89,25 @@ function AuthBootstrap() {
   return null;
 }
 
+const ANTD_LOCALES = { tr: trTR, en: enUS };
+
+// Date libraries are module-level singletons, so they follow the UI locale
+// before children render.
+function applyDateLocale(locale) {
+  // Server renders are shared between requests; only switch in the browser.
+  if (typeof window === "undefined") return;
+  const next = locale === "tr" ? "tr" : "en";
+  if (dayjs.locale() !== next) dayjs.locale(next);
+  if (moment.locale() !== next) moment.locale(next);
+}
+
 export function Providers({ children }) {
+  const { locale } = useLocaleInfo();
+  applyDateLocale(locale);
+
   return (
     <Provider store={store}>
-      <ConfigProvider theme={antdTheme}>
+      <ConfigProvider theme={antdTheme} locale={ANTD_LOCALES[locale] || enUS}>
         <AntdApp>
           <TransferDesignUploadQueueProvider>
             <OrderDesignUploadQueueProvider>

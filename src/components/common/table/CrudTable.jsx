@@ -487,9 +487,11 @@ const CrudTable = forwardRef(function CrudTable(
     <div className="flex flex-col gap-3">
       {/* Toolbar */}
       {showRefresh || toolbarLeft || toolbarRight ? (
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">{toolbarLeft}</div>
-          <Space wrap>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            {toolbarLeft}
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             {showRefresh ? (
               <Button
                 icon={<ReloadOutlined />}
@@ -500,7 +502,7 @@ const CrudTable = forwardRef(function CrudTable(
               </Button>
             ) : null}
             {toolbarRight}
-          </Space>
+          </div>
         </div>
       ) : null}
       {/* Table */}

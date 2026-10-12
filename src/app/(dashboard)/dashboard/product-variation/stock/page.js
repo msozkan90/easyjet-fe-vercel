@@ -137,6 +137,7 @@ export default function ProductStockPage() {
       {
         title: t("columns.product"),
         dataIndex: "product_id",
+        width: 240,
         sorter: true,
         filter: {
           type: "select",

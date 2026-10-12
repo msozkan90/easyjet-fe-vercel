@@ -29,6 +29,7 @@ export default function DashboardHome() {
     <PageHeader
       className=""
       title={entityName || userName || t("fallbackTitle")}
+      description={t("welcomeDescription")}
     />
   );
 }

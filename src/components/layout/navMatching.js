@@ -15,6 +15,8 @@ const scoreMatch = (target, pathname, searchParams) => {
   }
   const paramBonus = [...target.params.keys()].length * 100;
   if (pathname === target.path) return 10000 + target.path.length + paramBonus;
+  // The dashboard home only matches itself, never as a parent route.
+  if (target.path === "/dashboard") return -1;
   if (pathname.startsWith(`${target.path}/`)) return target.path.length;
   return -1;
 };

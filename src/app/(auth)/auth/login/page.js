@@ -84,11 +84,11 @@ export default function LoginPage() {
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-28 bottom-56 hidden h-28 w-[520px] -skew-y-[27deg] bg-ink-800 md:block"
+          className="pointer-events-none absolute -right-28 bottom-[19rem] hidden h-28 w-[520px] -skew-y-[27deg] bg-ink-800 md:block"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-28 bottom-24 hidden h-28 w-[520px] -skew-y-[27deg] bg-brand-500 opacity-90 md:block"
+          className="pointer-events-none absolute -right-28 bottom-40 hidden h-28 w-[520px] -skew-y-[27deg] bg-brand-500 opacity-90 md:block"
         />
         <div className="relative hidden max-w-md flex-col gap-4 md:flex">
           <h1 className="m-0 text-3xl font-semibold leading-tight tracking-tight md:text-4xl">

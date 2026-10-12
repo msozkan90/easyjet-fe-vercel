@@ -15,11 +15,10 @@ export default function RouteHeader() {
     return null;
   }
 
-  const breadcrumb = activeNav.trail.length
-    ? [
-        ...activeNav.trail.map((title) => ({ title })),
-        { title: activeNav.title },
-      ]
+  // A parent group that repeats the page title adds nothing to the trail.
+  const trail = activeNav.trail.filter((title) => title !== activeNav.title);
+  const breadcrumb = trail.length
+    ? [...trail.map((title) => ({ title })), { title: activeNav.title }]
     : undefined;
 
   return (

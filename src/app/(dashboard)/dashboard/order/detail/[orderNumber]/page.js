@@ -815,14 +815,14 @@ const OrderItemCard = ({
             <Typography.Title level={5} style={{ margin: 0 }}>
               {item?.name || tOrders("columns.item")}
             </Typography.Title>
-            <Tag className="rounded-full" color="geekblue">
+            <Tag className="ej-mono">
               {tOrders("columns.sku")} {item?.sku || tOrders("common.none")}
             </Tag>
-            <Tag className="rounded-full" color="gold">
+            <Tag>
               {tOrders("columns.quantity")}:{" "}
               {item?.quantity ?? tOrders("common.none")}
             </Tag>
-            <Tag className="rounded-full" color="green">
+            <Tag>
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>

@@ -422,7 +422,7 @@ export default function PendingOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 210,
+        width: 240,
         render: (_, record) => {
           const rowId = record?.id;
           const cancelLoading = isRowActionLoading(rowId, "cancel");

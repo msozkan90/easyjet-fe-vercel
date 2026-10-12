@@ -232,7 +232,8 @@
           "refresh": "Yenile",
           "retry": "Tekrar dene"
         }
-      }
+      },
+      "welcomeDescription": "İşlemlerinize soldaki menüden başlayabilirsiniz."
     },
     "table": {
       "title": "Son Siparişler",

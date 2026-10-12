@@ -1046,7 +1046,7 @@ export default function OrdersPage({ mode = "pending" }) {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 120,
+        width: 136,
         render: (_, record) => {
           if (isCancelledView) {
             const restoreLoading = isRowActionLoading(record.id, "restore");
