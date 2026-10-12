@@ -101,7 +101,9 @@ const redirectToLogin = () => {
   window.dispatchEvent(new Event("auth:session-expired"));
 
   const loginPath = "/auth/login";
-  if (window.location.pathname !== loginPath) {
+  // Public auth pages (login, e-mail verification results) work without a
+  // session, so an expired or missing session must not navigate away.
+  if (!window.location.pathname.startsWith("/auth/")) {
     window.location.replace(loginPath);
   }
 };

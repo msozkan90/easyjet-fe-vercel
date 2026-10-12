@@ -34,6 +34,7 @@ import Link from "next/link";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { useTranslations } from "@/i18n/use-translations";
 import { palette } from "@/theme/tokens";
+import { hasAnyRole } from "@/utils/rbac";
 
 const { Header } = Layout;
 
@@ -77,11 +78,18 @@ export default function HeaderBar({ isMobile = false }) {
       icon: <UserOutlined />,
       label: <Link href="/dashboard/profile">{tNavbar("profile")}</Link>,
     },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: <Link href="/dashboard/settings">{tNavbar("settings")}</Link>,
-    },
+    // Settings is only available to entity admins (see settings/page.js).
+    ...(hasAnyRole(user, ["companyAdmin", "partnerAdmin", "customerAdmin"])
+      ? [
+          {
+            key: "settings",
+            icon: <SettingOutlined />,
+            label: (
+              <Link href="/dashboard/settings">{tNavbar("settings")}</Link>
+            ),
+          },
+        ]
+      : []),
     { type: "divider" },
     {
       key: "logout",

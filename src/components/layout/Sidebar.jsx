@@ -1306,17 +1306,6 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
           },
         ]
       : []),
-    ...(isSystemAdmin
-      ? [
-          {
-            key: "settings",
-            icon: <SettingOutlined />,
-            label: (
-              <Link href="/dashboard/settings">{tSidebar("settings")}</Link>
-            ),
-          },
-        ]
-      : []),
   ];
 
   const { selectedKey, ancestorKeys, exact, title, trail } =
