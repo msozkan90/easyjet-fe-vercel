@@ -28,6 +28,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
+import PageHeader from "@/components/ui/PageHeader";
 
 const formatDate = (value) =>
   value
@@ -357,23 +358,20 @@ export default function DesignFlawRecordsPage({ categoryId, subCategoryId }) {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        <Space style={{ width: "100%", justifyContent: "space-between" }} wrap>
-          <div>
-            <Typography.Title level={3} style={{ margin: 0 }}>
-              {t("records.title")}
-            </Typography.Title>
-            <Typography.Text type="secondary">
-              {t("records.subtitle")}
-            </Typography.Text>
-          </div>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() => loadRows()}
-            loading={loading}
-          >
-            {tActions("refresh")}
-          </Button>
-        </Space>
+        <PageHeader
+          className=""
+          title={t("records.title")}
+          description={t("records.subtitle")}
+          extra={
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => loadRows()}
+              loading={loading}
+            >
+              {tActions("refresh")}
+            </Button>
+          }
+        />
         <Table
           rowKey="id"
           columns={columns}

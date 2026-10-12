@@ -13,11 +13,11 @@ import {
   InputNumber,
   Modal,
   Popconfirm,
-  Popover,
   Select,
   Space,
   Switch,
   Upload,
+  Tooltip,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -564,8 +564,9 @@ export default function TransferOrdersPage() {
 
           return (
             <Space wrap>
-              <Popover content={t("actions.viewDetail")}>
+              <Tooltip title={t("actions.viewDetail")}>
                 <Button
+                  aria-label={t("actions.viewDetail")}
                   icon={<FileSearchOutlined />}
                   type="default"
                   disabled={!canViewDetail}
@@ -574,28 +575,31 @@ export default function TransferOrdersPage() {
                     window.open(detailHref, "_blank", "noopener,noreferrer");
                   }}
                 />
-              </Popover>
-              <Popover content={t("actions.editAddress")}>
+              </Tooltip>
+              <Tooltip title={t("actions.editAddress")}>
                 <Button
+                  aria-label={t("actions.editAddress")}
                   icon={<EditOutlined />}
                   type="default"
                   disabled={!canEditRecord}
                   onClick={() => handleOpenAddressEditor(record)}
                 />
-              </Popover>
+              </Tooltip>
               {isParentRow ? (
-                <Popover content={t("actions.designUpload")}>
+                <Tooltip title={t("actions.designUpload")}>
                   <Button
+                    aria-label={t("actions.designUpload")}
                     icon={<UploadOutlined />}
                     type="default"
                     disabled={!canUploadDesign}
                     onClick={() => handleOpenDesignUpload(record)}
                   />
-                </Popover>
+                </Tooltip>
               ) : null}
               {isParentRow ? (
-                <Popover content={t("actions.sendToProduction")}>
+                <Tooltip title={t("actions.sendToProduction")}>
                   <Button
+                    aria-label={t("actions.sendToProduction")}
                     icon={<CheckCircleOutlined />}
                     type="primary"
                     disabled={!canSendToProduction}
@@ -627,9 +631,9 @@ export default function TransferOrdersPage() {
                       }
                     }}
                   />
-                </Popover>
+                </Tooltip>
               ) : null}
-              <Popover content={t("actions.cancel")}>
+              <Tooltip title={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
                   okText={t("actions.confirmCancelOk")}
@@ -638,6 +642,7 @@ export default function TransferOrdersPage() {
                   onConfirm={() => handleStatusUpdate(record, "cancel")}
                 >
                   <Button
+                    aria-label={t("actions.cancel")}
                     icon={<CloseOutlined />}
                     type="primary"
                     danger
@@ -645,9 +650,9 @@ export default function TransferOrdersPage() {
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
               {showWaitingAction ? (
-                <Popover content={t("actions.waitingForDesign")}>
+                <Tooltip title={t("actions.waitingForDesign")}>
                   <Popconfirm
                     title={t("actions.confirmWaitingTitle")}
                     okText={t("actions.confirmWaitingOk")}
@@ -658,6 +663,7 @@ export default function TransferOrdersPage() {
                     }
                   >
                     <Button
+                      aria-label={t("actions.waitingForDesign")}
                       icon={<ClockCircleOutlined />}
                       type="primary"
                       color="orange"
@@ -666,10 +672,10 @@ export default function TransferOrdersPage() {
                       disabled={disableActions}
                     />
                   </Popconfirm>
-                </Popover>
+                </Tooltip>
               ) : null}
               {showNewOrderAction ? (
-                <Popover content={t("actions.newOrder")}>
+                <Tooltip title={t("actions.newOrder")}>
                   <Popconfirm
                     title={t("actions.confirmNewOrderTitle")}
                     okText={t("actions.confirmNewOrderOk")}
@@ -681,13 +687,14 @@ export default function TransferOrdersPage() {
                     onConfirm={() => handleStatusUpdate(record, "newOrder")}
                   >
                     <Button
+                      aria-label={t("actions.newOrder")}
                       icon={<PlusOutlined />}
                       type="primary"
                       loading={newOrderLoading}
                       disabled={disableActions}
                     />
                   </Popconfirm>
-                </Popover>
+                </Tooltip>
               ) : null}
             </Space>
           );

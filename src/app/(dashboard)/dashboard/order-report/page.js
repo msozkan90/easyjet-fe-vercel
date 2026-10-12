@@ -44,9 +44,11 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import ReportExportButton from "@/components/reports/ReportExportButton";
+import PageHeader from "@/components/ui/PageHeader";
+import StatCard from "@/components/ui/StatCard";
 
 const { RangePicker } = DatePicker;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const ALL_ENTITIES_VALUE = "__all_entities__";
 const ORDER_STATUS_KEYS = [
@@ -696,25 +698,25 @@ export default function OrderReportPage() {
         key: "total_orders",
         title: t("summary.totalOrders"),
         value: formatCount(reportData?.summary?.total_orders),
-        accent: "linear-gradient(135deg, #173b7a 0%, #2f63d4 100%)",
+        dot: "#1F5F99",
       },
       {
         key: "total_items",
         title: t("summary.totalItems"),
         value: formatCount(reportData?.summary?.total_items),
-        accent: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
+        dot: "#0F6E73",
       },
       {
         key: "total_revenue",
         title: t("summary.totalRevenue"),
         value: formatMoney(reportData?.summary?.total_revenue),
-        accent: "linear-gradient(135deg, #9a3412 0%, #f97316 100%)",
+        dot: "#C4560B",
       },
       {
         key: "total_days",
         title: t("summary.totalDays"),
         value: formatCount(reportData?.summary?.total_days),
-        accent: "linear-gradient(135deg, #581c87 0%, #a855f7 100%)",
+        dot: "#5B3FB0",
       },
     ],
     [reportData?.summary, t],
@@ -723,71 +725,39 @@ export default function OrderReportPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
-        <Card
-          bordered={false}
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(253,186,116,0.24), transparent 32%), linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%)",
-            border: "1px solid rgba(37, 99, 235, 0.12)",
-            borderRadius: 24,
-          }}
-        >
-          <Space direction="vertical" size={6}>
-            <Tag color="blue" style={{ width: "fit-content", borderRadius: 999 }}>
-              {t("heroBadge")}
-            </Tag>
-            <Title level={3} style={{ margin: 0 }}>
-              {t("title")}
-            </Title>
-            <Text type="secondary">{t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}</Text>
-            {reportData?.applied_range ? (
-              <Text type="secondary">
-                {t("rangeLabel", {
-                  from: dayjs(reportData.applied_range.date_from).format("DD/MM/YYYY"),
-                  to: dayjs(reportData.applied_range.date_to).format("DD/MM/YYYY"),
-                })}
-              </Text>
-            ) : null}
-          </Space>
-        </Card>
+        <PageHeader
+          className=""
+          title={t("title")}
+          description={
+            <>
+              {t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}
+              {reportData?.applied_range ? (
+                <span className="block text-xs">
+                  {t("rangeLabel", {
+                    from: dayjs(reportData.applied_range.date_from).format("DD/MM/YYYY"),
+                    to: dayjs(reportData.applied_range.date_to).format("DD/MM/YYYY"),
+                  })}
+                </span>
+              ) : null}
+            </>
+          }
+        />
 
         <Row gutter={[16, 16]}>
           {summaryCards.map((card) => (
             <Col xs={24} sm={12} xl={6} key={card.key}>
-              <Card
+              <StatCard
                 loading={loading}
-                style={{
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  border: "none",
-                  background: card.accent,
-                  color: "#fff",
-                  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
-                }}
-                styles={{
-                  body: {
-                    position: "relative",
-                  },
-                }}
-              >
-                <Statistic
-                  title={<span style={{ color: "rgba(255,255,255,0.84)" }}>{card.title}</span>}
-                  value={card.value}
-                  valueStyle={{ color: "#fff" }}
-                />
-              </Card>
+                label={card.title}
+                value={card.value}
+                accent={card.dot}
+              />
             </Col>
           ))}
         </Row>
 
         <Card
           title={t("filters.title")}
-          bordered={false}
-          style={{
-            borderRadius: 24,
-            background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-            boxShadow: "0 14px 34px rgba(15, 23, 42, 0.06)",
-          }}
           extra={
             <Space>
               <Button icon={<ReloadOutlined />} onClick={handleReset}>
@@ -881,7 +851,7 @@ export default function OrderReportPage() {
         <Card
           title={t("table.title")}
           bordered={false}
-          style={{ borderRadius: 24, boxShadow: "0 14px 34px rgba(15, 23, 42, 0.06)" }}
+          
         >
           <Table
             rowKey="date"
@@ -914,7 +884,7 @@ export default function OrderReportPage() {
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
             <Row gutter={[16, 16]}>
               <Col xs={24} md={8}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalOrders")}
                     value={formatCount(detailData?.summary?.total_orders)}
@@ -922,7 +892,7 @@ export default function OrderReportPage() {
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalItems")}
                     value={formatCount(detailData?.summary?.total_items)}
@@ -930,7 +900,7 @@ export default function OrderReportPage() {
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalRevenue")}
                     value={formatMoney(detailData?.summary?.total_revenue)}

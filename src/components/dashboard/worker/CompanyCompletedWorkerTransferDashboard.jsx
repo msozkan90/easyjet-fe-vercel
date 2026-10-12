@@ -20,7 +20,7 @@ import DashboardSubCategoryFilter from "../DashboardSubCategoryFilter";
 
 const Pie = dynamic(() => import("@ant-design/charts").then((mod) => mod.Pie), { ssr: false });
 const Column = dynamic(() => import("@ant-design/charts").then((mod) => mod.Column), { ssr: false });
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const DASHBOARD_CONFIGS = {
   completed: {
     statuses: ["processing", "downloaded", "printed"],
@@ -107,10 +107,10 @@ export function TransferWorkerDashboard({ variant = "completed" }) {
 
   return (
     <Space direction="vertical" size={24} style={{ width: "100%" }}>
-      <Card bordered={false} style={{ background: `linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorBgContainer})` }}>
+      <Card>
         <Row gutter={[24, 20]} align="middle" justify="space-between">
           <Col xs={24} lg={14}>
-            <Title level={2} style={{ margin: 0 }}>{t(config.titleKey)}</Title>
+            <h2 className="m-0 text-xl font-semibold">{t(config.titleKey)}</h2>
             <Text type="secondary">{t(config.subtitleKey)}</Text>
             {data?.meta?.generated_at ? (
               <div><Text type="secondary" style={{ fontSize: 12 }}>{t("lastUpdated", { date: dayjs(data.meta.generated_at).format("DD.MM.YYYY HH:mm") })}</Text></div>

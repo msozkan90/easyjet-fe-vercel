@@ -19,6 +19,7 @@ import {
   Tag,
   Tabs,
   Typography,
+  Steps,
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -30,12 +31,14 @@ import {
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
-import { STATUS_COLORS } from "@/app/(dashboard)/dashboard/orders/statusConstants";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import { resolveTrackingUrl } from "@/utils/trackingUrl";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
 import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
+import StatCard from "@/components/ui/StatCard";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -60,18 +63,6 @@ const isReorderedOrder = (order) => {
   return Boolean(
     rawOrder && typeof rawOrder === "object" && rawOrder.reordered === true,
   );
-};
-
-const LABEL_STATUS_COLORS = {
-  purchased: "green",
-  created: "blue",
-  refunded: "volcano",
-  voided: "volcano",
-  cancelled: "volcano",
-  error: "red",
-  failed: "red",
-  autovoid: "orange",
-  errorvoid: "red",
 };
 
 const SCRAP_REASON_OPTIONS = [
@@ -126,16 +117,6 @@ const InfoField = ({ label, value, className, valueClassName }) => (
   </div>
 );
 
-const MetricCard = ({ label, value, hint }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-      {label}
-    </span>
-    <div className="mt-2 text-lg font-semibold text-slate-900">{value}</div>
-    {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
-  </div>
-);
-
 const SectionHeader = ({ title, subtitle }) => (
   <div className="flex flex-col gap-1">
     <Typography.Title level={5} style={{ margin: 0 }}>
@@ -152,7 +133,7 @@ const SectionHeader = ({ title, subtitle }) => (
 const AddressBlock = ({ title, rows }) => (
   <Card
     title={title}
-    className="rounded-2xl border border-slate-100 shadow-sm"
+    className="rounded-xl border border-line"
     styles={{ body: { padding: 16 } }}
     size="small"
   >
@@ -177,7 +158,6 @@ const LabelCard = ({
   const source = label?.source;
   const statusValue = detail?.status || label?.status;
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
-  const statusColor = LABEL_STATUS_COLORS[statusKey] || "default";
   const labelUrl = detail?.labelUrl || label?.label_url;
   const currency = detail?.currency || "USD";
   const createdAt = formatDateTime(
@@ -236,7 +216,7 @@ const LabelCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -249,9 +229,7 @@ const LabelCard = ({
           </Typography.Title>
         </div>
         {statusValue ? (
-          <Tag color={statusColor} className="rounded-full px-4 py-1 text-sm">
-            {statusValue}
-          </Tag>
+          <StatusTag status={statusKey}>{statusValue}</StatusTag>
         ) : null}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -326,7 +304,7 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -338,12 +316,9 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
             {labelVoid?.source || tOrders("common.none")}
           </Typography.Title>
         </div>
-        <Tag
-          color={LABEL_STATUS_COLORS[statusKey] || "volcano"}
-          className="rounded-full px-4 py-1 text-sm"
-        >
+        <StatusTag status={statusKey} tone={statusKey ? undefined : "danger"}>
           {statusLabel}
-        </Tag>
+        </StatusTag>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -573,7 +548,7 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -682,7 +657,7 @@ const ItemDesignPreview = ({
                 </Tag>
               ) : null
             }
-            className="rounded-2xl border border-slate-100 shadow-sm"
+            className="rounded-xl border border-line"
             styles={{
               body: {
                 display: "flex",
@@ -815,7 +790,7 @@ const OrderItemCard = ({
   return (
     <Card
       key={item?.id}
-      className="rounded-3xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -851,12 +826,9 @@ const OrderItemCard = ({
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>
-            <Tag
-              className="rounded-full"
-              color={STATUS_COLORS[statusKey] || "default"}
-            >
+            <StatusTag status={statusKey}>
               {tOrders("columns.status")}: {statusLabel}
-            </Tag>
+            </StatusTag>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoField
@@ -1250,7 +1222,9 @@ export default function OrderDetailPage() {
   }, [items, message, tDesign]);
 
   const statusLabel = orderDetail?.order_status || orderDetail?.status;
-  const statusColor = STATUS_COLORS[statusLabel] || "default";
+  const statusText = statusLabel
+    ? tOrders(`status.values.${statusLabel}`) || statusLabel
+    : "";
   const isReordered = isReorderedOrder(orderDetail);
   const canManageLabelVoid = useCallback(
     (label) => {
@@ -1379,12 +1353,76 @@ export default function OrderDetailPage() {
     tOrders("common.none"),
   );
 
+  const progressStep = (() => {
+    switch (String(statusLabel || "")) {
+      case "newOrder":
+      case "waitingForDesign":
+        return 1;
+      case "readyForProduction":
+      case "processing":
+      case "pdf":
+      case "designFlaw":
+      case "downloaded":
+      case "printed":
+        return 2;
+      case "completed":
+        return 4;
+      case "shipped":
+        return 5;
+      default:
+        return null;
+    }
+  })();
+  const progressItems = [
+    "received",
+    "preparation",
+    "production",
+    "completed",
+    "shipped",
+  ].map((key) => ({ key, title: tDesign(`progress.${key}`) }));
+
   const detailTabs = [
     {
       key: "overview",
       label: tDesign("tabs.overview"),
       children: (
         <div className="space-y-6">
+        <div className="space-y-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <SectionHeader title={tDesign("sections.items")} />
+              {positionsLoading ? (
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {tDesign("messages.positionsLoading")}
+                </Typography.Text>
+              ) : null}
+            </div>
+            {items.length ? (
+              <div className="grid gap-6">
+                {items.map((item) => {
+                  const productId = String(
+                    item?.product_id || item?.product?.id || "",
+                  );
+                  const positions = positionsByProductId[productId] || [];
+                  const positionMap = new Map(
+                    positions.map((position) => [String(position?.id), position]),
+                  );
+                  return (
+                    <OrderItemCard
+                      key={item?.id}
+                      item={item}
+                      positionMap={positionMap}
+                      tOrders={tOrders}
+                      tDesign={tDesign}
+                      tCommonActions={tCommonActions}
+                      fallbackText={fallbackText}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <Empty description={tDesign("messages.noItems")} />
+            )}
+          </div>
           {pendingPoolItems > 0 ? (
             <Alert
               type="warning"
@@ -1396,7 +1434,7 @@ export default function OrderDetailPage() {
           ) : null}
           <div className="grid gap-4 lg:grid-cols-3">
             <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
+              className="rounded-xl border border-line"
               styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.customer")} />
@@ -1418,7 +1456,7 @@ export default function OrderDetailPage() {
               </div>
             </Card>
             <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
+              className="rounded-xl border border-line"
               styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.shipping")} />
@@ -1440,7 +1478,7 @@ export default function OrderDetailPage() {
               </div>
             </Card>
             <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
+              className="rounded-xl border border-line"
               styles={{ body: { padding: 16 } }}
             >
               <SectionHeader title={tDesign("sections.package")} />
@@ -1497,7 +1535,7 @@ export default function OrderDetailPage() {
             />
           </div>
           <Card
-            className="rounded-2xl border border-slate-100 shadow-sm"
+            className="rounded-xl border border-line"
             styles={{ body: { padding: 16 } }}
           >
             <SectionHeader title={tDesign("sections.notes")} />
@@ -1512,48 +1550,6 @@ export default function OrderDetailPage() {
               />
             </div>
           </Card>
-        </div>
-      ),
-    },
-    {
-      key: "items",
-      label: tDesign("tabs.itemsAndDesigns"),
-      children: (
-        <div className="space-y-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <SectionHeader title={tDesign("sections.items")} />
-            {positionsLoading ? (
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {tDesign("messages.positionsLoading")}
-              </Typography.Text>
-            ) : null}
-          </div>
-          {items.length ? (
-            <div className="grid gap-6">
-              {items.map((item) => {
-                const productId = String(
-                  item?.product_id || item?.product?.id || "",
-                );
-                const positions = positionsByProductId[productId] || [];
-                const positionMap = new Map(
-                  positions.map((position) => [String(position?.id), position]),
-                );
-                return (
-                  <OrderItemCard
-                    key={item?.id}
-                    item={item}
-                    positionMap={positionMap}
-                    tOrders={tOrders}
-                    tDesign={tDesign}
-                    tCommonActions={tCommonActions}
-                    fallbackText={fallbackText}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <Empty description={tDesign("messages.noItems")} />
-          )}
         </div>
       ),
     },
@@ -1725,7 +1721,7 @@ export default function OrderDetailPage() {
         "partnerAdmin",
       ]}
     >
-      <div className="min-h-full bg-slate-50/70 p-4 md:p-6">
+      <div>
         {!orderNumber ? (
           <Alert
             type="error"
@@ -1743,63 +1739,58 @@ export default function OrderDetailPage() {
             showIcon
           />
         ) : (
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-2">
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {tDesign("sections.orderInfo")}
-                  </Typography.Text>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Typography.Title level={2} style={{ margin: 0 }}>
-                      #{orderDetail?.order_number || tOrders("common.none")}
-                    </Typography.Title>
-                    {statusLabel ? (
-                      <div className="flex flex-col items-start gap-1">
-                        {isReordered ? (
-                          <Tag
-                            color="purple"
-                            className="rounded-full px-4 py-1 text-sm"
-                          >
-                            Re Ordered
-                          </Tag>
-                        ) : null}
-                        <Tag
-                          color={statusColor}
-                          className="rounded-full px-4 py-1 text-sm"
-                        >
-                          {statusLabel}
-                        </Tag>
-                      </div>
+          <div className="space-y-5">
+            <PageHeader
+              className=""
+              breadcrumb={[
+                { title: tOrders("title") },
+                { title: `#${orderDetail?.order_number || ""}` },
+              ]}
+              title={
+                <span className="ej-mono">
+                  #{orderDetail?.order_number || tOrders("common.none")}
+                </span>
+              }
+              meta={
+                statusLabel ? (
+                  <>
+                    <StatusTag status={statusLabel}>{statusText}</StatusTag>
+                    {isReordered ? (
+                      <StatusTag tone="refund">
+                        {tOrders("values.reordered")}
+                      </StatusTag>
                     ) : null}
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
-                  <MetricCard
-                    label={tDesign("fields.amountPaid")}
-                    value={formatAmount(amountPaidTotal, "0.00")}
-                  />
-                  <MetricCard
-                    label={tDesign("fields.orderTotal")}
-                    value={formatAmount(orderItemsTotal, "0.00")}
-                  />
-
-                  <MetricCard
-                    label={tDesign("fields.shippingAmount")}
-                    value={formatAmount(
-                      shipmentTotal,
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="mt-6">
-                <Tabs
-                  defaultActiveKey="overview"
-                  items={detailTabs}
-                  size="large"
+                  </>
+                ) : null
+              }
+              description={`${tDesign("fields.orderDate")}: ${orderDate}`}
+            />
+            {progressStep !== null ? (
+              <div className="rounded-xl border border-line px-5 py-4">
+                <Steps
+                  size="small"
+                  current={progressStep}
+                  status={statusLabel === "designFlaw" ? "error" : "process"}
+                  items={progressItems}
+                  aria-label={tDesign("progress.ariaLabel")}
                 />
               </div>
+            ) : null}
+            <div className="grid gap-3 sm:grid-cols-3">
+              <StatCard
+                label={tDesign("fields.amountPaid")}
+                value={formatAmount(amountPaidTotal, "0.00")}
+              />
+              <StatCard
+                label={tDesign("fields.orderTotal")}
+                value={formatAmount(orderItemsTotal, "0.00")}
+              />
+              <StatCard
+                label={tDesign("fields.shippingAmount")}
+                value={formatAmount(shipmentTotal)}
+              />
             </div>
+            <Tabs defaultActiveKey="overview" items={detailTabs} />
           </div>
         )}
         <Modal

@@ -32,6 +32,7 @@ import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage
 import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { getQuotedShippingPrice, toProductionCarrierService } from "@/utils/productionCarrierService";
+import StatusTag from "@/components/ui/StatusTag";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -45,18 +46,6 @@ const SOURCE_BY_TAB = {
   [SERVICE_TABS.COMPANY]: "shipStationCompany",
   [SERVICE_TABS.PARTNER]: "shipStationPartner",
   [SERVICE_TABS.CUSTOMER]: "shipStationCustomer",
-};
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  downloaded: "blue",
-  printed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-  refund: "volcano",
-  remake: "magenta",
 };
 
 const formatAmount = (value, fallback = "-") => {
@@ -838,15 +827,12 @@ export default function TransferShippingRatesModal({
                   <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                     <div className="font-semibold text-gray-900">
                       {tOrders("columns.status")}:{" "}
-                      <Tag
-                        color={STATUS_COLORS[item?.status] || "default"}
-                        style={{ marginInlineEnd: 0 }}
-                      >
+                      <StatusTag status={item?.status}>
                         {item?.status
                           ? tOrders(`status.values.${item.status}`) ||
                             item.status
                           : "-"}
-                      </Tag>
+                      </StatusTag>
                     </div>
                   </div>
                 </div>

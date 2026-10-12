@@ -18,18 +18,8 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  downloaded: "blue",
-  printed: "cyan",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-  refund: "volcano",
-  remake: "magenta",
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -83,9 +73,9 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
             {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
           </Tag>
           <Tag color="green">{tOrders("columns.price")}: {formatAmount(item?.price)}</Tag>
-          <Tag color={STATUS_COLORS[statusKey] || "default"}>
+          <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
-          </Tag>
+          </StatusTag>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -223,15 +213,13 @@ export default function TransferPrinterOrderSearchPage({
     if (!orderSummary?.status) return null;
     const key = orderSummary.status;
     const label = tOrders(`status.values.${key}`) || key;
-    return <Tag color={STATUS_COLORS[key] || "default"}>{label}</Tag>;
+    return <StatusTag status={key}>{label}</StatusTag>;
   }, [orderSummary?.status, tOrders]);
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("workerPrinter.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("workerPrinter.title")} />
 
         <Card className="rounded-2xl">
           <Input.Search

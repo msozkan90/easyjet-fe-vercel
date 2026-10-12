@@ -21,7 +21,6 @@ import {
   Spin,
   Statistic,
   Table,
-  Tag,
   Tabs,
   Typography,
 } from "antd";
@@ -38,23 +37,7 @@ import {
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import { hasAnyRole } from "@/utils/rbac";
-
-const STATUS_COLORS = {
-  newOrder: "blue",
-  waitingForDesign: "gold",
-  readyForProduction: "purple",
-  processing: "geekblue",
-  pdf: "cyan",
-  completed: "green",
-  shipped: "volcano",
-  cancel: "red",
-};
-
-const REMAKE_REQUEST_STATUS_COLORS = {
-  pending: "gold",
-  completed: "green",
-  canceled: "red",
-};
+import StatusTag from "@/components/ui/StatusTag";
 
 const formatAmount = (value) => {
   if (value === null || value === undefined || value === "") return "-";
@@ -251,11 +234,11 @@ export default function TransferOrderDetailPage() {
         title: tOrders("columns.status"),
         dataIndex: "status",
         render: (value) => (
-          <Tag color={STATUS_COLORS[value] || "default"}>
+          <StatusTag status={value}>
             {value
               ? tOrders(`status.values.${value}`) || value
               : tOrders("common.none")}
-          </Tag>
+          </StatusTag>
         ),
       },
     ],
@@ -397,12 +380,12 @@ export default function TransferOrderDetailPage() {
                 {detail?.order_name || "-"}
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("columns.status")}>
-                <Tag color={STATUS_COLORS[detail?.order_status] || "default"}>
+                <StatusTag status={detail?.order_status}>
                   {detail?.order_status
                     ? tOrders(`status.values.${detail?.order_status}`) ||
                       detail?.order_status
                     : tOrders("common.none")}
-                </Tag>
+                </StatusTag>
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("columns.customerName")}>
                 {detail?.bill_to_name || "-"}
@@ -741,17 +724,11 @@ export default function TransferOrderDetailPage() {
                       label={tRefundRemake("detail.fields.status")}
                     >
                       {remakeContext?.request?.status ? (
-                        <Tag
-                          color={
-                            REMAKE_REQUEST_STATUS_COLORS[
-                              remakeContext.request.status
-                            ] || "default"
-                          }
-                        >
+                        <StatusTag status={remakeContext.request.status}>
                           {tRefundRemake(
                             `status.${remakeContext.request.status}`,
                           ) || remakeContext.request.status}
-                        </Tag>
+                        </StatusTag>
                       ) : (
                         "-"
                       )}
@@ -821,17 +798,11 @@ export default function TransferOrderDetailPage() {
                     </Descriptions.Item>
                     <Descriptions.Item label={tOrders("columns.status")}>
                       {remakeContext?.source_order?.order_status ? (
-                        <Tag
-                          color={
-                            STATUS_COLORS[
-                              remakeContext.source_order.order_status
-                            ] || "default"
-                          }
-                        >
+                        <StatusTag status={remakeContext.source_order.order_status}>
                           {tOrders(
                             `status.values.${remakeContext.source_order.order_status}`,
                           ) || remakeContext.source_order.order_status}
-                        </Tag>
+                        </StatusTag>
                       ) : (
                         "-"
                       )}
@@ -922,12 +893,12 @@ export default function TransferOrderDetailPage() {
                 {detail?.order_name || "-"}
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("columns.status")}>
-                <Tag color={STATUS_COLORS[detail?.order_status] || "default"}>
+                <StatusTag status={detail?.order_status}>
                   {detail?.order_status
                     ? tOrders(`status.values.${detail?.order_status}`) ||
                       detail?.order_status
                     : tOrders("common.none")}
-                </Tag>
+                </StatusTag>
               </Descriptions.Item>
               <Descriptions.Item label={tOrders("columns.customerName")}>
                 {detail?.bill_to_name || "-"}

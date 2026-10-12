@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
+import { App as AntdApp, Button, Form, Popconfirm, Space, Tooltip } from "antd";
 import { EditOutlined, FileSearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
@@ -162,8 +162,8 @@ export default function CancelTransferOrdersPage() {
           const orderNumber = record?.order_number;
           return (
             <Space wrap>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
+              <Tooltip title={t("actions.viewDetail")}>
+                <Button aria-label={t("actions.viewDetail")}
                   icon={<FileSearchOutlined />}
                   type="default"
                   disabled={!orderNumber}
@@ -171,16 +171,16 @@ export default function CancelTransferOrdersPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 />
-              </Popover>
-              <Popover content={t("actions.editAddress")}>
-                <Button
+              </Tooltip>
+              <Tooltip title={t("actions.editAddress")}>
+                <Button aria-label={t("actions.editAddress")}
                   icon={<EditOutlined />}
                   type="default"
                   disabled={!canEditRecord}
                   onClick={() => handleOpenAddressEditor(record)}
                 />
-              </Popover>
-              <Popover content={t("actions.newOrder")}>
+              </Tooltip>
+              <Tooltip title={t("actions.newOrder")}>
                 <Popconfirm
                   title={t("actions.confirmNewOrderTitle")}
                   okText={t("actions.confirmNewOrderOk")}
@@ -188,14 +188,14 @@ export default function CancelTransferOrdersPage() {
                   disabled={disableActions}
                   onConfirm={() => handleStatusUpdate(record, "newOrder")}
                 >
-                  <Button
+                  <Button aria-label={t("actions.newOrder")}
                     icon={<PlusOutlined />}
                     type="primary"
                     loading={newOrderLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },

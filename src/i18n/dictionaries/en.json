@@ -2371,7 +2371,8 @@
         "noData": "No data"
       },
       "values": {
-        "noOptions": "No options"
+        "noOptions": "No options",
+        "reordered": "Re-ordered"
       },
       "common": {
         "none": "-"
@@ -2964,6 +2965,14 @@
             "orderIdMissing": "Order information is missing.",
             "invalidItem": "Selected item does not have a valid variant."
           }
+        },
+        "progress": {
+          "received": "Order received",
+          "preparation": "Design & preparation",
+          "production": "Production",
+          "completed": "Completed",
+          "shipped": "Shipped",
+          "ariaLabel": "Order progress"
         }
       },
       "addressEditor": {

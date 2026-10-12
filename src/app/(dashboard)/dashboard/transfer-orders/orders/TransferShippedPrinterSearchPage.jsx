@@ -29,18 +29,8 @@ import TransferShippingRatesModal from "@/components/modals/TransferShippingRate
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  downloaded: "blue",
-  printed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-  refund: "volcano",
-  remake: "magenta",
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") return fallback;
@@ -135,9 +125,9 @@ const TransferOrderItemCard = ({
           <Tag color="green">
             {tOrders("columns.price")}: {formatAmount(item?.price)}
           </Tag>
-          <Tag color={STATUS_COLORS[statusKey] || "default"}>
+          <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
-          </Tag>
+          </StatusTag>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -542,15 +532,13 @@ export default function TransferShippedPrinterSearchPage() {
     if (!orderSummary?.status) return null;
     const key = orderSummary.status;
     const label = tOrders(`status.values.${key}`) || key;
-    return <Tag color={STATUS_COLORS[key] || "default"}>{label}</Tag>;
+    return <StatusTag status={key}>{label}</StatusTag>;
   }, [orderSummary?.status, tOrders]);
 
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("workerShipmentPrinter.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("workerShipmentPrinter.title")} />
 
         <Card className="rounded-2xl">
           <Input.Search
@@ -829,11 +817,9 @@ export default function TransferShippedPrinterSearchPage() {
                               {formatAmount(design?.width)}" x{" "}
                               {formatAmount(design?.height)}"
                             </Tag>
-                            <Tag
-                              color={STATUS_COLORS[design?.status] || "default"}
-                            >
+                            <StatusTag status={design?.status}>
                               {design?.status || "-"}
-                            </Tag>
+                            </StatusTag>
                           </div>
                         </div>
                       );
@@ -885,11 +871,9 @@ export default function TransferShippedPrinterSearchPage() {
                           <div className="flex flex-none flex-wrap justify-end gap-2">
                             <Tag color="blue">Qty: {item?.quantity ?? "-"}</Tag>
                             <Tag color="green">{formatAmount(item?.price)}</Tag>
-                            <Tag
-                              color={STATUS_COLORS[item?.status] || "default"}
-                            >
+                            <StatusTag status={item?.status}>
                               {item?.status || "-"}
-                            </Tag>
+                            </StatusTag>
                           </div>
                         </div>
                       );

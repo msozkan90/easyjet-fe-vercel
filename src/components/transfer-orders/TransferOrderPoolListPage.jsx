@@ -11,7 +11,6 @@ import {
   Tag,
   Tooltip,
   Popconfirm,
-  Popover,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
@@ -692,7 +691,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
           if (isCancelledView) {
             const restoreLoading = isRowActionLoading(record.id, "restore");
             return (
-              <Popover content={t("actions.restore")}>
+              <Tooltip title={t("actions.restore")}>
                 <Popconfirm
                   title={t("actions.confirmRestoreTitle")}
                   okText={t("actions.confirmRestoreOk")}
@@ -701,13 +700,14 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => restoreOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.restore")}
                     icon={<UndoOutlined />}
                     type="primary"
                     loading={restoreLoading}
                     disabled={restoreLoading}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             );
           }
           const approveLoading = isRowActionLoading(record.id, "approve");
@@ -716,7 +716,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
             bulkApproving || bulkCancelling || approveLoading || cancelLoading;
           return (
             <Space>
-              <Popover content={t("actions.approve")}>
+              <Tooltip title={t("actions.approve")}>
                 <Popconfirm
                   title={t("actions.confirmApproveTitle")}
                   okText={t("actions.confirmApproveOk")}
@@ -725,14 +725,15 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => handleSingleApprove(record)}
                 >
                   <Button
+                    aria-label={t("actions.approve")}
                     icon={<CheckOutlined />}
                     type="primary"
                     loading={approveLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
-              <Popover content={t("actions.cancel")}>
+              </Tooltip>
+              <Tooltip title={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
                   okText={t("actions.confirmCancelOk")}
@@ -741,13 +742,14 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => handleCancelOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.cancel")}
                     icon={<CloseOutlined />}
                     danger
                     loading={cancelLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },

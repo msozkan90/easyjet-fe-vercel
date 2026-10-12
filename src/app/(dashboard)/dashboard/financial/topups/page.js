@@ -15,8 +15,7 @@ import {
   Popconfirm,
   Upload,
   App as AntdApp,
-  Typography,
-} from "antd";
+  } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
@@ -29,8 +28,7 @@ import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 const statusColor = {
   pending: "gold",
@@ -262,9 +260,7 @@ export default function WalletTopupsListPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("topupList.title")}
-        </Title>
+        <PageHeader title={t("topupList.title")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"

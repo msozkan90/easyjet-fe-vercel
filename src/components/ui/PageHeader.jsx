@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { RightOutlined } from "@ant-design/icons";
+import {
+  registerCustomHeader,
+  unregisterCustomHeader,
+} from "@/redux/features/uiSlice";
 
 /**
  * Standard page heading: optional breadcrumb, title, one-line description and
@@ -13,11 +19,24 @@ export default function PageHeader({
   breadcrumb,
   extra,
   meta,
-  className = "",
+  className = "mb-5",
+  // Route-level headers set this to false; page-owned headers hide the
+  // automatic header rendered by the dashboard layout.
+  replacesRouteHeader = true,
 }) {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!replacesRouteHeader) return undefined;
+    dispatch(registerCustomHeader());
+    return () => {
+      dispatch(unregisterCustomHeader());
+    };
+  }, [dispatch, replacesRouteHeader]);
+
   const crumbs = Array.isArray(breadcrumb) ? breadcrumb.filter(Boolean) : [];
   return (
-    <header className={`mb-5 flex flex-col gap-3 ${className}`.trim()}>
+    <header className={`flex flex-col gap-3 ${className}`.trim()}>
       {crumbs.length ? (
         <nav aria-label="Breadcrumb">
           <ol className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0 text-[13px] text-text-secondary">

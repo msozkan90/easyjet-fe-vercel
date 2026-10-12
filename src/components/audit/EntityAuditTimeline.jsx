@@ -20,15 +20,11 @@ import {
 import { FileSearchOutlined } from "@ant-design/icons";
 import { AuditLogsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 const PAGE_SIZE = 10;
 const STATUS_OPTIONS = ["success", "failed"];
 const ACTION_OPTIONS = ["create", "update", "replace", "delete"];
-const STATUS_COLORS = {
-  success: "green",
-  failed: "red",
-};
-
 function normalizeText(value, fallback = "-") {
   if (value === null || value === undefined || value === "") {
     return fallback;
@@ -197,9 +193,9 @@ export default function EntityAuditTimeline({
         key: "status",
         width: 120,
         render: (value) => (
-          <Tag color={STATUS_COLORS[value] || "default"}>
+          <StatusTag status={value}>
             {t(`status.${value || "success"}`)}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -331,9 +327,9 @@ export default function EntityAuditTimeline({
                 )}
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.status")}>
-                <Tag color={STATUS_COLORS[selectedEntry?.status] || "default"}>
+                <StatusTag status={selectedEntry?.status}>
                   {t(`status.${selectedEntry?.status || "success"}`)}
-                </Tag>
+                </StatusTag>
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.action")}>
                 {t(`actions.${selectedEntry?.action || "update"}`)}

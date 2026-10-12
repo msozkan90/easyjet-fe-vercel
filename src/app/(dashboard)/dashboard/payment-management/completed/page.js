@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { App as AntdApp, Button, Space, Tag, Tooltip, Typography } from "antd";
+import { App as AntdApp, Button, Space, Tag, Tooltip } from "antd";
 import { DownloadOutlined, FileSearchOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -13,8 +13,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -273,9 +272,7 @@ export default function TransferPaymentCompletedPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("completedCompanyTitle")}
-        </Title>
+        <PageHeader title={t("completedCompanyTitle")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"

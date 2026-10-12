@@ -2151,7 +2151,8 @@
         "noData": "Kayıt bulunamadı"
       },
       "values": {
-        "noOptions": "Seçenek yok"
+        "noOptions": "Seçenek yok",
+        "reordered": "Yeniden sipariş"
       },
       "common": {
         "none": "-"
@@ -2744,6 +2745,14 @@
             "orderIdMissing": "Sipariş bilgisi bulunamadı.",
             "invalidItem": "Seçilen ürün geçerli bir varyanta sahip değil."
           }
+        },
+        "progress": {
+          "received": "Sipariş alındı",
+          "preparation": "Tasarım ve hazırlık",
+          "production": "Üretim",
+          "completed": "Tamamlandı",
+          "shipped": "Kargolandı",
+          "ariaLabel": "Sipariş aşamaları"
         }
       },
       "addressEditor": {

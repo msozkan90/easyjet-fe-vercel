@@ -23,6 +23,7 @@ import {
   pickFundingAccountDetails,
 } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
+import PageHeader from "@/components/ui/PageHeader";
 
 const statusColor = {
   active: "green",
@@ -230,9 +231,7 @@ export default function FundingAccountsAdminPage() {
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("title")}
-        </Title>
+        <PageHeader title={t("title")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"

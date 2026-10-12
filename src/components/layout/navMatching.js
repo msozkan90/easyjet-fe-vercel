@@ -19,28 +19,55 @@ const scoreMatch = (target, pathname, searchParams) => {
   return -1;
 };
 
+export const nodeText = (node) => {
+  if (node === null || node === undefined || typeof node === "boolean") {
+    return "";
+  }
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) return node.map(nodeText).join("");
+  return nodeText(node?.props?.children);
+};
+
 export function findActiveNavItem(items, pathname, searchParams) {
   const normalizedPath = (pathname || "/").replace(/\/+$/, "") || "/";
-  let best = { score: -1, key: null, ancestors: [] };
+  let best = { score: -1, key: null, ancestors: [], item: null, trail: [] };
 
-  const walk = (list, ancestors) => {
+  const walk = (list, ancestors, trail) => {
     (list || []).forEach((item) => {
       if (!item || item.type === "divider") return;
       if (Array.isArray(item.children)) {
-        walk(item.children, [...ancestors, item.key]);
+        walk(
+          item.children,
+          [...ancestors, item.key],
+          [...trail, nodeText(item.label)],
+        );
         return;
       }
       const target = parseHref(item.label?.props?.href);
       if (!target) return;
       const score = scoreMatch(target, normalizedPath, searchParams);
       if (score > best.score) {
-        best = { score, key: item.key, ancestors };
+        best = { score, key: item.key, ancestors, item, trail };
       }
     });
   };
 
-  walk(items, []);
+  walk(items, [], []);
   return best.key
-    ? { selectedKey: best.key, ancestorKeys: best.ancestors }
-    : { selectedKey: null, ancestorKeys: [] };
+    ? {
+        selectedKey: best.key,
+        ancestorKeys: best.ancestors,
+        exact: best.score >= 10000,
+        title: nodeText(best.item?.label),
+        trail: best.trail.filter(Boolean),
+      }
+    : {
+        selectedKey: null,
+        ancestorKeys: [],
+        exact: false,
+        title: "",
+        trail: [],
+      };
 }

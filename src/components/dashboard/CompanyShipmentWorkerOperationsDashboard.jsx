@@ -1,11 +1,9 @@
 "use client";
 
-import { Divider, Space, Typography } from "antd";
+import { Divider, Space } from "antd";
 import NormalProductionUrgencyDashboard from "./NormalProductionUrgencyDashboard";
 import CompanyShipmentWorkerTransferDashboard from "./worker/CompanyShipmentWorkerTransferDashboard";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
 
 export default function CompanyShipmentWorkerOperationsDashboard() {
   const t = useTranslations("dashboard.overview.urgency");
@@ -13,7 +11,7 @@ export default function CompanyShipmentWorkerOperationsDashboard() {
     <Space direction="vertical" size={32} style={{ width: "100%" }}>
       <NormalProductionUrgencyDashboard />
       <Divider />
-      <Title level={3} style={{ margin: 0 }}>{t("transferShipmentSection")}</Title>
+      <h2 className="m-0 text-xl font-semibold">{t("transferShipmentSection")}</h2>
       <CompanyShipmentWorkerTransferDashboard />
     </Space>
   );

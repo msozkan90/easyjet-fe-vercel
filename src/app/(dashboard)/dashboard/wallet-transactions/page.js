@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import dayjs from "dayjs";
-import { Card, Space, Statistic, Tag, Typography } from "antd";
+import { Card, Space, Statistic, Tag } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -11,8 +11,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 const directionColors = {
   credit: "green",
@@ -169,9 +168,7 @@ export default function WalletTransactionsPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin", "systemAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("title")}
-        </Title>
+        <PageHeader title={t("title")} className="" />
         <Card>
           <Statistic
             title={t("currentBalance")}

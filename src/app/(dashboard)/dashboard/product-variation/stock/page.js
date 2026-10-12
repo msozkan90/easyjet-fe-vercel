@@ -12,6 +12,7 @@ import {
   Popover,
   Space,
   Tag,
+  Tooltip,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -232,17 +233,17 @@ export default function ProductStockPage() {
         width: 200,
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
-              <Button
+            <Tooltip title={t("actions.edit")}>
+              <Button aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               ></Button>
-            </Popover>
-            <Popover content={t("actions.manualDecrease")}>
-              <Button
+            </Tooltip>
+            <Tooltip title={t("actions.manualDecrease")}>
+              <Button aria-label={t("actions.manualDecrease")}
                 icon={<MinusOutlined />}
                 disabled={!Number(record?.quantity)}
                 onClick={() => {
@@ -251,7 +252,7 @@ export default function ProductStockPage() {
                   setDecreaseModalOpen(true);
                 }}
               ></Button>
-            </Popover>
+            </Tooltip>
             <Popover
               content={
                 record?.status === "active"

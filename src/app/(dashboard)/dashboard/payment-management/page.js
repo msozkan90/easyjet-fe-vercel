@@ -23,8 +23,9 @@ import {
 } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
+import PageHeader from "@/components/ui/PageHeader";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -324,14 +325,15 @@ export default function TransferPaymentManagementPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-          <Title level={3} style={{ margin: 0 }}>
-            Transfer Payment Management
-          </Title>
-          <Text type="secondary">
-            Selected: {selectedRows.length} / {formatMoney(selectedTotal)}
-          </Text>
-        </div>
+        <PageHeader
+          className=""
+          title="Transfer Payment Management"
+          extra={
+            <Text type="secondary">
+              Selected: {selectedRows.length} / {formatMoney(selectedTotal)}
+            </Text>
+          }
+        />
 
         <CrudTable
           ref={tableRef}

@@ -27,6 +27,8 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvider";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -431,29 +433,30 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        <Space style={{ width: "100%", justifyContent: "space-between" }} wrap>
-          <div>
-            <Space size="small" wrap style={{ marginBottom: 4 }}>
-              <Typography.Title level={3} style={{ margin: 0 }}>
-                {t("title")}
-              </Typography.Title>
-              <Tag color={subCategoryId ? "blue" : "default"}>{scopeLabel}</Tag>
-            </Space>
-            <Typography.Text type="secondary">{t("subtitle")}</Typography.Text>
-          </div>
-          <Space wrap>
-            <Typography.Text type="secondary">
-              {t("summary.total", { count: total })}
-            </Typography.Text>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => loadRows()}
-              loading={loading}
-            >
-              {tActions("refresh")}
-            </Button>
-          </Space>
-        </Space>
+        <PageHeader
+          className=""
+          title={t("title")}
+          meta={
+            <StatusTag tone={subCategoryId ? "info" : "neutral"}>
+              {scopeLabel}
+            </StatusTag>
+          }
+          description={t("subtitle")}
+          extra={
+            <>
+              <Typography.Text type="secondary">
+                {t("summary.total", { count: total })}
+              </Typography.Text>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => loadRows()}
+                loading={loading}
+              >
+                {tActions("refresh")}
+              </Button>
+            </>
+          }
+        />
 
         <Table
           rowKey="id"

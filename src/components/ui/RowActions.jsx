@@ -8,7 +8,8 @@ import { useTranslations } from "@/i18n/use-translations";
  * Table row actions: up to two visible buttons plus an overflow menu.
  * `actions`: [{ key, label, icon, onClick, disabled, loading, primary }]
  * `menuItems`: antd Menu items for the "more" dropdown.
- * Icon-only visible actions always get a tooltip and aria-label.
+ * Icon-only visible actions always get a tooltip and aria-label; `tooltip`
+ * explains why a disabled action is unavailable.
  */
 export default function RowActions({
   actions = [],
@@ -38,12 +39,13 @@ export default function RowActions({
             {action.iconOnly ? null : action.label}
           </Button>
         );
-        return action.iconOnly ? (
-          <Tooltip key={action.key} title={action.label}>
-            {button}
+        const tooltip =
+          action.tooltip ?? (action.iconOnly ? action.label : null);
+        if (!tooltip) return button;
+        return (
+          <Tooltip key={action.key} title={tooltip}>
+            {action.disabled ? <span>{button}</span> : button}
           </Tooltip>
-        ) : (
-          button
         );
       })}
       {overflow.length ? (

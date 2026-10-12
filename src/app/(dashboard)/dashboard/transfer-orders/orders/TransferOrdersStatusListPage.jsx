@@ -44,7 +44,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useTranslations } from "@/i18n/use-translations";
-import { STATUS_COLORS } from "./statusConstants";
+import StatusTag from "@/components/ui/StatusTag";
 
 const { RangePicker } = DatePicker;
 
@@ -786,13 +786,12 @@ export default function TransferOrdersStatusListPage({
         render: (value, record) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
-          const color = STATUS_COLORS[value] || "default";
           const pendingPoolItems = Number(
             record?.pool_completion_summary?.pending_items || 0,
           );
           return (
             <Space size={4} wrap>
-              <Tag color={color}>{label}</Tag>
+              <StatusTag status={value}>{label}</StatusTag>
               {!record?.__isChild && pendingPoolItems > 0 ? (
                 <Tag color="volcano">{t("pool.badges.incomplete")}</Tag>
               ) : null}

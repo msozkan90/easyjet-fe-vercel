@@ -9,9 +9,7 @@ import {
   DatePicker,
   Input,
   Popconfirm,
-  Popover,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -28,7 +26,7 @@ import {
   FileSearchOutlined,
 } from "@ant-design/icons";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { STATUS_COLORS } from "../statusConstants";
+import StatusTag from "@/components/ui/StatusTag";
 
 const { RangePicker } = DatePicker;
 
@@ -407,8 +405,7 @@ export default function CancelOrdersPage() {
         render: (value) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
-          const color = STATUS_COLORS[value] || "default";
-          return <Tag color={color}>{label}</Tag>;
+          return <StatusTag status={value}>{label}</StatusTag>;
         },
       },
       {
@@ -517,15 +514,15 @@ export default function CancelOrdersPage() {
             : "";
           return (
             <Space>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
+              <Tooltip title={t("actions.viewDetail")}>
+                <Button aria-label={t("actions.viewDetail")}
                   icon={<FileSearchOutlined />}
                   type="default"
                   disabled={!canViewDetail}
                   href={detailHref}
                 />
-              </Popover>
-              <Popover content={t("actions.newOrder")}>
+              </Tooltip>
+              <Tooltip title={t("actions.newOrder")}>
                 <Popconfirm
                   title={t("actions.confirmNewOrderTitle")}
                   okText={t("actions.confirmNewOrderOk")}
@@ -536,14 +533,14 @@ export default function CancelOrdersPage() {
                   disabled={disabled}
                   onConfirm={() => handleStatusUpdate(record, "newOrder")}
                 >
-                  <Button
+                  <Button aria-label={t("actions.newOrder")}
                     icon={<PlusOutlined />}
                     type="primary"
                     loading={newOrderLoading}
                     disabled={disabled}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },

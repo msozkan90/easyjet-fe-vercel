@@ -27,7 +27,8 @@ import {
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setActiveNav } from "@/redux/features/uiSlice";
 import Image from "next/image";
 import { useTranslations } from "@/i18n/use-translations";
 import { palette } from "@/theme/tokens";
@@ -1318,11 +1319,20 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
       : []),
   ];
 
-  const { selectedKey, ancestorKeys } = findActiveNavItem(
-    items,
-    pathname,
-    searchParams,
-  );
+  const { selectedKey, ancestorKeys, exact, title, trail } =
+    findActiveNavItem(items, pathname, searchParams);
+  const dispatch = useDispatch();
+  const trailSignature = trail.join("\u0000");
+
+  useEffect(() => {
+    dispatch(
+      setActiveNav({
+        title: exact ? title : "",
+        trail: exact && trailSignature ? trailSignature.split("\u0000") : [],
+        exact,
+      }),
+    );
+  }, [dispatch, exact, title, trailSignature]);
   const ancestorSignature = ancestorKeys.join("|");
   const [openKeys, setOpenKeys] = useState(ancestorKeys);
 

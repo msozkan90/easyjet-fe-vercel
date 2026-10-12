@@ -27,8 +27,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { setBalance } from "@/redux/features/balanceSlice";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -317,9 +316,10 @@ export default function CustomerTransferPaymentProcessingPage({
   return (
     <RequireRole anyOfRoles={["customerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {isCompleted ? t("completedTitle") : t("title")}
-        </Title>
+        <PageHeader
+          title={isCompleted ? t("completedTitle") : t("title")}
+          className=""
+        />
         <CrudTable
           ref={tableRef}
           rowKey="id"

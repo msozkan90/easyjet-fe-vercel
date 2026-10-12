@@ -20,16 +20,8 @@ import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  pdf: "blue",
-  completed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
 
 const formatAmount = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") {
@@ -110,9 +102,9 @@ const OrderItemCard = ({
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>
-            <Tag color={STATUS_COLORS[statusKey] || "default"}>
+            <StatusTag status={statusKey}>
               {tOrders("columns.status")}: {statusLabel}
-            </Tag>
+            </StatusTag>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -375,10 +367,8 @@ export default function ShippedOrderPrinterSearchPage() {
 
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker", "companyadmin"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("scanner.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("scanner.title")} />
 
         <Card className="rounded-2xl">
           <Space.Compact style={{ width: "100%" }}>

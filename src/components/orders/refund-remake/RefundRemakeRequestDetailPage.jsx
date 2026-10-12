@@ -33,12 +33,7 @@ import {
   normalizeRefundRemakeImages,
   normalizeRefundRemakeItems,
 } from "@/utils/refundRemakeRequests";
-
-const STATUS_COLORS = {
-  pending: "gold",
-  approved: "green",
-  canceled: "red",
-};
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function RefundRemakeRequestDetailPage({
   requireRoles = ["customerAdmin"],
@@ -317,9 +312,9 @@ export default function RefundRemakeRequestDetailPage({
                     : t("requestType.refund")}
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.status")}>
-                  <Tag color={STATUS_COLORS[detail?.status] || "default"}>
+                  <StatusTag status={detail?.status}>
                     {t(`status.${detail?.status || "pending"}`)}
-                  </Tag>
+                  </StatusTag>
                 </Descriptions.Item>
                 <Descriptions.Item label={t("detail.fields.responsibleEntity")}>
                   {detail?.responsible_entity_name || "-"}

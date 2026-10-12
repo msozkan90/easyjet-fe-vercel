@@ -3,15 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { useSelector } from "react-redux";
-import {
-  App as AntdApp,
-  Button,
-  Form,
-  Popconfirm,
-  Popover,
-  Space,
-  Tag,
-} from "antd";
+import { App as AntdApp, Button, Form } from "antd";
 import {
   CheckCircleFilled,
   CloseCircleOutlined,
@@ -24,6 +16,10 @@ import {
   FileSearchOutlined,
   RetweetOutlined,
 } from "@ant-design/icons";
+import Link from "next/link";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
+import { palette } from "@/theme/tokens";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
@@ -63,7 +59,7 @@ const toNullableString = (value) => {
 };
 
 export default function PendingOrdersPage() {
-  const { message } = AntdApp.useApp();
+  const { message, modal } = AntdApp.useApp();
   const user = useSelector((state) => state.auth.user);
   const { tasks: designUploadTasks } = useOrderDesignUploadQueue();
   const t = useTranslations("dashboard.orders");
@@ -395,25 +391,30 @@ export default function PendingOrdersPage() {
             record?.pool_completion_summary?.pending_items || 0,
           );
           return pendingPoolItems > 0 ? (
-            <Tag color="volcano">
+            <StatusTag tone="waiting">
               {t("pool.pendingItems", { count: pendingPoolItems })}
-            </Tag>
+            </StatusTag>
           ) : (
-            <Tag color="green">{t("pool.complete")}</Tag>
+            <StatusTag tone="success">{t("pool.complete")}</StatusTag>
           );
         },
       },
       {
         title: t("columns.hasDesign"),
         dataIndex: "hasImage",
+        align: "center",
         render: (value) =>
           value ? (
             <CheckCircleFilled
-              style={{ color: "green", fontWeight: "bold", fontSize: "28px" }}
+              role="img"
+              aria-label={t("columns.hasDesign")}
+              style={{ color: palette.success, fontSize: 20 }}
             />
           ) : (
             <CloseCircleOutlined
-              style={{ color: "red", fontWeight: "bold", fontSize: "28px" }}
+              role="img"
+              aria-label={t("columns.hasDesign")}
+              style={{ color: palette.danger, fontSize: 20 }}
             />
           ),
       },
@@ -421,7 +422,7 @@ export default function PendingOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 190,
+        width: 210,
         render: (_, record) => {
           const rowId = record?.id;
           const cancelLoading = isRowActionLoading(rowId, "cancel");
@@ -460,144 +461,141 @@ export default function PendingOrdersPage() {
             record?.pool_completion_summary?.pending_items || 0,
           );
           const productionBlocked = pendingPoolItems > 0;
-          return (
-            <Space wrap>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
-                  icon={<FileSearchOutlined />}
-                  type="default"
-                  disabled={!canViewDetail}
-                  href={detailHref}
-                />
-              </Popover>
-              <Popover content={t("actions.editAddress")}>
-                <Button
-                  icon={<EditOutlined />}
-                  type="default"
-                  disabled={!canEditRecord}
-                  onClick={() => handleOpenAddressEditor(record)}
-                />
-              </Popover>
-              {canRematch ? (
-                <Popover content={t("actions.rematch")}>
-                  <Button
-                    icon={<RetweetOutlined />}
-                    type="default"
-                    onClick={() => setRematchRecord(record)}
-                  />
-                </Popover>
-              ) : null}
-              {canShowDesignAction ? (
-                <Popover
-                  content={
-                    hasDesignImage
-                      ? t("actions.designUpdate")
-                      : t("actions.designUpload")
-                  }
-                >
-                  <Button
-                    icon={<UploadOutlined />}
-                    type="default"
-                    variant="solid"
-                    style={{
-                      backgroundColor: hasDesignImage ? "#808080" : "#1677ff",
-                      color: "#fff",
-                      borderColor: hasDesignImage ? "#808080" : "#1677ff",
-                    }}
-                    onClick={() => handleOpenDesignModal(record)}
-                  />
-                </Popover>
-              ) : null}
-              {showShippingRatesAction ? (
-                <Popover
-                  content={
-                    productionBlocked
-                      ? t("messages.poolIncomplete", {
-                          count: pendingPoolItems,
-                        })
-                      : t("actions.shippingRates")
-                  }
-                >
-                  <span>
-                    <Button
-                      icon={<DollarOutlined />}
-                      type="default"
-                      disabled={productionBlocked}
-                      onClick={() => handleOpenShippingModal(record)}
-                    />
-                  </span>
-                </Popover>
-              ) : null}
-              <Popover content={t("actions.cancel")}>
-                <Popconfirm
-                  title={t("actions.confirmCancelTitle")}
-                  okText={t("actions.confirmCancelOk")}
-                  okButtonProps={{
-                    danger: true,
-                    loading: cancelLoading,
-                  }}
-                  disabled={disableActions}
-                  onConfirm={() => handleStatusUpdate(record, "cancel")}
-                >
-                  <Button
-                    icon={<CloseOutlined />}
-                    type="primary"
-                    danger
-                    loading={cancelLoading}
-                    disabled={disableActions}
-                  />
-                </Popconfirm>
-              </Popover>
-              {showWaitingAction ? (
-                <Popover content={t("actions.waitingForDesign")}>
-                  <Popconfirm
-                    title={t("actions.confirmWaitingTitle")}
-                    okText={t("actions.confirmWaitingOk")}
-                    okButtonProps={{
-                      type: "primary",
-                      loading: waitingLoading,
-                    }}
-                    disabled={disableActions}
-                    onConfirm={() =>
-                      handleStatusUpdate(record, "waitingForDesign")
-                    }
-                  >
-                    <Button
-                      icon={<ClockCircleOutlined />}
-                      type="primary"
-                      color="orange"
-                      variant="solid"
-                      loading={waitingLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
-              {showNewOrderAction ? (
-                <Popover content={t("actions.newOrder")}>
-                  <Popconfirm
-                    title={t("actions.confirmNewOrderTitle")}
-                    okText={t("actions.confirmNewOrderOk")}
-                    okButtonProps={{
-                      type: "primary",
-                      loading: newOrderLoading,
-                    }}
-                    disabled={disableActions}
-                    onConfirm={() => handleStatusUpdate(record, "newOrder")}
-                  >
-                    <Button
-                      icon={<PlusOutlined />}
-                      type="primary"
-                      color="primary"
-                      variant="solid"
-                      loading={newOrderLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
-            </Space>
-          );
+          const designLabel = hasDesignImage
+            ? t("actions.designUpdate")
+            : t("actions.designUpload");
+          const shippingLabel = productionBlocked
+            ? t("messages.poolIncomplete", { count: pendingPoolItems })
+            : t("actions.shippingRates");
+          const confirmStatusUpdate = (status, title, okText, danger) =>
+            modal.confirm({
+              title,
+              okText,
+              okButtonProps: { danger },
+              onOk: () => handleStatusUpdate(record, status),
+            });
+
+          // One contextual action stays visible; the rest live in the menu.
+          let primary = null;
+          if (canShowDesignAction && !hasDesignImage) {
+            primary = {
+              key: "design",
+              label: designLabel,
+              icon: <UploadOutlined />,
+              onClick: () => handleOpenDesignModal(record),
+            };
+          } else if (showShippingRatesAction) {
+            primary = {
+              key: "shipping",
+              label: t("actions.shippingRates"),
+              icon: <DollarOutlined />,
+              disabled: productionBlocked,
+              onClick: () => handleOpenShippingModal(record),
+            };
+          } else if (canViewDetail) {
+            primary = {
+              key: "detail",
+              label: t("actions.viewDetail"),
+              icon: <FileSearchOutlined />,
+              href: detailHref,
+            };
+          }
+
+          const menuItems = [
+            primary?.key !== "detail" && {
+              key: "detail",
+              icon: <FileSearchOutlined />,
+              disabled: !canViewDetail,
+              label: canViewDetail ? (
+                <Link href={detailHref}>{t("actions.viewDetail")}</Link>
+              ) : (
+                t("actions.viewDetail")
+              ),
+            },
+            {
+              key: "address",
+              icon: <EditOutlined />,
+              disabled: !canEditRecord,
+              label: t("actions.editAddress"),
+              onClick: () => handleOpenAddressEditor(record),
+            },
+            canRematch && {
+              key: "rematch",
+              icon: <RetweetOutlined />,
+              label: t("actions.rematch"),
+              onClick: () => setRematchRecord(record),
+            },
+            canShowDesignAction &&
+              primary?.key !== "design" && {
+                key: "design",
+                icon: <UploadOutlined />,
+                label: designLabel,
+                onClick: () => handleOpenDesignModal(record),
+              },
+            showShippingRatesAction &&
+              primary?.key !== "shipping" && {
+                key: "shipping",
+                icon: <DollarOutlined />,
+                disabled: productionBlocked,
+                label: shippingLabel,
+                onClick: () => handleOpenShippingModal(record),
+              },
+            (showWaitingAction || showNewOrderAction) && { type: "divider" },
+            showWaitingAction && {
+              key: "waiting",
+              icon: <ClockCircleOutlined />,
+              disabled: disableActions,
+              label: t("actions.waitingForDesign"),
+              onClick: () =>
+                confirmStatusUpdate(
+                  "waitingForDesign",
+                  t("actions.confirmWaitingTitle"),
+                  t("actions.confirmWaitingOk"),
+                ),
+            },
+            showNewOrderAction && {
+              key: "newOrder",
+              icon: <PlusOutlined />,
+              disabled: disableActions || newOrderLoading,
+              label: t("actions.newOrder"),
+              onClick: () =>
+                confirmStatusUpdate(
+                  "newOrder",
+                  t("actions.confirmNewOrderTitle"),
+                  t("actions.confirmNewOrderOk"),
+                ),
+            },
+            { type: "divider" },
+            {
+              key: "cancel",
+              icon: <CloseOutlined />,
+              danger: true,
+              disabled: disableActions,
+              label: t("actions.cancel"),
+              onClick: () =>
+                confirmStatusUpdate(
+                  "cancel",
+                  t("actions.confirmCancelTitle"),
+                  t("actions.confirmCancelOk"),
+                  true,
+                ),
+            },
+          ];
+
+          const actions = primary
+            ? [
+                {
+                  ...primary,
+                  tooltip:
+                    primary.key === "shipping" && productionBlocked
+                      ? shippingLabel
+                      : undefined,
+                  loading: cancelLoading || waitingLoading || newOrderLoading,
+                },
+              ]
+            : [];
+
+          return <RowActions actions={actions} menuItems={menuItems} />;
         },
       },
     ],
@@ -608,6 +606,7 @@ export default function PendingOrdersPage() {
       handleStatusUpdate,
       isCustomerAdmin,
       isRowActionLoading,
+      modal,
       shouldShowShippingRates,
       t,
     ],

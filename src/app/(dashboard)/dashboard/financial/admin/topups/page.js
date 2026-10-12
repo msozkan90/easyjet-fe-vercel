@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Button, Space, Tag, App as AntdApp, Typography } from "antd";
+import { Button, Space, Tag, App as AntdApp } from "antd";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -12,8 +12,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 const statusColor = {
   pending: "gold",
@@ -259,9 +258,7 @@ export default function WalletTopupsAdminListPage() {
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("adminTopups.title")}
-        </Title>
+        <PageHeader title={t("adminTopups.title")} className="" />
         <CrudTable rowKey="id" columns={columns} request={request} />
       </Space>
     </RequireRole>

@@ -10,7 +10,6 @@ import {
   Input,
   Select,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
@@ -26,9 +25,9 @@ import { ProductVariationAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
-import { STATUS_COLORS } from "./statusConstants";
 import { useSelector } from "react-redux";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import StatusTag from "@/components/ui/StatusTag";
 
 const { RangePicker } = DatePicker;
 
@@ -554,13 +553,12 @@ export default function OrdersStatusListPage({
         render: (value, record) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
-          const color = STATUS_COLORS[value] || "default";
           return (
             <Space direction="vertical" size={2}>
               {isReorderedOrder(record) ? (
-                <Tag color="purple">Re Ordered</Tag>
+                <StatusTag tone="refund">{t("values.reordered")}</StatusTag>
               ) : null}
-              <Tag color={color}>{label}</Tag>
+              <StatusTag status={value}>{label}</StatusTag>
             </Space>
           );
         },
@@ -830,8 +828,6 @@ export default function OrdersStatusListPage({
                 {tCommonActions("search")}
               </Button>
               <Button
-                type="primary"
-                danger
                 icon={<CloseCircleOutlined />}
                 onClick={handleToolbarReset}
               >

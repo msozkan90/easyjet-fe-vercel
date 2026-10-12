@@ -9,7 +9,6 @@ import {
   Card,
   Col,
   Empty,
-  Flex,
   Row,
   Skeleton,
   Space,
@@ -29,13 +28,14 @@ import OrdersStatusListPage from "@/app/(dashboard)/dashboard/orders/OrdersStatu
 import { DashboardAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import PageHeader from "@/components/ui/PageHeader";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const BUCKETS = [
-  { key: "overdue_72_plus", color: "#cf1322", background: "#fff1f0", icon: <ExclamationCircleOutlined /> },
-  { key: "critical_48_72", color: "#d46b08", background: "#fff7e6", icon: <ClockCircleOutlined /> },
-  { key: "warning_24_48", color: "#d4b106", background: "#feffe6", icon: <ClockCircleOutlined /> },
-  { key: "action_0_24", color: "#1677ff", background: "#e6f4ff", icon: <ShoppingOutlined /> },
+  { key: "overdue_72_plus", color: "#B42318", background: "#FDECEA", icon: <ExclamationCircleOutlined /> },
+  { key: "critical_48_72", color: "#C4560B", background: "#FFF4EB", icon: <ClockCircleOutlined /> },
+  { key: "warning_24_48", color: "#8A5300", background: "#FFF4DB", icon: <ClockCircleOutlined /> },
+  { key: "action_0_24", color: "#1F5F99", background: "#E8F1FA", icon: <ShoppingOutlined /> },
 ];
 
 const unwrap = (response) => response?.data || response;
@@ -156,21 +156,25 @@ export default function NormalProductionUrgencyDashboard() {
 
   return (
     <Space direction="vertical" size={24} style={{ width: "100%" }}>
-      <Card
-        bordered={false}
-        style={{ background: `linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorBgContainer})` }}
-      >
-        <Flex justify="space-between" align="center" gap={16} wrap>
-          <div>
-            <Title level={2} style={{ margin: 0 }}>{t("title")}</Title>
-            <Text type="secondary">{t("subtitle")}</Text>
+      <PageHeader
+        className=""
+        title={t("title")}
+        description={
+          <>
+            {t("subtitle")}
             {data?.meta?.generated_at ? (
-              <div><Text type="secondary" style={{ fontSize: 12 }}>{t("lastUpdated", { date: dayjs(data.meta.generated_at).format("DD.MM.YYYY HH:mm") })}</Text></div>
+              <span className="block text-xs">
+                {t("lastUpdated", { date: dayjs(data.meta.generated_at).format("DD.MM.YYYY HH:mm") })}
+              </span>
             ) : null}
-          </div>
-          <Button icon={<ReloadOutlined />} loading={loading} onClick={loadSummary}>{t("actions.refresh")}</Button>
-        </Flex>
-      </Card>
+          </>
+        }
+        extra={
+          <Button icon={<ReloadOutlined />} loading={loading} onClick={loadSummary}>
+            {t("actions.refresh")}
+          </Button>
+        }
+      />
 
       {error ? (
         <Alert
@@ -203,9 +207,9 @@ export default function NormalProductionUrgencyDashboard() {
                   }}
                   style={{
                     height: "100%",
-                    border: `2px solid ${selected ? bucket.color : "transparent"}`,
+                    border: `1px solid ${selected ? bucket.color : token.colorBorderSecondary}`,
                     background: selected ? bucket.background : token.colorBgContainer,
-                    boxShadow: selected ? token.boxShadowSecondary : token.boxShadowTertiary,
+                    boxShadow: selected ? `0 0 0 1px ${bucket.color}` : "none",
                   }}
                 >
                   <Space direction="vertical" size={12} style={{ width: "100%" }}>
@@ -235,7 +239,7 @@ export default function NormalProductionUrgencyDashboard() {
 
       {listApiFn && selectedBucket ? (
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
-          <Title level={4} style={{ margin: 0 }}>{t(`buckets.${selectedBucket}.listTitle`)}</Title>
+          <h2 className="m-0 text-lg font-semibold">{t(`buckets.${selectedBucket}.listTitle`)}</h2>
           <OrdersStatusListPage
             key={`${selectedBucket}-${data.meta.generated_at}`}
             listApiFn={listApiFn}

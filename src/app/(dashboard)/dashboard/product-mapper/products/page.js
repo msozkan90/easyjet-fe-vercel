@@ -8,9 +8,9 @@ import {
   Dropdown,
   Modal,
   Popconfirm,
-  Popover,
   Space,
   Tag,
+  Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -159,25 +159,25 @@ export default function ProductMapperProductsPage() {
         fixed: "right",
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
-              <Button
+            <Tooltip title={t("actions.edit")}>
+              <Button aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               />
-            </Popover>
-            <Popover content={t("actions.delete")}>
+            </Tooltip>
+            <Tooltip title={t("actions.delete")}>
               <Popconfirm
                 title={t("actions.confirmDeleteTitle")}
                 okText={t("actions.confirmDeleteOk")}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record.id)}
               >
-                <Button icon={<DeleteOutlined />} danger />
+                <Button aria-label={t("actions.delete")} icon={<DeleteOutlined />} danger />
               </Popconfirm>
-            </Popover>
+            </Tooltip>
           </Space>
         ),
       },

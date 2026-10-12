@@ -4,6 +4,7 @@ import { Drawer, Grid, Layout } from "antd";
 import HeaderBar from "@/components/layout/HeaderBar";
 import Sidebar, { SIDEBAR_WIDTH } from "@/components/layout/Sidebar";
 import PageContainer from "@/components/layout/PageContainer";
+import RouteHeader from "@/components/layout/RouteHeader";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children }) {
           onClose={closeMobileNav}
           width={SIDEBAR_WIDTH + 16}
           closable={false}
+          forceRender
           styles={{
             body: { padding: 0, background: palette.ink900 },
             content: { background: palette.ink900 },
@@ -76,7 +78,10 @@ export default function DashboardLayout({ children }) {
             background: palette.canvas,
           }}
         >
-          <PageContainer>{children}</PageContainer>
+          <PageContainer>
+            <RouteHeader />
+            {children}
+          </PageContainer>
         </Content>
         <ScrollToTopButton targetRef={contentRef} />
       </Layout>
