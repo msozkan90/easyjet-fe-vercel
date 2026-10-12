@@ -11,11 +11,10 @@ import {
   Modal,
   Select,
   Space,
-  Tag,
   Popconfirm,
   Upload,
   App as AntdApp,
-  } from "antd";
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
@@ -30,13 +29,7 @@ import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import MoneyText from "@/components/ui/MoneyText";
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function WalletTopupsListPage() {
   const { message } = AntdApp.useApp();
@@ -220,9 +213,9 @@ export default function WalletTopupsListPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {

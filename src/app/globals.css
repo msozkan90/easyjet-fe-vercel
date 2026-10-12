@@ -192,6 +192,14 @@ body {
   --ej-status-bg: #eef1f3;
 }
 
+/* Remaining antd tags share the pill shape of StatusTag */
+.ant-tag {
+  border-radius: 999px;
+  border-color: transparent;
+  padding-inline: 10px;
+  font-weight: 500;
+}
+
 /* CrudTable surface */
 .ej-table-surface {
   border: 1px solid var(--ej-border);

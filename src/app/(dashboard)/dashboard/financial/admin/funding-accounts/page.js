@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import {
   Button,
   Space,
-  Tag,
   Popconfirm,
   Modal,
   Form,
@@ -24,11 +23,7 @@ import {
 } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
-
-const statusColor = {
-  active: "green",
-  inactive: "red",
-};
+import StatusTag from "@/components/ui/StatusTag";
 
 const { Title } = Typography;
 
@@ -179,9 +174,9 @@ export default function FundingAccountsAdminPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {

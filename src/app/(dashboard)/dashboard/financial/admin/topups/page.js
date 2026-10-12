@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Button, Space, Tag, App as AntdApp } from "antd";
+import { Button, Space, App as AntdApp } from "antd";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -14,13 +14,7 @@ import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import MoneyText from "@/components/ui/MoneyText";
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
+import StatusTag from "@/components/ui/StatusTag";
 
 const resolveOwnerName = (record) => {
   if (!record) return "-";
@@ -232,9 +226,9 @@ export default function WalletTopupsAdminListPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
