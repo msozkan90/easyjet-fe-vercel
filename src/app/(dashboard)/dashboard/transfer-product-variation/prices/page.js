@@ -392,6 +392,10 @@ export default function TransferProductPricesPage() {
         destroyOnHidden
       >
         <TransferProductPriceForm
+          onCancel={() => {
+            setOpen(false);
+            setEditingRow(null);
+          }}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

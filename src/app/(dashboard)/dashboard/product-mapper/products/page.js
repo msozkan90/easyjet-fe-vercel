@@ -417,6 +417,10 @@ export default function ProductMapperProductsPage() {
         destroyOnHidden
       >
         <ProductMapperForm
+          onCancel={() => {
+            setOpen(false);
+            setEditingRow(null);
+          }}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

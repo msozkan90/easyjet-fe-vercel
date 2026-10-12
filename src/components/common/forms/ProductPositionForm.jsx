@@ -10,6 +10,8 @@ import {
   isFilePreviewAllowed,
   openFileInNewTab,
 } from "@/components/common/media/ImagePreviewGate";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -27,10 +29,12 @@ const normFile = (event) => {
 export default function ProductPositionForm({
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   products = [],
   isEdit = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const { message } = AntdApp.useApp();
   const tCommon = useTranslations("forms.common");
@@ -116,7 +120,7 @@ export default function ProductPositionForm({
         form={form}
         layout="vertical"
         initialValues={transformedInitialValues}
-        onFinish={onFinish}
+        onFinish={submitHandler}
       >
         <Form.Item
           name="product_id"
@@ -280,12 +284,11 @@ export default function ProductPositionForm({
         </Form.Item>
 
         <Form.Item className="mb-0">
-          <button
-            type="submit"
-            className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-          >
-            {submitButtonLabel}
-          </button>
+          <FormActions
+            submitText={submitButtonLabel}
+            loading={submitting}
+            onCancel={onCancel}
+          />
         </Form.Item>
       </Form>
 

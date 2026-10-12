@@ -463,6 +463,10 @@ export default function ProductColorsPage() {
         destroyOnHidden
       >
         <ProductColorForm
+          onCancel={() => {
+            setOpen(false);
+            setEditingRow(null);
+          }}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

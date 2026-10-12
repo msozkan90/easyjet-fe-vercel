@@ -15,6 +15,8 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { ProductPricesAPI } from "@/utils/api";
 import { formatPrice, pickBasePrice, toNumeric } from "@/utils/priceHelpers";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 const deriveBasePrice = (source) => {
   if (!source || typeof source !== "object") {
@@ -50,6 +52,7 @@ export default function PartnerProductPriceForm({
   partnerId,
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   products = [],
   customers = [],
@@ -303,10 +306,11 @@ export default function PartnerProductPriceForm({
         partner_id: partnerId,
         base_price: basePrice,
       };
-      onFinish?.(payload);
+      return onFinish?.(payload);
     },
     [basePrice, onFinish, partnerId]
   );
+  const [submitHandler, submitting] = useSubmitHandler(handleFinish);
 
   const priceValidator = useMemo(
     () => ({
@@ -346,7 +350,7 @@ export default function PartnerProductPriceForm({
     <Form
       layout="vertical"
       form={form}
-      onFinish={handleFinish}
+      onFinish={submitHandler}
       initialValues={initialValues}
     >
       <Form.Item
@@ -502,12 +506,11 @@ export default function PartnerProductPriceForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

@@ -14,6 +14,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslations } from "@/i18n/use-translations";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 const TRANSFER_CATEGORIES = new Set(["transfer", "transfers"]);
 const PRODUCTION_CATEGORIES = new Set(["apparel", "engraving", "print"]);
@@ -33,6 +35,7 @@ const isProductionCategoryName = (value) =>
 export default function CustomerForm({
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   has_api_key = false,
   categories = [],
@@ -42,6 +45,7 @@ export default function CustomerForm({
   showIsMine = false,
   onDirtyChange,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const { message } = AntdApp.useApp();
   const [form] = Form.useForm();
   const [storeList, setStoreList] = useState([]);
@@ -178,7 +182,7 @@ export default function CustomerForm({
       form={form}
       layout="vertical"
       initialValues={initialValues}
-      onFinish={onFinish}
+      onFinish={submitHandler}
       onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
@@ -334,12 +338,11 @@ export default function CustomerForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

@@ -560,6 +560,10 @@ export default function ProductStockPage() {
         destroyOnHidden
       >
         <ProductStockForm
+          onCancel={() => {
+            setOpen(false);
+            setEditingRow(null);
+          }}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

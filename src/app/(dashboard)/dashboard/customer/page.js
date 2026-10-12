@@ -351,6 +351,16 @@ export default function CustomersPage() {
       >
         <div onChangeCapture={() => setFormDirty(true)}>
           <CustomerForm
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditingRow(null);
+                },
+              })
+            }
             onFinish={onSubmit}
             submitText={
               editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

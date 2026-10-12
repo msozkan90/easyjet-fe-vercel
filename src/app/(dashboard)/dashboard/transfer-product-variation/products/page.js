@@ -255,6 +255,7 @@ export default function TransferProductsPage() {
         destroyOnHidden
       >
         <ProductForm
+          onCancel={closeModal}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

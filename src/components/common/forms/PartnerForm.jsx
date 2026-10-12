@@ -4,14 +4,18 @@
 import { Form, Input, Select, InputNumber } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 import { useSelector } from "react-redux";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 export default function PartnerForm({
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   categories = [],
   onDirtyChange,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const user = useSelector((s) => s.auth.user);
   const isShippingOwner = user?.entity?.is_shipstation_shipping_owner || false;
@@ -25,7 +29,7 @@ export default function PartnerForm({
       form={form}
       layout="vertical"
       initialValues={initialValues}
-      onFinish={onFinish}
+      onFinish={submitHandler}
       onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <Form.Item
@@ -135,12 +139,11 @@ export default function PartnerForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

@@ -3,16 +3,20 @@
 import { useEffect } from "react";
 import { Form, InputNumber, Select } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 export default function ProductAdditionalPriceForm({
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   products = [],
   customers = [],
   partners = [],
   isEdit = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const tCommon = useTranslations("forms.common");
   const tForm = useTranslations("forms.productAdditionalPrice");
@@ -40,7 +44,7 @@ export default function ProductAdditionalPriceForm({
       form={form}
       layout="vertical"
       initialValues={{ status: "active", ...(initialValues || {}) }}
-      onFinish={onFinish}
+      onFinish={submitHandler}
     >
       <Form.Item
         name="product_id"
@@ -168,12 +172,11 @@ export default function ProductAdditionalPriceForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

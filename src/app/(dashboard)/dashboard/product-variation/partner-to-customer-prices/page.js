@@ -405,6 +405,10 @@ export default function PartnerToCustomerProductPricesPage() {
         destroyOnHidden
       >
         <PartnerProductPriceForm
+          onCancel={() => {
+            setOpen(false);
+            setEditingRow(null);
+          }}
           partnerId={partnerId}
           onFinish={onSubmit}
           submitText={

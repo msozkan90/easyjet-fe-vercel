@@ -308,6 +308,16 @@ export default function PartnersPage() {
       >
         <div onChangeCapture={() => setFormDirty(true)}>
           <PartnerForm
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditingRow(null);
+                },
+              })
+            }
             onFinish={onSubmit}
             submitText={
               editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

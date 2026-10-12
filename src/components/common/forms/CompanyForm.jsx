@@ -5,14 +5,18 @@ import { useCallback, useEffect, useState } from "react";
 import { Form, Input, Select, InputNumber } from "antd";
 import GooglePlacesAutocomplete from "@/components/common/forms/GooglePlacesAutocomplete";
 import { useTranslations } from "@/i18n/use-translations";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 export default function CompanyForm({
   initialValues,
   onFinish,
+  onCancel,
   submitText,
   categories = [],
   onDirtyChange,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const [searchAddress, setSearchAddress] = useState("");
   const tCommonForms = useTranslations("forms.common");
@@ -65,7 +69,7 @@ export default function CompanyForm({
       form={form}
       layout="vertical"
       initialValues={initialValues}
-      onFinish={onFinish}
+      onFinish={submitHandler}
       onValuesChange={() => onDirtyChange?.(form.isFieldsTouched(true))}
     >
       <div className="flex flex-col gap-6 md:flex-row">
@@ -319,12 +323,11 @@ export default function CompanyForm({
       </div>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );
