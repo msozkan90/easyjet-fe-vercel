@@ -2332,7 +2332,8 @@
           "waitingForDesign": "Waiting for Design",
           "cancel": "Cancelled",
           "refund": "Refund",
-          "remake": "Remake"
+          "remake": "Remake",
+          "readyForProduction": "Ready for Production"
         }
       },
       "actions": {
@@ -3002,6 +3003,14 @@
           "completed": "Completed",
           "shipped": "Shipped",
           "ariaLabel": "Order progress"
+        },
+        "shipments": {
+          "title": "Shipments",
+          "canceledTitle": "Canceled shipment history",
+          "fallbackName": "Shipment {sequence}",
+          "itemsSummary": "{count} items • {amount}",
+          "labelsSummary": "{labels} labels • {voids} voids",
+          "canceled": "Canceled"
         }
       },
       "addressEditor": {
@@ -3283,7 +3292,8 @@
           "notFound": "Transfer order not found",
           "noUploadedDesigns": "No uploaded designs",
           "poolIncomplete": "Pool incomplete: {count} items are still pending in the source pool order."
-        }
+        },
+        "checklistRequired": "Please complete the shipping checklist."
       },
       "pool": {
         "pendingItems": "{count} pending pre-order items",
@@ -3653,6 +3663,11 @@
           "confirmSendDescription": "This will move the transfer order into production.",
           "confirmSendOk": "Send to production"
         }
+      },
+      "transferCopy": {
+        "tooltip": "Copy transfer order id",
+        "success": "Transfer order id copied.",
+        "error": "Transfer order id could not be copied."
       }
     },
     "refundRemake": {

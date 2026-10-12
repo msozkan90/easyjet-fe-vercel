@@ -2112,7 +2112,8 @@
           "waitingForDesign": "Tasarım Bekleniyor",
           "cancel": "İptal",
           "refund": "İade",
-          "remake": "Yeniden Üretim"
+          "remake": "Yeniden Üretim",
+          "readyForProduction": "Üretime Hazır"
         }
       },
       "actions": {
@@ -2123,7 +2124,7 @@
         "downloadDesigns": "Tasarımları İndir",
         "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
-        "cancelItem": "Order Itemı İptal Et",
+        "cancelItem": "Sipariş Kalemini İptal Et",
         "cancelItemConfirmTitle": "Bu order item iptal edilsin mi?",
         "cancelItemConfirmDescription": "Bu shipment'ın son aktif itemıysa kargo labelı da void edilecektir.",
         "cancelItemConfirmOk": "Itemı İptal Et",
@@ -2139,8 +2140,8 @@
         "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
         "confirmNewOrderOk": "Güncelle",
         "download": "İndir",
-        "printLabel": "Label Yazdır",
-        "manualOrder": "Manuel Order"
+        "printLabel": "Etiket Yazdır",
+        "manualOrder": "Manuel Sipariş"
       },
       "rematch": {
         "title": "Ürün Varyasyonunu Yeniden Eşleştir",
@@ -2403,7 +2404,7 @@
         }
       },
       "manualNormalOrderModal": {
-        "title": "Manuel Order Oluştur",
+        "title": "Manuel Sipariş Oluştur",
         "fields": {
           "orderNumber": "Order Number",
           "orderDate": "Order Date",
@@ -2782,6 +2783,14 @@
           "completed": "Tamamlandı",
           "shipped": "Kargolandı",
           "ariaLabel": "Sipariş aşamaları"
+        },
+        "shipments": {
+          "title": "Gönderiler",
+          "canceledTitle": "İptal edilen gönderiler",
+          "fallbackName": "Gönderi {sequence}",
+          "itemsSummary": "{count} kalem • {amount}",
+          "labelsSummary": "{labels} etiket • {voids} iptal",
+          "canceled": "İptal edildi"
         }
       },
       "addressEditor": {
@@ -3063,7 +3072,8 @@
           "notFound": "Transfer siparişi bulunamadı.",
           "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı.",
           "poolIncomplete": "Pool eksik: kaynak pool siparişinde hâlâ {count} bekleyen kalem var."
-        }
+        },
+        "checklistRequired": "Lütfen kargo kontrol listesini tamamlayın."
       },
       "pool": {
         "pendingItems": "{count} bekleyen pre-order kalemi",
@@ -3433,6 +3443,11 @@
           "confirmSendDescription": "Bu işlem transfer siparişini üretim aşamasına alır.",
           "confirmSendOk": "Üretime gönder"
         }
+      },
+      "transferCopy": {
+        "tooltip": "Transfer sipariş ID kopyala",
+        "success": "Transfer sipariş ID kopyalandı.",
+        "error": "Transfer sipariş ID kopyalanamadı."
       }
     },
     "refundRemake": {

@@ -1560,7 +1560,7 @@ export default function OrderDetailPage() {
         <div className="space-y-6">
           {shipments.length ? (
             <div className="space-y-4">
-              <SectionHeader title="Shipments" />
+              <SectionHeader title={tDesign("shipments.title")} />
               <div className="grid gap-4 lg:grid-cols-2">
                 {shipments.map((shipment) => (
                   <div
@@ -1569,16 +1569,24 @@ export default function OrderDetailPage() {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
-                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                        {shipment.shipment_number ||
+                          tDesign("shipments.fallbackName", {
+                            sequence: shipment.sequence,
+                          })}
                       </Typography.Text>
-                      <Tag color={shipment.fulfillment_status === "shipped" ? "green" : "blue"}>
-                        {shipment.fulfillment_status}
-                      </Tag>
+                      <StatusTag status={shipment.fulfillment_status}>
+                        {tOrders(`status.values.${shipment.fulfillment_status}`).startsWith("dashboard.")
+                          ? shipment.fulfillment_status
+                          : tOrders(`status.values.${shipment.fulfillment_status}`)}
+                      </StatusTag>
                     </div>
                     <div className="mt-2 text-sm text-text-secondary">
-                      {shipment.items?.filter((item) => item.status !== "cancel").length || 0} items • ${formatAmount(
-                        shipment.shipment_price,
-                      )}
+                      {tDesign("shipments.itemsSummary", {
+                        count:
+                          shipment.items?.filter((item) => item.status !== "cancel")
+                            .length || 0,
+                        amount: `$${formatAmount(shipment.shipment_price)}`,
+                      })}
                     </div>
                   </div>
                 ))}
@@ -1587,18 +1595,26 @@ export default function OrderDetailPage() {
           ) : null}
           {canceledShipments.length ? (
             <div className="space-y-4">
-              <SectionHeader title="Canceled shipment history" />
+              <SectionHeader title={tDesign("shipments.canceledTitle")} />
               <div className="grid gap-4 lg:grid-cols-2">
                 {canceledShipments.map((shipment) => (
                   <div key={shipment.id} className="rounded-xl border border-line bg-subtle p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
-                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                        {shipment.shipment_number ||
+                          tDesign("shipments.fallbackName", {
+                            sequence: shipment.sequence,
+                          })}
                       </Typography.Text>
-                      <Tag>canceled</Tag>
+                      <StatusTag status="canceled">
+                        {tDesign("shipments.canceled")}
+                      </StatusTag>
                     </div>
                     <div className="mt-2 text-sm text-text-secondary">
-                      {shipment.labels?.length || 0} labels • {shipment.label_voids?.length || 0} voids
+                      {tDesign("shipments.labelsSummary", {
+                        labels: shipment.labels?.length || 0,
+                        voids: shipment.label_voids?.length || 0,
+                      })}
                     </div>
                   </div>
                 ))}

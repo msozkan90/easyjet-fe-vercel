@@ -573,9 +573,9 @@ export default function TransferOrdersStatusListPage({
       if (!value) return;
       try {
         await navigator.clipboard.writeText(value);
-        message.success("Transfer order id copied.");
+        message.success(t("transferCopy.success"));
       } catch {
-        message.error("Transfer order id could not be copied.");
+        message.error(t("transferCopy.error"));
       }
     },
     [message],
@@ -683,7 +683,7 @@ export default function TransferOrdersStatusListPage({
           return (
             <Space size={4}>
               {showTransferOrderIdCopy && transferOrderId ? (
-                <Tooltip title="Copy transfer order id">
+                <Tooltip title={t("transferCopy.tooltip")}>
                   <Button
                     size="small"
                     type="text"

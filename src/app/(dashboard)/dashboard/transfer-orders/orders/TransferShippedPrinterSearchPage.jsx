@@ -450,7 +450,7 @@ export default function TransferShippedPrinterSearchPage() {
       return;
     }
     if (!allChecklistItemsChecked) {
-      message.warning("Please complete the shipping checklist.");
+      message.warning(tDetail("checklistRequired"));
       return;
     }
 
