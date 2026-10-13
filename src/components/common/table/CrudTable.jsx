@@ -31,6 +31,31 @@ const isActionsColumn = (column) => {
   return key === "actions";
 };
 
+function FilterDropdownFrame({ width, labels, onApply, onReset, onClose, applyIcon, applyLabel, children }) {
+  return (
+    <div
+      className="flex flex-col"
+      style={{ width }}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <div className="p-3">{children}</div>
+      <div className="flex items-center justify-between gap-2 border-t border-line px-3 py-2">
+        <Button type="text" size="small" onClick={onClose}>
+          {labels.close}
+        </Button>
+        <Space size={6}>
+          <Button size="small" onClick={onReset}>
+            {labels.reset}
+          </Button>
+          <Button type="primary" size="small" icon={applyIcon} onClick={onApply}>
+            {applyLabel}
+          </Button>
+        </Space>
+      </div>
+    </div>
+  );
+}
+
 function TextFilterDropdown({
   placeholder,
   labels,
@@ -41,40 +66,30 @@ function TextFilterDropdown({
   close,
 }) {
   return (
-    <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={240}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        confirm();
+      }}
+      onClose={() => close()}
+      applyIcon={<SearchOutlined />}
+      applyLabel={labels.search}
+    >
       <Input
         autoFocus
+        allowClear
+        prefix={<SearchOutlined className="text-ink-400" />}
         placeholder={placeholder}
         value={selectedKeys?.[0]}
         onChange={(e) =>
           setSelectedKeys(e.target.value ? [e.target.value] : [])
         }
         onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: "block", width: 188 }}
       />
-      <Space>
-        <Button
-          type="primary"
-          icon={<SearchOutlined />}
-          size="small"
-          onClick={() => confirm()}
-        >
-          {labels.search}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -95,7 +110,17 @@ function SelectFilterDropdown({
   const onChange = (val) =>
     setSelectedKeys(multiple ? val || [] : val ? [val] : []);
   return (
-    <div style={{ padding: 8, width }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={width}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        confirm();
+      }}
+      onClose={() => close()}
+      applyLabel={labels.apply}
+    >
       <Select
         allowClear
         showSearch
@@ -105,27 +130,11 @@ function SelectFilterDropdown({
         optionFilterProp="label"
         value={value}
         onChange={onChange}
-        style={{ width: "100%", marginBottom: 8 }}
+        style={{ width: "100%" }}
         options={options}
+        maxTagCount="responsive"
       />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.apply}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -164,33 +173,26 @@ function DateRangeFilterDropdown({
   };
 
   return (
-    <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={300}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        setSelectedKeys([]);
+        confirm();
+      }}
+      onClose={() => close()}
+      applyLabel={labels.apply}
+    >
       <RangePicker
         allowClear
         value={value}
         onChange={onRangeChange}
-        style={{ width: 260, marginBottom: 8 }}
+        style={{ width: "100%" }}
         placeholder={[placeholder, placeholder]}
       />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.apply}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            setSelectedKeys([]);
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -488,9 +490,13 @@ const CrudTable = forwardRef(function CrudTable(
       {/* Toolbar */}
       {showRefresh || toolbarLeft || toolbarRight ? (
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            {toolbarLeft}
-          </div>
+          {toolbarLeft ? (
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-xl border border-line bg-subtle p-2">
+              {toolbarLeft}
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             {showRefresh ? (
               <Button

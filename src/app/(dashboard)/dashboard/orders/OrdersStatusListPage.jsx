@@ -784,6 +784,7 @@ export default function OrdersStatusListPage({
           <Space wrap size="middle">
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchOrderNumber")}
               value={quickFilters.order_number}
               onChange={handleOrderNumberChange}
@@ -791,6 +792,7 @@ export default function OrdersStatusListPage({
             />
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchSku")}
               value={quickFilters.sku}
               onChange={handleSkuChange}

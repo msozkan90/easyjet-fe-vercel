@@ -1044,6 +1044,7 @@ export default function TransferOrdersStatusListPage({
           <Space wrap size="middle">
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchOrderNumber")}
               value={quickFilters.order_number}
               onChange={handleOrderNumberChange}
