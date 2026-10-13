@@ -33,3 +33,37 @@ export function formatMoney(
     return getFormatter("USD", fractionDigits).format(numeric);
   }
 }
+
+/**
+ * Formats a plain amount with two decimals in the browser locale
+ * ("1,234.50"), without a currency symbol. Empty input returns `fallback`;
+ * non-numeric input is returned unchanged.
+ */
+export function formatAmount(value, fallback = "-") {
+  if (value === null || value === undefined || value === "") return fallback;
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return value;
+  return numericValue.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Currency in the browser locale (used by transfer order screens).
+ * Non-numeric input returns "-".
+ */
+export function formatCurrency(value, currency = "USD") {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return "-";
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency || "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  } catch {
+    return formatAmount(numericValue);
+  }
+}

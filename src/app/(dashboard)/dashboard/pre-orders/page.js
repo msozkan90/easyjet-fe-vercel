@@ -29,6 +29,7 @@ import {
   CloseOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
+import { formatAmount as formatSharedAmount } from "@/utils/formatMoney";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -732,19 +733,7 @@ export default function OrdersPage({ mode = "pending" }) {
     [t],
   );
 
-  const formatAmount = (value) => {
-    if (value === null || value === undefined || value === "") {
-      return t("common.none");
-    }
-    const numericValue = Number(value);
-    if (Number.isNaN(numericValue)) {
-      return value;
-    }
-    return numericValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  const formatAmount = (value) => formatSharedAmount(value, t("common.none"));
 
   const columns = useMemo(() => {
     return [

@@ -27,6 +27,7 @@ import {
 } from "@ant-design/icons";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 
@@ -35,20 +36,6 @@ const createDefaultToolbarFilters = () => ({
   sku: "",
   order_date: undefined,
 });
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 export default function CancelOrdersPage() {
   const { message } = AntdApp.useApp();

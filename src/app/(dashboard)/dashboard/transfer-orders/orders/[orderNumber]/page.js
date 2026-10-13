@@ -39,31 +39,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { hasAnyRole } from "@/utils/rbac";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
-
-const formatAmount = (value) => {
-  if (value === null || value === undefined || value === "") return "-";
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) return value;
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-const formatCurrency = (value, currency = "USD") => {
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "-";
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currency || "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  } catch {
-    return formatAmount(numericValue);
-  }
-};
+import { formatAmount, formatCurrency } from "@/utils/formatMoney";
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {

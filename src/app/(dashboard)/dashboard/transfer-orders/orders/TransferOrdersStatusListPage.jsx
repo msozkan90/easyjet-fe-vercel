@@ -45,6 +45,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 
@@ -117,16 +118,6 @@ const fetchAllEntityOptions = async (tableName, type) => {
   return (normalized.list || [])
     .map((item) => toOwnerEntityOption(item, type))
     .filter(Boolean);
-};
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") return fallback;
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) return value;
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 };
 
 const renderTruncatedWithPopover = (value, fallback, maxWidth = 240) => {

@@ -31,26 +31,13 @@ import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
+import { formatAmount } from "@/utils/formatMoney";
 
 const SCRAP_REASON_OPTIONS = [
   { value: "wrong_print", labelKey: "wrongPrint" },
   { value: "damaged_product", labelKey: "damagedProduct" },
   { value: "other", labelKey: "other" },
 ];
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const extractPositionList = (response) => {
   if (!response) return [];

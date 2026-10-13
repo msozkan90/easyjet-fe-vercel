@@ -36,20 +36,7 @@ import {
 } from "@/components/common/media/ImagePreviewGate";
 import { OriginalDesignButton } from "@/components/common/media/DesignThumbnailImage";
 import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import { formatAmount } from "@/utils/formatMoney";
 
 const ACCEPTED_FILE_TYPES = [
   "image/png",

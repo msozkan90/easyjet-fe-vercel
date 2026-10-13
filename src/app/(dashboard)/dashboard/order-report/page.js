@@ -18,7 +18,6 @@ import {
   DatePicker,
   Drawer,
   Empty,
-  Input,
   Row,
   Select,
   Space,
@@ -46,11 +45,21 @@ import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import ReportExportButton from "@/components/reports/ReportExportButton";
 import PageHeader from "@/components/ui/PageHeader";
 import StatCard from "@/components/ui/StatCard";
+import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
+import TextColumnFilter from "@/components/reports/TextColumnFilter";
+import {
+  ALL_ENTITIES_VALUE,
+  createDefaultRange,
+  extractPayload,
+  formatCount,
+  getTextValue,
+  isTransferCategory,
+  normalizeCategoryList,
+} from "@/components/reports/reportHelpers";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 
-const ALL_ENTITIES_VALUE = "__all_entities__";
 const ORDER_STATUS_KEYS = [
   "newOrder",
   "processing",
@@ -66,8 +75,6 @@ const ORDER_STATUS_KEYS = [
   "remake",
 ];
 
-const createDefaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
-
 const createDefaultFilters = () => ({
   entity_ids: [],
   category_id: undefined,
@@ -76,32 +83,7 @@ const createDefaultFilters = () => ({
   date_range: createDefaultRange(),
 });
 
-const extractPayload = (response) => response?.data ?? response ?? {};
-
-const normalizeCategoryList = (response) => {
-  const payload = extractPayload(response);
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.items)) return payload.items;
-  if (Array.isArray(payload?.data)) return payload.data;
-  return [];
-};
-
-const formatMoney = (value) =>
-  `${Number(value || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} $`;
-
-const formatCount = (value) => Number(value || 0).toLocaleString();
-
-const isTransferCategory = (category) => {
-  const name = String(category?.name || "")
-    .trim()
-    .toLowerCase();
-  return name === "transfer" || name === "transfers";
-};
-
-const getTextValue = (value) => String(value || "").toLowerCase();
+const formatMoney = (value) => formatMoneyShared(Number(value || 0));
 
 const buildReportPayload = (filters, entityOptionsMap) => {
   const [from, to] = filters?.date_range || [];
@@ -129,44 +111,6 @@ const buildReportPayload = (filters, entityOptionsMap) => {
     date_to: to?.endOf("day").toISOString(),
   };
 };
-
-function TextColumnFilter({
-  placeholder,
-  selectedKeys,
-  setSelectedKeys,
-  confirm,
-  clearFilters,
-  labels,
-}) {
-  return (
-    <div style={{ padding: 8 }} onKeyDown={(event) => event.stopPropagation()}>
-      <Input
-        autoFocus
-        placeholder={placeholder}
-        value={selectedKeys?.[0]}
-        onChange={(event) =>
-          setSelectedKeys(event.target.value ? [event.target.value] : [])
-        }
-        onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: "block", width: 220 }}
-      />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.search}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-      </Space>
-    </div>
-  );
-}
 
 export default function OrderReportPage() {
   const user = useSelector((state) => state.auth.user);

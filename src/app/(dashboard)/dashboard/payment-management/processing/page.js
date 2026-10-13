@@ -13,17 +13,10 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
+import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
 
-const moneyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-});
-
-const formatMoney = (value) => {
-  const number = Number(value ?? 0);
-  return moneyFormatter.format(Number.isFinite(number) ? number : 0);
-};
+const formatMoney = (value) =>
+  formatMoneyShared(value ?? 0, { fallback: formatMoneyShared(0) });
 
 const listAll = async (apiFn) => {
   const resp = await apiFn({

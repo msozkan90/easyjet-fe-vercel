@@ -28,17 +28,10 @@ import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { setBalance } from "@/redux/features/balanceSlice";
 import PageHeader from "@/components/ui/PageHeader";
+import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
 
-const moneyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-});
-
-const formatMoney = (value) => {
-  const number = Number(value ?? 0);
-  return moneyFormatter.format(Number.isFinite(number) ? number : 0);
-};
+const formatMoney = (value) =>
+  formatMoneyShared(value ?? 0, { fallback: formatMoneyShared(0) });
 
 const shortId = (value) => {
   if (!value) return "-";

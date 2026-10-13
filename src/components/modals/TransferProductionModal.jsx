@@ -33,6 +33,7 @@ import {
   getQuotedShippingPrice,
   toProductionCarrierService,
 } from "@/utils/productionCarrierService";
+import { formatAmount } from "@/utils/formatMoney";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -72,15 +73,6 @@ const getRateKey = (rate) =>
       "service",
     rate?.packageTypeId || "pkg",
   ].join("-");
-
-const formatAmount = (value, fallback = "-") => {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return fallback;
-  return num.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const normalizeAddress = (order) => {
   const nested = order?.shipping_address || {};

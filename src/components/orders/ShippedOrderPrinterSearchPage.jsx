@@ -22,20 +22,7 @@ import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import { formatAmount } from "@/utils/formatMoney";
 
 const extractPositionList = (response) => {
   if (!response) return [];

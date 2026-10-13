@@ -15,6 +15,7 @@ import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import ReportExportButton from "@/components/reports/ReportExportButton";
 import PageHeader from "@/components/ui/PageHeader";
 import StatCard from "@/components/ui/StatCard";
+import { formatMoney } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -25,10 +26,7 @@ const payloadFor = (range, entityKey, entityId) => ({
   ...(entityKey && entityId ? { [entityKey]: entityId } : {}),
 });
 const dataOf = (response) => response?.data ?? response ?? {};
-const money = (value) =>
-  value === null || value === undefined
-    ? "—"
-    : `${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
+const money = (value) => formatMoney(value, { fallback: "—" });
 const count = (value) => Number(value || 0).toLocaleString();
 const compareText = (a, b) => String(a ?? "").localeCompare(String(b ?? ""));
 const compareNumber = (a, b) => Number(a ?? 0) - Number(b ?? 0);

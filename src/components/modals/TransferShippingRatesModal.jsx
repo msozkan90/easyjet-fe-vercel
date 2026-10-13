@@ -33,6 +33,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { getQuotedShippingPrice, toProductionCarrierService } from "@/utils/productionCarrierService";
 import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount, formatCurrency } from "@/utils/formatMoney";
 
 const SERVICE_TABS = {
   EASYJET: "easyjet",
@@ -46,30 +47,6 @@ const SOURCE_BY_TAB = {
   [SERVICE_TABS.COMPANY]: "shipStationCompany",
   [SERVICE_TABS.PARTNER]: "shipStationPartner",
   [SERVICE_TABS.CUSTOMER]: "shipStationCustomer",
-};
-
-const formatAmount = (value, fallback = "-") => {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return fallback;
-  return num.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-const formatCurrency = (value, currency = "USD") => {
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "-";
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currency || "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  } catch {
-    return formatAmount(numericValue);
-  }
 };
 
 const getRateKey = (rate) =>

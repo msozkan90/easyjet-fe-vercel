@@ -39,20 +39,7 @@ import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPr
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
 import StatCard from "@/components/ui/StatCard";
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import { formatAmount } from "@/utils/formatMoney";
 
 const formatDateTime = (value, fallback = "-") =>
   value ? moment(value).format("LLL") : fallback;

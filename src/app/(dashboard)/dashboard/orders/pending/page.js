@@ -30,22 +30,9 @@ import ManualOrderModal from "@/components/modals/ManualOrderModal";
 import OrdersStatusListPage from "../OrdersStatusListPage";
 import { useOrderDesignUploadQueue } from "@/components/orders/OrderDesignUploadQueueProvider";
 import { hasAnyRole } from "@/utils/rbac";
+import { formatAmount } from "@/utils/formatMoney";
 
 const PENDING_STATUSES = ["newOrder", "waitingForDesign"];
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const toNullableString = (value) => {
   if (value === undefined || value === null) {

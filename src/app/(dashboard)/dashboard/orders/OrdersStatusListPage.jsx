@@ -28,6 +28,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useSelector } from "react-redux";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 
@@ -37,20 +38,6 @@ const createDefaultToolbarFilters = () => ({
   status: [],
   order_date: undefined,
 });
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const isReorderedOrder = (record) => {
   if (record?.is_reordered || record?.order?.is_reordered) return true;
