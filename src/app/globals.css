@@ -200,6 +200,18 @@ body {
   font-weight: 500;
 }
 
+/* Toolbar action groups wrap instead of overflowing on narrow screens */
+.ej-toolbar-actions .ant-space {
+  flex-wrap: wrap;
+}
+
+/* Long tags and option lists stay inside mobile cards */
+.ej-mobile-card .ant-tag {
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+
 /* CrudTable surface */
 .ej-table-surface {
   border: 1px solid var(--ej-border);

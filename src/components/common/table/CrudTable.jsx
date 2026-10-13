@@ -9,7 +9,7 @@ import {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Table, Space, Button, Input, Select, DatePicker } from "antd";
+import { Table, Space, Button, Input, Select, DatePicker, Grid } from "antd";
 import {
   SearchOutlined,
   FilterFilled,
@@ -19,6 +19,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import dayjs from "dayjs";
 import { palette } from "@/theme/tokens";
 import { EmptyState, ErrorState } from "@/components/ui/StateView";
+import MobileCardList from "./MobileCardList";
 
 const { RangePicker } = DatePicker;
 
@@ -225,10 +226,14 @@ const CrudTable = forwardRef(function CrudTable(
     onFiltersChange,
     showRefresh = true,
     tableProps = {},
+    // "cards" renders rows as cards on phones; "table" keeps the table.
+    mobileLayout = "cards",
   },
   ref
 ) {
   const tTable = useTranslations("common.table");
+  const screens = Grid.useBreakpoint();
+  const showCards = mobileLayout === "cards" && screens.md === false;
   const tActions = useTranslations("common.actions");
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -497,7 +502,7 @@ const CrudTable = forwardRef(function CrudTable(
           ) : (
             <div className="flex-1" />
           )}
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="ej-toolbar-actions flex min-w-0 shrink-0 flex-wrap items-center gap-2">
             {showRefresh ? (
               <Button
                 icon={<ReloadOutlined />}
@@ -512,12 +517,28 @@ const CrudTable = forwardRef(function CrudTable(
         </div>
       ) : null}
       {/* Table */}
-      <div className="ej-table-surface">
+      <div className={showCards ? "" : "ej-table-surface"}>
         {loadError && !loading ? (
           <div className="border-b border-line">
             <ErrorState compact onRetry={() => fetchData()} />
           </div>
         ) : null}
+        {showCards ? (
+          <MobileCardList
+            columns={effectiveColumns}
+            rows={rows}
+            rowKey={rowKey}
+            loading={loading}
+            emptyText={emptyText}
+            rowSelection={restTableProps.rowSelection}
+            pagination={{
+              current: pageState.page,
+              pageSize: pageState.pageSize,
+              total,
+              onChange: (page) => setPageState((prev) => ({ ...prev, page })),
+            }}
+          />
+        ) : (
         <Table
           rowKey={rowKey}
           loading={loading}
@@ -538,6 +559,7 @@ const CrudTable = forwardRef(function CrudTable(
           {...restTableProps}
           locale={{ ...(tableLocale || {}), emptyText }}
         />
+        )}
       </div>
     </div>
   );
