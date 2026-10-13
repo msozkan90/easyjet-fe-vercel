@@ -10,6 +10,7 @@ export default function TransferProductPriceForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   transferProducts = [],
   customers = [],
@@ -45,6 +46,7 @@ export default function TransferProductPriceForm({
       layout="vertical"
       initialValues={{ status: "active", ...(initialValues || {}) }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="transfer_product_id"

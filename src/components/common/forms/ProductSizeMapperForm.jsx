@@ -11,6 +11,7 @@ export default function ProductSizeMapperForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -97,6 +98,7 @@ export default function ProductSizeMapperForm({
         ...(initialValues || {}),
       }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

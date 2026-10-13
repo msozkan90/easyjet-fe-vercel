@@ -203,6 +203,7 @@ body {
 /* Toolbar action groups wrap instead of overflowing on narrow screens */
 .ej-toolbar-actions .ant-space {
   flex-wrap: wrap;
+  max-width: 100%;
 }
 
 /* Long tags and option lists stay inside mobile cards */

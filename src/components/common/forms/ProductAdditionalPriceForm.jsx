@@ -10,6 +10,7 @@ export default function ProductAdditionalPriceForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   customers = [],
@@ -45,6 +46,7 @@ export default function ProductAdditionalPriceForm({
       layout="vertical"
       initialValues={{ status: "active", ...(initialValues || {}) }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

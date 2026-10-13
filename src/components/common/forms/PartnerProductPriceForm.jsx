@@ -53,6 +53,7 @@ export default function PartnerProductPriceForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   customers = [],
@@ -351,6 +352,7 @@ export default function PartnerProductPriceForm({
       layout="vertical"
       form={form}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
       initialValues={initialValues}
     >
       <Form.Item

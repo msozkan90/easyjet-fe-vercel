@@ -25,6 +25,7 @@ export default function ProductForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   categories = [],
   showWithoutDesign = false,
@@ -458,6 +459,7 @@ export default function ProductForm({
         layout="vertical"
         initialValues={{ status: "active", ...(initialValues || {}) }}
         onFinish={submitHandler}
+        onValuesChange={() => onDirtyChange?.(true)}
       >
         <Form.Item
           name="name"

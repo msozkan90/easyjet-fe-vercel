@@ -17,6 +17,7 @@ export default function ProductStockForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -184,6 +185,7 @@ export default function ProductStockForm({
       layout="vertical"
       initialValues={mergedInitialValues}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

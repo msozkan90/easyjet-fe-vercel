@@ -30,6 +30,7 @@ export default function ProductPositionForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -121,6 +122,7 @@ export default function ProductPositionForm({
         layout="vertical"
         initialValues={transformedInitialValues}
         onFinish={submitHandler}
+        onValuesChange={() => onDirtyChange?.(true)}
       >
         <Form.Item
           name="product_id"

@@ -25,6 +25,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function TransferProductsPage() {
   const { message } = AntdApp.useApp();
@@ -78,6 +79,8 @@ export default function TransferProductsPage() {
     },
     normalizeListAndMeta,
   );
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const onDelete = useCallback(
     async (id) => {
@@ -253,13 +256,14 @@ export default function TransferProductsPage() {
 
       <Modal
         open={open}
-        onCancel={closeModal}
+        onCancel={guardClose(closeModal)}
         title={editingRow ? t("modal.editTitle", { name: editingRow?.name || "" }) : t("modal.createTitle")}
         footer={null}
         destroyOnHidden
       >
         <ProductForm
-          onCancel={closeModal}
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(closeModal)}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

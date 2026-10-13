@@ -23,6 +23,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function ProductSizesPage() {
   const { message } = AntdApp.useApp();
@@ -68,6 +69,8 @@ export default function ProductSizesPage() {
     },
     normalizeListAndMeta,
   );
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const onDelete = useCallback(
     async (id) => {
@@ -394,18 +397,19 @@ export default function ProductSizesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductSizeForm
-          onCancel={() => {
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
             setOpen(false);
             setEditingRow(null);
-          }}
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

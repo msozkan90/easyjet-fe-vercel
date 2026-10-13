@@ -31,6 +31,7 @@ import {
   serializeDesignArea,
 } from "@/utils/designArea";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function ProductPositionsPage() {
   const { message } = AntdApp.useApp();
@@ -71,6 +72,8 @@ export default function ProductPositionsPage() {
     },
     normalizeListAndMeta,
   );
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const onDelete = useCallback(
     async (id) => {
@@ -265,18 +268,19 @@ export default function ProductPositionsPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductPositionForm
-          onCancel={() => {
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
             setOpen(false);
             setEditingRow(null);
-          }}
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

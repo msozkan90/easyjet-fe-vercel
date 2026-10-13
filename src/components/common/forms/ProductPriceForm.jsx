@@ -17,6 +17,7 @@ export default function ProductPriceForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   customers = [],
@@ -183,6 +184,7 @@ export default function ProductPriceForm({
       layout="vertical"
       initialValues={mergedInitialValues}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

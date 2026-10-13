@@ -24,6 +24,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { formatPrice, pickBasePrice, toNumeric } from "@/utils/priceHelpers";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const resolveBasePrice = (record) => {
   if (!record || typeof record !== "object") {
@@ -186,6 +187,8 @@ export default function PartnerToCustomerProductPricesPage() {
       normalizeListAndMeta
     );
   }, [partnerId]);
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const onDelete = useCallback(
     async (id) => {
@@ -402,18 +405,19 @@ export default function PartnerToCustomerProductPricesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <PartnerProductPriceForm
-          onCancel={() => {
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
             setOpen(false);
             setEditingRow(null);
-          }}
+          })}
           partnerId={partnerId}
           onFinish={onSubmit}
           submitText={

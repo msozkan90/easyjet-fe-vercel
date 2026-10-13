@@ -10,6 +10,7 @@ export default function ProductSizeForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -32,6 +33,7 @@ export default function ProductSizeForm({
         ...(isEdit ? {} : { nameList: [""] }),
       }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

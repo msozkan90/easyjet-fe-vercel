@@ -42,6 +42,7 @@ export default function ProductColorForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -64,6 +65,7 @@ export default function ProductColorForm({
         ...(isEdit ? {} : { colorList: [{ name: "", hex_code: undefined }] }),
       }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

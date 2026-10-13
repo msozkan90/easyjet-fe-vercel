@@ -24,6 +24,7 @@ import {
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const { Title } = Typography;
 
@@ -131,6 +132,8 @@ export default function FundingAccountsAdminPage() {
       setSubmitting(false);
     }
   };
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const handleDelete = useCallback(
     async (record) => {
@@ -269,14 +272,14 @@ export default function FundingAccountsAdminPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form onValuesChange={() => onDirtyChange(true)} form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
             label={t("fields.displayName")}
             name="display_name"

@@ -9,6 +9,7 @@ export default function ProductMapperForm({
   initialValues,
   onFinish,
   onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
@@ -29,6 +30,7 @@ export default function ProductMapperForm({
         ...(initialValues || {}),
       }}
       onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"

@@ -30,6 +30,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import MoneyText from "@/components/ui/MoneyText";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function WalletTopupsListPage() {
   const { message } = AntdApp.useApp();
@@ -144,6 +145,8 @@ export default function WalletTopupsListPage() {
       setSubmitting(false);
     }
   };
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const handleCancel = useCallback(
     async (record) => {
@@ -279,11 +282,11 @@ export default function WalletTopupsListPage() {
         <Modal
           title={t("form.title")}
           open={open}
-          onCancel={() => setOpen(false)}
+          onCancel={guardClose(() => setOpen(false))}
           footer={null}
           destroyOnHidden
         >
-          <Form
+          <Form onValuesChange={() => onDirtyChange(true)}
             form={form}
             layout="vertical"
             initialValues={{ currency: "USD" }}

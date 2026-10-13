@@ -25,6 +25,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const TRANSFER_CATEGORIES = new Set(["transfer", "transfers"]);
 
@@ -184,6 +185,8 @@ export default function TransferProductPricesPage() {
     },
     normalizeListAndMeta,
   );
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
 
   const onDelete = useCallback(
     async (id) => {
@@ -387,18 +390,19 @@ export default function TransferProductPricesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <TransferProductPriceForm
-          onCancel={() => {
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
             setOpen(false);
             setEditingRow(null);
-          }}
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")
