@@ -1,30 +1,13 @@
 "use client";
 
-import {
-  AppstoreOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
-import { FloatButton, Grid, Popconfirm, theme } from "antd";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { Button, Popconfirm } from "antd";
 
-const DOCK_STYLE = {
-  position: "fixed",
-  right: 24,
-  bottom: 24,
-  zIndex: 1200,
-  display: "flex",
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 12,
-};
-
-const BASE_BUTTON_STYLE = {
-  position: "static",
-  width: 56,
-  height: 56,
-};
-
+/**
+ * Bulk action bar shown at the bottom of the screen while rows are selected:
+ * selection summary on the left, the cancel and approve actions on the right.
+ * Both actions keep their confirmation step.
+ */
 export default function SelectionFloatActions({
   count,
   selectedLabel,
@@ -40,91 +23,64 @@ export default function SelectionFloatActions({
   onApprove,
   onCancel,
 }) {
-  const { token } = theme.useToken();
-  const screens = Grid.useBreakpoint();
   const busy = approving || cancelling;
 
   return (
     <div
-      style={{
-        ...DOCK_STYLE,
-        right: screens.xs && !screens.sm ? 12 : 24,
-        bottom: screens.xs && !screens.sm ? 12 : 24,
-        flexWrap: screens.xs && !screens.sm ? "wrap" : "nowrap",
-        justifyContent: screens.xs && !screens.sm ? "flex-end" : "flex-start",
-      }}
+      role="region"
+      aria-label={selectedLabel}
+      className="fixed bottom-4 left-1/2 z-[1200] flex w-[min(640px,calc(100vw-24px))] -translate-x-1/2 flex-wrap items-center justify-between gap-3 rounded-xl bg-ink-900 px-4 py-3 text-white shadow-[0_16px_40px_rgba(10,26,36,0.32)] md:bottom-6"
     >
-      <Popconfirm
-        title={confirmApproveTitle}
-        okText={confirmApproveOk}
-        okButtonProps={{ loading: approving, type: "primary" }}
-        onConfirm={onApprove}
-        disabled={busy}
-        placement="top"
-      >
-        <div>
-          <FloatButton
-            tooltip={approveTooltip}
+      <div className="flex items-center gap-3">
+        <span
+          className="ej-mono inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-600 px-2 text-sm font-semibold"
+          aria-hidden="true"
+        >
+          {count}
+        </span>
+        <span className="text-sm font-medium">{selectedLabel}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Popconfirm
+          title={confirmCancelTitle}
+          okText={confirmCancelOk}
+          cancelText={confirmCancelDismiss}
+          okButtonProps={{ loading: cancelling, danger: true }}
+          onConfirm={onCancel}
+          disabled={busy}
+          placement="top"
+        >
+          <Button
+            icon={<CloseOutlined />}
+            loading={cancelling}
+            disabled={busy}
+            style={{
+              background: "var(--ej-ink-800)",
+              borderColor: "var(--ej-ink-700)",
+              color: "#FFFFFF",
+            }}
+          >
+            {cancelTooltip}
+          </Button>
+        </Popconfirm>
+        <Popconfirm
+          title={confirmApproveTitle}
+          okText={confirmApproveOk}
+          okButtonProps={{ loading: approving, type: "primary" }}
+          onConfirm={onApprove}
+          disabled={busy}
+          placement="top"
+        >
+          <Button
             type="primary"
-            icon={approving ? <LoadingOutlined /> : <CheckOutlined />}
-            style={{
-              ...BASE_BUTTON_STYLE,
-              background: busy
-                ? token.colorBgContainerDisabled
-                : token.colorPrimary,
-              boxShadow: busy
-                ? token.boxShadowSecondary
-                : "0 12px 24px rgba(196, 86, 11, 0.32)",
-              color: "#fff",
-              border: `1px solid ${busy ? token.colorBorder : token.colorPrimaryHover}`,
-              opacity: busy ? 0.72 : 1,
-            }}
-          />
-        </div>
-      </Popconfirm>
-
-      <Popconfirm
-        title={confirmCancelTitle}
-        okText={confirmCancelOk}
-        cancelText={confirmCancelDismiss}
-        okButtonProps={{ loading: cancelling, danger: true }}
-        onConfirm={onCancel}
-        disabled={busy}
-        placement="top"
-      >
-        <div>
-          <FloatButton
-            tooltip={cancelTooltip}
-            type="danger"
-            icon={cancelling ? <LoadingOutlined /> : <CloseOutlined />}
-            style={{
-              ...BASE_BUTTON_STYLE,
-              background: busy
-                ? token.colorBgContainerDisabled
-                : token.colorError,
-              boxShadow: busy
-                ? token.boxShadowSecondary
-                : "0 12px 24px rgba(180, 35, 24, 0.28)",
-              color: "#fff",
-              border: `1px solid ${busy ? token.colorBorder : token.colorErrorHover}`,
-              opacity: busy ? 0.72 : 1,
-            }}
-          />
-        </div>
-      </Popconfirm>
-
-      <FloatButton
-        tooltip={selectedLabel}
-        icon={<AppstoreOutlined />}
-        badge={{ count, overflowCount: 999 }}
-        style={{
-          ...BASE_BUTTON_STYLE,
-          background: token.colorBgElevated,
-          boxShadow: token.boxShadowSecondary,
-          color: token.colorText,
-          border: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      />
+            icon={<CheckOutlined />}
+            loading={approving}
+            disabled={busy}
+          >
+            {approveTooltip}
+          </Button>
+        </Popconfirm>
+      </div>
     </div>
   );
 }

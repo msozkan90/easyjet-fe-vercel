@@ -34,7 +34,14 @@ export const nodeText = (node) => {
 
 export function findActiveNavItem(items, pathname, searchParams) {
   const normalizedPath = (pathname || "/").replace(/\/+$/, "") || "/";
-  let best = { score: -1, key: null, ancestors: [], item: null, trail: [] };
+  let best = {
+    score: -1,
+    key: null,
+    ancestors: [],
+    item: null,
+    trail: [],
+    siblings: [],
+  };
 
   const walk = (list, ancestors, trail) => {
     (list || []).forEach((item) => {
@@ -51,9 +58,15 @@ export function findActiveNavItem(items, pathname, searchParams) {
       if (!target) return;
       const score = scoreMatch(target, normalizedPath, searchParams);
       if (score > best.score) {
-        best = { score, key: item.key, ancestors, item, trail };
+        best = { score, key: item.key, ancestors, item, trail, siblings: list };
       }
     });
+  };
+
+  const toLink = (item) => {
+    const href = item?.label?.props?.href;
+    if (!item || item.type === "divider" || item.children || !href) return null;
+    return { key: item.key, title: nodeText(item.label), href };
   };
 
   walk(items, [], []);
@@ -64,6 +77,8 @@ export function findActiveNavItem(items, pathname, searchParams) {
         exact: best.score >= 10000,
         title: nodeText(best.item?.label),
         trail: best.trail.filter(Boolean),
+        parentKey: best.ancestors[best.ancestors.length - 1] || null,
+        siblings: (best.siblings || []).map(toLink).filter(Boolean),
       }
     : {
         selectedKey: null,
@@ -71,5 +86,7 @@ export function findActiveNavItem(items, pathname, searchParams) {
         exact: false,
         title: "",
         trail: [],
+        parentKey: null,
+        siblings: [],
       };
 }

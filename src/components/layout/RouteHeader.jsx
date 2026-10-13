@@ -2,6 +2,16 @@
 
 import { useSelector } from "react-redux";
 import PageHeader from "@/components/ui/PageHeader";
+import RouteTabs from "@/components/layout/RouteTabs";
+
+// Sidebar groups whose items are steps of the same order list; their routes
+// are shown as tabs under the page title.
+const TABBED_GROUPS = new Set([
+  "order",
+  "transfer-orders",
+  "orders-affiliated",
+  "transfer-orders-affiliated",
+]);
 
 /**
  * Default page heading for dashboard routes, derived from the active sidebar
@@ -20,12 +30,22 @@ export default function RouteHeader() {
   const breadcrumb = trail.length
     ? [...trail.map((title) => ({ title })), { title: activeNav.title }]
     : undefined;
+  const showTabs = TABBED_GROUPS.has(activeNav.parentKey);
 
   return (
-    <PageHeader
-      title={activeNav.title}
-      breadcrumb={breadcrumb}
-      replacesRouteHeader={false}
-    />
+    <>
+      <PageHeader
+        title={activeNav.title}
+        breadcrumb={breadcrumb}
+        replacesRouteHeader={false}
+      />
+      {showTabs ? (
+        <RouteTabs
+          items={activeNav.siblings}
+          activeKey={activeNav.selectedKey}
+          ariaLabel={trail[trail.length - 1] || activeNav.title}
+        />
+      ) : null}
+    </>
   );
 }

@@ -50,7 +50,7 @@ export default function PageHeader({
                   {crumb.href && !isLast ? (
                     <Link
                       href={crumb.href}
-                      className="text-text-secondary no-underline hover:text-text"
+                      className="text-text-secondary! no-underline hover:text-text!"
                     >
                       {crumb.title}
                     </Link>

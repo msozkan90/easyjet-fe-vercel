@@ -1308,10 +1308,18 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
       : []),
   ];
 
-  const { selectedKey, ancestorKeys, exact, title, trail } =
-    findActiveNavItem(items, pathname, searchParams);
+  const {
+    selectedKey,
+    ancestorKeys,
+    exact,
+    title,
+    trail,
+    parentKey,
+    siblings,
+  } = findActiveNavItem(items, pathname, searchParams);
   const dispatch = useDispatch();
   const trailSignature = trail.join("\u0000");
+  const siblingsSignature = JSON.stringify(siblings);
 
   useEffect(() => {
     dispatch(
@@ -1319,9 +1327,20 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
         title: exact ? title : "",
         trail: exact && trailSignature ? trailSignature.split("\u0000") : [],
         exact,
+        selectedKey: exact ? selectedKey : null,
+        parentKey: exact ? parentKey : null,
+        siblings: exact ? JSON.parse(siblingsSignature) : [],
       }),
     );
-  }, [dispatch, exact, title, trailSignature]);
+  }, [
+    dispatch,
+    exact,
+    title,
+    trailSignature,
+    selectedKey,
+    parentKey,
+    siblingsSignature,
+  ]);
   const ancestorSignature = ancestorKeys.join("|");
   const [openKeys, setOpenKeys] = useState(ancestorKeys);
 

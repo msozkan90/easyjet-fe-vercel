@@ -73,7 +73,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-wrap bg-surface">
-      <section className="relative flex flex-[1_1_420px] flex-col justify-between gap-12 overflow-hidden bg-ink-900 px-6 py-5 text-white md:px-14 md:py-12">
+      <section className="relative flex flex-[1_1_420px] flex-col gap-12 overflow-hidden bg-ink-900 px-6 py-5 text-white md:px-14 md:py-12">
         <Image
           src="/white_text_logo.png"
           alt="EasyJet"
@@ -90,16 +90,13 @@ export default function LoginPage() {
           aria-hidden="true"
           className="pointer-events-none absolute -right-28 bottom-40 hidden h-28 w-[520px] -skew-y-[27deg] bg-brand-500 opacity-90 md:block"
         />
-        <div className="relative hidden max-w-md flex-col gap-4 md:flex">
+        <div className="relative hidden max-w-md flex-col gap-4 md:my-auto md:flex">
           <h1 className="m-0 text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
             {t("brand.headline")}
           </h1>
           <p className="m-0 text-base leading-relaxed text-ink-200">
             {t("brand.body")}
           </p>
-        </div>
-        <div className="relative hidden text-[13px] text-ink-300 md:block">
-          © {new Date().getFullYear()} EasyJet
         </div>
       </section>
 
@@ -156,6 +153,9 @@ export default function LoginPage() {
               </Button>
             </Form>
           </div>
+        </div>
+        <div className="text-center text-xs text-ink-400">
+          © {new Date().getFullYear()} EasyJet
         </div>
       </section>
     </div>
