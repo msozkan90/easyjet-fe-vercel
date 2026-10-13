@@ -5,7 +5,7 @@ import { Provider, useDispatch } from "react-redux";
 import { store } from "../redux/store";
 import { App as AntdApp, ConfigProvider, theme } from "antd";
 import "@ant-design/v5-patch-for-react-19";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { AuthAPI, CategoriesAPI } from "@/utils/api";
 import { logoutLocal, setUser } from "@/redux/features/authSlice";
 import { resetBalance } from "@/redux/features/balanceSlice";
@@ -23,6 +23,7 @@ import { ensureCsrfSeed } from "@/utils/http";
 import { installErrorMonitoring } from "@/utils/telemetry.mjs";
 import { RoleEnum } from "@/utils/consts";
 import { getAntdTheme } from "@/theme/tokens";
+import { ThemeModeProvider, useThemeMode } from "@/theme/ThemeModeProvider";
 import { useLocaleInfo } from "@/i18n/use-translations";
 import trTR from "antd/locale/tr_TR";
 import enUS from "antd/locale/en_US";
@@ -30,8 +31,6 @@ import dayjs from "dayjs";
 import "dayjs/locale/tr";
 import moment from "moment";
 import "moment/locale/tr";
-
-const antdTheme = getAntdTheme(theme);
 
 function ErrorMonitoring() {
   useEffect(() => installErrorMonitoring(), []);
@@ -101,27 +100,39 @@ function applyDateLocale(locale) {
   if (moment.locale() !== next) moment.locale(next);
 }
 
+function ThemedConfigProvider({ locale, children }) {
+  const { mode } = useThemeMode();
+  const antdTheme = useMemo(() => getAntdTheme(theme, mode), [mode]);
+  return (
+    <ConfigProvider theme={antdTheme} locale={ANTD_LOCALES[locale] || enUS}>
+      {children}
+    </ConfigProvider>
+  );
+}
+
 export function Providers({ children }) {
   const { locale } = useLocaleInfo();
   applyDateLocale(locale);
 
   return (
     <Provider store={store}>
-      <ConfigProvider theme={antdTheme} locale={ANTD_LOCALES[locale] || enUS}>
-        <AntdApp>
-          <TransferDesignUploadQueueProvider>
-            <OrderDesignUploadQueueProvider>
-              <OrdersPdfDesignUploadQueueProvider>
-                <DownloadQueueProvider>
-                  <AuthBootstrap />
-                  <ErrorMonitoring />
-                  {children}
-                </DownloadQueueProvider>
-              </OrdersPdfDesignUploadQueueProvider>
-            </OrderDesignUploadQueueProvider>
-          </TransferDesignUploadQueueProvider>
-        </AntdApp>
-      </ConfigProvider>
+      <ThemeModeProvider>
+        <ThemedConfigProvider locale={locale}>
+          <AntdApp>
+            <TransferDesignUploadQueueProvider>
+              <OrderDesignUploadQueueProvider>
+                <OrdersPdfDesignUploadQueueProvider>
+                  <DownloadQueueProvider>
+                    <AuthBootstrap />
+                    <ErrorMonitoring />
+                    {children}
+                  </DownloadQueueProvider>
+                </OrdersPdfDesignUploadQueueProvider>
+              </OrderDesignUploadQueueProvider>
+            </TransferDesignUploadQueueProvider>
+          </AntdApp>
+        </ThemedConfigProvider>
+      </ThemeModeProvider>
     </Provider>
   );
 }

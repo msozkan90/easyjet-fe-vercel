@@ -52,19 +52,119 @@ body,
   --ej-radius-modal: 14px;
   --ej-shadow-overlay: 0 12px 32px rgba(15, 36, 51, 0.16);
 
+  --ej-avatar-bg: #0f2433;
+
   --background: var(--ej-canvas);
   --foreground: var(--ej-text);
 }
 
 :root[data-theme="dark"] {
   --ej-canvas: #0a1a24;
-  --ej-surface: #0f2433;
-  --ej-subtle: #1a3446;
+  --ej-surface: #102231;
+  --ej-subtle: #15293a;
   --ej-muted: #1a3446;
-  --ej-border: #1a3446;
+  --ej-border: #22394b;
   --ej-border-strong: #2e4a5d;
   --ej-text: #e6ecf0;
-  --ej-text-secondary: #b9c6cf;
+  --ej-text-secondary: #a9b8c3;
+
+  /* Brand tints used as backgrounds/text become translucent/lighter */
+  --ej-orange-800: #ffb27a;
+  --ej-orange-700: #f7934a;
+  --ej-orange-100: rgba(245, 122, 31, 0.22);
+  --ej-orange-50: rgba(245, 122, 31, 0.14);
+
+  --ej-success: #5cc493;
+  --ej-success-bg: rgba(30, 122, 76, 0.22);
+  --ej-warning: #f2c063;
+  --ej-warning-bg: rgba(185, 137, 0, 0.2);
+  --ej-danger: #f28b82;
+  --ej-danger-bg: rgba(180, 35, 24, 0.22);
+  --ej-info: #8ec1f0;
+  --ej-info-bg: rgba(31, 95, 153, 0.25);
+
+  --ej-shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.4);
+  --ej-avatar-bg: #2e4a5d;
+}
+
+/* Dark variants of the status pills */
+:root[data-theme="dark"] .ej-status--info {
+  --ej-status-fg: #8ec1f0;
+  --ej-status-bg: rgba(31, 95, 153, 0.25);
+}
+:root[data-theme="dark"] .ej-status--waiting {
+  --ej-status-fg: #f2c063;
+  --ej-status-bg: rgba(185, 137, 0, 0.2);
+}
+:root[data-theme="dark"] .ej-status--production {
+  --ej-status-fg: #b9a6f2;
+  --ej-status-bg: rgba(91, 63, 176, 0.28);
+}
+:root[data-theme="dark"] .ej-status--printed {
+  --ej-status-fg: #a5b2f0;
+  --ej-status-bg: rgba(61, 79, 168, 0.28);
+}
+:root[data-theme="dark"] .ej-status--success {
+  --ej-status-fg: #5cc493;
+  --ej-status-bg: rgba(30, 122, 76, 0.22);
+}
+:root[data-theme="dark"] .ej-status--shipped {
+  --ej-status-fg: #63c7cc;
+  --ej-status-bg: rgba(15, 110, 115, 0.26);
+}
+:root[data-theme="dark"] .ej-status--danger {
+  --ej-status-fg: #f28b82;
+  --ej-status-bg: rgba(180, 35, 24, 0.22);
+}
+:root[data-theme="dark"] .ej-status--refund {
+  --ej-status-fg: #f0a3c3;
+  --ej-status-bg: rgba(163, 48, 95, 0.26);
+}
+:root[data-theme="dark"] .ej-status--neutral {
+  --ej-status-fg: #a9b8c3;
+  --ej-status-bg: #1a3446;
+}
+
+/* Multi-item order row tints in dark mode */
+:root[data-theme="dark"] .ant-table-row.orders-nested-row > td,
+:root[data-theme="dark"] .ant-table-row.orders-child-row > td {
+  background-color: #13283a;
+}
+:root[data-theme="dark"] .ant-table-row.orders-parent-row > td {
+  background-color: #17314a !important;
+}
+:root[data-theme="dark"] .ant-table-row.orders-parent-row:hover > td,
+:root[data-theme="dark"] .ant-table-row.orders-nested-row:hover > td {
+  background-color: #1c3a56 !important;
+}
+:root[data-theme="dark"] .ant-table-row.transfer-status-row > td {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 14%,
+    #102231
+  ) !important;
+}
+:root[data-theme="dark"] .ant-table-row.transfer-status-row:hover > td {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 22%,
+    #102231
+  ) !important;
+}
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td,
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-left,
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-right {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 7%,
+    #102231
+  ) !important;
 }
 
 @theme inline {
@@ -120,6 +220,12 @@ body {
 
 .ej-mono {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Initials avatar background that follows the theme */
+.ant-avatar.ej-avatar {
+  background: var(--ej-avatar-bg);
+  color: #ffffff;
 }
 
 /* Status pill (src/components/ui/StatusTag.jsx) */
@@ -375,13 +481,21 @@ a:focus-visible,
 .ant-table-row.transfer-status-row > td,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-right {
-  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 11%, #ffffff) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 11%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row:hover > td,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-right {
-  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 16%, #ffffff) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 16%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row > td,
@@ -389,7 +503,11 @@ a:focus-visible,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row
   > td.ant-table-cell-fix-right {
-  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 4%, #ffffff) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 4%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row:hover > td,
@@ -397,7 +515,11 @@ a:focus-visible,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row:hover
   > td.ant-table-cell-fix-right {
-  background-color: color-mix(in srgb, rgb(var(--transfer-status-rgb)) 8%, #ffffff) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 8%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-newOrder {

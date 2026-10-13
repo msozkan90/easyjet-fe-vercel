@@ -163,28 +163,86 @@ const baseComponents = {
   },
 };
 
-// Dark mode is not enabled yet; the overrides below only keep the
-// infrastructure ready (see `[data-theme="dark"]` in globals.css).
+// Dark surfaces; mirrored by the [data-theme="dark"] block in globals.css.
+export const darkPalette = {
+  canvas: "#0A1A24",
+  surface: "#102231",
+  subtle: "#15293A",
+  muted: "#1A3446",
+  border: "#22394B",
+  borderStrong: "#2E4A5D",
+  text: "#E6ECF0",
+  textSecondary: "#A9B8C3",
+  textTertiary: "#7F93A2",
+  link: "#F7934A",
+  linkHover: "#FFB27A",
+};
+
+const dp = darkPalette;
+
 const darkToken = {
-  colorTextBase: "#E6ECF0",
-  colorText: "#E6ECF0",
-  colorTextSecondary: p.ink200,
+  colorTextBase: dp.text,
+  colorText: dp.text,
+  colorTextSecondary: dp.textSecondary,
+  colorTextTertiary: dp.textTertiary,
+  colorTextQuaternary: p.ink400,
   colorTextHeading: "#FFFFFF",
-  colorBgLayout: p.ink950,
-  colorBgContainer: p.ink900,
-  colorBorder: p.ink700,
-  colorBorderSecondary: p.ink800,
-  colorSplit: p.ink800,
-  colorFillAlter: p.ink800,
+  colorBgLayout: dp.canvas,
+  colorBgContainer: dp.surface,
+  colorBgElevated: dp.subtle,
+  colorBorder: dp.borderStrong,
+  colorBorderSecondary: dp.border,
+  colorSplit: dp.border,
+  colorFillAlter: dp.subtle,
+  colorLink: dp.link,
+  colorLinkHover: dp.linkHover,
+  colorLinkActive: dp.linkHover,
+  colorPrimaryText: dp.link,
+  colorPrimaryTextHover: dp.linkHover,
+  colorPrimaryBg: "rgba(245, 122, 31, 0.14)",
+  colorPrimaryBgHover: "rgba(245, 122, 31, 0.22)",
+  boxShadow: "0 16px 40px rgba(0, 0, 0, 0.45)",
+  boxShadowSecondary: "0 12px 32px rgba(0, 0, 0, 0.4)",
+};
+
+const darkComponents = {
+  Layout: { headerBg: dp.surface, bodyBg: dp.canvas },
+  Table: {
+    headerBg: dp.subtle,
+    headerColor: dp.textSecondary,
+    headerSortActiveBg: dp.muted,
+    rowHoverBg: dp.subtle,
+    rowSelectedBg: "rgba(245, 122, 31, 0.12)",
+    rowSelectedHoverBg: "rgba(245, 122, 31, 0.18)",
+    borderColor: dp.border,
+    footerBg: dp.subtle,
+  },
+  Tabs: {
+    itemColor: dp.textSecondary,
+    itemSelectedColor: "#FFFFFF",
+    itemHoverColor: "#FFFFFF",
+    itemActiveColor: "#FFFFFF",
+  },
+  Tag: { defaultBg: dp.muted, defaultColor: dp.text },
 };
 
 export const THEME_MODES = Object.freeze({ LIGHT: "light", DARK: "dark" });
+
+const mergeComponents = (base, overrides) =>
+  Object.fromEntries(
+    Object.entries({ ...base, ...overrides }).map(([name]) => [
+      name,
+      { ...(base[name] || {}), ...(overrides[name] || {}) },
+    ]),
+  );
 
 export function getAntdTheme(algorithms, mode = THEME_MODES.LIGHT) {
   const isDark = mode === THEME_MODES.DARK;
   return {
     algorithm: isDark ? algorithms.darkAlgorithm : algorithms.defaultAlgorithm,
     token: isDark ? { ...baseToken, ...darkToken } : baseToken,
-    components: baseComponents,
+    components: isDark
+      ? mergeComponents(baseComponents, darkComponents)
+      : baseComponents,
   };
 }

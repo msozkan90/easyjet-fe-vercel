@@ -21,6 +21,8 @@ import {
   LogoutOutlined,
   SettingOutlined,
   SearchOutlined,
+  MoonOutlined,
+  SunOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleMobileNav, toggleSidebar } from "@/redux/features/uiSlice";
@@ -33,13 +35,16 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { useTranslations } from "@/i18n/use-translations";
-import { palette } from "@/theme/tokens";
 import { hasAnyRole } from "@/utils/rbac";
+import { useThemeMode } from "@/theme/ThemeModeProvider";
+import { THEME_MODES } from "@/theme/tokens";
 
 const { Header } = Layout;
 
 export default function HeaderBar({ isMobile = false }) {
   const { message } = AntdApp.useApp();
+  const { mode: themeMode, toggleMode } = useThemeMode();
+  const isDarkMode = themeMode === THEME_MODES.DARK;
   const tNavbar = useTranslations("common.navbar");
   const dispatch = useDispatch();
   const router = useRouter();
@@ -90,6 +95,12 @@ export default function HeaderBar({ isMobile = false }) {
           },
         ]
       : []),
+    {
+      key: "theme",
+      icon: isDarkMode ? <SunOutlined /> : <MoonOutlined />,
+      label: isDarkMode ? tNavbar("lightMode") : tNavbar("darkMode"),
+      onClick: toggleMode,
+    },
     { type: "divider" },
     {
       key: "logout",
@@ -192,14 +203,14 @@ export default function HeaderBar({ isMobile = false }) {
   return (
     <Header
       style={{
-        background: palette.surface,
+        background: "var(--ej-surface)",
         height: 60,
         lineHeight: "normal",
         display: "flex",
         alignItems: "center",
         gap: isMobile ? 8 : 12,
         padding: isMobile ? "0 12px" : "0 24px",
-        borderBottom: `1px solid ${palette.border}`,
+        borderBottom: "1px solid var(--ej-border)",
       }}
     >
       <Button
@@ -324,11 +335,11 @@ export default function HeaderBar({ isMobile = false }) {
             }}
           >
             <Avatar
+              className="ej-avatar"
               size={32}
               src={user?.avatar_url || undefined}
               icon={!userInitials ? <UserOutlined /> : undefined}
               style={{
-                background: palette.ink900,
                 color: "#FFFFFF",
                 fontWeight: 600,
                 fontSize: 13,

@@ -30,7 +30,9 @@
       "openNavigation": "Open menu",
       "balance": "Balance",
       "userMenu": "User menu",
-      "search": "Search"
+      "search": "Search",
+      "darkMode": "Dark mode",
+      "lightMode": "Light mode"
     },
     "actions": {
       "search": "Search",

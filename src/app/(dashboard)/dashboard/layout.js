@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }) {
             flex: 1,
             overflow: "auto",
             padding: isMobile ? 12 : 24,
-            background: palette.canvas,
+            background: "var(--ej-canvas)",
           }}
         >
           <PageContainer>

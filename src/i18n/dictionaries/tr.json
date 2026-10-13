@@ -30,7 +30,9 @@
       "openNavigation": "Menüyü aç",
       "balance": "Bakiye",
       "userMenu": "Kullanıcı menüsü",
-      "search": "Ara"
+      "search": "Ara",
+      "darkMode": "Koyu tema",
+      "lightMode": "Açık tema"
     },
     "actions": {
       "search": "Ara",

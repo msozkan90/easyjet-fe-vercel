@@ -27,7 +27,6 @@ import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
 import FormActions from "@/components/ui/FormActions";
-import { palette } from "@/theme/tokens";
 
 const { Text } = Typography;
 
@@ -275,12 +274,13 @@ function ProfileHeader({ user, roles, tProfile, uploadProps, loadingAvatar }) {
     <section className="flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex min-w-0 items-center gap-4">
         <Avatar
+              className="ej-avatar"
           size={72}
           src={user?.avatar_url}
           icon={!user?.avatar_url && !initials ? <UserOutlined /> : undefined}
           style={{
             flexShrink: 0,
-            background: palette.ink900,
+            
             color: "#FFFFFF",
             fontSize: 24,
             fontWeight: 600,
