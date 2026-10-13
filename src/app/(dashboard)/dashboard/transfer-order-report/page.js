@@ -743,7 +743,7 @@ export default function TransferOrderReportPage() {
 
         <Card
           title={t("table.title")}
-          bordered={false}
+          variant="borderless"
           
         >
           <Table
@@ -771,7 +771,7 @@ export default function TransferOrderReportPage() {
             setDrawerOpen(false);
             setDetailData(null);
           }}
-          destroyOnClose
+          destroyOnHidden
         >
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
             <Row gutter={[16, 16]}>

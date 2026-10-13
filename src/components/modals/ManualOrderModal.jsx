@@ -449,11 +449,11 @@ export default function ManualOrderModal({ open, onCancel, onCreated }) {
         onCancel={() => setAddressOpen(false)}
         onSave={saveAddress}
         editForm={addressForm}
-        editingOrder={{ order_number: form.getFieldValue("order_number") || "-", order_date: form.getFieldValue("order_date") || "-" }}
+        editingOrder={{ order_number: (open && form.getFieldValue("order_number")) || "-", order_date: (open && form.getFieldValue("order_date")) || "-" }}
         onAddressSelect={selectAddress}
         showBillToName={false}
         showRecipientFields
-        orderDateLabel={form.getFieldValue("order_date")?.format?.("YYYY-MM-DD HH:mm:ss") || "-"}
+        orderDateLabel={(open && form.getFieldValue("order_date")?.format?.("YYYY-MM-DD HH:mm:ss")) || "-"}
         zIndex={1600}
       />
     </>

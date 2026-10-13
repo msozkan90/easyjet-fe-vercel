@@ -140,13 +140,13 @@ const ItemDesignPreview = ({
               ) : null
             }
             className="rounded-xl border border-line"
-            bodyStyle={{
+            styles={{ body: {
               display: "flex",
               flexDirection: "column",
               gap: 12,
               flex: 1,
               padding: 16,
-            }}
+            } }}
           >
             <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
               {previewImageUrl ? (
@@ -270,7 +270,7 @@ const OrderItemCard = ({
   return (
     <Card
       className="rounded-xl border border-line"
-      bodyStyle={{ padding: 20 }}
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row">
         <div className="w-full max-w-[240px] rounded-xl border border-line bg-surface p-3">

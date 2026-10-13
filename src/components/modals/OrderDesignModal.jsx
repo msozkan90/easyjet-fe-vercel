@@ -1111,11 +1111,13 @@ export default function OrderDesignModal({
             </Popconfirm>
           ) : null
         }
-        bodyStyle={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          flex: 1,
+        styles={{
+          body: {
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            flex: 1,
+          },
         }}
       >
         <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
@@ -1408,7 +1410,7 @@ export default function OrderDesignModal({
         onCancel={handleCancel}
         width="min(1200px, 95vw)"
         zIndex={zIndex}
-        destroyOnClose={false}
+        destroyOnHidden={false}
         styles={{
           body: {
             maxHeight: "calc(100vh - 220px)",
@@ -1446,7 +1448,7 @@ export default function OrderDesignModal({
           <div className="space-y-4">
             <Card
               title={t("orderInfo.title")}
-              bodyStyle={{ padding: 24 }}
+              styles={{ body: { padding: 24 } }}
               className="w-full"
             >
               <div className="mx-auto flex w-full flex-col gap-6">

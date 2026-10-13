@@ -1341,6 +1341,12 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
     parentKey,
     siblingsSignature,
   ]);
+  // Menu items depend on the signed-in user, which only exists in the
+  // browser; rendering the menu after mount avoids SSR/client id mismatches.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const ancestorSignature = ancestorKeys.join("|");
   const [openKeys, setOpenKeys] = useState(ancestorKeys);
 
@@ -1424,6 +1430,7 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
         </Link>
       </div>
 
+      {mounted ? (
       <Menu
         className="sidebar-navigation"
         theme="dark"
@@ -1442,6 +1449,9 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
           borderInlineEnd: 0,
         }}
       />
+      ) : (
+        <div className="flex-1" />
+      )}
       <div
         className="shrink-0 border-t border-ink-800"
         style={{ padding: isCollapsed ? "10px 8px" : "10px 10px" }}

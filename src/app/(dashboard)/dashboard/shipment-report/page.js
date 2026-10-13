@@ -265,7 +265,7 @@ export default function ShipmentReportPage() {
         </Card>
 
         <Drawer title={detailDate ? t("detail", { date: dayjs(detailDate).format("DD/MM/YYYY") }) : t("title")}
-          open={!!detailDate} onClose={() => { detailRequest.current++; setDetailDate(null); }} width="min(1400px, 95vw)" destroyOnClose>
+          open={!!detailDate} onClose={() => { detailRequest.current++; setDetailDate(null); }} width="min(1400px, 95vw)" destroyOnHidden>
           <Table rowKey="id" loading={detailLoading} columns={detailColumns} dataSource={detail?.rows || []}
             scroll={{ x: "max-content" }} pagination={{ pageSize: 20, showSizeChanger: true }}
             locale={{ emptyText: <Empty description={t("empty")} /> }} />

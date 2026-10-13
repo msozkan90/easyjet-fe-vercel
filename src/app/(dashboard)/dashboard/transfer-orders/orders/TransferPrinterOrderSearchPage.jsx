@@ -63,7 +63,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
     item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
 
   return (
-    <Card className="rounded-xl border border-line" bodyStyle={{ padding: 20 }}>
+    <Card className="rounded-xl border border-line" styles={{ body: { padding: 20 } }}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
@@ -316,7 +316,7 @@ export default function TransferPrinterOrderSearchPage({
                                   <Card
                                     key={String(design?.id || design?.design_url)}
                                     size="small"
-                                    bodyStyle={{ padding: 10 }}
+                                    styles={{ body: { padding: 10 } }}
                                   >
                                     <div className="space-y-2">
                                       <DesignThumbnailImage

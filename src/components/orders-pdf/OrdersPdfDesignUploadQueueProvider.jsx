@@ -406,11 +406,11 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
                 onClick={() => setCollapsed((prev) => !prev)}
               />
             }
-            bodyStyle={{
+            styles={{ body: {
               display: collapsed ? "none" : "block",
               maxHeight: 340,
               overflowY: "auto",
-            }}
+            } }}
           >
             <Space direction="vertical" size="small" style={{ width: "100%" }}>
               <Space style={{ width: "100%", justifyContent: "space-between" }}>

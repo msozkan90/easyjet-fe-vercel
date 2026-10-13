@@ -111,7 +111,7 @@ const TransferOrderItemCard = ({
   return (
     <Card
       className="rounded-xl border border-line"
-      bodyStyle={{ padding: 20 }}
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -760,7 +760,7 @@ export default function TransferShippedPrinterSearchPage() {
         onOk={handleChecklistConfirm}
         onCancel={() => setChecklistModalOpen(false)}
         width={760}
-        destroyOnClose={false}
+        destroyOnHidden={false}
       >
         <Space direction="vertical" size={16} style={{ width: "100%" }}>
           <Alert

@@ -147,10 +147,10 @@ export function TransferWorkerDashboard({ variant = "completed" }) {
 
           {hasData ? (
             <Row gutter={[16, 16]}>
-              <Col xs={24} xl={9}><Card title={t("charts.distribution")} bordered={false}><Pie data={distribution} angleField="value" colorField="label" color={statusColorList} innerRadius={0.64} height={320} label={{ text: "value", position: "outside" }} legend={{ color: { position: "bottom" } }} /></Card></Col>
-              <Col xs={24} xl={15}><Card title={t(config.trendTitleKey)} bordered={false}><Column data={trend} xField="date" yField="value" colorField="label" color={statusColorList} stack height={320} axis={{ x: { labelAutoHide: true, labelAutoRotate: true }, y: { title: suffix } }} legend={{ color: { position: "bottom" } }} /></Card></Col>
+              <Col xs={24} xl={9}><Card title={t("charts.distribution")} variant="borderless"><Pie data={distribution} angleField="value" colorField="label" color={statusColorList} innerRadius={0.64} height={320} label={{ text: "value", position: "outside" }} legend={{ color: { position: "bottom" } }} /></Card></Col>
+              <Col xs={24} xl={15}><Card title={t(config.trendTitleKey)} variant="borderless"><Column data={trend} xField="date" yField="value" colorField="label" color={statusColorList} stack height={320} axis={{ x: { labelAutoHide: true, labelAutoRotate: true }, y: { title: suffix } }} legend={{ color: { position: "bottom" } }} /></Card></Col>
             </Row>
-          ) : <Card bordered={false}><Empty description={t("messages.empty")} /></Card>}
+          ) : <Card variant="borderless"><Empty description={t("messages.empty")} /></Card>}
         </>
       )}
     </Space>

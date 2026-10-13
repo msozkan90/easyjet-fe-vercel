@@ -850,7 +850,7 @@ export default function OrderReportPage() {
 
         <Card
           title={t("table.title")}
-          bordered={false}
+          variant="borderless"
           
         >
           <Table
@@ -879,7 +879,7 @@ export default function OrderReportPage() {
             setDetailData(null);
             setDetailFilters({ product: [], size: [], color: [] });
           }}
-          destroyOnClose
+          destroyOnHidden
         >
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
             <Row gutter={[16, 16]}>

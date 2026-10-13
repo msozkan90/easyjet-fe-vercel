@@ -948,12 +948,15 @@ export default function TransferOrdersPage() {
         onSave={handleSaveManualAddress}
         editForm={manualAddressForm}
         editingOrder={{
-          order_number: manualOrderForm.getFieldValue("order_number") || "-",
-          order_date: manualOrderForm.getFieldValue("order_date")
-            ? dayjs(manualOrderForm.getFieldValue("order_date")).format(
-                "YYYY-MM-DD HH:mm:ss",
-              )
-            : "-",
+          order_number:
+            (manualModalOpen && manualOrderForm.getFieldValue("order_number")) ||
+            "-",
+          order_date:
+            manualModalOpen && manualOrderForm.getFieldValue("order_date")
+              ? dayjs(manualOrderForm.getFieldValue("order_date")).format(
+                  "YYYY-MM-DD HH:mm:ss",
+                )
+              : "-",
           bill_to_name: "-",
         }}
         onAddressSelect={handleManualAddressSelect}

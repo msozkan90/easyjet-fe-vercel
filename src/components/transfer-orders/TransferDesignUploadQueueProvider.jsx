@@ -524,10 +524,12 @@ export function TransferDesignUploadQueueProvider({ children }) {
                 />
               </Space>
             }
-            bodyStyle={{
-              display: collapsed ? "none" : "block",
-              maxHeight: 340,
-              overflowY: "auto",
+            styles={{
+              body: {
+                display: collapsed ? "none" : "block",
+                maxHeight: 340,
+                overflowY: "auto",
+              },
             }}
           >
             <Space direction="vertical" size="small" style={{ width: "100%" }}>

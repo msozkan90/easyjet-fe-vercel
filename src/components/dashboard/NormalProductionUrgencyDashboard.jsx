@@ -234,7 +234,7 @@ export default function NormalProductionUrgencyDashboard() {
       )}
 
       {!loading && data && !selectedBucket ? (
-        <Card bordered={false}><Empty description={t("messages.empty")} /></Card>
+        <Card variant="borderless"><Empty description={t("messages.empty")} /></Card>
       ) : null}
 
       {listApiFn && selectedBucket ? (
