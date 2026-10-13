@@ -334,6 +334,7 @@ export default function CancelOrdersPage() {
         title: t("columns.image"),
         dataIndex: "image_url",
         width: 80,
+        fixed: "left",
         render: (value) =>
           value ? (
             <GuardedPreviewImage
@@ -356,6 +357,8 @@ export default function CancelOrdersPage() {
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
+        fixed: "left",
+        width: 140,
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
@@ -586,6 +589,7 @@ export default function CancelOrdersPage() {
     () => ({
       locale: { emptyText: t("table.noData") },
       expandable: {
+        fixed: "left",
         expandIconColumnIndex: 0,
         columnWidth: 36,
       },

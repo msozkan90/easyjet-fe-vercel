@@ -465,7 +465,8 @@ export default function OrdersStatusListPage({
       {
         title: null,
         dataIndex: "id",
-        width: 5,
+        width: 44,
+        fixed: "left",
         render: (_, record) => {
           const parentOrderQuantity = record?.children?.length + 1 || null;
           if (parentOrderQuantity) {
@@ -483,6 +484,7 @@ export default function OrdersStatusListPage({
         title: t("columns.image"),
         dataIndex: "image_url",
         width: 80,
+        fixed: "left",
         render: (value) =>
           value ? (
             <GuardedPreviewImage
@@ -505,6 +507,8 @@ export default function OrdersStatusListPage({
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
+        fixed: "left",
+        width: 140,
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
@@ -752,6 +756,7 @@ export default function OrdersStatusListPage({
     () => ({
       locale: { emptyText: t("table.noData") },
       expandable: {
+        fixed: "left",
         expandIconColumnIndex: 0,
         columnWidth: 36,
       },

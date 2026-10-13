@@ -656,7 +656,8 @@ export default function TransferOrdersStatusListPage({
       {
         title: null,
         dataIndex: "id",
-        width: 5,
+        width: 44,
+        fixed: "left",
         render: (_, record) => {
           if (record?.children?.length) {
             return (
@@ -671,6 +672,8 @@ export default function TransferOrdersStatusListPage({
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
+        fixed: "left",
+        width: 140,
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
@@ -1017,6 +1020,7 @@ export default function TransferOrdersStatusListPage({
     () => ({
       locale: { emptyText: t("table.noData") },
       expandable: {
+        fixed: "left",
         expandIconColumnIndex: 0,
         columnWidth: 36,
       },
