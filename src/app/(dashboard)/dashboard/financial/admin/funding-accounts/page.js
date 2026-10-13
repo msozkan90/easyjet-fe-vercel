@@ -132,17 +132,20 @@ export default function FundingAccountsAdminPage() {
     }
   };
 
-  const handleDelete = async (record) => {
-    try {
-      await FundingAccountsAPI.delete(record.id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
+  const handleDelete = useCallback(
+    async (record) => {
+      try {
+        await FundingAccountsAPI.delete(record.id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
 
   const columns = useMemo(
     () => [

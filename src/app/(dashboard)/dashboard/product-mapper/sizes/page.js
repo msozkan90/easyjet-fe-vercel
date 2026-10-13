@@ -115,6 +115,21 @@ export default function ProductMapperSizesPage() {
     [sizes]
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductSizeMappersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -206,7 +221,7 @@ export default function ProductMapperSizesPage() {
         ),
       },
     ],
-    [productOptions, sizeOptions, t, tStatus]
+    [onDelete, productOptions, sizeOptions, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -230,17 +245,6 @@ export default function ProductMapperSizesPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductSizeMappersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   const handleExistingDownload = async (format) => {
     setExistingLoading(true);

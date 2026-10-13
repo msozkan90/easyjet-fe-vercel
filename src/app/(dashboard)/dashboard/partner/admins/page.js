@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Space, Button, Modal, App as AntdApp, Tag, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -80,6 +80,19 @@ export default function PartnerAdminsPage() {
       fixedFilters: { role_code: RoleEnum.PARTNER_ADMIN },
     },
     normalizeListAndMeta
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await PartnerAdminsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -203,7 +216,7 @@ export default function PartnerAdminsPage() {
         ),
       },
     ],
-    [categories, partners, t]
+    [categories, onDelete, partners, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -243,15 +256,6 @@ export default function PartnerAdminsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await PartnerAdminsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["companyAdmin"]}>

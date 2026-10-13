@@ -145,20 +145,23 @@ export default function WalletTopupsListPage() {
     }
   };
 
-  const handleCancel = async (record) => {
-    try {
-      setActionLoading(true);
-      await WalletTopupsAPI.cancel(record.id, {});
-      message.success(t("messages.cancelSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.cancelError")
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const handleCancel = useCallback(
+    async (record) => {
+      try {
+        setActionLoading(true);
+        await WalletTopupsAPI.cancel(record.id, {});
+        message.success(t("messages.cancelSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.cancelError")
+        );
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [message, t],
+  );
 
   const columns = useMemo(
     () => [

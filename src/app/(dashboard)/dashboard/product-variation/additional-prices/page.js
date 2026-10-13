@@ -101,6 +101,21 @@ export default function ProductAdditionalPricesPage() {
     normalizeListAndMeta
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductAdditionalPricesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -215,7 +230,7 @@ export default function ProductAdditionalPricesPage() {
         ),
       },
     ],
-    [customers, partners, products, t, tStatus]
+    [customers, onDelete, partners, products, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -243,17 +258,6 @@ export default function ProductAdditionalPricesPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductAdditionalPricesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   const handleTemplateDownload = async (format) => {
     setTemplateLoading(true);

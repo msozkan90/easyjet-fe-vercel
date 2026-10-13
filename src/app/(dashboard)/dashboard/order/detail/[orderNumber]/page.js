@@ -671,6 +671,10 @@ const ItemDesignPreview = ({
             <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
               {previewImageUrl ? (
                 <div className="relative w-full">
+                  {/* Design previews come from arbitrary storage URLs and need
+                      their natural size for the overlay math, so next/image is
+                      not used here. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={previewImageUrl}
                     alt={positionName}

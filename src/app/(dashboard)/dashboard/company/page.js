@@ -225,7 +225,7 @@ export default function CompaniesPage() {
               : {},
           }
         : { status: "active", shipment_multiplier: 0, address: {} },
-    [editingRow, open],
+    [editingRow],
   );
 
   const onSubmit = async (values) => {

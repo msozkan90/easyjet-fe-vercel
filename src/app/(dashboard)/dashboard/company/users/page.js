@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -83,6 +83,19 @@ export default function CompanyUsersPage() {
       [RoleEnum.COMPANY_COMPLETED_WORKER]: tRoles("companyCompletedWorker"),
     }),
     [tRoles],
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await CompanyAdminsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -200,7 +213,7 @@ export default function CompanyUsersPage() {
         ),
       },
     ],
-    [categories, roleLabels, t, tStatus],
+    [categories, onDelete, roleLabels, t, tStatus],
   );
 
   const buildPayload = (values, isEditing) => {
@@ -244,16 +257,6 @@ export default function CompanyUsersPage() {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await CompanyAdminsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
     }
   };
 

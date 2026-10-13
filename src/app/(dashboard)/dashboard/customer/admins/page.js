@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -80,6 +80,19 @@ export default function CustomerAdminsPage() {
       fixedFilters: { role_code: RoleEnum.CUSTOMER_ADMIN },
     },
     normalizeListAndMeta
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await CustomerAdminsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -204,7 +217,7 @@ export default function CustomerAdminsPage() {
         ),
       },
     ],
-    [categories, customers, t]
+    [categories, customers, onDelete, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -244,15 +257,6 @@ export default function CustomerAdminsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await CustomerAdminsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin"]}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
@@ -187,6 +187,21 @@ export default function PartnerToCustomerProductPricesPage() {
     );
   }, [partnerId]);
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductPricesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(() => {
     return [
       {
@@ -317,7 +332,7 @@ export default function PartnerToCustomerProductPricesPage() {
         },
       },
     ];
-  }, [colors, customers, products, sizes, t, tStatus]);
+  }, [colors, customers, onDelete, products, sizes, t, tStatus]);
 
   const onSubmit = async (values) => {
     try {
@@ -344,17 +359,6 @@ export default function PartnerToCustomerProductPricesPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductPricesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["partnerAdmin"]}>

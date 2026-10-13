@@ -69,6 +69,21 @@ export default function ProductSizesPage() {
     normalizeListAndMeta,
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductSizesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -155,7 +170,7 @@ export default function ProductSizesPage() {
         ),
       },
     ],
-    [products, t, tStatus],
+    [onDelete, products, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -186,18 +201,6 @@ export default function ProductSizesPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
-      );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await ProductSizesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };

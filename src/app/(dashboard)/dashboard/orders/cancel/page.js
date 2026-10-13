@@ -188,8 +188,10 @@ export default function CancelOrdersPage() {
     [annotateRows, baseRequest]
   );
 
-  const formatDateTime = (value) =>
-    value ? moment(value).format("LLL") : t("common.none");
+  const formatDateTime = useCallback(
+    (value) => (value ? moment(value).format("LLL") : t("common.none")),
+    [t],
+  );
 
   const applyFilterPatch = useCallback(
     (patch) => {
@@ -563,6 +565,7 @@ export default function CancelOrdersPage() {
     ];
   }, [
     colorOptions,
+    formatDateTime,
     productOptions,
     sizeOptions,
     statusLabels,

@@ -103,6 +103,21 @@ export default function ProductMapperProductsPage() {
     [products]
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductMappersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -183,7 +198,7 @@ export default function ProductMapperProductsPage() {
         ),
       },
     ],
-    [productOptions, t, tStatus]
+    [onDelete, productOptions, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -207,17 +222,6 @@ export default function ProductMapperProductsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductMappersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   const handleExistingDownload = async (format) => {
     setExistingLoading(true);

@@ -115,6 +115,21 @@ export default function ProductMapperColorsPage() {
     [colors]
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductColorMappersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -206,7 +221,7 @@ export default function ProductMapperColorsPage() {
         ),
       },
     ],
-    [colorOptions, productOptions, t, tStatus]
+    [colorOptions, onDelete, productOptions, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -230,17 +245,6 @@ export default function ProductMapperColorsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductColorMappersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   const handleExistingDownload = async (format) => {
     setExistingLoading(true);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -79,6 +79,19 @@ export default function CompanyAdminsPage() {
       fixedFilters: { role_code: RoleEnum.COMPANY_ADMIN },
     },
     normalizeListAndMeta
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await CompanyAdminsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -203,7 +216,7 @@ export default function CompanyAdminsPage() {
         ),
       },
     ],
-    [categories, companies, t]
+    [categories, companies, onDelete, t]
   );
 
   const onSubmit = async (values) => {
@@ -243,15 +256,6 @@ export default function CompanyAdminsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await CompanyAdminsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>

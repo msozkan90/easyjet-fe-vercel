@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -68,6 +68,19 @@ export default function PartnersPage() {
       fixedFilters: {},
     },
     normalizeListAndMeta,
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await PartnersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -192,7 +205,7 @@ export default function PartnersPage() {
         ),
       },
     ],
-    [categories, t, isShippingOwner, tStatus],
+    [categories, isShippingOwner, onDelete, t, tStatus],
   );
 
   const buildPayload = (values) => {
@@ -239,16 +252,6 @@ export default function PartnersPage() {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await PartnersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
     }
   };
 

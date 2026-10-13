@@ -131,6 +131,21 @@ export default function ProductPricesPage() {
     normalizeListAndMeta,
   );
 
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductPricesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -284,7 +299,7 @@ export default function ProductPricesPage() {
         ),
       },
     ],
-    [colors, customers, partners, products, sizes, t, tStatus],
+    [colors, customers, onDelete, partners, products, sizes, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -309,18 +324,6 @@ export default function ProductPricesPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
-      );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await ProductPricesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };

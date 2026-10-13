@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
@@ -77,6 +77,19 @@ export default function TransferProductsPage() {
       },
     },
     normalizeListAndMeta,
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await TransferProductsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload?.();
+      } catch (error) {
+        message.error(error?.response?.data?.error?.message || t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -183,7 +196,7 @@ export default function TransferProductsPage() {
         ),
       },
     ],
-    [categories, t, tStatus],
+    [categories, onDelete, t, tStatus],
   );
 
   const openCreateModal = () => {
@@ -214,15 +227,6 @@ export default function TransferProductsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await TransferProductsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload?.();
-    } catch (error) {
-      message.error(error?.response?.data?.error?.message || t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole
