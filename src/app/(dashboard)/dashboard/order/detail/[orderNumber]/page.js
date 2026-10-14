@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import { FileSearchOutlined } from "@ant-design/icons";
 import {
   Alert,
   App as AntdApp,
@@ -38,7 +39,6 @@ import { hasAnyRole } from "@/utils/rbac";
 import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
-import StatCard from "@/components/ui/StatCard";
 import { formatAmount } from "@/utils/formatMoney";
 
 const formatDateTime = (value, fallback = "-") =>
@@ -92,45 +92,99 @@ const extractPositionList = (response) => {
 };
 
 const InfoField = ({ label, value, className, valueClassName }) => (
-  <div className={`flex flex-col gap-1 ${className || ""}`}>
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
-      {label}
-    </span>
+  <div className={`flex min-w-0 flex-col gap-0.5 ${className || ""}`}>
+    <span className="text-xs text-text-secondary">{label}</span>
     <span
-      className={`text-sm font-semibold text-text ${valueClassName || ""}`}
+      className={`break-words text-[13px] font-medium text-text ${valueClassName || ""}`}
     >
       {value}
     </span>
   </div>
 );
 
-const SectionHeader = ({ title, subtitle }) => (
-  <div className="flex flex-col gap-1">
-    <Typography.Title level={5} style={{ margin: 0 }}>
-      {title}
-    </Typography.Title>
-    {subtitle ? (
-      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        {subtitle}
-      </Typography.Text>
-    ) : null}
+const SectionHeader = ({ title, subtitle, count, extra }) => (
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex items-center gap-2">
+        <h2 className="m-0 text-base font-semibold text-text">{title}</h2>
+        {typeof count === "number" ? (
+          <span className="ej-mono rounded-full bg-muted px-2 text-xs leading-5 text-text-secondary">
+            {count}
+          </span>
+        ) : null}
+      </div>
+      {subtitle ? (
+        <span className="text-xs text-text-secondary">{subtitle}</span>
+      ) : null}
+    </div>
+    {extra}
   </div>
 );
 
-const AddressBlock = ({ title, rows }) => (
-  <Card
-    title={title}
-    className="rounded-xl border border-line"
-    styles={{ body: { padding: 16 } }}
-    size="small"
-  >
-    <div className="grid gap-3 sm:grid-cols-2">
-      {rows.map((row) => (
-        <InfoField key={row.label} label={row.label} value={row.value} />
-      ))}
-    </div>
-  </Card>
+const SectionEmpty = ({ children }) => (
+  <div className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-[13px] text-text-secondary">
+    {children}
+  </div>
 );
+
+// Compact titled panel used in the overview side column.
+const SideCard = ({ title, children }) => (
+  <section className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+    <h2 className="m-0 text-[15px] font-semibold text-text">{title}</h2>
+    {children}
+  </section>
+);
+
+const KeyValueList = ({ rows }) => (
+  <dl className="m-0 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-3 gap-y-2">
+    {rows
+      .filter(Boolean)
+      .map((row) => (
+        <div key={row.label} className="contents">
+          <dt className="text-xs leading-5 text-text-secondary">{row.label}</dt>
+          <dd className="m-0 min-w-0 break-words text-[13px] font-medium leading-5 text-text">
+            {row.value}
+          </dd>
+        </div>
+      ))}
+  </dl>
+);
+
+// Postal-style address block; `prefix` is "ship_to" or "bill_to".
+const AddressCard = ({ title, order, prefix, emptyText }) => {
+  const field = (name) => String(order?.[`${prefix}_${name}`] || "").trim();
+  const cityLine = [
+    field("city"),
+    [field("state"), field("postal_code")].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const lines = [
+    field("company"),
+    field("street1"),
+    field("street2"),
+    cityLine,
+    field("country"),
+  ].filter(Boolean);
+  const name = field("name");
+
+  return (
+    <SideCard title={title}>
+      {name || lines.length ? (
+        <address className="flex flex-col gap-0.5 text-[13px] not-italic leading-5 text-text">
+          {name ? <span className="font-semibold">{name}</span> : null}
+          {lines.map((line, index) => (
+            <span key={`${line}-${index}`} className="text-text-secondary">
+              {line}
+            </span>
+          ))}
+        </address>
+      ) : (
+        <span className="text-[13px] text-text-secondary">{emptyText}</span>
+      )}
+    </SideCard>
+  );
+};
 
 const LabelCard = ({
   label,
@@ -191,7 +245,7 @@ const LabelCard = ({
         href={trackingUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all text-brand-700 underline decoration-blue-300 underline-offset-2 transition hover:text-brand-800"
+        className="break-all text-brand-700 underline underline-offset-2 transition hover:text-brand-800"
       >
         {trackingValue}
       </a>
@@ -202,24 +256,21 @@ const LabelCard = ({
     );
 
   return (
-    <Card
-      className="rounded-xl border border-line"
-      styles={{ body: { padding: 16 } }}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1">
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+    <article className="flex flex-col rounded-xl border border-line bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div className="flex min-w-0 flex-col">
+          <span className="text-xs text-text-secondary">
             {tDesign("fields.labelSource")}
-          </Typography.Text>
-          <Typography.Title level={5} style={{ margin: 0 }}>
+          </span>
+          <span className="truncate text-[15px] font-semibold text-text">
             {label?.source || tOrders("common.none")}
-          </Typography.Title>
+          </span>
         </div>
         {statusValue ? (
           <StatusTag status={statusKey}>{statusValue}</StatusTag>
         ) : null}
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoField
           label={tDesign("fields.labelCarrier")}
           value={source ? carrierValue : tOrders("common.none")}
@@ -235,25 +286,17 @@ const LabelCard = ({
               ? tOrders("common.none")
               : `${formatAmount(shipmentPrice)} ${currency}`
           }
+          valueClassName="ej-mono"
         />
         <InfoField
           label={tDesign("fields.labelTracking")}
           value={trackingDisplayValue}
+          valueClassName="ej-mono"
         />
         <InfoField label={tDesign("fields.labelCreatedAt")} value={createdAt} />
       </div>
       {labelUrl || canVoid ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {labelUrl ? (
-            <a
-              href={labelUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-text-secondary transition hover:border-line-strong hover:text-text"
-            >
-              {tDesign("actions.viewLabel")}
-            </a>
-          ) : null}
+        <div className="mt-auto flex flex-wrap justify-end gap-2 border-t border-line px-4 py-3">
           {canVoid ? (
             <Popconfirm
               title={tDesign("actions.voidLabelConfirmTitle")}
@@ -267,9 +310,19 @@ const LabelCard = ({
               </Button>
             </Popconfirm>
           ) : null}
+          {labelUrl ? (
+            <Button
+              href={labelUrl}
+              target="_blank"
+              rel="noreferrer"
+              icon={<FileSearchOutlined />}
+            >
+              {tDesign("actions.viewLabel")}
+            </Button>
+          ) : null}
         </div>
       ) : null}
-    </Card>
+    </article>
   );
 };
 
@@ -1249,82 +1302,6 @@ export default function OrderDetailPage() {
     [items, statusLabel, user],
   );
 
-  const billingRows = useMemo(
-    () => [
-      {
-        label: tDesign("fields.billToName"),
-        value: orderDetail?.bill_to_name || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCompany"),
-        value: orderDetail?.bill_to_company || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToStreet1"),
-        value: orderDetail?.bill_to_street1 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToStreet2"),
-        value: orderDetail?.bill_to_street2 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCity"),
-        value: orderDetail?.bill_to_city || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToState"),
-        value: orderDetail?.bill_to_state || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToPostalCode"),
-        value: orderDetail?.bill_to_postal_code || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCountry"),
-        value: orderDetail?.bill_to_country || tOrders("common.none"),
-      },
-    ],
-    [orderDetail, tDesign, tOrders],
-  );
-
-  const shippingRows = useMemo(
-    () => [
-      {
-        label: tDesign("fields.shipToName"),
-        value: orderDetail?.ship_to_name || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCompany"),
-        value: orderDetail?.ship_to_company || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToStreet1"),
-        value: orderDetail?.ship_to_street1 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToStreet2"),
-        value: orderDetail?.ship_to_street2 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCity"),
-        value: orderDetail?.ship_to_city || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToState"),
-        value: orderDetail?.ship_to_state || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToPostalCode"),
-        value: orderDetail?.ship_to_postal_code || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCountry"),
-        value: orderDetail?.ship_to_country || tOrders("common.none"),
-      },
-    ],
-    [orderDetail, tDesign, tOrders],
-  );
-
   const fallbackText = tDesign("designs.designAreaPlaceholder");
   const pendingPoolItems = Number(
     orderDetail?.pool_completion_summary?.pending_items || 0,
@@ -1377,16 +1354,28 @@ export default function OrderDetailPage() {
       key: "overview",
       label: tDesign("tabs.overview"),
       children: (
-        <div className="space-y-6">
-        <div className="space-y-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader title={tDesign("sections.items")} />
-              {positionsLoading ? (
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  {tDesign("messages.positionsLoading")}
-                </Typography.Text>
-              ) : null}
-            </div>
+        <div className="flex flex-wrap items-start gap-5">
+          <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-5">
+            {pendingPoolItems > 0 ? (
+              <Alert
+                type="warning"
+                showIcon
+                message={tDesign("messages.poolIncomplete", {
+                  count: pendingPoolItems,
+                })}
+              />
+            ) : null}
+            <SectionHeader
+              title={tDesign("sections.items")}
+              count={items.length}
+              extra={
+                positionsLoading ? (
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {tDesign("messages.positionsLoading")}
+                  </Typography.Text>
+                ) : null
+              }
+            />
             {items.length ? (
               <div className="grid gap-6">
                 {items.map((item) => {
@@ -1413,134 +1402,124 @@ export default function OrderDetailPage() {
             ) : (
               <Empty description={tDesign("messages.noItems")} />
             )}
+            <SideCard title={tDesign("sections.notes")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.customerNotes"),
+                    value: orderDetail?.customer_notes || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.internalNotes"),
+                    value: orderDetail?.internal_notes || tOrders("common.none"),
+                  },
+                ]}
+              />
+            </SideCard>
           </div>
-          {pendingPoolItems > 0 ? (
-            <Alert
-              type="warning"
-              showIcon
-              message={tDesign("messages.poolIncomplete", {
-                count: pendingPoolItems,
-              })}
+          <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
+            <SideCard title={tDesign("sections.totals")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.orderTotal"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatAmount(orderItemsTotal, "0.00")}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDesign("fields.shippingAmount"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatAmount(shipmentTotal)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDesign("fields.amountPaid"),
+                    value: (
+                      <span className="ej-mono font-semibold">
+                        {formatAmount(amountPaidTotal, "0.00")}
+                      </span>
+                    ),
+                  },
+                  { label: tDesign("fields.orderDate"), value: orderDate },
+                  { label: tDesign("fields.paymentDate"), value: paymentDate },
+                  { label: tDesign("fields.shipDate"), value: shipDate },
+                ]}
+              />
+            </SideCard>
+            <SideCard title={tDesign("sections.customer")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.customerName"),
+                    value: orderDetail?.customer?.name || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.customerEmail"),
+                    value: orderDetail?.customer_email || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.customerUsername"),
+                    value:
+                      orderDetail?.customer_username || tOrders("common.none"),
+                  },
+                ]}
+              />
+            </SideCard>
+            <AddressCard
+              title={tDesign("sections.shippingAddress")}
+              order={orderDetail}
+              prefix="ship_to"
+              emptyText={tOrders("common.none")}
             />
-          ) : null}
-          <div className="grid gap-4 lg:grid-cols-3">
-            <Card
-              className="rounded-xl border border-line"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.customer")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.customerName")}
-                  value={orderDetail?.customer?.name || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.customerEmail")}
-                  value={orderDetail?.customer_email || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.customerUsername")}
-                  value={
-                    orderDetail?.customer_username || tOrders("common.none")
-                  }
-                />
-              </div>
-            </Card>
-            <Card
-              className="rounded-xl border border-line"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.shipping")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.requestedService")}
-                  value={
-                    orderDetail?.requested_service || tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.carrierCode")}
-                  value={orderDetail?.carrier_code || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.serviceCode")}
-                  value={orderDetail?.service_code || tOrders("common.none")}
-                />
-              </div>
-            </Card>
-            <Card
-              className="rounded-xl border border-line"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.package")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.weight")}
-                  value={
-                    orderDetail?.weight?.value
+            <AddressCard
+              title={tDesign("sections.billing")}
+              order={orderDetail}
+              prefix="bill_to"
+              emptyText={tOrders("common.none")}
+            />
+            <SideCard title={tDesign("sections.shipping")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.requestedService"),
+                    value:
+                      orderDetail?.requested_service || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.carrierCode"),
+                    value: orderDetail?.carrier_code || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.serviceCode"),
+                    value: orderDetail?.service_code || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.weight"),
+                    value: orderDetail?.weight?.value
                       ? `${orderDetail.weight.value} ${
                           orderDetail.weight.units || ""
                         }`.trim()
-                      : tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.dimensions")}
-                  value={
-                    orderDetail?.dimensions
+                      : tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.dimensions"),
+                    value: orderDetail?.dimensions
                       ? `${orderDetail.dimensions.length} x ${
                           orderDetail.dimensions.width
                         } x ${orderDetail.dimensions.height} ${
                           orderDetail.dimensions.units || ""
                         }`
-                      : tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.orderDate")}
-                  value={orderDate}
-                />
-                <InfoField
-                  label={tDesign("fields.paymentDate")}
-                  value={paymentDate}
-                />
-                <InfoField
-                  label={tDesign("fields.shipDate")}
-                  value={shipDate}
-                />
-                <InfoField
-                  label={tDesign("fields.orderTotal")}
-                  value={orderTotal}
-                />
-              </div>
-            </Card>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <AddressBlock
-              title={tDesign("sections.billing")}
-              rows={billingRows}
-            />
-            <AddressBlock
-              title={tDesign("sections.shippingAddress")}
-              rows={shippingRows}
-            />
-          </div>
-          <Card
-            className="rounded-xl border border-line"
-            styles={{ body: { padding: 16 } }}
-          >
-            <SectionHeader title={tDesign("sections.notes")} />
-            <div className="mt-4 grid gap-3">
-              <InfoField
-                label={tDesign("fields.customerNotes")}
-                value={orderDetail?.customer_notes || tOrders("common.none")}
+                      : tOrders("common.none"),
+                  },
+                ]}
               />
-              <InfoField
-                label={tDesign("fields.internalNotes")}
-                value={orderDetail?.internal_notes || tOrders("common.none")}
-              />
-            </div>
-          </Card>
+            </SideCard>
+          </aside>
         </div>
       ),
     },
@@ -1548,10 +1527,13 @@ export default function OrderDetailPage() {
       key: "operations",
       label: tDesign("tabs.labelsAndProduction"),
       children: (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-8">
           {shipments.length ? (
-            <div className="space-y-4">
-              <SectionHeader title={tDesign("shipments.title")} />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("shipments.title")}
+                count={shipments.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {shipments.map((shipment) => (
                   <div
@@ -1585,8 +1567,11 @@ export default function OrderDetailPage() {
             </div>
           ) : null}
           {canceledShipments.length ? (
-            <div className="space-y-4">
-              <SectionHeader title={tDesign("shipments.canceledTitle")} />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("shipments.canceledTitle")}
+                count={canceledShipments.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {canceledShipments.map((shipment) => (
                   <div key={shipment.id} className="rounded-xl border border-line bg-subtle p-4">
@@ -1612,8 +1597,11 @@ export default function OrderDetailPage() {
               </div>
             </div>
           ) : null}
-          <div className="space-y-4">
-            <SectionHeader title={tDesign("sections.labels")} />
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.labels")}
+              count={labels.length}
+            />
             {labels.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {labels.map((label) => (
@@ -1635,12 +1623,15 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("messages.noLabels")} />
+              <SectionEmpty>{tDesign("messages.noLabels")}</SectionEmpty>
             )}
           </div>
           {labelRecoveries.length ? (
-            <div className="space-y-4">
-              <SectionHeader title={tDesign("sections.labelRecovery")} />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("sections.labelRecovery")}
+                count={labelRecoveries.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {labelRecoveries.map((recovery) => (
                   <ProductionRecoveryCard
@@ -1656,8 +1647,11 @@ export default function OrderDetailPage() {
               </div>
             </div>
           ) : null}
-          <div className="space-y-4">
-            <SectionHeader title={tDesign("sections.labelVoids")} />
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.labelVoids")}
+              count={labelVoids.length}
+            />
             {labelVoids.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {labelVoids.map((labelVoid) => (
@@ -1670,18 +1664,21 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("labelVoid.empty")} />
+              <SectionEmpty>{tDesign("labelVoid.empty")}</SectionEmpty>
             )}
           </div>
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <SectionHeader title={tDesign("sections.scrap")} />
-              {canRecordScrap ? (
-                <Button type="primary" onClick={openScrapModal}>
-                  {tDesign("scrap.actions.add")}
-                </Button>
-              ) : null}
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.scrap")}
+              count={scrapMovements.length}
+              extra={
+                canRecordScrap ? (
+                  <Button onClick={openScrapModal}>
+                    {tDesign("scrap.actions.add")}
+                  </Button>
+                ) : null
+              }
+            />
             {scrapMovements.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {scrapMovements.map((movement) => (
@@ -1694,7 +1691,7 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("scrap.messages.empty")} />
+              <SectionEmpty>{tDesign("scrap.messages.empty")}</SectionEmpty>
             )}
           </div>
         </div>
@@ -1783,20 +1780,6 @@ export default function OrderDetailPage() {
                 />
               </div>
             ) : null}
-            <div className="grid gap-3 sm:grid-cols-3">
-              <StatCard
-                label={tDesign("fields.amountPaid")}
-                value={formatAmount(amountPaidTotal, "0.00")}
-              />
-              <StatCard
-                label={tDesign("fields.orderTotal")}
-                value={formatAmount(orderItemsTotal, "0.00")}
-              />
-              <StatCard
-                label={tDesign("fields.shippingAmount")}
-                value={formatAmount(shipmentTotal)}
-              />
-            </div>
             <Tabs defaultActiveKey="overview" items={detailTabs} />
           </div>
         )}
