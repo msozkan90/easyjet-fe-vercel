@@ -529,19 +529,16 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
                           : []),
                       ],
                     },
-                    ...(isCompanyAdmin
-                      ? [
-                          {
-                            key: "wallet-transactions",
-                            icon: <LineChartOutlined />,
-                            label: (
-                              <Link href="/dashboard/wallet-transactions">
-                                {tSidebar("financial.walletTransactions")}
-                              </Link>
-                            ),
-                          },
-                        ]
-                      : []),
+                    // Entity admins only (this branch); workers never see it.
+                    {
+                      key: "wallet-transactions",
+                      icon: <LineChartOutlined />,
+                      label: (
+                        <Link href="/dashboard/wallet-transactions">
+                          {tSidebar("financial.walletTransactions")}
+                        </Link>
+                      ),
+                    },
                     ...(hasTransferOrderCategory
                       ? [
                           {

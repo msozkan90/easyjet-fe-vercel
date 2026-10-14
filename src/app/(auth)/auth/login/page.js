@@ -102,7 +102,7 @@ export default function LoginPage() {
 
       <section className="flex flex-[1_1_480px] flex-col p-6 md:p-8">
         <div className="flex justify-end">
-          <LanguageSwitcher size="small" />
+          <LanguageSwitcher />
         </div>
         <div className="flex flex-1 items-center justify-center py-8">
           <div className="flex w-full max-w-[380px] flex-col gap-6">

@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import {
   Button,
   Space,
-  Popconfirm,
   Modal,
   Form,
   Input,
@@ -24,6 +23,7 @@ import {
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const { Title } = Typography;
@@ -194,39 +194,45 @@ export default function FundingAccountsAdminPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 180,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingRow(record);
-                form.setFieldsValue({
-                  display_name: record?.display_name,
-                  type: record?.type,
-                  details: pickFundingAccountDetails(record?.type, record?.details),
-                  status: record?.status || "active",
-                });
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-            <Popconfirm
-              title={t("actions.confirmDeleteTitle")}
-              okText={t("actions.confirmDeleteOk")}
-              cancelText={tCommon("cancel")}
-              onConfirm={() => handleDelete(record)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t("actions.delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditingRow(record);
+                  form.setFieldsValue({
+                    display_name: record?.display_name,
+                    type: record?.type,
+                    details: pickFundingAccountDetails(record?.type, record?.details),
+                    status: record?.status || "active",
+                  });
+                  setOpen(true);
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: t("actions.delete"),
+                confirm: {
+                  title: t("actions.confirmDeleteTitle"),
+                  okText: t("actions.confirmDeleteOk"),
+                },
+                onClick: () => handleDelete(record),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [form, handleDelete, t, tCommon, tStatus, typeOptions]
+    [form, handleDelete, t, tStatus, typeOptions]
   );
 
   return (

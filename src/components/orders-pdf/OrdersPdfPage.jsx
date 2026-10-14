@@ -29,6 +29,7 @@ import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvi
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -328,44 +329,55 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       title: t("fields.actions"),
       key: "actions",
       fixed: "right",
-      width: 500,
+      width: 96,
       render: (_, row) => (
-        <Space wrap={false}>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setSelectedPdf(row);
-              void loadDesigns(row);
-            }}
-          >
-            {tActions("detail")}
-          </Button>
-          <Button
-            icon={<DownloadOutlined />}
-            loading={isDownloading(`orders-pdf:order-item-designs:${row.id}`)}
-            disabled={!Array.isArray(row.design_ids) || !row.design_ids.length}
-            onClick={() => handleDownloadOrderItemDesigns(row)}
-          >
-            {t("actions.downloadOrderItemDesigns")}
-          </Button>
-          <Upload
-            multiple
-            showUploadList={false}
-            beforeUpload={(file, fileList) => {
-              if (file?.uid === fileList?.[0]?.uid) handleUpload(row, fileList);
-              return false;
-            }}
-          >
-            <Button icon={<UploadOutlined />}>{t("actions.addDesign")}</Button>
-          </Upload>
-          <Popconfirm
-            title={t("confirm.deleteTitle")}
-            description={t("confirm.deleteDescription")}
-            onConfirm={() => handleDeletePdf(row)}
-          >
-            <Button danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+        <RowActions
+          actions={[
+            {
+              key: "detail",
+              iconOnly: true,
+              icon: <EyeOutlined />,
+              label: tActions("detail"),
+              onClick: () => {
+                setSelectedPdf(row);
+                void loadDesigns(row);
+              },
+            },
+          ]}
+          menuItems={[
+            {
+              key: "download",
+              icon: <DownloadOutlined />,
+              label: t("actions.downloadOrderItemDesigns"),
+              disabled:
+                !Array.isArray(row.design_ids) ||
+                !row.design_ids.length ||
+                isDownloading(`orders-pdf:order-item-designs:${row.id}`),
+              onClick: () => handleDownloadOrderItemDesigns(row),
+            },
+            {
+              key: "upload",
+              icon: <UploadOutlined />,
+              label: t("actions.addDesign"),
+              pickFiles: {
+                multiple: true,
+                onPick: (files) => handleUpload(row, files),
+              },
+            },
+            { type: "divider" },
+            {
+              key: "delete",
+              icon: <DeleteOutlined />,
+              danger: true,
+              label: tActions("delete"),
+              confirm: {
+                title: t("confirm.deleteTitle"),
+                description: t("confirm.deleteDescription"),
+              },
+              onClick: () => handleDeletePdf(row),
+            },
+          ]}
+        />
       ),
     },
   ];

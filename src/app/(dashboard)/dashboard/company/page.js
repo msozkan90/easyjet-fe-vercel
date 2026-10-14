@@ -18,6 +18,7 @@ import {
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 export default function CompaniesPage() {
   const { message } = AntdApp.useApp();
@@ -148,19 +149,22 @@ export default function CompaniesPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingRow(record);
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditingRow(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+          />
         ),
       },
     ],

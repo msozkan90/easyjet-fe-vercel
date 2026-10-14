@@ -33,9 +33,9 @@ import { resetCategories } from "@/redux/features/categoriesSlice";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { useLanguageMenuItem } from "@/components/common/LanguageSwitcher";
 import { useTranslations } from "@/i18n/use-translations";
-import { hasAnyRole } from "@/utils/rbac";
+import { hasAnyRole, isEntityAdmin } from "@/utils/rbac";
 import { useThemeMode } from "@/theme/ThemeModeProvider";
 import { THEME_MODES } from "@/theme/tokens";
 
@@ -51,6 +51,9 @@ export default function HeaderBar({ isMobile = false }) {
   const collapsed = useSelector((s) => s.ui.sidebarCollapsed);
   const user = useSelector((s) => s.auth.user);
   const balance = useSelector((s) => s.balance.value);
+  // Wallet balance belongs to the entity; only its admins may see it.
+  const canSeeBalance = isEntityAdmin(user);
+  const languageMenuItem = useLanguageMenuItem();
   const [orderSearch, setOrderSearch] = useState("");
   const [orderSearchLoading, setOrderSearchLoading] = useState(false);
   const [orderSearchMatches, setOrderSearchMatches] = useState([]);
@@ -95,6 +98,7 @@ export default function HeaderBar({ isMobile = false }) {
           },
         ]
       : []),
+    languageMenuItem,
     {
       key: "theme",
       icon: isDarkMode ? <SunOutlined /> : <MoonOutlined />,
@@ -131,7 +135,7 @@ export default function HeaderBar({ isMobile = false }) {
       .toUpperCase() || userDisplayName.charAt(0).toUpperCase();
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !canSeeBalance) return;
     let cancelled = false;
 
     const fetchBalance = async () => {
@@ -151,7 +155,7 @@ export default function HeaderBar({ isMobile = false }) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, user?.id]);
+  }, [dispatch, user?.id, canSeeBalance]);
 
   const getOrderSearchRoute = (match) => {
     const orderNumber = encodeURIComponent(match?.order_number || "");
@@ -312,16 +316,17 @@ export default function HeaderBar({ isMobile = false }) {
             }}
           />
         </Modal>
-        {!isMobile ? <LanguageSwitcher size="small" showLabel={false} /> : null}
-        <Link
-          href="/dashboard/wallet-transactions"
-          className="hidden h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100 sm:flex"
-          aria-label={`${tNavbar("walletTransactions")}: ${formattedBalance}`}
-          title={tNavbar("walletTransactions")}
-        >
-          {!isMobile ? <span>{tNavbar("balance")}</span> : null}
-          <span className="ej-mono font-semibold">{formattedBalance}</span>
-        </Link>
+        {canSeeBalance ? (
+          <Link
+            href="/dashboard/wallet-transactions"
+            className="hidden h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100 sm:flex"
+            aria-label={`${tNavbar("walletTransactions")}: ${formattedBalance}`}
+            title={tNavbar("walletTransactions")}
+          >
+            {!isMobile ? <span>{tNavbar("balance")}</span> : null}
+            <span className="ej-mono font-semibold">{formattedBalance}</span>
+          </Link>
+        ) : null}
         <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
           <Button
             type="text"

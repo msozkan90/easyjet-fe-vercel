@@ -76,7 +76,8 @@
       "failed": "Önizleme hazırlanamadı.",
       "notApplicable": "Bu dosya türü önizlenemez.",
       "empty": "Önizleme yok",
-      "openOriginal": "Orijinali indir"
+      "download": "İndir",
+      "openOriginal": "Orijinal tasarımı indir"
     },
     "none": "-",
     "states": {
@@ -90,6 +91,19 @@
       "body": "Sayfa yüklenirken bir sorun çıktı. Tekrar deneyebilir ya da panele dönebilirsiniz.",
       "retry": "Tekrar dene",
       "home": "Panele dön"
+    },
+    "entityPermissions": {
+      "enabledCount": "{enabled}/{total} açık",
+      "on": "Açık",
+      "off": "Kapalı",
+      "default": "Varsayılan",
+      "defaultValue": "Varsayılan: {value}",
+      "modalDescription": "Bu hesap için varsayılanı değiştirmek istediğiniz yetkiyi açıp kapatın. Kilitli yetkiler değiştirilemez.",
+      "empty": "Tanımlı yetki yok.",
+      "keys": {
+        "CAN_USE_SS_SHIPMENT": "ShipStation kargo",
+        "CAN_USE_NS_SHIPMENT": "NestShipper kargo"
+      }
     }
   },
   "home": {

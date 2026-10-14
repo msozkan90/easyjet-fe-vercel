@@ -306,6 +306,42 @@ body {
   font-weight: 500;
 }
 
+/* Language flags (src/components/common/LanguageSwitcher.jsx) */
+.ej-flag {
+  display: inline-flex;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgb(15 36 51 / 0.12);
+}
+.ej-flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ant-btn.ej-language-trigger {
+  height: 36px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ej-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Design download buttons never spill outside narrow design cards */
+.ant-btn.ej-design-download {
+  max-width: 100%;
+  min-width: 0;
+}
+.ant-btn.ej-design-download > span:not(.ant-btn-icon) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Toolbar action groups wrap instead of overflowing on narrow screens */
 .ej-toolbar-actions .ant-space {
   flex-wrap: wrap;

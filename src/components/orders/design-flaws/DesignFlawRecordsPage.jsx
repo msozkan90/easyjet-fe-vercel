@@ -29,6 +29,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
 import PageHeader from "@/components/ui/PageHeader";
+import RowActions from "@/components/ui/RowActions";
 
 const formatDate = (value) =>
   value
@@ -250,29 +251,44 @@ export default function DesignFlawRecordsPage({ categoryId, subCategoryId }) {
     },
     {
       title: t("fields.actions"),
+      key: "actions",
       fixed: "right",
-      width: 410,
+      width: 96,
       render: (_, row) => (
-        <Space>
-          <Button
-            icon={<DownloadOutlined />}
-            loading={isDownloading(`design-flaw:source-designs:${row.id}`)}
-            disabled={!row?.source_design_ids?.length}
-            onClick={() => downloadSourceDesigns(row)}
-          >
-            {t("actions.download")}
-          </Button>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setSelectedBatch(row);
-              void loadDesigns(row);
-            }}
-          >
-            {tActions("detail")}
-          </Button>
-          {uploadButton(row)}
-        </Space>
+        <RowActions
+          actions={[
+            {
+              key: "detail",
+              iconOnly: true,
+              icon: <EyeOutlined />,
+              label: tActions("detail"),
+              onClick: () => {
+                setSelectedBatch(row);
+                void loadDesigns(row);
+              },
+            },
+          ]}
+          menuItems={[
+            {
+              key: "download",
+              icon: <DownloadOutlined />,
+              label: t("actions.download"),
+              disabled:
+                !row?.source_design_ids?.length ||
+                isDownloading(`design-flaw:source-designs:${row.id}`),
+              onClick: () => downloadSourceDesigns(row),
+            },
+            {
+              key: "upload",
+              icon: <UploadOutlined />,
+              label: t("actions.addDesign"),
+              pickFiles: {
+                multiple: true,
+                onPick: (files) => handleUpload(row, files),
+              },
+            },
+          ]}
+        />
       ),
     },
   ];

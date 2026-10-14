@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Empty, Image, Tag, Typography } from "antd";
+import { Card, Empty, Image, Tag } from "antd";
 import {
   OriginalDesignButton,
   resolveDesignThumbnailStatus,
@@ -57,7 +57,7 @@ const buildPersonalizedDesignGroups = (item) => {
   });
 };
 
-const PositionDesignCard = ({
+export const PositionDesignCard = ({
   item,
   design,
   positionMap,
@@ -111,6 +111,10 @@ const PositionDesignCard = ({
       <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
         {previewImageUrl ? (
           <div className="relative w-full">
+            {/* Design previews come from arbitrary storage URLs and need
+                their natural size for the overlay math, so next/image is
+                not used here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewImageUrl}
               alt={positionName}
@@ -174,13 +178,7 @@ const PositionDesignCard = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1">
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          {tDetail("designs.positionLabel")}
-        </Typography.Text>
-        <Typography.Text>{positionName}</Typography.Text>
-        <OriginalDesignButton url={design?.design_url} block />
-      </div>
+      <OriginalDesignButton url={design?.design_url} block />
     </Card>
   );
 };

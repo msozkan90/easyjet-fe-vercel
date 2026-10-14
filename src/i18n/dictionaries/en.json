@@ -1,7 +1,7 @@
 {
   "common": {
     "language": "Language",
-    "languageChanged": "Dil {language} olarak güncellendi.",
+    "languageChanged": "Language changed to {language}.",
     "languageChangeError": "We couldn't update the language. Please try again.",
     "unsavedChanges": {
       "title": "You have unsaved changes",
@@ -76,7 +76,8 @@
       "failed": "Preview could not be generated.",
       "notApplicable": "This file type cannot be previewed.",
       "empty": "No preview",
-      "openOriginal": "Download original"
+      "download": "Download",
+      "openOriginal": "Download original design"
     },
     "none": "-",
     "states": {
@@ -90,6 +91,19 @@
       "body": "There was a problem loading this page. You can try again or go back to the panel.",
       "retry": "Try again",
       "home": "Back to panel"
+    },
+    "entityPermissions": {
+      "enabledCount": "{enabled}/{total} on",
+      "on": "On",
+      "off": "Off",
+      "default": "Default",
+      "defaultValue": "Default: {value}",
+      "modalDescription": "Switch a permission to override the default for this account. Locked permissions cannot be changed.",
+      "empty": "No permissions defined.",
+      "keys": {
+        "CAN_USE_SS_SHIPMENT": "ShipStation shipping",
+        "CAN_USE_NS_SHIPMENT": "NestShipper shipping"
+      }
     }
   },
   "home": {

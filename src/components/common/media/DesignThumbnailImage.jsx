@@ -46,7 +46,7 @@ export function OriginalDesignButton({
     <Button
       size={size}
       block={block}
-      className={className}
+      className={["ej-design-download", className].filter(Boolean).join(" ")}
       style={style}
       icon={<DownloadOutlined />}
       loading={downloading}
@@ -63,11 +63,13 @@ export function OriginalDesignButton({
         }
       }}
     >
-      {compact ? null : t("openOriginal")}
+      {compact ? null : t("download")}
     </Button>
   );
 
-  return compact ? <Tooltip title={t("openOriginal")}>{button}</Tooltip> : button;
+  // The visible label stays short so it fits narrow design cards; the
+  // tooltip carries the full meaning.
+  return <Tooltip title={t("openOriginal")}>{button}</Tooltip>;
 }
 
 export default function DesignThumbnailImage({

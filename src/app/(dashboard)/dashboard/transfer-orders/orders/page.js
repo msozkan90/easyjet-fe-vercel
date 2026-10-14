@@ -12,12 +12,10 @@ import {
   Input,
   InputNumber,
   Modal,
-  Popconfirm,
   Select,
   Space,
   Switch,
   Upload,
-  Tooltip,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -33,6 +31,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import TransferProductionModal from "@/components/modals/TransferProductionModal";
+import RowActions from "@/components/ui/RowActions";
 import { TransferOrdersAPI } from "@/utils/api";
 import { isValidOrderNumber } from "@/utils/orderNumberValidation";
 import {
@@ -528,7 +527,7 @@ export default function TransferOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 220,
+        width: 96,
         render: (_, record) => {
           const isParentRow =
             Boolean(record?.__hasChildren) && !record?.__isChild;
@@ -563,140 +562,102 @@ export default function TransferOrdersPage() {
             : "";
 
           return (
-            <Space wrap>
-              <Tooltip title={t("actions.viewDetail")}>
-                <Button
-                  aria-label={t("actions.viewDetail")}
-                  icon={<FileSearchOutlined />}
-                  type="default"
-                  disabled={!canViewDetail}
-                  onClick={() => {
+            <RowActions
+              actions={[
+                {
+                  key: "detail",
+                  iconOnly: true,
+                  icon: <FileSearchOutlined />,
+                  label: t("actions.viewDetail"),
+                  disabled: !canViewDetail,
+                  onClick: () => {
                     if (!canViewDetail) return;
                     window.open(detailHref, "_blank", "noopener,noreferrer");
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title={t("actions.editAddress")}>
-                <Button
-                  aria-label={t("actions.editAddress")}
-                  icon={<EditOutlined />}
-                  type="default"
-                  disabled={!canEditRecord}
-                  onClick={() => handleOpenAddressEditor(record)}
-                />
-              </Tooltip>
-              {isParentRow ? (
-                <Tooltip title={t("actions.designUpload")}>
-                  <Button
-                    aria-label={t("actions.designUpload")}
-                    icon={<UploadOutlined />}
-                    type="default"
-                    disabled={!canUploadDesign}
-                    onClick={() => handleOpenDesignUpload(record)}
-                  />
-                </Tooltip>
-              ) : null}
-              {isParentRow ? (
-                <Tooltip title={t("actions.sendToProduction")}>
-                  <Button
-                    aria-label={t("actions.sendToProduction")}
-                    icon={<CheckCircleOutlined />}
-                    type="primary"
-                    disabled={!canSendToProduction}
-                    loading={isRowActionLoading(record.id, "production")}
-                    onClick={async () => {
-                      if (!canSendToProduction) return;
-                      setRowActionLoadingState(record.id, "production", true);
-                      try {
-                        await TransferOrdersAPI.validateProduction({
-                          transfer_order_id: record.transfer_order_id,
-                          label_purchase_option: "label_purchase",
-                        });
-                        const response = await TransferOrdersAPI.detail(
-                          record.order_number,
-                        );
-                        setProductionRecord(response?.data || record);
-                        setProductionModalOpen(true);
-                      } catch (error) {
-                        message.error(
-                          error?.response?.data?.error?.message ||
-                            t("productionModal.messages.error"),
-                        );
-                      } finally {
-                        setRowActionLoadingState(
-                          record.id,
-                          "production",
-                          false,
-                        );
-                      }
-                    }}
-                  />
-                </Tooltip>
-              ) : null}
-              <Tooltip title={t("actions.cancel")}>
-                <Popconfirm
-                  title={t("actions.confirmCancelTitle")}
-                  okText={t("actions.confirmCancelOk")}
-                  okButtonProps={{ danger: true, loading: cancelLoading }}
-                  disabled={disableActions}
-                  onConfirm={() => handleStatusUpdate(record, "cancel")}
-                >
-                  <Button
-                    aria-label={t("actions.cancel")}
-                    icon={<CloseOutlined />}
-                    type="primary"
-                    danger
-                    loading={cancelLoading}
-                    disabled={disableActions}
-                  />
-                </Popconfirm>
-              </Tooltip>
-              {showWaitingAction ? (
-                <Tooltip title={t("actions.waitingForDesign")}>
-                  <Popconfirm
-                    title={t("actions.confirmWaitingTitle")}
-                    okText={t("actions.confirmWaitingOk")}
-                    okButtonProps={{ type: "primary", loading: waitingLoading }}
-                    disabled={disableActions}
-                    onConfirm={() =>
-                      handleStatusUpdate(record, "waitingForDesign")
+                  },
+                },
+              ]}
+              menuItems={[
+                {
+                  key: "address",
+                  icon: <EditOutlined />,
+                  label: t("actions.editAddress"),
+                  disabled: !canEditRecord,
+                  onClick: () => handleOpenAddressEditor(record),
+                },
+                isParentRow && {
+                  key: "designUpload",
+                  icon: <UploadOutlined />,
+                  label: t("actions.designUpload"),
+                  disabled: !canUploadDesign,
+                  onClick: () => handleOpenDesignUpload(record),
+                },
+                isParentRow && {
+                  key: "production",
+                  icon: <CheckCircleOutlined />,
+                  label: t("actions.sendToProduction"),
+                  disabled:
+                    !canSendToProduction ||
+                    isRowActionLoading(record.id, "production"),
+                  onClick: async () => {
+                    if (!canSendToProduction) return;
+                    setRowActionLoadingState(record.id, "production", true);
+                    try {
+                      await TransferOrdersAPI.validateProduction({
+                        transfer_order_id: record.transfer_order_id,
+                        label_purchase_option: "label_purchase",
+                      });
+                      const response = await TransferOrdersAPI.detail(
+                        record.order_number,
+                      );
+                      setProductionRecord(response?.data || record);
+                      setProductionModalOpen(true);
+                    } catch (error) {
+                      message.error(
+                        error?.response?.data?.error?.message ||
+                          t("productionModal.messages.error"),
+                      );
+                    } finally {
+                      setRowActionLoadingState(record.id, "production", false);
                     }
-                  >
-                    <Button
-                      aria-label={t("actions.waitingForDesign")}
-                      icon={<ClockCircleOutlined />}
-                      type="primary"
-                      color="orange"
-                      variant="solid"
-                      loading={waitingLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Tooltip>
-              ) : null}
-              {showNewOrderAction ? (
-                <Tooltip title={t("actions.newOrder")}>
-                  <Popconfirm
-                    title={t("actions.confirmNewOrderTitle")}
-                    okText={t("actions.confirmNewOrderOk")}
-                    okButtonProps={{
-                      type: "primary",
-                      loading: newOrderLoading,
-                    }}
-                    disabled={disableActions}
-                    onConfirm={() => handleStatusUpdate(record, "newOrder")}
-                  >
-                    <Button
-                      aria-label={t("actions.newOrder")}
-                      icon={<PlusOutlined />}
-                      type="primary"
-                      loading={newOrderLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Tooltip>
-              ) : null}
-            </Space>
+                  },
+                },
+                showWaitingAction && {
+                  key: "waitingForDesign",
+                  icon: <ClockCircleOutlined />,
+                  label: t("actions.waitingForDesign"),
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmWaitingTitle"),
+                    okText: t("actions.confirmWaitingOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "waitingForDesign"),
+                },
+                showNewOrderAction && {
+                  key: "newOrder",
+                  icon: <PlusOutlined />,
+                  label: t("actions.newOrder"),
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmNewOrderTitle"),
+                    okText: t("actions.confirmNewOrderOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "newOrder"),
+                },
+                { type: "divider" },
+                {
+                  key: "cancel",
+                  icon: <CloseOutlined />,
+                  label: t("actions.cancel"),
+                  danger: true,
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmCancelTitle"),
+                    okText: t("actions.confirmCancelOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "cancel"),
+                },
+              ]}
+            />
           );
         },
       },

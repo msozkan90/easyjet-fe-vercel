@@ -8,10 +8,7 @@ import {
   Dropdown,
   InputNumber,
   Modal,
-  Popconfirm,
-  Popover,
   Space,
-  Tooltip,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -31,6 +28,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function ProductStockPage() {
@@ -234,68 +232,61 @@ export default function ProductStockPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Tooltip title={t("actions.edit")}>
-              <Button aria-label={t("actions.edit")}
-                icon={<EditOutlined />}
-                onClick={() => {
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
                   setEditingRow(record);
                   setOpen(true);
-                }}
-              ></Button>
-            </Tooltip>
-            <Tooltip title={t("actions.manualDecrease")}>
-              <Button aria-label={t("actions.manualDecrease")}
-                icon={<MinusOutlined />}
-                disabled={!Number(record?.quantity)}
-                onClick={() => {
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "manualDecrease",
+                icon: <MinusOutlined />,
+                label: t("actions.manualDecrease"),
+                disabled: !Number(record?.quantity),
+                onClick: () => {
                   setDecreaseTarget(record);
                   setDecreaseQuantity(1);
                   setDecreaseModalOpen(true);
-                }}
-              ></Button>
-            </Tooltip>
-            <Popover
-              content={
-                record?.status === "active"
-                  ? t("actions.deactivate")
-                  : t("actions.activate")
-              }
-            >
-              <Popconfirm
-                title={
+                },
+              },
+              { type: "divider" },
+              {
+                key: "toggleStatus",
+                icon:
+                  record?.status === "active" ? (
+                    <CloseCircleOutlined />
+                  ) : (
+                    <CheckCircleOutlined />
+                  ),
+                danger: record?.status === "active",
+                label:
                   record?.status === "active"
-                    ? t("actions.confirmDeactivateTitle")
-                    : t("actions.confirmActivateTitle")
-                }
-                okText={
-                  record?.status === "active"
-                    ? t("actions.confirmDeactivateOk")
-                    : t("actions.confirmActivateOk")
-                }
-                okButtonProps={{ danger: record?.status === "active" }}
-                onConfirm={() => onToggleStatus(record)}
-              >
-                <Button
-                  icon={
-                    record?.status === "active" ? (
-                      <CloseCircleOutlined />
-                    ) : (
-                      <CheckCircleOutlined />
-                    )
-                  }
-                  danger={record?.status === "active"}
-                  style={
-                    record?.status === "inactive"
-                      ? { color: "#1E7A4C", borderColor: "#A7D8BC" }
-                      : undefined
-                  }
-                ></Button>
-              </Popconfirm>
-            </Popover>
-          </Space>
+                    ? t("actions.deactivate")
+                    : t("actions.activate"),
+                confirm: {
+                  title:
+                    record?.status === "active"
+                      ? t("actions.confirmDeactivateTitle")
+                      : t("actions.confirmActivateTitle"),
+                  okText:
+                    record?.status === "active"
+                      ? t("actions.confirmDeactivateOk")
+                      : t("actions.confirmActivateOk"),
+                },
+                onClick: () => onToggleStatus(record),
+              },
+            ]}
+          />
         ),
       },
     ],

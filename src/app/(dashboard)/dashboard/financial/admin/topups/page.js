@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Button, Space, App as AntdApp } from "antd";
-import Link from "next/link";
+import { Space, App as AntdApp } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -15,6 +15,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import MoneyText from "@/components/ui/MoneyText";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const resolveOwnerName = (record) => {
   if (!record) return "-";
@@ -244,13 +245,19 @@ export default function WalletTopupsAdminListPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 160,
+        width: 96,
         render: (_, record) => (
-          <Button type="link">
-            <Link href={`/dashboard/financial/admin/topups/${record.id}`}>
-              {t("actions.view")}
-            </Link>
-          </Button>
+          <RowActions
+            actions={[
+              {
+                key: "view",
+                iconOnly: true,
+                icon: <EyeOutlined />,
+                label: t("actions.view"),
+                href: `/dashboard/financial/admin/topups/${record.id}`,
+              },
+            ]}
+          />
         ),
       },
     ],

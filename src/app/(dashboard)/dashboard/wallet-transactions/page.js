@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { Card, Space, Statistic } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { ENTITY_ADMIN_ROLES } from "@/utils/rbac";
 import CrudTable from "@/components/common/table/CrudTable";
 import { TransactionsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
@@ -157,7 +158,7 @@ export default function WalletTransactionsPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin", "systemAdmin"]}>
+    <RequireRole anyOfRoles={ENTITY_ADMIN_ROLES}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <PageHeader title={t("title")} className="" />
         <Card>

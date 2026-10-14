@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
+import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -15,6 +15,7 @@ import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
 import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const ROLE_FILTERS = [
   RoleEnum.COMPANY_ADMIN,
@@ -187,29 +188,35 @@ export default function CompanyUsersPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 220,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditing(record);
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-            <Popconfirm
-              title={t("actions.confirmDeleteTitle")}
-              okText={t("actions.confirmDeleteOk")}
-              okButtonProps={{ danger: true }}
-              onConfirm={() => onDelete(record.id)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t("actions.delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditing(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: t("actions.delete"),
+                confirm: {
+                  title: t("actions.confirmDeleteTitle"),
+                  okText: t("actions.confirmDeleteOk"),
+                },
+                onClick: () => onDelete(record.id),
+              },
+            ]}
+          />
         ),
       },
     ],

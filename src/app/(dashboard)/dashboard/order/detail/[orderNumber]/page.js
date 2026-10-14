@@ -10,7 +10,6 @@ import {
   Card,
   Empty,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
@@ -25,18 +24,15 @@ import {
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import {
-  OriginalDesignButton,
-  resolveDesignThumbnailStatus,
-} from "@/components/common/media/DesignThumbnailImage";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
-import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import { resolveTrackingUrl } from "@/utils/trackingUrl";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
-import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
+import GroupedOrderItemDesignPreview, {
+  PositionDesignCard,
+} from "@/components/orders/OrderItemDesignPreview";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
 import { formatAmount } from "@/utils/formatMoney";
@@ -656,142 +652,23 @@ const ItemDesignPreview = ({
   tOrders,
   fallbackText,
 }) => {
-  const tThumbnail = useTranslations("common.designThumbnail");
   if (!designs.length) {
     return <Empty description={tDesign("designs.empty")} />;
   }
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      {designs.map((design) => {
-        const positionId = String(design?.product_position_id || "");
-        const position = positionMap.get(positionId);
-        const designArea = position
-          ? extractDesignAreaFromRecord(position)
-          : null;
-        const positionImageUrl = position?.images?.[0]?.image_url;
-        const previewImageUrl = positionImageUrl || item?.image_url;
-        const designPreviewUrl = design?.thumbnail_url;
-        const thumbnailStatus = resolveDesignThumbnailStatus(design);
-        const thumbnailFallbackText =
-          thumbnailStatus === "pending" || thumbnailStatus === "processing"
-            ? tThumbnail("preparing")
-            : thumbnailStatus === "failed"
-              ? tThumbnail("failed")
-              : thumbnailStatus === "not_applicable"
-                ? tThumbnail("notApplicable")
-                : fallbackText;
-        const positionName =
-          position?.name ||
-          design?.product_position?.name ||
-          tDesign("designs.unknownPosition");
-
-        return (
-          <Card
-            key={design?.id || positionId}
-            title={positionName}
-            extra={
-              Number(design?.display_quantity || 1) > 1 ? (
-                <Tag color="blue">
-                  {tOrders("columns.quantity")}: {design.display_quantity}
-                </Tag>
-              ) : null
-            }
-            className="rounded-xl border border-line"
-            styles={{
-              body: {
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                flex: 1,
-                padding: 16,
-              },
-            }}
-          >
-            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
-              {previewImageUrl ? (
-                <div className="relative w-full">
-                  {/* Design previews come from arbitrary storage URLs and need
-                      their natural size for the overlay math, so next/image is
-                      not used here. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewImageUrl}
-                    alt={positionName}
-                    className="block w-full rounded-xl object-contain"
-                    style={{
-                      backgroundColor: item?.color?.hex_code || undefined,
-                    }}
-                  />
-                  <div className="absolute inset-0">
-                    {designArea ? (
-                      <div
-                        className="absolute rounded-xl border-2 border-blue-500/70 bg-blue-500/10 shadow-inner"
-                        style={{
-                          left: `${designArea.x * 100}%`,
-                          top: `${designArea.y * 100}%`,
-                          width: `${designArea.width * 100}%`,
-                          height: `${designArea.height * 100}%`,
-                        }}
-                      >
-                        {designPreviewUrl ? (
-                          <Image
-                            src={designPreviewUrl}
-                            alt="design preview"
-                            width="100%"
-                            height="100%"
-                            preview={{ src: designPreviewUrl }}
-                            style={{ objectFit: "contain", borderRadius: 8 }}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
-                            {thumbnailFallbackText}
-                          </div>
-                        )}
-                      </div>
-                    ) : designPreviewUrl ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src={designPreviewUrl}
-                          alt="design preview"
-                          width={96}
-                          height={96}
-                          preview={{ src: designPreviewUrl }}
-                          style={{ objectFit: "contain", borderRadius: 8 }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ) : designPreviewUrl ? (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Image
-                    src={designPreviewUrl}
-                    alt="design preview"
-                    width="100%"
-                    height="100%"
-                    preview={{ src: designPreviewUrl }}
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Empty
-                    description={thumbnailFallbackText || tDesign("designs.noPreview")}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {tDesign("designs.positionLabel")}
-              </Typography.Text>
-              <Typography.Text>{positionName}</Typography.Text>
-              <OriginalDesignButton url={design?.design_url} block />
-            </div>
-          </Card>
-        );
-      })}
+      {designs.map((design) => (
+        <PositionDesignCard
+          key={design?.id || design?.product_position_id}
+          item={item}
+          design={design}
+          positionMap={positionMap}
+          tDetail={tDesign}
+          tOrders={tOrders}
+          fallbackText={fallbackText}
+        />
+      ))}
     </div>
   );
 };
@@ -1456,7 +1333,7 @@ export default function OrderDetailPage() {
                 rows={[
                   {
                     label: tDesign("fields.customerName"),
-                    value: orderDetail?.customer?.name || tOrders("common.none"),
+                    value: orderDetail?.bill_to_name || tOrders("common.none"),
                   },
                   {
                     label: tDesign("fields.customerEmail"),

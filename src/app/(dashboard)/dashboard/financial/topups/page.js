@@ -11,12 +11,14 @@ import {
   Modal,
   Select,
   Space,
-  Popconfirm,
   Upload,
   App as AntdApp,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import Link from "next/link";
+import {
+  CloseCircleOutlined,
+  EyeOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -28,6 +30,7 @@ import { refreshWalletBalance } from "@/utils/walletBalance";
 import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
+import RowActions from "@/components/ui/RowActions";
 import MoneyText from "@/components/ui/MoneyText";
 import StatusTag from "@/components/ui/StatusTag";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
@@ -237,31 +240,37 @@ export default function WalletTopupsListPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button type="link">
-              <Link href={`/dashboard/financial/topups/${record.id}`}>
-                {t("actions.view")}
-              </Link>
-            </Button>
-            {record.status === "pending" ? (
-              <Popconfirm
-                title={t("actions.confirmCancel")}
-                okText={t("actions.confirmOk")}
-                cancelText={tCommon("cancel")}
-                onConfirm={() => handleCancel(record)}
-              >
-                <Button danger loading={actionLoading}>
-                  {t("actions.cancel")}
-                </Button>
-              </Popconfirm>
-            ) : null}
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "view",
+                iconOnly: true,
+                icon: <EyeOutlined />,
+                label: t("actions.view"),
+                href: `/dashboard/financial/topups/${record.id}`,
+              },
+            ]}
+            menuItems={[
+              record.status === "pending" && {
+                key: "cancel",
+                icon: <CloseCircleOutlined />,
+                danger: true,
+                label: t("actions.cancel"),
+                disabled: actionLoading,
+                confirm: {
+                  title: t("actions.confirmCancel"),
+                  okText: t("actions.confirmOk"),
+                },
+                onClick: () => handleCancel(record),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [fundingOptions, handleCancel, t, tCommon, tStatus, actionLoading]
+    [fundingOptions, handleCancel, t, tStatus, actionLoading]
   );
 
   return (
