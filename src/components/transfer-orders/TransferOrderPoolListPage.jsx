@@ -152,7 +152,13 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
           numericArrayKeys: [""],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
-            next.item_state = isCancelledView ? "cancelled" : "pending";
+            // Pending is the backend default. Sending it counts as an active
+            // filter there and disables the "missing price first" ordering.
+            if (isCancelledView) {
+              next.item_state = "cancelled";
+            } else {
+              delete next.item_state;
+            }
             const orderDate = next.order_date;
             if (orderDate?.gte || orderDate?.lte) {
               next.date_from = orderDate?.gte;
@@ -901,6 +907,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
           cancelling={bulkCancelling}
           onApprove={handleBulkApprove}
           onCancel={handleBulkCancel}
+          onClearSelection={() => setSelectedRowMap({})}
         />
       ) : null}
     </RequireRole>

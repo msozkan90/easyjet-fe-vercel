@@ -337,16 +337,31 @@ a:focus-visible,
   outline-offset: 2px;
 }
 
-.ant-table-row.missing-price-row > td {
-  background-color: rgba(255, 77, 79, 0.12);
+/* Pool items without a price: tinted row, red marker and red text, while
+   buttons, selects and tags keep their own colors. */
+.ant-table-row.missing-price-row > td,
+.ant-table-row.missing-price-row > td.ant-table-cell-fix-left,
+.ant-table-row.missing-price-row > td.ant-table-cell-fix-right {
+  background-color: #fdf1f0 !important;
+  color: var(--ej-danger);
 }
 
-.ant-table-row.missing-price-row > td * {
-  color: #ff4d4f;
+.ant-table-row.missing-price-row:hover > td,
+.ant-table-row.missing-price-row:hover > td.ant-table-cell-fix-left,
+.ant-table-row.missing-price-row:hover > td.ant-table-cell-fix-right {
+  background-color: #fbe4e2 !important;
 }
 
-.ant-table-row.missing-price-row > td *:hover {
-  color: #ff4d4f;
+.ant-table-row.missing-price-row > td:first-child {
+  box-shadow: inset 3px 0 0 var(--ej-danger);
+}
+
+:root[data-theme="dark"] .ant-table-row.missing-price-row > td {
+  background-color: #2a1d24 !important;
+}
+
+:root[data-theme="dark"] .ant-table-row.missing-price-row:hover > td {
+  background-color: #33212a !important;
 }
 
 /* Multi-item orders: opaque tints so fixed columns never show content behind */

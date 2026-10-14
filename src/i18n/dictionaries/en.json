@@ -50,7 +50,8 @@
       "open": "Open",
       "backToTop": "Back to top",
       "moreActions": "More actions",
-      "retry": "Try again"
+      "retry": "Try again",
+      "clearSelection": "Clear all selections"
     },
     "status": {
       "active": "Active",

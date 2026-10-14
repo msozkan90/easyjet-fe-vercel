@@ -492,17 +492,21 @@ const CrudTable = forwardRef(function CrudTable(
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Toolbar */}
+      {/* Toolbar: filters and actions share one panel */}
       {showRefresh || toolbarLeft || toolbarRight ? (
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div
+          className={`flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between ${
+            toolbarLeft ? "rounded-xl border border-line bg-subtle p-2" : ""
+          }`}
+        >
           {toolbarLeft ? (
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-xl border border-line bg-subtle p-2">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               {toolbarLeft}
             </div>
           ) : (
             <div className="flex-1" />
           )}
-          <div className="ej-toolbar-actions flex min-w-0 max-w-full flex-wrap items-center gap-2 lg:shrink-0">
+          <div className="ej-toolbar-actions flex min-w-0 max-w-full flex-wrap items-center gap-2 lg:shrink-0 lg:justify-end">
             {showRefresh ? (
               <Button
                 icon={<ReloadOutlined />}

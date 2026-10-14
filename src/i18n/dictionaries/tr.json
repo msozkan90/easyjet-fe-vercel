@@ -50,7 +50,8 @@
       "open": "Aç",
       "backToTop": "En üste çık",
       "moreActions": "Diğer işlemler",
-      "retry": "Tekrar dene"
+      "retry": "Tekrar dene",
+      "clearSelection": "Tüm seçimleri kaldır"
     },
     "status": {
       "active": "Aktif",

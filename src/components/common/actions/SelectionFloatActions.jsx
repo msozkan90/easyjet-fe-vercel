@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CheckOutlined, ClearOutlined, CloseOutlined } from "@ant-design/icons";
 import { Button, Popconfirm } from "antd";
+import { useTranslations } from "@/i18n/use-translations";
 
 /**
  * Bulk action bar shown at the bottom of the screen while rows are selected:
@@ -22,14 +23,16 @@ export default function SelectionFloatActions({
   cancelling = false,
   onApprove,
   onCancel,
+  onClearSelection,
 }) {
+  const tActions = useTranslations("common.actions");
   const busy = approving || cancelling;
 
   return (
     <div
       role="region"
       aria-label={selectedLabel}
-      className="fixed bottom-4 left-1/2 z-[1200] flex w-[min(640px,calc(100vw-24px))] -translate-x-1/2 flex-wrap items-center justify-between gap-3 rounded-xl bg-ink-900 px-4 py-3 text-white shadow-[0_16px_40px_rgba(10,26,36,0.32)] md:bottom-6"
+      className="fixed bottom-4 left-1/2 z-[1200] flex w-[min(760px,calc(100vw-24px))] -translate-x-1/2 flex-wrap items-center justify-between gap-3 rounded-xl bg-ink-900 px-4 py-3 text-white shadow-[0_16px_40px_rgba(10,26,36,0.32)] md:bottom-6"
     >
       <div className="flex items-center gap-3">
         <span
@@ -39,6 +42,18 @@ export default function SelectionFloatActions({
           {count}
         </span>
         <span className="text-sm font-medium">{selectedLabel}</span>
+        {onClearSelection ? (
+          <Button
+            type="link"
+            size="small"
+            icon={<ClearOutlined />}
+            onClick={onClearSelection}
+            disabled={busy}
+            style={{ color: "#FFB27A", paddingInline: 4 }}
+          >
+            {tActions("clearSelection")}
+          </Button>
+        ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Popconfirm
