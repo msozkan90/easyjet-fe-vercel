@@ -85,8 +85,8 @@ export default function ShipStationStoreStatusCard({ storeId, customerName, t })
   const lastUpdated = formatRefreshDate(status?.refreshDate, t);
 
   return (
-    <div className="flex min-w-[240px] items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 ring-1 ring-slate-200">
+    <div className="flex min-w-[240px] items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-subtle ring-1 ring-line">
         <img
           src="/assets/logos/ss_logo.png"
           alt="ShipStation"
@@ -95,15 +95,15 @@ export default function ShipStationStoreStatusCard({ storeId, customerName, t })
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-base font-semibold leading-tight text-slate-900">
+        <div className="truncate text-base font-semibold leading-tight text-text">
           {displayName}
         </div>
-        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
-          <CheckCircleFilled className="text-sm text-emerald-500" />
+        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-text-secondary">
+          <CheckCircleFilled className="text-sm text-success" />
           <span className="truncate">
             {t("shipStationStatus.lastUpdated", { date: lastUpdated })}
           </span>
-          {loading && <LoadingOutlined className="text-xs text-slate-400" />}
+          {loading && <LoadingOutlined className="text-xs text-ink-400" />}
         </div>
       </div>
 

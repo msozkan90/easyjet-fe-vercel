@@ -20,30 +20,9 @@ import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  pdf: "blue",
-  completed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-};
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
+import { formatAmount } from "@/utils/formatMoney";
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -73,12 +52,12 @@ const OrderItemCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
-      bodyStyle={{ padding: 20 }}
+      className="rounded-xl border border-line"
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
+        <div className="w-full max-w-[240px] rounded-xl border border-line bg-surface p-3">
+          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-line bg-subtle">
             {item?.image_url ? (
               <GuardedPreviewImage
                 src={item.image_url}
@@ -110,9 +89,9 @@ const OrderItemCard = ({
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>
-            <Tag color={STATUS_COLORS[statusKey] || "default"}>
+            <StatusTag status={statusKey}>
               {tOrders("columns.status")}: {statusLabel}
-            </Tag>
+            </StatusTag>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -151,7 +130,7 @@ const OrderItemCard = ({
                 {options.map((option, index) => (
                   <span
                     key={`${option?.name || "option"}-${index}`}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                   >
                     {option?.name || tOrders("common.none")}:{" "}
                     {option?.value || tOrders("common.none")}
@@ -375,12 +354,10 @@ export default function ShippedOrderPrinterSearchPage() {
 
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker", "companyadmin"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("scanner.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("scanner.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <Space.Compact style={{ width: "100%" }}>
             <Input
               ref={orderNumberInputRef}

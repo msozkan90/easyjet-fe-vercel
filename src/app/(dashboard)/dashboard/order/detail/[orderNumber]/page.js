@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import { FileSearchOutlined } from "@ant-design/icons";
 import {
   Alert,
   App as AntdApp,
@@ -9,7 +10,6 @@ import {
   Card,
   Empty,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
@@ -19,37 +19,23 @@ import {
   Tag,
   Tabs,
   Typography,
+  Steps,
 } from "antd";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import {
-  OriginalDesignButton,
-  resolveDesignThumbnailStatus,
-} from "@/components/common/media/DesignThumbnailImage";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "@/i18n/use-translations";
-import { STATUS_COLORS } from "@/app/(dashboard)/dashboard/orders/statusConstants";
-import { extractDesignAreaFromRecord } from "@/utils/designArea";
 import { resolveTrackingUrl } from "@/utils/trackingUrl";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
-import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import GroupedOrderItemDesignPreview, {
+  PositionDesignCard,
+} from "@/components/orders/OrderItemDesignPreview";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const formatDateTime = (value, fallback = "-") =>
   value ? moment(value).format("LLL") : fallback;
@@ -60,18 +46,6 @@ const isReorderedOrder = (order) => {
   return Boolean(
     rawOrder && typeof rawOrder === "object" && rawOrder.reordered === true,
   );
-};
-
-const LABEL_STATUS_COLORS = {
-  purchased: "green",
-  created: "blue",
-  refunded: "volcano",
-  voided: "volcano",
-  cancelled: "volcano",
-  error: "red",
-  failed: "red",
-  autovoid: "orange",
-  errorvoid: "red",
 };
 
 const SCRAP_REASON_OPTIONS = [
@@ -114,55 +88,99 @@ const extractPositionList = (response) => {
 };
 
 const InfoField = ({ label, value, className, valueClassName }) => (
-  <div className={`flex flex-col gap-1 ${className || ""}`}>
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-      {label}
-    </span>
+  <div className={`flex min-w-0 flex-col gap-0.5 ${className || ""}`}>
+    <span className="text-xs text-text-secondary">{label}</span>
     <span
-      className={`text-sm font-semibold text-slate-900 ${valueClassName || ""}`}
+      className={`break-words text-[13px] font-medium text-text ${valueClassName || ""}`}
     >
       {value}
     </span>
   </div>
 );
 
-const MetricCard = ({ label, value, hint }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-      {label}
-    </span>
-    <div className="mt-2 text-lg font-semibold text-slate-900">{value}</div>
-    {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
-  </div>
-);
-
-const SectionHeader = ({ title, subtitle }) => (
-  <div className="flex flex-col gap-1">
-    <Typography.Title level={5} style={{ margin: 0 }}>
-      {title}
-    </Typography.Title>
-    {subtitle ? (
-      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        {subtitle}
-      </Typography.Text>
-    ) : null}
-  </div>
-);
-
-const AddressBlock = ({ title, rows }) => (
-  <Card
-    title={title}
-    className="rounded-2xl border border-slate-100 shadow-sm"
-    styles={{ body: { padding: 16 } }}
-    size="small"
-  >
-    <div className="grid gap-3 sm:grid-cols-2">
-      {rows.map((row) => (
-        <InfoField key={row.label} label={row.label} value={row.value} />
-      ))}
+const SectionHeader = ({ title, subtitle, count, extra }) => (
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex items-center gap-2">
+        <h2 className="m-0 text-base font-semibold text-text">{title}</h2>
+        {typeof count === "number" ? (
+          <span className="ej-mono rounded-full bg-muted px-2 text-xs leading-5 text-text-secondary">
+            {count}
+          </span>
+        ) : null}
+      </div>
+      {subtitle ? (
+        <span className="text-xs text-text-secondary">{subtitle}</span>
+      ) : null}
     </div>
-  </Card>
+    {extra}
+  </div>
 );
+
+const SectionEmpty = ({ children }) => (
+  <div className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-[13px] text-text-secondary">
+    {children}
+  </div>
+);
+
+// Compact titled panel used in the overview side column.
+const SideCard = ({ title, children }) => (
+  <section className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+    <h2 className="m-0 text-[15px] font-semibold text-text">{title}</h2>
+    {children}
+  </section>
+);
+
+const KeyValueList = ({ rows }) => (
+  <dl className="m-0 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-3 gap-y-2">
+    {rows
+      .filter(Boolean)
+      .map((row) => (
+        <div key={row.label} className="contents">
+          <dt className="text-xs leading-5 text-text-secondary">{row.label}</dt>
+          <dd className="m-0 min-w-0 break-words text-[13px] font-medium leading-5 text-text">
+            {row.value}
+          </dd>
+        </div>
+      ))}
+  </dl>
+);
+
+// Postal-style address block; `prefix` is "ship_to" or "bill_to".
+const AddressCard = ({ title, order, prefix, emptyText }) => {
+  const field = (name) => String(order?.[`${prefix}_${name}`] || "").trim();
+  const cityLine = [
+    field("city"),
+    [field("state"), field("postal_code")].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const lines = [
+    field("company"),
+    field("street1"),
+    field("street2"),
+    cityLine,
+    field("country"),
+  ].filter(Boolean);
+  const name = field("name");
+
+  return (
+    <SideCard title={title}>
+      {name || lines.length ? (
+        <address className="flex flex-col gap-0.5 text-[13px] not-italic leading-5 text-text">
+          {name ? <span className="font-semibold">{name}</span> : null}
+          {lines.map((line, index) => (
+            <span key={`${line}-${index}`} className="text-text-secondary">
+              {line}
+            </span>
+          ))}
+        </address>
+      ) : (
+        <span className="text-[13px] text-text-secondary">{emptyText}</span>
+      )}
+    </SideCard>
+  );
+};
 
 const LabelCard = ({
   label,
@@ -177,7 +195,6 @@ const LabelCard = ({
   const source = label?.source;
   const statusValue = detail?.status || label?.status;
   const statusKey = statusValue ? String(statusValue).toLowerCase() : "";
-  const statusColor = LABEL_STATUS_COLORS[statusKey] || "default";
   const labelUrl = detail?.labelUrl || label?.label_url;
   const currency = detail?.currency || "USD";
   const createdAt = formatDateTime(
@@ -224,7 +241,7 @@ const LabelCard = ({
         href={trackingUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all text-blue-600 underline decoration-blue-300 underline-offset-2 transition hover:text-blue-800"
+        className="break-all text-brand-700 underline underline-offset-2 transition hover:text-brand-800"
       >
         {trackingValue}
       </a>
@@ -235,26 +252,21 @@ const LabelCard = ({
     );
 
   return (
-    <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
-      styles={{ body: { padding: 16 } }}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1">
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+    <article className="flex flex-col rounded-xl border border-line bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div className="flex min-w-0 flex-col">
+          <span className="text-xs text-text-secondary">
             {tDesign("fields.labelSource")}
-          </Typography.Text>
-          <Typography.Title level={5} style={{ margin: 0 }}>
+          </span>
+          <span className="truncate text-[15px] font-semibold text-text">
             {label?.source || tOrders("common.none")}
-          </Typography.Title>
+          </span>
         </div>
         {statusValue ? (
-          <Tag color={statusColor} className="rounded-full px-4 py-1 text-sm">
-            {statusValue}
-          </Tag>
+          <StatusTag status={statusKey}>{statusValue}</StatusTag>
         ) : null}
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoField
           label={tDesign("fields.labelCarrier")}
           value={source ? carrierValue : tOrders("common.none")}
@@ -270,25 +282,17 @@ const LabelCard = ({
               ? tOrders("common.none")
               : `${formatAmount(shipmentPrice)} ${currency}`
           }
+          valueClassName="ej-mono"
         />
         <InfoField
           label={tDesign("fields.labelTracking")}
           value={trackingDisplayValue}
+          valueClassName="ej-mono"
         />
         <InfoField label={tDesign("fields.labelCreatedAt")} value={createdAt} />
       </div>
       {labelUrl || canVoid ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {labelUrl ? (
-            <a
-              href={labelUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-            >
-              {tDesign("actions.viewLabel")}
-            </a>
-          ) : null}
+        <div className="mt-auto flex flex-wrap justify-end gap-2 border-t border-line px-4 py-3">
           {canVoid ? (
             <Popconfirm
               title={tDesign("actions.voidLabelConfirmTitle")}
@@ -302,9 +306,19 @@ const LabelCard = ({
               </Button>
             </Popconfirm>
           ) : null}
+          {labelUrl ? (
+            <Button
+              href={labelUrl}
+              target="_blank"
+              rel="noreferrer"
+              icon={<FileSearchOutlined />}
+            >
+              {tDesign("actions.viewLabel")}
+            </Button>
+          ) : null}
         </div>
       ) : null}
-    </Card>
+    </article>
   );
 };
 
@@ -326,7 +340,7 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -338,12 +352,9 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
             {labelVoid?.source || tOrders("common.none")}
           </Typography.Title>
         </div>
-        <Tag
-          color={LABEL_STATUS_COLORS[statusKey] || "volcano"}
-          className="rounded-full px-4 py-1 text-sm"
-        >
+        <StatusTag status={statusKey} tone={statusKey ? undefined : "danger"}>
           {statusLabel}
-        </Tag>
+        </StatusTag>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -506,7 +517,7 @@ const ProductionRecoveryCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-amber-200 bg-amber-50/40 shadow-sm"
+      className="rounded-xl border border-amber-200 bg-amber-50/40"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -573,7 +584,7 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -625,7 +636,7 @@ const ScrapMovementCard = ({ movement, tDesign, tOrders }) => {
         <Typography.Text type="secondary">
           {tDesign("scrap.fields.note")}
         </Typography.Text>
-        <div className="mt-1 text-sm text-slate-700">
+        <div className="mt-1 text-sm text-text-secondary">
           {movement?.note || tOrders("common.none")}
         </div>
       </div>
@@ -641,138 +652,23 @@ const ItemDesignPreview = ({
   tOrders,
   fallbackText,
 }) => {
-  const tThumbnail = useTranslations("common.designThumbnail");
   if (!designs.length) {
     return <Empty description={tDesign("designs.empty")} />;
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      {designs.map((design) => {
-        const positionId = String(design?.product_position_id || "");
-        const position = positionMap.get(positionId);
-        const designArea = position
-          ? extractDesignAreaFromRecord(position)
-          : null;
-        const positionImageUrl = position?.images?.[0]?.image_url;
-        const previewImageUrl = positionImageUrl || item?.image_url;
-        const designPreviewUrl = design?.thumbnail_url;
-        const thumbnailStatus = resolveDesignThumbnailStatus(design);
-        const thumbnailFallbackText =
-          thumbnailStatus === "pending" || thumbnailStatus === "processing"
-            ? tThumbnail("preparing")
-            : thumbnailStatus === "failed"
-              ? tThumbnail("failed")
-              : thumbnailStatus === "not_applicable"
-                ? tThumbnail("notApplicable")
-                : fallbackText;
-        const positionName =
-          position?.name ||
-          design?.product_position?.name ||
-          tDesign("designs.unknownPosition");
-
-        return (
-          <Card
-            key={design?.id || positionId}
-            title={positionName}
-            extra={
-              Number(design?.display_quantity || 1) > 1 ? (
-                <Tag color="blue">
-                  {tOrders("columns.quantity")}: {design.display_quantity}
-                </Tag>
-              ) : null
-            }
-            className="rounded-2xl border border-slate-100 shadow-sm"
-            styles={{
-              body: {
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                flex: 1,
-                padding: 16,
-              },
-            }}
-          >
-            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
-              {previewImageUrl ? (
-                <div className="relative w-full">
-                  <img
-                    src={previewImageUrl}
-                    alt={positionName}
-                    className="block w-full rounded-2xl object-contain"
-                    style={{
-                      backgroundColor: item?.color?.hex_code || undefined,
-                    }}
-                  />
-                  <div className="absolute inset-0">
-                    {designArea ? (
-                      <div
-                        className="absolute rounded-xl border-2 border-blue-500/70 bg-blue-500/10 shadow-inner"
-                        style={{
-                          left: `${designArea.x * 100}%`,
-                          top: `${designArea.y * 100}%`,
-                          width: `${designArea.width * 100}%`,
-                          height: `${designArea.height * 100}%`,
-                        }}
-                      >
-                        {designPreviewUrl ? (
-                          <Image
-                            src={designPreviewUrl}
-                            alt="design preview"
-                            width="100%"
-                            height="100%"
-                            preview={{ src: designPreviewUrl }}
-                            style={{ objectFit: "contain", borderRadius: 8 }}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-                            {thumbnailFallbackText}
-                          </div>
-                        )}
-                      </div>
-                    ) : designPreviewUrl ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src={designPreviewUrl}
-                          alt="design preview"
-                          width={96}
-                          height={96}
-                          preview={{ src: designPreviewUrl }}
-                          style={{ objectFit: "contain", borderRadius: 8 }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ) : designPreviewUrl ? (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Image
-                    src={designPreviewUrl}
-                    alt="design preview"
-                    width="100%"
-                    height="100%"
-                    preview={{ src: designPreviewUrl }}
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Empty
-                    description={thumbnailFallbackText || tDesign("designs.noPreview")}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {tDesign("designs.positionLabel")}
-              </Typography.Text>
-              <Typography.Text>{positionName}</Typography.Text>
-              <OriginalDesignButton url={design?.design_url} block />
-            </div>
-          </Card>
-        );
-      })}
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
+      {designs.map((design) => (
+        <PositionDesignCard
+          key={design?.id || design?.product_position_id}
+          item={item}
+          design={design}
+          positionMap={positionMap}
+          tDetail={tDesign}
+          tOrders={tOrders}
+          fallbackText={fallbackText}
+        />
+      ))}
     </div>
   );
 };
@@ -815,12 +711,12 @@ const OrderItemCard = ({
   return (
     <Card
       key={item?.id}
-      className="rounded-3xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <div className="w-full max-w-[260px] rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50">
+        <div className="w-full max-w-[260px] rounded-xl border border-line bg-surface p-4">
+          <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-line bg-subtle">
             {item?.image_url ? (
               <GuardedPreviewImage
                 src={item.image_url}
@@ -840,23 +736,20 @@ const OrderItemCard = ({
             <Typography.Title level={5} style={{ margin: 0 }}>
               {item?.name || tOrders("columns.item")}
             </Typography.Title>
-            <Tag className="rounded-full" color="geekblue">
+            <Tag className="ej-mono">
               {tOrders("columns.sku")} {item?.sku || tOrders("common.none")}
             </Tag>
-            <Tag className="rounded-full" color="gold">
+            <Tag>
               {tOrders("columns.quantity")}:{" "}
               {item?.quantity ?? tOrders("common.none")}
             </Tag>
-            <Tag className="rounded-full" color="green">
+            <Tag>
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>
-            <Tag
-              className="rounded-full"
-              color={STATUS_COLORS[statusKey] || "default"}
-            >
+            <StatusTag status={statusKey}>
               {tOrders("columns.status")}: {statusLabel}
-            </Tag>
+            </StatusTag>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoField
@@ -881,7 +774,7 @@ const OrderItemCard = ({
                 {options.map((option, index) => (
                   <span
                     key={`${option?.name || "option"}-${index}`}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-text-secondary"
                   >
                     {option?.name || tOrders("common.none")}:{" "}
                     {option?.value || tOrders("common.none")}
@@ -898,7 +791,7 @@ const OrderItemCard = ({
             </Typography.Text>
 
             <div className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700">
+              <span className="rounded-full border border-line bg-surface px-3 py-1 text-text-secondary">
                 {item?.notes || tOrders("common.none")}
               </span>
             </div>
@@ -1250,7 +1143,9 @@ export default function OrderDetailPage() {
   }, [items, message, tDesign]);
 
   const statusLabel = orderDetail?.order_status || orderDetail?.status;
-  const statusColor = STATUS_COLORS[statusLabel] || "default";
+  const statusText = statusLabel
+    ? tOrders(`status.values.${statusLabel}`) || statusLabel
+    : "";
   const isReordered = isReorderedOrder(orderDetail);
   const canManageLabelVoid = useCallback(
     (label) => {
@@ -1284,82 +1179,6 @@ export default function OrderDetailPage() {
     [items, statusLabel, user],
   );
 
-  const billingRows = useMemo(
-    () => [
-      {
-        label: tDesign("fields.billToName"),
-        value: orderDetail?.bill_to_name || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCompany"),
-        value: orderDetail?.bill_to_company || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToStreet1"),
-        value: orderDetail?.bill_to_street1 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToStreet2"),
-        value: orderDetail?.bill_to_street2 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCity"),
-        value: orderDetail?.bill_to_city || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToState"),
-        value: orderDetail?.bill_to_state || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToPostalCode"),
-        value: orderDetail?.bill_to_postal_code || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.billToCountry"),
-        value: orderDetail?.bill_to_country || tOrders("common.none"),
-      },
-    ],
-    [orderDetail, tDesign, tOrders],
-  );
-
-  const shippingRows = useMemo(
-    () => [
-      {
-        label: tDesign("fields.shipToName"),
-        value: orderDetail?.ship_to_name || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCompany"),
-        value: orderDetail?.ship_to_company || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToStreet1"),
-        value: orderDetail?.ship_to_street1 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToStreet2"),
-        value: orderDetail?.ship_to_street2 || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCity"),
-        value: orderDetail?.ship_to_city || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToState"),
-        value: orderDetail?.ship_to_state || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToPostalCode"),
-        value: orderDetail?.ship_to_postal_code || tOrders("common.none"),
-      },
-      {
-        label: tDesign("fields.shipToCountry"),
-        value: orderDetail?.ship_to_country || tOrders("common.none"),
-      },
-    ],
-    [orderDetail, tDesign, tOrders],
-  );
-
   const fallbackText = tDesign("designs.designAreaPlaceholder");
   const pendingPoolItems = Number(
     orderDetail?.pool_completion_summary?.pending_items || 0,
@@ -1379,181 +1198,205 @@ export default function OrderDetailPage() {
     tOrders("common.none"),
   );
 
+  const progressStep = (() => {
+    switch (String(statusLabel || "")) {
+      case "newOrder":
+      case "waitingForDesign":
+        return 1;
+      case "readyForProduction":
+      case "processing":
+      case "pdf":
+      case "designFlaw":
+      case "downloaded":
+      case "printed":
+        return 2;
+      case "completed":
+        return 4;
+      case "shipped":
+        return 5;
+      default:
+        return null;
+    }
+  })();
+  const progressItems = [
+    "received",
+    "preparation",
+    "production",
+    "completed",
+    "shipped",
+  ].map((key) => ({ key, title: tDesign(`progress.${key}`) }));
+
   const detailTabs = [
     {
       key: "overview",
       label: tDesign("tabs.overview"),
       children: (
-        <div className="space-y-6">
-          {pendingPoolItems > 0 ? (
-            <Alert
-              type="warning"
-              showIcon
-              message={tDesign("messages.poolIncomplete", {
-                count: pendingPoolItems,
-              })}
+        <div className="flex flex-wrap items-start gap-5">
+          <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-5">
+            {pendingPoolItems > 0 ? (
+              <Alert
+                type="warning"
+                showIcon
+                message={tDesign("messages.poolIncomplete", {
+                  count: pendingPoolItems,
+                })}
+              />
+            ) : null}
+            <SectionHeader
+              title={tDesign("sections.items")}
+              count={items.length}
+              extra={
+                positionsLoading ? (
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {tDesign("messages.positionsLoading")}
+                  </Typography.Text>
+                ) : null
+              }
             />
-          ) : null}
-          <div className="grid gap-4 lg:grid-cols-3">
-            <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.customer")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.customerName")}
-                  value={orderDetail?.customer?.name || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.customerEmail")}
-                  value={orderDetail?.customer_email || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.customerUsername")}
-                  value={
-                    orderDetail?.customer_username || tOrders("common.none")
-                  }
-                />
+            {items.length ? (
+              <div className="grid gap-6">
+                {items.map((item) => {
+                  const productId = String(
+                    item?.product_id || item?.product?.id || "",
+                  );
+                  const positions = positionsByProductId[productId] || [];
+                  const positionMap = new Map(
+                    positions.map((position) => [String(position?.id), position]),
+                  );
+                  return (
+                    <OrderItemCard
+                      key={item?.id}
+                      item={item}
+                      positionMap={positionMap}
+                      tOrders={tOrders}
+                      tDesign={tDesign}
+                      tCommonActions={tCommonActions}
+                      fallbackText={fallbackText}
+                    />
+                  );
+                })}
               </div>
-            </Card>
-            <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.shipping")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.requestedService")}
-                  value={
-                    orderDetail?.requested_service || tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.carrierCode")}
-                  value={orderDetail?.carrier_code || tOrders("common.none")}
-                />
-                <InfoField
-                  label={tDesign("fields.serviceCode")}
-                  value={orderDetail?.service_code || tOrders("common.none")}
-                />
-              </div>
-            </Card>
-            <Card
-              className="rounded-2xl border border-slate-100 shadow-sm"
-              styles={{ body: { padding: 16 } }}
-            >
-              <SectionHeader title={tDesign("sections.package")} />
-              <div className="mt-4 grid gap-3">
-                <InfoField
-                  label={tDesign("fields.weight")}
-                  value={
-                    orderDetail?.weight?.value
+            ) : (
+              <Empty description={tDesign("messages.noItems")} />
+            )}
+            <SideCard title={tDesign("sections.notes")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.customerNotes"),
+                    value: orderDetail?.customer_notes || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.internalNotes"),
+                    value: orderDetail?.internal_notes || tOrders("common.none"),
+                  },
+                ]}
+              />
+            </SideCard>
+          </div>
+          <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
+            <SideCard title={tDesign("sections.totals")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.orderTotal"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatAmount(orderItemsTotal, "0.00")}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDesign("fields.shippingAmount"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatAmount(shipmentTotal)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDesign("fields.amountPaid"),
+                    value: (
+                      <span className="ej-mono font-semibold">
+                        {formatAmount(amountPaidTotal, "0.00")}
+                      </span>
+                    ),
+                  },
+                  { label: tDesign("fields.orderDate"), value: orderDate },
+                  { label: tDesign("fields.paymentDate"), value: paymentDate },
+                  { label: tDesign("fields.shipDate"), value: shipDate },
+                ]}
+              />
+            </SideCard>
+            <SideCard title={tDesign("sections.customer")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.customerName"),
+                    value: orderDetail?.bill_to_name || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.customerEmail"),
+                    value: orderDetail?.customer_email || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.customerUsername"),
+                    value:
+                      orderDetail?.customer_username || tOrders("common.none"),
+                  },
+                ]}
+              />
+            </SideCard>
+            <AddressCard
+              title={tDesign("sections.shippingAddress")}
+              order={orderDetail}
+              prefix="ship_to"
+              emptyText={tOrders("common.none")}
+            />
+            <AddressCard
+              title={tDesign("sections.billing")}
+              order={orderDetail}
+              prefix="bill_to"
+              emptyText={tOrders("common.none")}
+            />
+            <SideCard title={tDesign("sections.shipping")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.requestedService"),
+                    value:
+                      orderDetail?.requested_service || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.carrierCode"),
+                    value: orderDetail?.carrier_code || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.serviceCode"),
+                    value: orderDetail?.service_code || tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.weight"),
+                    value: orderDetail?.weight?.value
                       ? `${orderDetail.weight.value} ${
                           orderDetail.weight.units || ""
                         }`.trim()
-                      : tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.dimensions")}
-                  value={
-                    orderDetail?.dimensions
+                      : tOrders("common.none"),
+                  },
+                  {
+                    label: tDesign("fields.dimensions"),
+                    value: orderDetail?.dimensions
                       ? `${orderDetail.dimensions.length} x ${
                           orderDetail.dimensions.width
                         } x ${orderDetail.dimensions.height} ${
                           orderDetail.dimensions.units || ""
                         }`
-                      : tOrders("common.none")
-                  }
-                />
-                <InfoField
-                  label={tDesign("fields.orderDate")}
-                  value={orderDate}
-                />
-                <InfoField
-                  label={tDesign("fields.paymentDate")}
-                  value={paymentDate}
-                />
-                <InfoField
-                  label={tDesign("fields.shipDate")}
-                  value={shipDate}
-                />
-                <InfoField
-                  label={tDesign("fields.orderTotal")}
-                  value={orderTotal}
-                />
-              </div>
-            </Card>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <AddressBlock
-              title={tDesign("sections.billing")}
-              rows={billingRows}
-            />
-            <AddressBlock
-              title={tDesign("sections.shippingAddress")}
-              rows={shippingRows}
-            />
-          </div>
-          <Card
-            className="rounded-2xl border border-slate-100 shadow-sm"
-            styles={{ body: { padding: 16 } }}
-          >
-            <SectionHeader title={tDesign("sections.notes")} />
-            <div className="mt-4 grid gap-3">
-              <InfoField
-                label={tDesign("fields.customerNotes")}
-                value={orderDetail?.customer_notes || tOrders("common.none")}
+                      : tOrders("common.none"),
+                  },
+                ]}
               />
-              <InfoField
-                label={tDesign("fields.internalNotes")}
-                value={orderDetail?.internal_notes || tOrders("common.none")}
-              />
-            </div>
-          </Card>
-        </div>
-      ),
-    },
-    {
-      key: "items",
-      label: tDesign("tabs.itemsAndDesigns"),
-      children: (
-        <div className="space-y-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <SectionHeader title={tDesign("sections.items")} />
-            {positionsLoading ? (
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {tDesign("messages.positionsLoading")}
-              </Typography.Text>
-            ) : null}
-          </div>
-          {items.length ? (
-            <div className="grid gap-6">
-              {items.map((item) => {
-                const productId = String(
-                  item?.product_id || item?.product?.id || "",
-                );
-                const positions = positionsByProductId[productId] || [];
-                const positionMap = new Map(
-                  positions.map((position) => [String(position?.id), position]),
-                );
-                return (
-                  <OrderItemCard
-                    key={item?.id}
-                    item={item}
-                    positionMap={positionMap}
-                    tOrders={tOrders}
-                    tDesign={tDesign}
-                    tCommonActions={tCommonActions}
-                    fallbackText={fallbackText}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <Empty description={tDesign("messages.noItems")} />
-          )}
+            </SideCard>
+          </aside>
         </div>
       ),
     },
@@ -1561,28 +1404,39 @@ export default function OrderDetailPage() {
       key: "operations",
       label: tDesign("tabs.labelsAndProduction"),
       children: (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-8">
           {shipments.length ? (
-            <div className="space-y-4">
-              <SectionHeader title="Shipments" />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("shipments.title")}
+                count={shipments.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {shipments.map((shipment) => (
                   <div
                     key={shipment.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-line bg-surface p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
-                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                        {shipment.shipment_number ||
+                          tDesign("shipments.fallbackName", {
+                            sequence: shipment.sequence,
+                          })}
                       </Typography.Text>
-                      <Tag color={shipment.fulfillment_status === "shipped" ? "green" : "blue"}>
-                        {shipment.fulfillment_status}
-                      </Tag>
+                      <StatusTag status={shipment.fulfillment_status}>
+                        {tOrders(`status.values.${shipment.fulfillment_status}`).startsWith("dashboard.")
+                          ? shipment.fulfillment_status
+                          : tOrders(`status.values.${shipment.fulfillment_status}`)}
+                      </StatusTag>
                     </div>
-                    <div className="mt-2 text-sm text-slate-600">
-                      {shipment.items?.filter((item) => item.status !== "cancel").length || 0} items • ${formatAmount(
-                        shipment.shipment_price,
-                      )}
+                    <div className="mt-2 text-sm text-text-secondary">
+                      {tDesign("shipments.itemsSummary", {
+                        count:
+                          shipment.items?.filter((item) => item.status !== "cancel")
+                            .length || 0,
+                        amount: `$${formatAmount(shipment.shipment_price)}`,
+                      })}
                     </div>
                   </div>
                 ))}
@@ -1590,27 +1444,41 @@ export default function OrderDetailPage() {
             </div>
           ) : null}
           {canceledShipments.length ? (
-            <div className="space-y-4">
-              <SectionHeader title="Canceled shipment history" />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("shipments.canceledTitle")}
+                count={canceledShipments.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {canceledShipments.map((shipment) => (
-                  <div key={shipment.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div key={shipment.id} className="rounded-xl border border-line bg-subtle p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Typography.Text strong>
-                        {shipment.shipment_number || `Shipment ${shipment.sequence}`}
+                        {shipment.shipment_number ||
+                          tDesign("shipments.fallbackName", {
+                            sequence: shipment.sequence,
+                          })}
                       </Typography.Text>
-                      <Tag>canceled</Tag>
+                      <StatusTag status="canceled">
+                        {tDesign("shipments.canceled")}
+                      </StatusTag>
                     </div>
-                    <div className="mt-2 text-sm text-slate-600">
-                      {shipment.labels?.length || 0} labels • {shipment.label_voids?.length || 0} voids
+                    <div className="mt-2 text-sm text-text-secondary">
+                      {tDesign("shipments.labelsSummary", {
+                        labels: shipment.labels?.length || 0,
+                        voids: shipment.label_voids?.length || 0,
+                      })}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           ) : null}
-          <div className="space-y-4">
-            <SectionHeader title={tDesign("sections.labels")} />
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.labels")}
+              count={labels.length}
+            />
             {labels.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {labels.map((label) => (
@@ -1632,12 +1500,15 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("messages.noLabels")} />
+              <SectionEmpty>{tDesign("messages.noLabels")}</SectionEmpty>
             )}
           </div>
           {labelRecoveries.length ? (
-            <div className="space-y-4">
-              <SectionHeader title={tDesign("sections.labelRecovery")} />
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title={tDesign("sections.labelRecovery")}
+                count={labelRecoveries.length}
+              />
               <div className="grid gap-4 lg:grid-cols-2">
                 {labelRecoveries.map((recovery) => (
                   <ProductionRecoveryCard
@@ -1653,8 +1524,11 @@ export default function OrderDetailPage() {
               </div>
             </div>
           ) : null}
-          <div className="space-y-4">
-            <SectionHeader title={tDesign("sections.labelVoids")} />
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.labelVoids")}
+              count={labelVoids.length}
+            />
             {labelVoids.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {labelVoids.map((labelVoid) => (
@@ -1667,18 +1541,21 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("labelVoid.empty")} />
+              <SectionEmpty>{tDesign("labelVoid.empty")}</SectionEmpty>
             )}
           </div>
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <SectionHeader title={tDesign("sections.scrap")} />
-              {canRecordScrap ? (
-                <Button type="primary" onClick={openScrapModal}>
-                  {tDesign("scrap.actions.add")}
-                </Button>
-              ) : null}
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionHeader
+              title={tDesign("sections.scrap")}
+              count={scrapMovements.length}
+              extra={
+                canRecordScrap ? (
+                  <Button onClick={openScrapModal}>
+                    {tDesign("scrap.actions.add")}
+                  </Button>
+                ) : null
+              }
+            />
             {scrapMovements.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 {scrapMovements.map((movement) => (
@@ -1691,7 +1568,7 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <Empty description={tDesign("scrap.messages.empty")} />
+              <SectionEmpty>{tDesign("scrap.messages.empty")}</SectionEmpty>
             )}
           </div>
         </div>
@@ -1725,7 +1602,7 @@ export default function OrderDetailPage() {
         "partnerAdmin",
       ]}
     >
-      <div className="min-h-full bg-slate-50/70 p-4 md:p-6">
+      <div>
         {!orderNumber ? (
           <Alert
             type="error"
@@ -1743,63 +1620,44 @@ export default function OrderDetailPage() {
             showIcon
           />
         ) : (
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-2">
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {tDesign("sections.orderInfo")}
-                  </Typography.Text>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Typography.Title level={2} style={{ margin: 0 }}>
-                      #{orderDetail?.order_number || tOrders("common.none")}
-                    </Typography.Title>
-                    {statusLabel ? (
-                      <div className="flex flex-col items-start gap-1">
-                        {isReordered ? (
-                          <Tag
-                            color="purple"
-                            className="rounded-full px-4 py-1 text-sm"
-                          >
-                            Re Ordered
-                          </Tag>
-                        ) : null}
-                        <Tag
-                          color={statusColor}
-                          className="rounded-full px-4 py-1 text-sm"
-                        >
-                          {statusLabel}
-                        </Tag>
-                      </div>
+          <div className="space-y-5">
+            <PageHeader
+              className=""
+              breadcrumb={[
+                { title: tOrders("title") },
+                { title: `#${orderDetail?.order_number || ""}` },
+              ]}
+              title={
+                <span className="ej-mono">
+                  #{orderDetail?.order_number || tOrders("common.none")}
+                </span>
+              }
+              meta={
+                statusLabel ? (
+                  <>
+                    <StatusTag status={statusLabel}>{statusText}</StatusTag>
+                    {isReordered ? (
+                      <StatusTag tone="refund">
+                        {tOrders("values.reordered")}
+                      </StatusTag>
                     ) : null}
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
-                  <MetricCard
-                    label={tDesign("fields.amountPaid")}
-                    value={formatAmount(amountPaidTotal, "0.00")}
-                  />
-                  <MetricCard
-                    label={tDesign("fields.orderTotal")}
-                    value={formatAmount(orderItemsTotal, "0.00")}
-                  />
-
-                  <MetricCard
-                    label={tDesign("fields.shippingAmount")}
-                    value={formatAmount(
-                      shipmentTotal,
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="mt-6">
-                <Tabs
-                  defaultActiveKey="overview"
-                  items={detailTabs}
-                  size="large"
+                  </>
+                ) : null
+              }
+              description={`${tDesign("fields.orderDate")}: ${orderDate}`}
+            />
+            {progressStep !== null ? (
+              <div className="rounded-xl border border-line px-5 py-4">
+                <Steps
+                  size="small"
+                  current={progressStep}
+                  status={statusLabel === "designFlaw" ? "error" : "process"}
+                  items={progressItems}
+                  aria-label={tDesign("progress.ariaLabel")}
                 />
               </div>
-            </div>
+            ) : null}
+            <Tabs defaultActiveKey="overview" items={detailTabs} />
           </div>
         )}
         <Modal
@@ -1823,7 +1681,7 @@ export default function OrderDetailPage() {
                     <Card
                       key={field.key}
                       size="small"
-                      className="rounded-2xl border border-slate-100"
+                      className="rounded-xl border border-line"
                     >
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <Typography.Text strong>

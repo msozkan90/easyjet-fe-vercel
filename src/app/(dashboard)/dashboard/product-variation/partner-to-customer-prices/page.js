@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
   Button,
   Modal,
   Popconfirm,
-  Popover,
   Space,
   Tag,
   Typography,
+  Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -23,6 +23,8 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { formatPrice, pickBasePrice, toNumeric } from "@/utils/priceHelpers";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const resolveBasePrice = (record) => {
   if (!record || typeof record !== "object") {
@@ -80,10 +82,10 @@ const resolveBasePrice = (record) => {
 
 const formatStatusTag = (value, tStatus) => {
   if (value === "active") {
-    return <Tag color="green">{tStatus("active")}</Tag>;
+    return <StatusTag status="active">{tStatus("active")}</StatusTag>;
   }
   if (value === "inactive") {
-    return <Tag color="red">{tStatus("inactive")}</Tag>;
+    return <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>;
   }
   return <Tag>{value || "-"}</Tag>;
 };
@@ -185,6 +187,23 @@ export default function PartnerToCustomerProductPricesPage() {
       normalizeListAndMeta
     );
   }, [partnerId]);
+
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductPricesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
 
   const columns = useMemo(() => {
     return [
@@ -292,31 +311,31 @@ export default function PartnerToCustomerProductPricesPage() {
 
           return (
             <Space>
-              <Popover content={t("actions.edit")}>
-                <Button
+              <Tooltip title={t("actions.edit")}>
+                <Button aria-label={t("actions.edit")}
                   icon={<EditOutlined />}
                   onClick={() => {
                     setEditingRow(record);
                     setOpen(true);
                   }}
                 />
-              </Popover>
-              <Popover content={t("actions.delete")}>
+              </Tooltip>
+              <Tooltip title={t("actions.delete")}>
                 <Popconfirm
                   title={t("actions.confirmDeleteTitle")}
                   okText={t("actions.confirmDeleteOk")}
                   okButtonProps={{ danger: true }}
                   onConfirm={() => onDelete(record.id)}
                 >
-                  <Button icon={<DeleteOutlined />} danger />
+                  <Button aria-label={t("actions.delete")} icon={<DeleteOutlined />} danger />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },
       },
     ];
-  }, [colors, customers, products, sizes, t, tStatus]);
+  }, [colors, customers, onDelete, products, sizes, t, tStatus]);
 
   const onSubmit = async (values) => {
     try {
@@ -343,17 +362,6 @@ export default function PartnerToCustomerProductPricesPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductPricesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["partnerAdmin"]}>
@@ -397,14 +405,19 @@ export default function PartnerToCustomerProductPricesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <PartnerProductPriceForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
+            setOpen(false);
+            setEditingRow(null);
+          })}
           partnerId={partnerId}
           onFinish={onSubmit}
           submitText={

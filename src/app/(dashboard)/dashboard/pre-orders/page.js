@@ -29,6 +29,7 @@ import {
   CloseOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
+import { formatAmount as formatSharedAmount } from "@/utils/formatMoney";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -186,7 +187,13 @@ export default function OrdersPage({ mode = "pending" }) {
           numericArrayKeys: [""],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
-            next.item_state = isCancelledView ? "cancelled" : "pending";
+            // Pending is the backend default. Sending it counts as an active
+            // filter there and disables the "missing price first" ordering.
+            if (isCancelledView) {
+              next.item_state = "cancelled";
+            } else {
+              delete next.item_state;
+            }
             const orderDate = next.order_date;
             if (orderDate?.gte || orderDate?.lte) {
               next.date_from = orderDate?.gte;
@@ -732,19 +739,7 @@ export default function OrdersPage({ mode = "pending" }) {
     [t],
   );
 
-  const formatAmount = (value) => {
-    if (value === null || value === undefined || value === "") {
-      return t("common.none");
-    }
-    const numericValue = Number(value);
-    if (Number.isNaN(numericValue)) {
-      return value;
-    }
-    return numericValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  const formatAmount = (value) => formatSharedAmount(value, t("common.none"));
 
   const columns = useMemo(() => {
     return [
@@ -1046,12 +1041,12 @@ export default function OrdersPage({ mode = "pending" }) {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 120,
+        width: 136,
         render: (_, record) => {
           if (isCancelledView) {
             const restoreLoading = isRowActionLoading(record.id, "restore");
             return (
-              <Popover content={t("actions.restore")}>
+              <Tooltip title={t("actions.restore")}>
                 <Popconfirm
                   title={t("actions.confirmRestoreTitle")}
                   okText={t("actions.confirmRestoreOk")}
@@ -1060,13 +1055,14 @@ export default function OrdersPage({ mode = "pending" }) {
                   onConfirm={() => restoreOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.restore")}
                     icon={<UndoOutlined />}
                     type="primary"
                     loading={restoreLoading}
                     disabled={restoreLoading}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             );
           }
           const approveLoading = isRowActionLoading(record.id, "approve");
@@ -1075,7 +1071,7 @@ export default function OrdersPage({ mode = "pending" }) {
             bulkApproving || bulkCancelling || approveLoading || cancelLoading;
           return (
             <Space>
-              <Popover content={t("actions.approve")}>
+              <Tooltip title={t("actions.approve")}>
                 <Popconfirm
                   title={t("actions.confirmApproveTitle")}
                   okText={t("actions.confirmApproveOk")}
@@ -1084,14 +1080,15 @@ export default function OrdersPage({ mode = "pending" }) {
                   onConfirm={() => handleSingleApprove(record)}
                 >
                   <Button
+                    aria-label={t("actions.approve")}
                     icon={<CheckOutlined />}
                     type="primary"
                     loading={approveLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
-              <Popover content={t("actions.cancel")}>
+              </Tooltip>
+              <Tooltip title={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
                   okText={t("actions.confirmCancelOk")}
@@ -1101,13 +1098,14 @@ export default function OrdersPage({ mode = "pending" }) {
                   onConfirm={() => handleCancelOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.cancel")}
                     icon={<CloseOutlined />}
                     danger
                     loading={cancelLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },
@@ -1258,6 +1256,7 @@ export default function OrdersPage({ mode = "pending" }) {
           cancelling={bulkCancelling}
           onApprove={handleBulkApprove}
           onCancel={handleBulkCancel}
+          onClearSelection={() => setSelectedRowMap({})}
         />
       ) : null}
     </RequireRole>

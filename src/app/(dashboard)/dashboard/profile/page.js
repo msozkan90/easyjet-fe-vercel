@@ -5,13 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Card,
   Avatar,
-  Tag,
   Typography,
-  Space,
   Form,
   Input,
   Button,
-  Divider,
   App as AntdApp,
   Upload,
   Tooltip,
@@ -27,8 +24,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AuthAPI, ProfileAPI } from "@/utils/api";
 import { setUser } from "@/redux/features/authSlice";
 import { useTranslations } from "@/i18n/use-translations";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
+import FormActions from "@/components/ui/FormActions";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const INITIAL_LOADING_STATE = {
   me: true,
@@ -48,6 +48,7 @@ export default function ProfilePage() {
 
   const tProfile = useTranslations("dashboard.profile");
   const tCommon = useTranslations("common");
+  const tNavbar = useTranslations("common.navbar");
   const tForms = useTranslations("forms.common");
 
   const user = useSelector((state) => state.auth.user);
@@ -225,6 +226,7 @@ export default function ProfilePage() {
 
   return (
     <div className="grid gap-4">
+      <PageHeader className="" title={tNavbar("profile")} />
       <ProfileHeader
         user={user}
         roles={translatedRoles}
@@ -233,7 +235,7 @@ export default function ProfilePage() {
         loadingAvatar={loading.avatar}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PersonalInfoCard
           form={infoForm}
           loading={loading.me}
@@ -258,61 +260,70 @@ export default function ProfilePage() {
 }
 
 function ProfileHeader({ user, roles, tProfile, uploadProps, loadingAvatar }) {
+  const fullName = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .join(" ");
+  const initials = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .map((part) => String(part).trim().charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <Card className="shadow-sm p-0 relative overflow-hidden !bg-gradient-to-r !from-indigo-500 !via-sky-500 !to-cyan-400">
-      <div className="absolute left-6 bottom-6 flex flex-col items-center gap-2">
+    <section className="flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 md:flex-row md:items-center md:justify-between">
+      <div className="flex min-w-0 items-center gap-4">
         <Avatar
-          size={112}
+              className="ej-avatar"
+          size={72}
           src={user?.avatar_url}
-          icon={!user?.avatar_url && <UserOutlined />}
-          className="shadow ring-4 ring-white bg-white"
-        />
-        <Upload {...uploadProps} disabled={loadingAvatar}>
-          <Tooltip title={tProfile("header.uploadTooltip")}>
-            <Button
-              size="small"
-              icon={<UploadOutlined />}
-              loading={loadingAvatar}
-            >
-              {tProfile("buttons.changePhoto")}
-            </Button>
-          </Tooltip>
-        </Upload>
-      </div>
-
-      <div className="px-6 pt-16 pb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="pl-36 md:pl-0 md:ml-36">
-            <Title level={3} className="mb-1">
-              {user?.first_name} {user?.last_name}
-            </Title>
-            <Space size="small" wrap>
-              {roles.map((role) => (
-                <Tag key={role} color="blue">
-                  {role}
-                </Tag>
-              ))}
-              {user?.entity?.entity_name && (
-                <Tag color="geekblue">{user.entity.entity_name}</Tag>
-              )}
-            </Space>
+          icon={!user?.avatar_url && !initials ? <UserOutlined /> : undefined}
+          style={{
+            flexShrink: 0,
+            
+            color: "#FFFFFF",
+            fontSize: 24,
+            fontWeight: 600,
+          }}
+        >
+          {!user?.avatar_url ? initials : null}
+        </Avatar>
+        <div className="flex min-w-0 flex-col gap-2">
+          <div className="truncate text-lg font-semibold text-text">
+            {fullName || user?.email || "-"}
           </div>
-
-          <Space split={<Divider type="vertical" />} align="center" wrap>
-            <Space>
-              <MailOutlined />
-              <Text>{user?.email}</Text>
-            </Space>
-            {user?.mobile_phone && (
-              <Space>
-                <PhoneOutlined />
-                <Text>{user.mobile_phone}</Text>
-              </Space>
-            )}
-          </Space>
+          <div className="flex flex-wrap items-center gap-2">
+            {roles.map((role) => (
+              <StatusTag key={role} tone="info">
+                {role}
+              </StatusTag>
+            ))}
+            {user?.entity?.entity_name ? (
+              <StatusTag tone="neutral">{user.entity.entity_name}</StatusTag>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-text-secondary">
+            <span className="inline-flex items-center gap-1.5">
+              <MailOutlined aria-hidden="true" />
+              {user?.email || "-"}
+            </span>
+            {user?.mobile_phone ? (
+              <span className="inline-flex items-center gap-1.5">
+                <PhoneOutlined aria-hidden="true" />
+                {user.mobile_phone}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
-    </Card>
+      <Upload {...uploadProps} disabled={loadingAvatar}>
+        <Tooltip title={tProfile("header.uploadTooltip")}>
+          <Button icon={<UploadOutlined />} loading={loadingAvatar}>
+            {tProfile("buttons.changePhoto")}
+          </Button>
+        </Tooltip>
+      </Upload>
+    </section>
   );
 }
 
@@ -330,7 +341,6 @@ function PersonalInfoCard({
     <Card
       title={tProfile("info.title")}
       extra={<Text type="secondary">{tProfile("info.subtitle")}</Text>}
-      className="shadow-sm"
     >
       {loading ? (
         <Skeleton active paragraph={{ rows: 4 }} />
@@ -372,11 +382,12 @@ function PersonalInfoCard({
               <Input placeholder={tProfile("info.fields.mobile.placeholder")} />
             </Form.Item>
           </div>
-          <Space className="justify-end w/full">
-            <Button type="primary" onClick={onSave} loading={saving}>
-              {tCommon("actions.save")}
-            </Button>
-          </Space>
+          <FormActions
+            htmlType="button"
+            onSubmit={onSave}
+            loading={saving}
+            submitText={tCommon("actions.save")}
+          />
         </Form>
       )}
     </Card>
@@ -395,7 +406,6 @@ function SecurityCard({
     <Card
       title={tProfile("security.title")}
       extra={<Text type="secondary">{tProfile("security.subtitle")}</Text>}
-      className="shadow-sm"
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -439,14 +449,14 @@ function SecurityCard({
           </Form.Item>
         </div>
 
-        <Space className="justify-end w/full">
-          <Button onClick={() => form.resetFields()}>
-            {tProfile("security.actions.clear")}
-          </Button>
-          <Button type="primary" onClick={onSubmit} loading={submitting}>
-            {tProfile("security.actions.update")}
-          </Button>
-        </Space>
+        <FormActions
+          htmlType="button"
+          onCancel={() => form.resetFields()}
+          cancelText={tProfile("security.actions.clear")}
+          onSubmit={onSubmit}
+          loading={submitting}
+          submitText={tProfile("security.actions.update")}
+        />
       </Form>
     </Card>
   );

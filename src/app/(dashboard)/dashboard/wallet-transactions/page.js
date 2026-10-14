@@ -2,29 +2,19 @@
 
 import { useCallback, useMemo } from "react";
 import dayjs from "dayjs";
-import { Card, Space, Statistic, Tag, Typography } from "antd";
+import { Card, Space, Statistic } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
+import { ENTITY_ADMIN_ROLES } from "@/utils/rbac";
 import CrudTable from "@/components/common/table/CrudTable";
 import { TransactionsAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
-
-const directionColors = {
-  credit: "green",
-  debit: "red",
-};
-
-const statusColors = {
-  completed: "green",
-  pending: "gold",
-  failed: "red",
-  canceled: "default",
-};
+import PageHeader from "@/components/ui/PageHeader";
+import MoneyText from "@/components/ui/MoneyText";
+import StatusTag from "@/components/ui/StatusTag";
 
 export default function WalletTransactionsPage() {
   const t = useTranslations("dashboard.financial.transactions");
@@ -107,7 +97,7 @@ export default function WalletTransactionsPage() {
           const label = t(`directions.${value}`);
           const display = label === `directions.${value}` ? value : label;
           return (
-            <Tag color={directionColors[value] || "default"}>{display}</Tag>
+            <StatusTag status={value}>{display}</StatusTag>
           );
         },
       },
@@ -115,7 +105,8 @@ export default function WalletTransactionsPage() {
         title: t("columns.amount"),
         dataIndex: "amount",
         sorter: true,
-        render: (value) => (value ?? "-"),
+        align: "right",
+        render: (value) => <MoneyText value={value} />,
       },
       {
         title: t("columns.status"),
@@ -135,7 +126,7 @@ export default function WalletTransactionsPage() {
           if (!value) return "-";
           const label = t(`statuses.${value}`);
           const display = label === `statuses.${value}` ? value : label;
-          return <Tag color={statusColors[value] || "default"}>{display}</Tag>;
+          return <StatusTag status={value}>{display}</StatusTag>;
         },
       },
       {
@@ -167,11 +158,9 @@ export default function WalletTransactionsPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin", "systemAdmin"]}>
+    <RequireRole anyOfRoles={ENTITY_ADMIN_ROLES}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("title")}
-        </Title>
+        <PageHeader title={t("title")} className="" />
         <Card>
           <Statistic
             title={t("currentBalance")}

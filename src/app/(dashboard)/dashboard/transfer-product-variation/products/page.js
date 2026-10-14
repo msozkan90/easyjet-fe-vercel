@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   App as AntdApp,
   Button,
   Modal,
   Popconfirm,
-  Popover,
   Space,
-  Tag,
+  Tooltip,
 } from "antd";
 import {
   CheckOutlined,
@@ -25,6 +24,8 @@ import { CategoriesAPI, TransferProductsAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function TransferProductsPage() {
   const { message } = AntdApp.useApp();
@@ -79,6 +80,21 @@ export default function TransferProductsPage() {
     normalizeListAndMeta,
   );
 
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await TransferProductsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload?.();
+      } catch (error) {
+        message.error(error?.response?.data?.error?.message || t("messages.deleteError"));
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -121,9 +137,9 @@ export default function TransferProductsPage() {
         },
         render: (value) =>
           value ? (
-            <CheckOutlined style={{ color: "#16a34a", fontSize: 16 }} />
+            <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
           ) : (
-            <CloseOutlined style={{ color: "#dc2626", fontSize: 16 }} />
+            <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
           ),
       },
       {
@@ -141,9 +157,9 @@ export default function TransferProductsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -160,30 +176,30 @@ export default function TransferProductsPage() {
         width: 90,
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
-              <Button
+            <Tooltip title={t("actions.edit")}>
+              <Button aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               />
-            </Popover>
-            <Popover content={t("actions.delete")}>
+            </Tooltip>
+            <Tooltip title={t("actions.delete")}>
               <Popconfirm
                 title={t("actions.confirmDeleteTitle")}
                 okText={t("actions.confirmDeleteOk")}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record.id)}
               >
-                <Button icon={<DeleteOutlined />} danger />
+                <Button aria-label={t("actions.delete")} icon={<DeleteOutlined />} danger />
               </Popconfirm>
-            </Popover>
+            </Tooltip>
           </Space>
         ),
       },
     ],
-    [categories, t, tStatus],
+    [categories, onDelete, t, tStatus],
   );
 
   const openCreateModal = () => {
@@ -214,15 +230,6 @@ export default function TransferProductsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await TransferProductsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload?.();
-    } catch (error) {
-      message.error(error?.response?.data?.error?.message || t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole
@@ -249,12 +256,14 @@ export default function TransferProductsPage() {
 
       <Modal
         open={open}
-        onCancel={closeModal}
+        onCancel={guardClose(closeModal)}
         title={editingRow ? t("modal.editTitle", { name: editingRow?.name || "" }) : t("modal.createTitle")}
         footer={null}
         destroyOnHidden
       >
         <ProductForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(closeModal)}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

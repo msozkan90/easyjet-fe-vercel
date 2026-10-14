@@ -3,14 +3,19 @@
 import { Form, Input, Select, Button } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 export default function ProductSizeForm({
   initialValues,
   onFinish,
+  onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const tCommon = useTranslations("forms.common");
   const tForm = useTranslations("forms.productSize");
@@ -27,7 +32,8 @@ export default function ProductSizeForm({
         ...(initialValues || {}),
         ...(isEdit ? {} : { nameList: [""] }),
       }}
-      onFinish={onFinish}
+      onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"
@@ -164,12 +170,11 @@ export default function ProductSizeForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

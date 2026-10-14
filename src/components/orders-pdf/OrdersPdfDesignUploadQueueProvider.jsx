@@ -10,16 +10,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { Badge, Button, Card, Progress, Space, Tag, Typography } from "antd";
-import {
-  CloseOutlined,
-  DeleteOutlined,
-  MinusOutlined,
-  RedoOutlined,
-} from "@ant-design/icons";
 import { OrdersDesignFlawsAPI, OrdersPdfAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { uploadFileDirectMultipart } from "@/utils/directMultipartUpload";
+import UploadQueuePanel, {
+  formatBytes,
+  normalizeProgressPercent,
+} from "@/components/uploads/UploadQueuePanel";
 
 const MAX_CONCURRENT_UPLOADS = 3;
 
@@ -29,29 +26,6 @@ const createTaskId = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID)
     return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
-
-const formatBytes = (value) => {
-  const size = Number(value || 0);
-  if (!Number.isFinite(size) || size <= 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  const exp = Math.min(
-    Math.floor(Math.log(size) / Math.log(1024)),
-    units.length - 1,
-  );
-  const amount = size / 1024 ** exp;
-  return `${amount.toFixed(amount >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`;
-};
-
-const normalizeProgressPercent = (value) => {
-  const percent = Number(value);
-  if (!Number.isFinite(percent)) return 0;
-  return Math.round(Math.max(0, Math.min(100, percent)) * 100) / 100;
-};
-
-const formatProgressPercent = (value) => {
-  const percent = normalizeProgressPercent(value);
-  return percent.toFixed(Number.isInteger(percent) ? 0 : 2);
 };
 
 export function OrdersPdfDesignUploadQueueProvider({ children }) {
@@ -159,7 +133,8 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
               : OrdersPdfAPI;
           if (!canceled) {
             try {
-              const progress = await uploadApi.uploadDesignProgress(uploadSessionId);
+              const progress =
+                await uploadApi.uploadDesignProgress(uploadSessionId);
               const progressData = progress?.data || progress;
               if (progressData?.status === "completed") {
                 updateTask(taskId, {
@@ -348,207 +323,26 @@ export function OrdersPdfDesignUploadQueueProvider({ children }) {
     ],
   );
 
-  const queuedCount = tasks.filter((task) => task.status === "queued").length;
-  const uploadingCount = tasks.filter(
-    (task) => task.status === "uploading",
-  ).length;
-  const statusMeta = {
-    queued: { label: tQueue("status.queued"), color: "default" },
-    uploading: { label: tQueue("status.uploading"), color: "processing" },
-    preparing: { label: tQueue("status.preparing"), color: "processing" },
-    saving: { label: tQueue("status.saving"), color: "processing" },
-    success: { label: tQueue("status.success"), color: "success" },
-    failed: { label: tQueue("status.failed"), color: "error" },
-    canceled: { label: tQueue("status.canceled"), color: "warning" },
-  };
-
   return (
     <OrdersPdfDesignUploadQueueContext.Provider value={value}>
       {children}
-      {tasks.length > 0 ? (
-        <div
-          style={{
-            position: "fixed",
-            left: 16,
-            bottom: "calc(16px + var(--download-queue-offset, 0px))",
-            width: 380,
-            zIndex: 1810,
-            pointerEvents: "none",
-          }}
-        >
-          <Card
-            size="small"
-            style={{
-              pointerEvents: "auto",
-              boxShadow: "0 10px 32px rgba(0,0,0,0.16)",
-            }}
-            title={
-              <Space>
-                <Badge status={hasOngoingUploads ? "processing" : "default"} />
-                <span>{tQueue("title")}</span>
-                <Tag>{tasks.length}</Tag>
-                {uploadingCount ? (
-                  <Tag color="processing">
-                    {tQueue("badges.uploading", { count: uploadingCount })}
-                  </Tag>
-                ) : null}
-                {queuedCount ? (
-                  <Tag color="default">
-                    {tQueue("badges.queued", { count: queuedCount })}
-                  </Tag>
-                ) : null}
-              </Space>
-            }
-            extra={
-              <Button
-                size="small"
-                icon={<MinusOutlined />}
-                onClick={() => setCollapsed((prev) => !prev)}
-              />
-            }
-            bodyStyle={{
-              display: collapsed ? "none" : "block",
-              maxHeight: 340,
-              overflowY: "auto",
-            }}
-          >
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-              <Space style={{ width: "100%", justifyContent: "space-between" }}>
-                <Typography.Text type="secondary">
-                  {tQueue("subtitle")}
-                </Typography.Text>
-                <Button
-                  size="small"
-                  icon={<DeleteOutlined />}
-                  onClick={clearFinished}
-                >
-                  {tQueue("actions.clearFinished")}
-                </Button>
-              </Space>
-              {tasks.map((task) => {
-                const isPreparing =
-                  task.status === "uploading" &&
-                  ["pending", "preparing"].includes(task.serverStatus);
-                const isSaving =
-                  task.status === "uploading" && task.serverStatus === "saving";
-                const meta = isPreparing
-                  ? statusMeta.preparing
-                  : isSaving
-                    ? statusMeta.saving
-                    : statusMeta[task.status] || statusMeta.queued;
-                const canCancel = ["queued", "uploading"].includes(task.status);
-                const canRetry = ["failed", "canceled"].includes(task.status);
-                const canRemove = !canCancel;
-                return (
-                  <Card
-                    key={task.id}
-                    size="small"
-                    styles={{ body: { padding: 10 } }}
-                  >
-                    <Space
-                      direction="vertical"
-                      size={4}
-                      style={{ width: "100%" }}
-                    >
-                      <Space
-                        style={{
-                          width: "100%",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Typography.Text ellipsis style={{ maxWidth: 210 }}>
-                          {task.fileName}
-                        </Typography.Text>
-                        <Tag color={meta.color}>{meta.label}</Tag>
-                      </Space>
-                      <Typography.Text
-                        type="secondary"
-                        style={{ fontSize: 12 }}
-                      >
-                        {task.pdfName} • {formatBytes(task.fileSize)}
-                      </Typography.Text>
-                      <Progress
-                        percent={task.status === "queued" ? 0 : task.progress}
-                        size="small"
-                        status={
-                          task.status === "failed"
-                            ? "exception"
-                            : task.status === "success"
-                              ? "success"
-                              : "active"
-                        }
-                        showInfo={task.status !== "queued"}
-                        format={(percent) =>
-                          `${formatProgressPercent(percent)}%`
-                        }
-                      />
-                      {task.status === "uploading" ? (
-                        <Typography.Text
-                          type="secondary"
-                          style={{ fontSize: 12 }}
-                        >
-                          {isPreparing
-                            ? tQueue("fields.preparationProgress", {
-                                percent: formatProgressPercent(
-                                  task.preparationProgress,
-                                ),
-                              })
-                            : tQueue("fields.uploadProgress", {
-                                uploaded: formatBytes(task.uploadedBytes),
-                                total: formatBytes(
-                                  task.uploadTotalBytes || task.fileSize,
-                                ),
-                              })}
-                          {!isPreparing && task.uploadSpeed > 0
-                            ? ` • ${formatBytes(task.uploadSpeed)}/s`
-                            : ""}
-                        </Typography.Text>
-                      ) : null}
-                      {task.errorMessage ? (
-                        <Typography.Text type="danger" style={{ fontSize: 12 }}>
-                          {task.errorMessage}
-                        </Typography.Text>
-                      ) : null}
-                      <Space
-                        style={{ width: "100%", justifyContent: "flex-end" }}
-                      >
-                        {canRetry ? (
-                          <Button
-                            size="small"
-                            icon={<RedoOutlined />}
-                            onClick={() => retryUpload(task.id)}
-                          >
-                            {tQueue("actions.retry")}
-                          </Button>
-                        ) : null}
-                        {canCancel ? (
-                          <Button
-                            size="small"
-                            danger
-                            icon={<CloseOutlined />}
-                            onClick={() => cancelUpload(task.id)}
-                          >
-                            {tQueue("actions.cancel")}
-                          </Button>
-                        ) : null}
-                        {canRemove ? (
-                          <Button
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            onClick={() => removeTask(task.id)}
-                          >
-                            {tQueue("actions.remove")}
-                          </Button>
-                        ) : null}
-                      </Space>
-                    </Space>
-                  </Card>
-                );
-              })}
-            </Space>
-          </Card>
-        </div>
-      ) : null}
+      <UploadQueuePanel
+        tasks={tasks}
+        tQueue={tQueue}
+        zIndex={1810}
+        hasOngoingUploads={hasOngoingUploads}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed((prev) => !prev)}
+        onClearFinished={clearFinished}
+        onRetry={retryUpload}
+        onCancel={cancelUpload}
+        onRemove={removeTask}
+        renderMeta={(task) => (
+          <>
+            {task.pdfName} • {formatBytes(task.fileSize)}
+          </>
+        )}
+      />
     </OrdersPdfDesignUploadQueueContext.Provider>
   );
 }

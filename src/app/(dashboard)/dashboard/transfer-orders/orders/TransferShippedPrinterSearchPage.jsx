@@ -16,7 +16,6 @@ import {
   Popconfirm,
   Space,
   Spin,
-  Tag,
   Typography,
 } from "antd";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -29,43 +28,10 @@ import TransferShippingRatesModal from "@/components/modals/TransferShippingRate
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  downloaded: "blue",
-  printed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-  refund: "volcano",
-  remake: "magenta",
-};
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") return fallback;
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) return value;
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-const formatCurrency = (value, currency = "USD") => {
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "-";
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currency || "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  } catch {
-    return formatAmount(numericValue);
-  }
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
+import { formatAmount, formatCurrency } from "@/utils/formatMoney";
+import { MetaChip } from "@/components/ui/TableCells";
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
@@ -120,24 +86,24 @@ const TransferOrderItemCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
-      bodyStyle={{ padding: 20 }}
+      className="rounded-xl border border-line"
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
-          <Tag color="gold">
+          <MetaChip>
             {tOrders("columns.quantity")}:{" "}
             {item?.quantity ?? tOrders("common.none")}
-          </Tag>
-          <Tag color="green">
+          </MetaChip>
+          <MetaChip>
             {tOrders("columns.price")}: {formatAmount(item?.price)}
-          </Tag>
-          <Tag color={STATUS_COLORS[statusKey] || "default"}>
+          </MetaChip>
+          <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
-          </Tag>
+          </StatusTag>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -166,7 +132,7 @@ const TransferOrderItemCard = ({
               {options.map((option, index) => (
                 <span
                   key={`${option?.name || "option"}-${index}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                  className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                 >
                   {option?.name || tOrders("common.none")}:{" "}
                   {option?.value || tOrders("common.none")}
@@ -460,7 +426,7 @@ export default function TransferShippedPrinterSearchPage() {
       return;
     }
     if (!allChecklistItemsChecked) {
-      message.warning("Please complete the shipping checklist.");
+      message.warning(tDetail("checklistRequired"));
       return;
     }
 
@@ -542,17 +508,15 @@ export default function TransferShippedPrinterSearchPage() {
     if (!orderSummary?.status) return null;
     const key = orderSummary.status;
     const label = tOrders(`status.values.${key}`) || key;
-    return <Tag color={STATUS_COLORS[key] || "default"}>{label}</Tag>;
+    return <StatusTag status={key}>{label}</StatusTag>;
   }, [orderSummary?.status, tOrders]);
 
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("workerShipmentPrinter.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("workerShipmentPrinter.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <Input.Search
             allowClear
             enterButton={
@@ -595,7 +559,7 @@ export default function TransferShippedPrinterSearchPage() {
         ) : null}
 
         {orderSummary ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <Typography.Title level={5} style={{ margin: 0 }}>
@@ -632,7 +596,7 @@ export default function TransferShippedPrinterSearchPage() {
 
         {transferLabel ? (
           <Card
-            className="rounded-2xl border border-slate-100"
+            className="rounded-xl border border-line"
             title={tOrders("detail.fields.labels")}
           >
             <Descriptions
@@ -772,7 +736,7 @@ export default function TransferShippedPrinterSearchPage() {
         onOk={handleChecklistConfirm}
         onCancel={() => setChecklistModalOpen(false)}
         width={760}
-        destroyOnClose={false}
+        destroyOnHidden={false}
       >
         <Space direction="vertical" size={16} style={{ width: "100%" }}>
           <Alert
@@ -792,7 +756,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Designs
                 </Typography.Title>
                 {shippingChecklist.designs.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
                     {shippingChecklist.designs.map((design) => {
                       const designKey = `design:${design?.id}`;
                       return (
@@ -801,7 +765,7 @@ export default function TransferShippedPrinterSearchPage() {
                           className="flex items-center gap-3 px-3 py-2"
                         >
                           <Checkbox value={designKey} />
-                          <div className="h-14 w-14 flex-none overflow-hidden rounded border border-slate-100 bg-slate-50">
+                          <div className="h-14 w-14 flex-none overflow-hidden rounded border border-line bg-subtle">
                             {design?.design_url ? (
                               <DesignThumbnailImage
                                 design={design}
@@ -822,18 +786,16 @@ export default function TransferShippedPrinterSearchPage() {
                             </Typography.Text>
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
-                            <Tag color="blue">
+                            <MetaChip>
                               Qty: {design?.quantity ?? "-"}
-                            </Tag>
-                            <Tag>
+                            </MetaChip>
+                            <MetaChip>
                               {formatAmount(design?.width)}" x{" "}
                               {formatAmount(design?.height)}"
-                            </Tag>
-                            <Tag
-                              color={STATUS_COLORS[design?.status] || "default"}
-                            >
+                            </MetaChip>
+                            <StatusTag status={design?.status}>
                               {design?.status || "-"}
-                            </Tag>
+                            </StatusTag>
                           </div>
                         </div>
                       );
@@ -854,7 +816,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Without-design items
                 </Typography.Title>
                 {shippingChecklist.without_design_items.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
                     {shippingChecklist.without_design_items.map((item) => {
                       const itemKey = `without-design-item:${item?.id}`;
                       const optionText = getChecklistOptionText(item);
@@ -883,13 +845,11 @@ export default function TransferShippedPrinterSearchPage() {
                             ) : null}
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
-                            <Tag color="blue">Qty: {item?.quantity ?? "-"}</Tag>
-                            <Tag color="green">{formatAmount(item?.price)}</Tag>
-                            <Tag
-                              color={STATUS_COLORS[item?.status] || "default"}
-                            >
+                            <MetaChip>Qty: {item?.quantity ?? "-"}</MetaChip>
+                            <MetaChip>{formatAmount(item?.price)}</MetaChip>
+                            <StatusTag status={item?.status}>
                               {item?.status || "-"}
-                            </Tag>
+                            </StatusTag>
                           </div>
                         </div>
                       );

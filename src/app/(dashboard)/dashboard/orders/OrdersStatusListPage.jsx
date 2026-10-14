@@ -10,7 +10,6 @@ import {
   Input,
   Select,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
@@ -26,9 +25,10 @@ import { ProductVariationAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
-import { STATUS_COLORS } from "./statusConstants";
 import { useSelector } from "react-redux";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 
@@ -38,20 +38,6 @@ const createDefaultToolbarFilters = () => ({
   status: [],
   order_date: undefined,
 });
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const isReorderedOrder = (record) => {
   if (record?.is_reordered || record?.order?.is_reordered) return true;
@@ -466,7 +452,8 @@ export default function OrdersStatusListPage({
       {
         title: null,
         dataIndex: "id",
-        width: 5,
+        width: 44,
+        fixed: "left",
         render: (_, record) => {
           const parentOrderQuantity = record?.children?.length + 1 || null;
           if (parentOrderQuantity) {
@@ -484,6 +471,7 @@ export default function OrdersStatusListPage({
         title: t("columns.image"),
         dataIndex: "image_url",
         width: 80,
+        fixed: "left",
         render: (value) =>
           value ? (
             <GuardedPreviewImage
@@ -506,6 +494,8 @@ export default function OrdersStatusListPage({
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
+        fixed: "left",
+        width: 140,
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
@@ -554,13 +544,12 @@ export default function OrdersStatusListPage({
         render: (value, record) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
-          const color = STATUS_COLORS[value] || "default";
           return (
             <Space direction="vertical" size={2}>
               {isReorderedOrder(record) ? (
-                <Tag color="purple">Re Ordered</Tag>
+                <StatusTag tone="refund">{t("values.reordered")}</StatusTag>
               ) : null}
-              <Tag color={color}>{label}</Tag>
+              <StatusTag status={value}>{label}</StatusTag>
             </Space>
           );
         },
@@ -754,6 +743,7 @@ export default function OrdersStatusListPage({
     () => ({
       locale: { emptyText: t("table.noData") },
       expandable: {
+        fixed: "left",
         expandIconColumnIndex: 0,
         columnWidth: 36,
       },
@@ -786,6 +776,7 @@ export default function OrdersStatusListPage({
           <Space wrap size="middle">
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchOrderNumber")}
               value={quickFilters.order_number}
               onChange={handleOrderNumberChange}
@@ -793,6 +784,7 @@ export default function OrdersStatusListPage({
             />
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchSku")}
               value={quickFilters.sku}
               onChange={handleSkuChange}
@@ -830,8 +822,6 @@ export default function OrdersStatusListPage({
                 {tCommonActions("search")}
               </Button>
               <Button
-                type="primary"
-                danger
                 icon={<CloseCircleOutlined />}
                 onClick={handleToolbarReset}
               >

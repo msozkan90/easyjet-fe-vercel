@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Button, Input, Select, Space, Tag, Tooltip } from "antd";
+import { App as AntdApp, Button, Input, Select, Space, Tooltip } from "antd";
 import { FileSearchOutlined, SearchOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -12,6 +12,7 @@ import {
   buildRefundRemakeListPayload,
   normalizeRefundRemakeListResponse,
 } from "@/utils/refundRemakeRequests";
+import StatusTag from "@/components/ui/StatusTag";
 
 const createDefaultFilters = () => ({
   order_id: "",
@@ -29,12 +30,6 @@ const cleanFilters = (filters = {}) =>
       return true;
     })
   );
-
-const STATUS_COLORS = {
-  pending: "gold",
-  approved: "green",
-  canceled: "red",
-};
 
 export default function RefundRemakeRequestsListPage({
   requireRoles = ["customerAdmin"],
@@ -163,9 +158,9 @@ export default function RefundRemakeRequestsListPage({
           placeholder: t("filters.status"),
         },
         render: (value) => (
-          <Tag color={STATUS_COLORS[value] || "default"}>
+          <StatusTag status={value}>
             {t(`status.${value || "pending"}`)}
-          </Tag>
+          </StatusTag>
         ),
       },
       {

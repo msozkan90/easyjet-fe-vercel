@@ -134,15 +134,12 @@ export default function ShipStationCard({
     <Card
       title={cardTitle}
       extra={<Text type="secondary">{tProfile("shipStation.subtitle")}</Text>}
-      className="shadow-sm"
     >
       {tabItems.length > 0 && (
         <Tabs
           activeKey={activeKey}
           onChange={onSourceChange}
           items={tabItems}
-          type="card"
-          size="large"
           className="mb-4"
         />
       )}
@@ -231,10 +228,9 @@ export default function ShipStationCard({
             {canVerify && (
               <Form.Item label=" " colon={false}>
                 <Button
-                  type="primary"
                   onClick={() => onVerify?.(activeSourceId)}
                   loading={isVerifying}
-                  icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
+                  icon={<CheckCircleTwoTone twoToneColor="#1E7A4C" />}
                 >
                   {tProfile("shipStation.buttons.verify")}
                 </Button>
@@ -243,7 +239,7 @@ export default function ShipStationCard({
           </div>
 
           {credential && (
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="mt-1 text-xs text-text-secondary">
               <div>
                 <Text strong>{tProfile("shipStation.labels.createdAt")}:</Text>{" "}
                 {credential.created_at
@@ -259,7 +255,7 @@ export default function ShipStationCard({
             </div>
           )}
 
-          <Space className="justify-end w/full mt-3">
+          <div className="mt-4 flex w-full flex-wrap justify-end gap-2">
             {!credential ? (
               <Button
                 type="primary"
@@ -305,7 +301,7 @@ export default function ShipStationCard({
                 </Button>
               </Space>
             )}
-          </Space>
+          </div>
 
           {isShipstation && (
             <div className="mt-3">

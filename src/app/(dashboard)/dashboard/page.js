@@ -1,11 +1,9 @@
 "use client";
 
-import { Typography } from "antd";
 import { useSelector } from "react-redux";
 import { useTranslations } from "@/i18n/use-translations";
 import { resolveDashboard } from "@/components/dashboard/dashboardRegistry";
-
-const { Title } = Typography;
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function DashboardHome() {
   const t = useTranslations("dashboard.overview");
@@ -27,5 +25,11 @@ export default function DashboardHome() {
       .join(" ") ||
     String(user?.email || "").trim();
 
-  return <Title level={2}>{entityName || userName || t("fallbackTitle")}</Title>;
+  return (
+    <PageHeader
+      className=""
+      title={entityName || userName || t("fallbackTitle")}
+      description={t("welcomeDescription")}
+    />
+  );
 }

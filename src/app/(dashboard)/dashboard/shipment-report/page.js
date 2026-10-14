@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import {
   App as AntdApp, Button, Card, Col, DatePicker, Drawer, Empty, Input,
-  Row, Select, Space, Statistic, Table, Tag, Typography,
+  Row, Select, Space, Table, Tag, Typography,
 } from "antd";
 import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -13,9 +13,12 @@ import { ShipmentReportAPI } from "@/utils/api";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import ReportExportButton from "@/components/reports/ReportExportButton";
+import PageHeader from "@/components/ui/PageHeader";
+import StatCard from "@/components/ui/StatCard";
+import { formatMoney } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const defaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
 const payloadFor = (range, entityKey, entityId) => ({
   date_from: range[0].startOf("day").toISOString(),
@@ -23,10 +26,7 @@ const payloadFor = (range, entityKey, entityId) => ({
   ...(entityKey && entityId ? { [entityKey]: entityId } : {}),
 });
 const dataOf = (response) => response?.data ?? response ?? {};
-const money = (value) =>
-  value === null || value === undefined
-    ? "—"
-    : `${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
+const money = (value) => formatMoney(value, { fallback: "—" });
 const count = (value) => Number(value || 0).toLocaleString();
 const compareText = (a, b) => String(a ?? "").localeCompare(String(b ?? ""));
 const compareNumber = (a, b) => Number(a ?? 0) - Number(b ?? 0);
@@ -46,7 +46,7 @@ function TextFilterDropdown({ selectedKeys, setSelectedKeys, confirm, clearFilte
 
 const textFilter = (title, accessor, t) => ({
   filterDropdown: (props) => <TextFilterDropdown {...props} title={title} t={t} />,
-  filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />,
+  filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#C4560B" : undefined }} />,
   onFilter: (value, row) => textValue(accessor(row)).includes(textValue(value)),
 });
 
@@ -220,28 +220,28 @@ export default function ShipmentReportPage() {
   }, [isCustomer, isSystem, t]);
 
   const cards = [
-    { key: "purchase_amount", title: t("purchaseAmount"), color: "#047857" },
-    { key: "void_amount", title: t("voidAmount"), color: "#b91c1c" },
-    { key: "net_amount", title: t("netAmount"), color: "#1d4ed8" },
+    { key: "purchase_amount", title: t("purchaseAmount"), color: "#1E7A4C" },
+    { key: "void_amount", title: t("voidAmount"), color: "#B42318" },
+    { key: "net_amount", title: t("netAmount"), color: "#1F5F99" },
   ];
 
   return (
     <RequireRole anyOfRoles={["systemAdmin", "companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
-        <Card style={{ borderRadius: 24, background: "linear-gradient(135deg, #f8fafc, #edf4ff)" }}>
-          <Title level={3} style={{ margin: 0 }}>{t("title")}</Title>
-          <Text type="secondary">{t(isCustomer ? "customerSubtitle" : "subtitle")}</Text>
-        </Card>
+        <PageHeader
+          className=""
+          title={t("title")}
+          description={t(isCustomer ? "customerSubtitle" : "subtitle")}
+        />
 
         <Row gutter={[16, 16]}>
           {cards.map((card) => <Col xs={24} md={8} key={card.key}>
-            <Card loading={loading} style={{ borderRadius: 18, background: card.color }}>
-              <Statistic title={<span style={{ color: "#fff" }}>{card.title}</span>} value={money(report?.summary?.[card.key])} valueStyle={{ color: "#fff" }} />
-            </Card>
+            <StatCard loading={loading} label={card.title} accent={card.color}
+              value={money(report?.summary?.[card.key])} />
           </Col>)}
         </Row>
 
-        <Card title={t("filters")} style={{ borderRadius: 20 }} extra={<Space>
+        <Card title={t("filters")} extra={<Space>
           <Button icon={<ReloadOutlined />} onClick={() => { const next = defaultRange(); setRange(next); setSelectedEntityId(undefined); load(next, undefined); }}>{t("reset")}</Button>
           <Button type="primary" icon={<SearchOutlined />} onClick={() => load(range, selectedEntityId)}>{t("search")}</Button>
           <ReportExportButton onExport={handleExport} loading={exportLoading}
@@ -256,14 +256,14 @@ export default function ShipmentReportPage() {
           </Space>
         </Card>
 
-        <Card title={t("summary")} style={{ borderRadius: 20 }}>
+        <Card title={t("summary")}>
           <Table key={reportVersion} rowKey="date" loading={loading} columns={dailyColumns} dataSource={report?.daily_rows || []}
             scroll={{ x: "max-content" }} pagination={{ pageSize: 20, showSizeChanger: true }}
             locale={{ emptyText: <Empty description={t("empty")} /> }} />
         </Card>
 
         <Drawer title={detailDate ? t("detail", { date: dayjs(detailDate).format("DD/MM/YYYY") }) : t("title")}
-          open={!!detailDate} onClose={() => { detailRequest.current++; setDetailDate(null); }} width="min(1400px, 95vw)" destroyOnClose>
+          open={!!detailDate} onClose={() => { detailRequest.current++; setDetailDate(null); }} width="min(1400px, 95vw)" destroyOnHidden>
           <Table rowKey="id" loading={detailLoading} columns={detailColumns} dataSource={detail?.rows || []}
             scroll={{ x: "max-content" }} pagination={{ pageSize: 20, showSizeChanger: true }}
             locale={{ emptyText: <Empty description={t("empty")} /> }} />

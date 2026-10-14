@@ -8,9 +8,8 @@ import {
   Dropdown,
   Modal,
   Popconfirm,
-  Popover,
   Space,
-  Tag,
+  Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -23,6 +22,8 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function ProductPricesPage() {
   const { message } = AntdApp.useApp();
@@ -131,6 +132,23 @@ export default function ProductPricesPage() {
     normalizeListAndMeta,
   );
 
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductPricesAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -236,9 +254,9 @@ export default function ProductPricesPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -256,30 +274,35 @@ export default function ProductPricesPage() {
         width: 200,
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
+            <Tooltip title={t("actions.edit")}>
               <Button
+                aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               ></Button>
-            </Popover>
-            <Popover content={t("actions.delete")}>
+            </Tooltip>
+            <Tooltip title={t("actions.delete")}>
               <Popconfirm
                 title={t("actions.confirmDeleteTitle")}
                 okText={t("actions.confirmDeleteOk")}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record.id)}
               >
-                <Button icon={<DeleteOutlined />} danger></Button>
+                <Button
+                  aria-label={t("actions.delete")}
+                  icon={<DeleteOutlined />}
+                  danger
+                ></Button>
               </Popconfirm>
-            </Popover>
+            </Tooltip>
           </Space>
         ),
       },
     ],
-    [colors, customers, partners, products, sizes, t, tStatus],
+    [colors, customers, onDelete, partners, products, sizes, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -304,18 +327,6 @@ export default function ProductPricesPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
-      );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await ProductPricesAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
@@ -516,14 +527,19 @@ export default function ProductPricesPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductPriceForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
+            setOpen(false);
+            setEditingRow(null);
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

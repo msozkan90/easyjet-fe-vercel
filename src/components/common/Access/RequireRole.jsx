@@ -1,9 +1,8 @@
 "use client";
 
-import { Result, Button } from "antd";
+import { Result, Button, Skeleton } from "antd";
 import { useSelector } from "react-redux";
 import { hasAnyRole, can } from "@/utils/rbac";
-import Link from "next/link";
 import { useTranslations } from "@/i18n/use-translations";
 
 export default function RequireRole({
@@ -13,6 +12,7 @@ export default function RequireRole({
   children,
 }) {
   const user = useSelector((s) => s.auth.user);
+  const authStatus = useSelector((s) => s.auth.status);
   const tForbidden = useTranslations("rbac.forbidden");
   const grantedByRole = anyOfRoles.length === 0 || hasAnyRole(user, anyOfRoles);
   const grantedByPerm =
@@ -22,16 +22,27 @@ export default function RequireRole({
       .map((category) => {
         if (!category) return null;
         if (typeof category === "string") return category.trim().toLowerCase();
-        return String(category?.name || "").trim().toLowerCase();
+        return String(category?.name || "")
+          .trim()
+          .toLowerCase();
       })
       .filter(Boolean),
   );
   const grantedByCategory =
     anyOfCategories.length === 0 ||
     anyOfCategories.some((name) =>
-      categoryNames.has(String(name || "").trim().toLowerCase()),
+      categoryNames.has(
+        String(name || "")
+          .trim()
+          .toLowerCase(),
+      ),
     );
   const granted = grantedByRole && grantedByPerm && grantedByCategory;
+
+  // The session is still loading: show a placeholder instead of flashing 403.
+  if (!user && authStatus !== "failed") {
+    return <Skeleton active paragraph={{ rows: 6 }} />;
+  }
 
   if (!granted) {
     return (
@@ -40,8 +51,8 @@ export default function RequireRole({
         title="403"
         subTitle={tForbidden("subtitle")}
         extra={
-          <Button type="primary">
-            <Link href="/dashboard">{tForbidden("backToDashboard")}</Link>
+          <Button type="primary" href="/dashboard">
+            {tForbidden("backToDashboard")}
           </Button>
         }
       />

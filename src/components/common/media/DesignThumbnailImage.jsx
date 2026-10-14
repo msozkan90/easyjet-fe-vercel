@@ -15,8 +15,8 @@ const fallbackFrameStyle = ({ width, height, style = {}, aspectRatio }) => ({
   maxHeight: style.maxHeight,
   aspectRatio: style.aspectRatio ?? aspectRatio,
   borderRadius: style.borderRadius ?? 8,
-  border: style.border ?? "1px solid #f0f0f0",
-  background: "#f5f5f5",
+  border: style.border ?? "1px solid #E3E8EC",
+  background: "#F3F5F6",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -46,8 +46,8 @@ export function OriginalDesignButton({
     <Button
       size={size}
       block={block}
-      className={className}
-      style={style}
+      className={["ej-design-download", className].filter(Boolean).join(" ")}
+      style={{ maxWidth: "100%", minWidth: 0, ...style }}
       icon={<DownloadOutlined />}
       loading={downloading}
       aria-label={t("openOriginal")}
@@ -63,11 +63,24 @@ export function OriginalDesignButton({
         }
       }}
     >
-      {compact ? null : t("openOriginal")}
+      {compact ? null : (
+        <span
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {t("download")}
+        </span>
+      )}
     </Button>
   );
 
-  return compact ? <Tooltip title={t("openOriginal")}>{button}</Tooltip> : button;
+  // The visible label stays short so it fits narrow design cards; the
+  // tooltip carries the full meaning.
+  return <Tooltip title={t("openOriginal")}>{button}</Tooltip>;
 }
 
 export default function DesignThumbnailImage({

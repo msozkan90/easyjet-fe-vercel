@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Empty, Image, Tag, Typography } from "antd";
+import { Card, Empty, Image, Tag } from "antd";
 import {
   OriginalDesignButton,
   resolveDesignThumbnailStatus,
@@ -57,7 +57,7 @@ const buildPersonalizedDesignGroups = (item) => {
   });
 };
 
-const PositionDesignCard = ({
+export const PositionDesignCard = ({
   item,
   design,
   positionMap,
@@ -97,7 +97,7 @@ const PositionDesignCard = ({
           </Tag>
         ) : null
       }
-      className="rounded-2xl border border-slate-100 shadow-sm"
+      className="rounded-xl border border-line"
       styles={{
         body: {
           display: "flex",
@@ -108,13 +108,17 @@ const PositionDesignCard = ({
         },
       }}
     >
-      <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-xl border border-line bg-subtle">
         {previewImageUrl ? (
           <div className="relative w-full">
+            {/* Design previews come from arbitrary storage URLs and need
+                their natural size for the overlay math, so next/image is
+                not used here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewImageUrl}
               alt={positionName}
-              className="block w-full rounded-2xl object-contain"
+              className="block w-full rounded-xl object-contain"
               style={{ backgroundColor: item?.color?.hex_code || undefined }}
             />
             <div className="absolute inset-0">
@@ -138,7 +142,7 @@ const PositionDesignCard = ({
                       style={{ objectFit: "contain", borderRadius: 8 }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                    <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-brand-700">
                       {thumbnailFallbackText}
                     </div>
                   )}
@@ -174,13 +178,7 @@ const PositionDesignCard = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1">
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          {tDetail("designs.positionLabel")}
-        </Typography.Text>
-        <Typography.Text>{positionName}</Typography.Text>
-        <OriginalDesignButton url={design?.design_url} block />
-      </div>
+      <OriginalDesignButton url={design?.design_url} block />
     </Card>
   );
 };
@@ -199,7 +197,7 @@ export default function OrderItemDesignPreview({
 
   if (!hasFilledPersonalization(item)) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
         {rawDesigns.map((design) => (
           <PositionDesignCard
             key={design?.id || design?.design_url}
@@ -229,10 +227,10 @@ export default function OrderItemDesignPreview({
               })}
             </Tag>
           }
-          className="rounded-2xl border border-slate-200 bg-slate-50/40"
+          className="rounded-xl border border-line bg-subtle"
           styles={{ body: { padding: 16 } }}
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
             {group.designs.map((design) => (
               <PositionDesignCard
                 key={`${group.id}-${design?.product_position_id}`}

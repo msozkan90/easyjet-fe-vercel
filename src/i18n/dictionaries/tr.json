@@ -25,7 +25,14 @@
       "orderTypes": {
         "order": "Sipariş",
         "transferOrder": "Transfer Sipariş"
-      }
+      },
+      "toggleSidebar": "Menüyü daralt / genişlet",
+      "openNavigation": "Menüyü aç",
+      "balance": "Bakiye",
+      "userMenu": "Kullanıcı menüsü",
+      "search": "Ara",
+      "darkMode": "Koyu tema",
+      "lightMode": "Açık tema"
     },
     "actions": {
       "search": "Ara",
@@ -36,12 +43,15 @@
       "downloadPdf": "PDF indir",
       "add": "Ekle",
       "save": "Kaydet",
-      "cancel": "İptal",
+      "cancel": "Vazgeç",
       "edit": "Düzenle",
       "delete": "Sil",
       "detail": "Detay",
       "open": "Aç",
-      "backToTop": "En üste çık"
+      "backToTop": "En üste çık",
+      "moreActions": "Diğer işlemler",
+      "retry": "Tekrar dene",
+      "clearSelection": "Tüm seçimleri kaldır"
     },
     "status": {
       "active": "Aktif",
@@ -66,9 +76,45 @@
       "failed": "Önizleme hazırlanamadı.",
       "notApplicable": "Bu dosya türü önizlenemez.",
       "empty": "Önizleme yok",
-      "openOriginal": "Orijinali indir"
+      "download": "İndir",
+      "openOriginal": "Orijinal tasarımı indir"
     },
-    "none": "-"
+    "none": "-",
+    "states": {
+      "emptyTitle": "Kayıt bulunamadı",
+      "emptyDescription": "Filtreleri değiştirerek tekrar deneyin.",
+      "errorTitle": "Liste yüklenemedi",
+      "errorDescription": "Bağlantıyı kontrol edip tekrar deneyin. Filtreleriniz korunuyor."
+    },
+    "errorPage": {
+      "title": "Beklenmeyen bir hata oluştu",
+      "body": "Sayfa yüklenirken bir sorun çıktı. Tekrar deneyebilir ya da panele dönebilirsiniz.",
+      "retry": "Tekrar dene",
+      "home": "Panele dön"
+    },
+    "entityPermissions": {
+      "enabledCount": "{enabled}/{total} açık",
+      "on": "Açık",
+      "off": "Kapalı",
+      "default": "Varsayılan",
+      "defaultValue": "Varsayılan: {value}",
+      "modalDescription": "Bu hesap için varsayılanı değiştirmek istediğiniz yetkiyi açıp kapatın. Kilitli yetkiler değiştirilemez.",
+      "empty": "Tanımlı yetki yok.",
+      "keys": {
+        "CAN_USE_SS_SHIPMENT": "ShipStation kargo",
+        "CAN_USE_NS_SHIPMENT": "NestShipper kargo"
+      }
+    },
+    "entityTypes": {
+      "company": "Şirket",
+      "partner": "Partner",
+      "customer": "Müşteri",
+      "system": "Sistem"
+    },
+    "boolean": {
+      "yes": "Evet",
+      "no": "Hayır"
+    }
   },
   "home": {
     "title": "EasyJet'e Hoş Geldiniz",
@@ -80,7 +126,7 @@
       "subtitle": "Siparişlerinizi yönetin, takip edin.",
       "fields": {
         "email": {
-          "label": "Kullanıcı Adı",
+          "label": "E-posta",
           "placeholder": "kullanici@ornek.com"
         },
         "password": {
@@ -89,7 +135,7 @@
         }
       },
       "validation": {
-        "emailRequired": "Lütfen kullanıcı adınızı girin.",
+        "emailRequired": "Lütfen e-posta adresinizi girin.",
         "passwordRequired": "Lütfen şifrenizi girin."
       },
       "actions": {
@@ -98,8 +144,25 @@
       "messages": {
         "welcome": "Hoş geldiniz!",
         "loginFailed": "Giriş başarısız",
-        "invalidCredentials": "Kullanıcı adı veya şifre hatalı"
+        "invalidCredentials": "E-posta veya şifre hatalı. Lütfen tekrar deneyin."
+      },
+      "brand": {
+        "headline": "Siparişten kargoya, tek panel.",
+        "body": "Tasarım, üretim, kargo ve bakiye işlemlerinizi tek yerden takip edin."
       }
+    },
+    "verify": {
+      "successTitle": "E-posta doğrulandı",
+      "successBody": "Hesabınız aktif; şimdi giriş yapabilirsiniz.",
+      "successBodyWithEmail": "{email} adresi doğrulandı. Hesabınız aktif; şimdi giriş yapabilirsiniz.",
+      "failedTitle": "Doğrulama başarısız",
+      "expiredBody": "Doğrulama bağlantısının süresi dolmuş. Lütfen yeni bir doğrulama isteyin.",
+      "expiredBodyWithEmail": "Doğrulama bağlantısının süresi dolmuş. {email} için yeni bir doğrulama isteyin.",
+      "invalidBody": "Doğrulama bağlantısı geçersiz veya daha önce kullanılmış olabilir.",
+      "invalidBodyWithEmail": "Doğrulama bağlantısı geçersiz veya daha önce kullanılmış olabilir. {email} için yeni bir doğrulama isteyin.",
+      "goToLogin": "Girişe git",
+      "home": "Ana sayfa",
+      "redirectNote": "Birkaç saniye içinde giriş sayfasına yönlendirileceksiniz."
     }
   },
   "dashboard": {
@@ -196,7 +259,8 @@
           "refresh": "Yenile",
           "retry": "Tekrar dene"
         }
-      }
+      },
+      "welcomeDescription": "İşlemlerinize soldaki menüden başlayabilirsiniz."
     },
     "table": {
       "title": "Son Siparişler",
@@ -351,7 +415,12 @@
         "rejectTitle": "Reddet",
         "approvedAmount": "Onaylanan Tutar",
         "rejectReason": "Red Sebebi",
-        "reject": "Reddet"
+        "reject": "Reddet",
+        "approve": "Onayla",
+        "confirmApproveTitle": "Bakiye yüklemesi onaylansın mı?",
+        "confirmApproveBody": "Onaylanan tutar talep sahibinin bakiyesine eklenecek.",
+        "confirmRejectTitle": "Bakiye yüklemesi reddedilsin mi?",
+        "confirmRejectBody": "Talep sahibi red sebebini görecek. Bu işlem geri alınamaz."
       },
       "messages": {
         "loadFundingError": "Hesaplar yüklenemedi.",
@@ -2070,7 +2139,8 @@
           "waitingForDesign": "Tasarım Bekleniyor",
           "cancel": "İptal",
           "refund": "İade",
-          "remake": "Yeniden Üretim"
+          "remake": "Yeniden Üretim",
+          "readyForProduction": "Üretime Hazır"
         }
       },
       "actions": {
@@ -2081,7 +2151,7 @@
         "downloadDesigns": "Tasarımları İndir",
         "sendToProduction": "Üretime Gönder",
         "viewDetail": "Detayı Gör",
-        "cancelItem": "Order Itemı İptal Et",
+        "cancelItem": "Sipariş Kalemini İptal Et",
         "cancelItemConfirmTitle": "Bu order item iptal edilsin mi?",
         "cancelItemConfirmDescription": "Bu shipment'ın son aktif itemıysa kargo labelı da void edilecektir.",
         "cancelItemConfirmOk": "Itemı İptal Et",
@@ -2097,8 +2167,8 @@
         "confirmNewOrderTitle": "Bu sipariş Yeni Sipariş durumuna alınsın mı?",
         "confirmNewOrderOk": "Güncelle",
         "download": "İndir",
-        "printLabel": "Label Yazdır",
-        "manualOrder": "Manuel Order"
+        "printLabel": "Etiket Yazdır",
+        "manualOrder": "Manuel Sipariş"
       },
       "rematch": {
         "title": "Ürün Varyasyonunu Yeniden Eşleştir",
@@ -2138,7 +2208,8 @@
         "noData": "Kayıt bulunamadı"
       },
       "values": {
-        "noOptions": "Seçenek yok"
+        "noOptions": "Seçenek yok",
+        "reordered": "Yeniden sipariş"
       },
       "common": {
         "none": "-"
@@ -2360,7 +2431,7 @@
         }
       },
       "manualNormalOrderModal": {
-        "title": "Manuel Order Oluştur",
+        "title": "Manuel Sipariş Oluştur",
         "fields": {
           "orderNumber": "Order Number",
           "orderDate": "Order Date",
@@ -2731,6 +2802,22 @@
             "orderIdMissing": "Sipariş bilgisi bulunamadı.",
             "invalidItem": "Seçilen ürün geçerli bir varyanta sahip değil."
           }
+        },
+        "progress": {
+          "received": "Sipariş alındı",
+          "preparation": "Tasarım ve hazırlık",
+          "production": "Üretim",
+          "completed": "Tamamlandı",
+          "shipped": "Kargolandı",
+          "ariaLabel": "Sipariş aşamaları"
+        },
+        "shipments": {
+          "title": "Gönderiler",
+          "canceledTitle": "İptal edilen gönderiler",
+          "fallbackName": "Gönderi {sequence}",
+          "itemsSummary": "{count} kalem • {amount}",
+          "labelsSummary": "{labels} etiket • {voids} iptal",
+          "canceled": "İptal edildi"
         }
       },
       "addressEditor": {
@@ -3012,7 +3099,8 @@
           "notFound": "Transfer siparişi bulunamadı.",
           "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı.",
           "poolIncomplete": "Pool eksik: kaynak pool siparişinde hâlâ {count} bekleyen kalem var."
-        }
+        },
+        "checklistRequired": "Lütfen kargo kontrol listesini tamamlayın."
       },
       "pool": {
         "pendingItems": "{count} bekleyen pre-order kalemi",
@@ -3382,6 +3470,11 @@
           "confirmSendDescription": "Bu işlem transfer siparişini üretim aşamasına alır.",
           "confirmSendOk": "Üretime gönder"
         }
+      },
+      "transferCopy": {
+        "tooltip": "Transfer sipariş ID kopyala",
+        "success": "Transfer sipariş ID kopyalandı.",
+        "error": "Transfer sipariş ID kopyalanamadı."
       }
     },
     "refundRemake": {
@@ -4091,6 +4184,46 @@
       },
       "common": {
         "none": "-"
+      }
+    },
+    "paymentManagement": {
+      "title": "Transfer Ödeme Yönetimi",
+      "selectedSummary": "Seçili: {count} / {total}",
+      "filterLoadError": "Filtre seçenekleri yüklenemedi",
+      "selectEntity": "Bir müşteri veya partner seçin",
+      "selectOrders": "En az bir transfer siparişi seçin",
+      "createSuccess": "Ödeme talebi oluşturuldu. Grup: {group}",
+      "createError": "Ödeme talebi oluşturulamadı",
+      "entityPlaceholder": "Müşteri veya partner seçin",
+      "confirmCreate": "Seçili transfer siparişleri için ödeme talebi oluşturulsun mu?",
+      "confirmOk": "Oluştur",
+      "createButton": "Ödeme talebi oluştur",
+      "itemCount": "{count} kalem",
+      "detail": "Detay",
+      "columns": {
+        "order": "Sipariş",
+        "item": "Kalem",
+        "product": "Ürün",
+        "quantity": "Adet",
+        "customer": "Müşteri",
+        "partner": "Partner",
+        "orderPrice": "Sipariş tutarı",
+        "shipmentPrice": "Kargo tutarı",
+        "status": "Durum",
+        "orderDate": "Sipariş tarihi",
+        "actions": "İşlemler",
+        "group": "Grup",
+        "shipment": "Kargo",
+        "created": "Oluşturulma",
+        "basePrice": "Baz fiyat",
+        "multiplier": "Çarpan",
+        "customerPrice": "Müşteri fiyatı",
+        "partnerCredit": "Partner alacağı",
+        "price": "Fiyat"
+      },
+      "filters": {
+        "orderSearch": "Sipariş / müşteri ara",
+        "orderDate": "Sipariş tarihi"
       }
     }
   },

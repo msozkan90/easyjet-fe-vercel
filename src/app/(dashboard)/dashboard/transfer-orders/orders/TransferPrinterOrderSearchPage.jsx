@@ -10,7 +10,6 @@ import {
   Descriptions,
   Input,
   Spin,
-  Tag,
   Typography,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -18,32 +17,10 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  downloaded: "blue",
-  printed: "cyan",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-  refund: "volcano",
-  remake: "magenta",
-};
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
+import { formatAmount } from "@/utils/formatMoney";
+import { MetaChip } from "@/components/ui/TableCells";
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
@@ -73,19 +50,19 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
     item?.transfer_product?.name || item?.product?.name || tOrders("common.none");
 
   return (
-    <Card className="rounded-2xl border border-slate-100 shadow-sm" bodyStyle={{ padding: 20 }}>
+    <Card className="rounded-xl border border-line" styles={{ body: { padding: 20 } }}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
-          <Tag color="gold">
+          <MetaChip>
             {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
-          </Tag>
-          <Tag color="green">{tOrders("columns.price")}: {formatAmount(item?.price)}</Tag>
-          <Tag color={STATUS_COLORS[statusKey] || "default"}>
+          </MetaChip>
+          <MetaChip>{tOrders("columns.price")}: {formatAmount(item?.price)}</MetaChip>
+          <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
-          </Tag>
+          </StatusTag>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -106,7 +83,7 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
               {options.map((option, index) => (
                 <span
                   key={`${option?.name || "option"}-${index}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                  className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                 >
                   {option?.name || tOrders("common.none")}: {option?.value || tOrders("common.none")}
                 </span>
@@ -223,17 +200,15 @@ export default function TransferPrinterOrderSearchPage({
     if (!orderSummary?.status) return null;
     const key = orderSummary.status;
     const label = tOrders(`status.values.${key}`) || key;
-    return <Tag color={STATUS_COLORS[key] || "default"}>{label}</Tag>;
+    return <StatusTag status={key}>{label}</StatusTag>;
   }, [orderSummary?.status, tOrders]);
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {tOrders("workerPrinter.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={tOrders("workerPrinter.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <Input.Search
             allowClear
             enterButton={
@@ -270,7 +245,7 @@ export default function TransferPrinterOrderSearchPage({
         ) : null}
 
         {orderSummary ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <Typography.Title level={5} style={{ margin: 0 }}>
@@ -304,7 +279,7 @@ export default function TransferPrinterOrderSearchPage({
         ) : null}
 
         {designGroups.length ? (
-          <Card className="rounded-2xl border border-slate-100">
+          <Card className="rounded-xl border border-line">
             <Descriptions
               size="small"
               bordered
@@ -328,7 +303,7 @@ export default function TransferPrinterOrderSearchPage({
                                   <Card
                                     key={String(design?.id || design?.design_url)}
                                     size="small"
-                                    bodyStyle={{ padding: 10 }}
+                                    styles={{ body: { padding: 10 } }}
                                   >
                                     <div className="space-y-2">
                                       <DesignThumbnailImage
@@ -339,7 +314,7 @@ export default function TransferPrinterOrderSearchPage({
                                           maxHeight: 220,
                                           objectFit: "cover",
                                           borderRadius: 8,
-                                          border: "1px solid #f1f5f9",
+                                          border: "1px solid #EEF1F3",
                                         }}
                                         preview
                                       />

@@ -8,10 +8,7 @@ import {
   Dropdown,
   InputNumber,
   Modal,
-  Popconfirm,
-  Popover,
   Space,
-  Tag,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -30,6 +27,9 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function ProductStockPage() {
   const { message } = AntdApp.useApp();
@@ -131,11 +131,14 @@ export default function ProductStockPage() {
     }
   }, [message, t]);
 
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
   const columns = useMemo(
     () => [
       {
         title: t("columns.product"),
         dataIndex: "product_id",
+        width: 240,
         sorter: true,
         filter: {
           type: "select",
@@ -212,9 +215,9 @@ export default function ProductStockPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -229,68 +232,61 @@ export default function ProductStockPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Popover content={t("actions.edit")}>
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => {
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
                   setEditingRow(record);
                   setOpen(true);
-                }}
-              ></Button>
-            </Popover>
-            <Popover content={t("actions.manualDecrease")}>
-              <Button
-                icon={<MinusOutlined />}
-                disabled={!Number(record?.quantity)}
-                onClick={() => {
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "manualDecrease",
+                icon: <MinusOutlined />,
+                label: t("actions.manualDecrease"),
+                disabled: !Number(record?.quantity),
+                onClick: () => {
                   setDecreaseTarget(record);
                   setDecreaseQuantity(1);
                   setDecreaseModalOpen(true);
-                }}
-              ></Button>
-            </Popover>
-            <Popover
-              content={
-                record?.status === "active"
-                  ? t("actions.deactivate")
-                  : t("actions.activate")
-              }
-            >
-              <Popconfirm
-                title={
+                },
+              },
+              { type: "divider" },
+              {
+                key: "toggleStatus",
+                icon:
+                  record?.status === "active" ? (
+                    <CloseCircleOutlined />
+                  ) : (
+                    <CheckCircleOutlined />
+                  ),
+                danger: record?.status === "active",
+                label:
                   record?.status === "active"
-                    ? t("actions.confirmDeactivateTitle")
-                    : t("actions.confirmActivateTitle")
-                }
-                okText={
-                  record?.status === "active"
-                    ? t("actions.confirmDeactivateOk")
-                    : t("actions.confirmActivateOk")
-                }
-                okButtonProps={{ danger: record?.status === "active" }}
-                onConfirm={() => onToggleStatus(record)}
-              >
-                <Button
-                  icon={
-                    record?.status === "active" ? (
-                      <CloseCircleOutlined />
-                    ) : (
-                      <CheckCircleOutlined />
-                    )
-                  }
-                  danger={record?.status === "active"}
-                  style={
-                    record?.status === "inactive"
-                      ? { color: "#389e0d", borderColor: "#b7eb8f" }
-                      : undefined
-                  }
-                ></Button>
-              </Popconfirm>
-            </Popover>
-          </Space>
+                    ? t("actions.deactivate")
+                    : t("actions.activate"),
+                confirm: {
+                  title:
+                    record?.status === "active"
+                      ? t("actions.confirmDeactivateTitle")
+                      : t("actions.confirmActivateTitle"),
+                  okText:
+                    record?.status === "active"
+                      ? t("actions.confirmDeactivateOk")
+                      : t("actions.confirmActivateOk"),
+                },
+                onClick: () => onToggleStatus(record),
+              },
+            ]}
+          />
         ),
       },
     ],
@@ -551,14 +547,19 @@ export default function ProductStockPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductStockForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
+            setOpen(false);
+            setEditingRow(null);
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

@@ -95,7 +95,9 @@ export default function TransferSubCategoryViewOrderPage({ params }) {
       return (
         <Tooltip title={tOrders("actions.downloadDesigns")}>
           <Button
+            size="small"
             icon={<DownloadOutlined />}
+            aria-label={tOrders("actions.downloadDesigns")}
             onClick={() => handleDownloadDesigns(record)}
           />
         </Tooltip>

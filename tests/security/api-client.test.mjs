@@ -49,6 +49,21 @@ test('401 refreshes once and retries while 403 does not refresh', async (t) => {
   assert.equal(refreshes, 1);
 });
 
+test('expired session redirects dashboard pages but not public auth pages', async (t) => {
+  const http = await loadClient(t);
+  const redirects = [];
+  globalThis.window.location.replace = (path) => redirects.push(path);
+  http.defaults.adapter = async (config) => { throw { config, response: { status: 401 } }; };
+
+  globalThis.window.location.pathname = '/auth/verify-failed';
+  await assert.rejects(http.get('/auth/me'));
+  assert.deepEqual(redirects, []);
+
+  globalThis.window.location.pathname = '/dashboard/orders';
+  await assert.rejects(http.get('/auth/me'));
+  assert.deepEqual(redirects, ['/auth/login']);
+});
+
 test('login 401 does not create an infinite refresh loop', async (t) => {
   const http = await loadClient(t);
   let calls = 0;

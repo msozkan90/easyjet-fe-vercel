@@ -91,7 +91,7 @@ function ManualOrderItemFields({ field, form, products, loading, remove, canRemo
   };
 
   return (
-    <div className="space-y-3 rounded border border-slate-200 p-4">
+    <div className="space-y-3 rounded border border-line p-4">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Form.Item
           name={[field.name, "sku"]}
@@ -390,14 +390,14 @@ export default function ManualOrderModal({ open, onCancel, onCreated }) {
               <Form.Item name="package_code" label={t("fields.packageCode")}><Input /></Form.Item>
             </div>
 
-            <div className="mb-4 rounded border border-slate-200 p-3">
+            <div className="mb-4 rounded border border-line p-3">
               <div className="mb-2 flex items-center justify-between">
                 <Typography.Text strong>{t("fields.address")}</Typography.Text>
                 <Button onClick={openAddress}>{t("actions.address")}</Button>
               </div>
               <div>{[address.ship_to_name, address.ship_to_company].filter(Boolean).join(" — ") || "-"}</div>
-              <div className="text-slate-500">{addressSummary || "-"}</div>
-              <div className="text-slate-500">{address.ship_to_phone || "-"}</div>
+              <div className="text-text-secondary">{addressSummary || "-"}</div>
+              <div className="text-text-secondary">{address.ship_to_phone || "-"}</div>
             </div>
 
             {["ship_to_name", "ship_to_company", "ship_to_street1", "ship_to_street2", "ship_to_street3", "ship_to_city", "ship_to_state", "ship_to_postal_code", "ship_to_country", "ship_to_phone"].map((name) => (
@@ -449,11 +449,11 @@ export default function ManualOrderModal({ open, onCancel, onCreated }) {
         onCancel={() => setAddressOpen(false)}
         onSave={saveAddress}
         editForm={addressForm}
-        editingOrder={{ order_number: form.getFieldValue("order_number") || "-", order_date: form.getFieldValue("order_date") || "-" }}
+        editingOrder={{ order_number: (open && form.getFieldValue("order_number")) || "-", order_date: (open && form.getFieldValue("order_date")) || "-" }}
         onAddressSelect={selectAddress}
         showBillToName={false}
         showRecipientFields
-        orderDateLabel={form.getFieldValue("order_date")?.format?.("YYYY-MM-DD HH:mm:ss") || "-"}
+        orderDateLabel={(open && form.getFieldValue("order_date")?.format?.("YYYY-MM-DD HH:mm:ss")) || "-"}
         zIndex={1600}
       />
     </>

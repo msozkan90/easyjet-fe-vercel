@@ -28,6 +28,8 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "@/components/orders-pdf/OrdersPdfDesignUploadQueueProvider";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
+import PageHeader from "@/components/ui/PageHeader";
+import RowActions from "@/components/ui/RowActions";
 
 const formatDate = (value) =>
   value
@@ -249,29 +251,44 @@ export default function DesignFlawRecordsPage({ categoryId, subCategoryId }) {
     },
     {
       title: t("fields.actions"),
+      key: "actions",
       fixed: "right",
-      width: 410,
+      width: 96,
       render: (_, row) => (
-        <Space>
-          <Button
-            icon={<DownloadOutlined />}
-            loading={isDownloading(`design-flaw:source-designs:${row.id}`)}
-            disabled={!row?.source_design_ids?.length}
-            onClick={() => downloadSourceDesigns(row)}
-          >
-            {t("actions.download")}
-          </Button>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setSelectedBatch(row);
-              void loadDesigns(row);
-            }}
-          >
-            {tActions("detail")}
-          </Button>
-          {uploadButton(row)}
-        </Space>
+        <RowActions
+          actions={[
+            {
+              key: "detail",
+              iconOnly: true,
+              icon: <EyeOutlined />,
+              label: tActions("detail"),
+              onClick: () => {
+                setSelectedBatch(row);
+                void loadDesigns(row);
+              },
+            },
+          ]}
+          menuItems={[
+            {
+              key: "download",
+              icon: <DownloadOutlined />,
+              label: t("actions.download"),
+              disabled:
+                !row?.source_design_ids?.length ||
+                isDownloading(`design-flaw:source-designs:${row.id}`),
+              onClick: () => downloadSourceDesigns(row),
+            },
+            {
+              key: "upload",
+              icon: <UploadOutlined />,
+              label: t("actions.addDesign"),
+              pickFiles: {
+                multiple: true,
+                onPick: (files) => handleUpload(row, files),
+              },
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -357,23 +374,20 @@ export default function DesignFlawRecordsPage({ categoryId, subCategoryId }) {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        <Space style={{ width: "100%", justifyContent: "space-between" }} wrap>
-          <div>
-            <Typography.Title level={3} style={{ margin: 0 }}>
-              {t("records.title")}
-            </Typography.Title>
-            <Typography.Text type="secondary">
-              {t("records.subtitle")}
-            </Typography.Text>
-          </div>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() => loadRows()}
-            loading={loading}
-          >
-            {tActions("refresh")}
-          </Button>
-        </Space>
+        <PageHeader
+          className=""
+          title={t("records.title")}
+          description={t("records.subtitle")}
+          extra={
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => loadRows()}
+              loading={loading}
+            >
+              {tActions("refresh")}
+            </Button>
+          }
+        />
         <Table
           rowKey="id"
           columns={columns}
