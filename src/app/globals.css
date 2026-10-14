@@ -319,6 +319,37 @@ body {
   word-break: break-word;
 }
 
+/* Descriptions (detail pages): quiet labels, compact values, token borders */
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-view {
+  border-color: var(--ej-border);
+  border-radius: var(--ej-radius-card);
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-row {
+  border-color: var(--ej-border);
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-item-label {
+  background: var(--ej-subtle);
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  border-color: var(--ej-border);
+  width: 1%;
+  white-space: nowrap;
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-item-content {
+  color: var(--ej-text);
+  font-size: 13px;
+  border-color: var(--ej-border);
+}
+.ant-descriptions:not(.ant-descriptions-bordered) .ant-descriptions-item-label {
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+}
+.ant-descriptions .ant-descriptions-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
 /* CrudTable surface */
 .ej-table-surface {
   border: 1px solid var(--ej-border);

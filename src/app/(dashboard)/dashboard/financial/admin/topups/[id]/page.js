@@ -20,6 +20,7 @@ import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
+import MoneyText from "@/components/ui/MoneyText";
 
 
 const formatPerson = (person, fallbackId) => {
@@ -202,10 +203,10 @@ export default function WalletTopupAdminDetailPage() {
               {resolveOwnerName(record)}
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.amount")}>
-              {record?.amount ?? "-"}
+              <MoneyText value={record?.amount} currency={record?.currency} />
             </Descriptions.Item>
             <Descriptions.Item label={t("fields.approvedAmount")}>
-              {record?.approved_amount ?? "-"}
+              <MoneyText value={record?.approved_amount} currency={record?.currency} />
             </Descriptions.Item>
             <Descriptions.Item label={t("columns.currency")}>
               {record?.currency || "-"}
