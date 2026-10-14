@@ -197,7 +197,7 @@ export default function OrderItemDesignPreview({
 
   if (!hasFilledPersonalization(item)) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
         {rawDesigns.map((design) => (
           <PositionDesignCard
             key={design?.id || design?.design_url}
@@ -230,7 +230,7 @@ export default function OrderItemDesignPreview({
           className="rounded-xl border border-line bg-subtle"
           styles={{ body: { padding: 16 } }}
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
             {group.designs.map((design) => (
               <PositionDesignCard
                 key={`${group.id}-${design?.product_position_id}`}

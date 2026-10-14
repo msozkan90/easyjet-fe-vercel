@@ -657,7 +657,7 @@ const ItemDesignPreview = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
       {designs.map((design) => (
         <PositionDesignCard
           key={design?.id || design?.product_position_id}

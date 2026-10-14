@@ -8,7 +8,6 @@ import {
   Modal,
   Space,
   Table,
-  Tag,
   Tooltip,
   Typography,
 } from "antd";
@@ -29,6 +28,7 @@ import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { setBalance } from "@/redux/features/balanceSlice";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
+import StatusTag from "@/components/ui/StatusTag";
 
 const formatMoney = (value) =>
   formatMoneyShared(value ?? 0, { fallback: formatMoneyShared(0) });
@@ -241,7 +241,7 @@ export default function CustomerTransferPaymentProcessingPage({
         width: 120,
         render: (value, record) => {
           if (record.__rowType === "item") return null;
-          return value ? <Tag color="gold">{value}</Tag> : "-";
+          return value ? <StatusTag status={value}>{value}</StatusTag> : "-";
         },
       },
       {

@@ -47,7 +47,7 @@ export function OriginalDesignButton({
       size={size}
       block={block}
       className={["ej-design-download", className].filter(Boolean).join(" ")}
-      style={style}
+      style={{ maxWidth: "100%", minWidth: 0, ...style }}
       icon={<DownloadOutlined />}
       loading={downloading}
       aria-label={t("openOriginal")}
@@ -63,7 +63,18 @@ export function OriginalDesignButton({
         }
       }}
     >
-      {compact ? null : t("download")}
+      {compact ? null : (
+        <span
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {t("download")}
+        </span>
+      )}
     </Button>
   );
 

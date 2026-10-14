@@ -9,9 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import moment from "moment";
 import dayjs from "dayjs";
-import Link from "next/link";
 import {
   App as AntdApp,
   Button,
@@ -20,12 +18,9 @@ import {
   Popover,
   Select,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import {
-  CheckOutlined,
-  CloseOutlined,
   CloseCircleOutlined,
   CopyOutlined,
   DownloadOutlined,
@@ -45,6 +40,7 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
+import { DateTimeCell, EntityCell, YesNoCell } from "@/components/ui/TableCells";
 import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
@@ -692,9 +688,9 @@ export default function TransferOrdersStatusListPage({
               ) : null}
               <span>{value || t("common.none")}</span>
               {!record?.__isChild && pendingPoolItems > 0 ? (
-                <Tag color="orange">
+                <StatusTag tone="waiting" size="small">
                   {t("pool.badges.pendingItems", { count: pendingPoolItems })}
-                </Tag>
+                </StatusTag>
               ) : null}
             </Space>
           );
@@ -787,7 +783,9 @@ export default function TransferOrdersStatusListPage({
             <Space size={4} wrap>
               <StatusTag status={value}>{label}</StatusTag>
               {!record?.__isChild && pendingPoolItems > 0 ? (
-                <Tag color="volcano">{t("pool.badges.incomplete")}</Tag>
+                <StatusTag tone="danger" size="small">
+                  {t("pool.badges.incomplete")}
+                </StatusTag>
               ) : null}
             </Space>
           );
@@ -829,18 +827,12 @@ export default function TransferOrdersStatusListPage({
               },
               render: (value, record) => {
                 if (record?.__isChild) return null;
-                const name = value || record?.owner_entity?.name;
-                const type = record?.entity_type || record?.owner_entity?.type;
-                if (!name && !type) return t("common.none");
                 return (
-                  <Space size={6}>
-                    {name || t("common.none")}
-                    {type ? (
-                      <Tag color={type === "partner" ? "blue" : "green"}>
-                        {type}
-                      </Tag>
-                    ) : null}
-                  </Space>
+                  <EntityCell
+                    name={value || record?.owner_entity?.name}
+                    type={record?.entity_type || record?.owner_entity?.type}
+                    empty={t("common.none")}
+                  />
                 );
               },
             },
@@ -865,11 +857,7 @@ export default function TransferOrdersStatusListPage({
               dataIndex: "local_pickup",
               render: (value, record) => {
                 if (record?.__isChild) return null;
-                return Boolean(value) ? (
-                  <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
-                ) : (
-                  <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
-                );
+                return <YesNoCell value={Boolean(value)} />;
               },
             },
           ]
@@ -880,11 +868,7 @@ export default function TransferOrdersStatusListPage({
               title: t("columns.hasDesign"),
               dataIndex: "has_design",
               render: (value) => {
-                return value ? (
-                  <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
-                ) : (
-                  <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
-                );
+                return <YesNoCell value={Boolean(value)} noTone="danger" />;
               },
             },
           ]
@@ -913,15 +897,16 @@ export default function TransferOrdersStatusListPage({
           type: "dateRange",
           placeholder: t("filters.orderDateRange"),
         },
-        render: (value) =>
-          value ? moment(value).format("LLL") : t("common.none"),
+        render: (value) => (
+          <DateTimeCell value={value} empty={t("common.none")} />
+        ),
       },
       ...(showDetailAction
         ? [
             {
               title: t("columns.actions"),
               key: "actions",
-              width: rowActionsRenderer ? 220 : 120,
+              width: rowActionsRenderer ? 104 : 72,
               fixed: "right",
               render: (_, record) => {
                 const isParentRow =
@@ -941,20 +926,21 @@ export default function TransferOrdersStatusListPage({
                 const canViewDetail = Boolean(orderNumber);
                 if (!hasExtraActions && !canViewDetail) return null;
                 return (
-                  <Space>
+                  <div className="flex items-center justify-end gap-1">
                     {canViewDetail ? (
                       <Tooltip title={t("actions.viewDetail")}>
-                        <Link
-                          href={`/dashboard/transfer-orders/orders/${orderNumber || ""}`}
+                        <Button
+                          size="small"
+                          icon={<FileSearchOutlined />}
+                          href={`/dashboard/transfer-orders/orders/${orderNumber}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                        >
-                          <Button icon={<FileSearchOutlined />} />
-                        </Link>
+                          aria-label={t("actions.viewDetail")}
+                        />
                       </Tooltip>
                     ) : null}
                     {extraActions}
-                  </Space>
+                  </div>
                 );
               },
             },
@@ -1089,8 +1075,6 @@ export default function TransferOrdersStatusListPage({
                 {tCommonActions("search")}
               </Button>
               <Button
-                type="primary"
-                danger
                 icon={<CloseCircleOutlined />}
                 onClick={handleToolbarReset}
               >

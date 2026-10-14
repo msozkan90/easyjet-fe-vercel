@@ -128,8 +128,10 @@ export default function TransferShippedOrdersPage() {
       return (
         <Tooltip title={t("actions.createRequest")}>
           <Button
+            size="small"
             type="primary"
             icon={<RedoOutlined />}
+            aria-label={t("actions.createRequest")}
             disabled={!canOpenModal || !orderNumber}
             onClick={() => handleOpenCreateModal(record)}
           />

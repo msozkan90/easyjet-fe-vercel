@@ -10,7 +10,6 @@ import {
   Descriptions,
   Input,
   Spin,
-  Tag,
   Typography,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -21,6 +20,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount } from "@/utils/formatMoney";
+import { MetaChip } from "@/components/ui/TableCells";
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
@@ -56,10 +56,10 @@ const TransferOrderItemCard = ({ item, tOrders }) => {
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
-          <Tag color="gold">
+          <MetaChip>
             {tOrders("columns.quantity")}: {item?.quantity ?? tOrders("common.none")}
-          </Tag>
-          <Tag color="green">{tOrders("columns.price")}: {formatAmount(item?.price)}</Tag>
+          </MetaChip>
+          <MetaChip>{tOrders("columns.price")}: {formatAmount(item?.price)}</MetaChip>
           <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
           </StatusTag>

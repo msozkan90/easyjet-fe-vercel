@@ -104,6 +104,16 @@
         "CAN_USE_SS_SHIPMENT": "ShipStation kargo",
         "CAN_USE_NS_SHIPMENT": "NestShipper kargo"
       }
+    },
+    "entityTypes": {
+      "company": "Şirket",
+      "partner": "Partner",
+      "customer": "Müşteri",
+      "system": "Sistem"
+    },
+    "boolean": {
+      "yes": "Evet",
+      "no": "Hayır"
     }
   },
   "home": {

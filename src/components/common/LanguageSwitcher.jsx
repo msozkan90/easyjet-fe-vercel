@@ -37,17 +37,40 @@ const FLAGS = {
   ),
 };
 
-export function LanguageFlag({ locale, size = 18 }) {
+export function LanguageFlag({ locale, size = 18, className, style }) {
   const flag = FLAGS[locale];
-  if (!flag) return <GlobalOutlined style={{ fontSize: size * 0.8 }} />;
+  if (!flag) {
+    return (
+      <GlobalOutlined
+        className={className}
+        style={{ fontSize: size * 0.8, ...style }}
+      />
+    );
+  }
   return (
     <span
-      className="ej-flag"
-      style={{ width: size, height: Math.round(size * 0.7) }}
+      className={["ej-flag", className].filter(Boolean).join(" ")}
+      style={{
+        display: "inline-flex",
+        flexShrink: 0,
+        alignSelf: "center",
+        overflow: "hidden",
+        borderRadius: 2,
+        boxShadow: "0 0 0 1px rgb(15 36 51 / 0.12)",
+        width: size,
+        height: Math.round(size * 0.7),
+        ...style,
+      }}
     >
       {flag}
     </span>
   );
+}
+
+// Menu icon slot: antd passes its icon class (spacing) via `className`; the
+// flag is sized like the 14px line icons of the other menu rows.
+function MenuFlagIcon({ locale, className }) {
+  return <LanguageFlag locale={locale} size={14} className={className} />;
 }
 
 function useLocaleSelect() {
@@ -93,7 +116,7 @@ export function useLanguageMenuItem() {
   const { t, locale, items } = useLocaleSelect();
   return {
     key: "language",
-    icon: <LanguageFlag locale={locale} size={16} />,
+    icon: <MenuFlagIcon locale={locale} />,
     label: (
       <span className="flex items-center justify-between gap-6">
         <span>{t("language")}</span>

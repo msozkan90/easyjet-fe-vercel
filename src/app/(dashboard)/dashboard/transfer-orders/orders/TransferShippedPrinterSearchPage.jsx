@@ -16,7 +16,6 @@ import {
   Popconfirm,
   Space,
   Spin,
-  Tag,
   Typography,
 } from "antd";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -32,6 +31,7 @@ import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount, formatCurrency } from "@/utils/formatMoney";
+import { MetaChip } from "@/components/ui/TableCells";
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
@@ -94,13 +94,13 @@ const TransferOrderItemCard = ({
           <Typography.Title level={5} style={{ margin: 0 }}>
             {item?.name || tOrders("columns.item")}
           </Typography.Title>
-          <Tag color="gold">
+          <MetaChip>
             {tOrders("columns.quantity")}:{" "}
             {item?.quantity ?? tOrders("common.none")}
-          </Tag>
-          <Tag color="green">
+          </MetaChip>
+          <MetaChip>
             {tOrders("columns.price")}: {formatAmount(item?.price)}
-          </Tag>
+          </MetaChip>
           <StatusTag status={statusKey}>
             {tOrders("columns.status")}: {statusLabel}
           </StatusTag>
@@ -786,13 +786,13 @@ export default function TransferShippedPrinterSearchPage() {
                             </Typography.Text>
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
-                            <Tag color="blue">
+                            <MetaChip>
                               Qty: {design?.quantity ?? "-"}
-                            </Tag>
-                            <Tag>
+                            </MetaChip>
+                            <MetaChip>
                               {formatAmount(design?.width)}" x{" "}
                               {formatAmount(design?.height)}"
-                            </Tag>
+                            </MetaChip>
                             <StatusTag status={design?.status}>
                               {design?.status || "-"}
                             </StatusTag>
@@ -845,8 +845,8 @@ export default function TransferShippedPrinterSearchPage() {
                             ) : null}
                           </div>
                           <div className="flex flex-none flex-wrap justify-end gap-2">
-                            <Tag color="blue">Qty: {item?.quantity ?? "-"}</Tag>
-                            <Tag color="green">{formatAmount(item?.price)}</Tag>
+                            <MetaChip>Qty: {item?.quantity ?? "-"}</MetaChip>
+                            <MetaChip>{formatAmount(item?.price)}</MetaChip>
                             <StatusTag status={item?.status}>
                               {item?.status || "-"}
                             </StatusTag>

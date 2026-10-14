@@ -8,7 +8,6 @@ import {
   Space,
   App as AntdApp,
   Select,
-  Tag,
   Tooltip,
   Popconfirm,
 } from "antd";
@@ -26,6 +25,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
 import { CheckOutlined, CloseOutlined, UndoOutlined } from "@ant-design/icons";
+import StatusTag from "@/components/ui/StatusTag";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -639,13 +639,18 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
 
           return (
             <Space size={[4, 4]} wrap>
-              <Tag color={pendingCount > 0 ? "orange" : "green"}>
+              <StatusTag
+                tone={pendingCount > 0 ? "waiting" : "success"}
+                size="small"
+              >
                 {pendingCount > 0
                   ? t("badges.pendingItems", { count: pendingCount })
                   : t("badges.complete")}
-              </Tag>
+              </StatusTag>
               {pendingCount > 0 && hasLockedLinkedOrder ? (
-                <Tag color="volcano">{t("badges.progressBlocked")}</Tag>
+                <StatusTag tone="danger" size="small">
+                  {t("badges.progressBlocked")}
+                </StatusTag>
               ) : null}
             </Space>
           );

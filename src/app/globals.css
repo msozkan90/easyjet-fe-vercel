@@ -306,6 +306,22 @@ body {
   font-weight: 500;
 }
 
+/* Neutral meta chip for counts, sizes and prices (src/components/ui/TableCells.jsx) */
+.ej-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding-inline: 8px;
+  border-radius: 999px;
+  background: var(--ej-muted);
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* Language flags (src/components/common/LanguageSwitcher.jsx) */
 .ej-flag {
   display: inline-flex;

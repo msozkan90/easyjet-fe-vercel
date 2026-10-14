@@ -104,6 +104,16 @@
         "CAN_USE_SS_SHIPMENT": "ShipStation shipping",
         "CAN_USE_NS_SHIPMENT": "NestShipper shipping"
       }
+    },
+    "entityTypes": {
+      "company": "Company",
+      "partner": "Partner",
+      "customer": "Customer",
+      "system": "System"
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
     }
   },
   "home": {
