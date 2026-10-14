@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Space, Button, Modal, App as AntdApp, Tag, Popconfirm } from "antd";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Space, Button, Modal, App as AntdApp, Tag } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -14,6 +14,8 @@ import moment from "moment";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 export default function PartnerAdminsPage() {
   const { message } = AntdApp.useApp();
@@ -79,6 +81,19 @@ export default function PartnerAdminsPage() {
       fixedFilters: { role_code: RoleEnum.PARTNER_ADMIN },
     },
     normalizeListAndMeta
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await PartnerAdminsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -168,41 +183,47 @@ export default function PartnerAdminsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 220,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditing(record);
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-            <Popconfirm
-              title={t("actions.confirmDeleteTitle")}
-              okText={t("actions.confirmDeleteOk")}
-              okButtonProps={{ danger: true }}
-              onConfirm={() => onDelete(record.id)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t("actions.delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditing(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: t("actions.delete"),
+                confirm: {
+                  title: t("actions.confirmDeleteTitle"),
+                  okText: t("actions.confirmDeleteOk"),
+                },
+                onClick: () => onDelete(record.id),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [categories, partners, t]
+    [categories, onDelete, partners, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -242,15 +263,6 @@ export default function PartnerAdminsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await PartnerAdminsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
-    }
-  };
 
   return (
     <RequireRole anyOfRoles={["companyAdmin"]}>

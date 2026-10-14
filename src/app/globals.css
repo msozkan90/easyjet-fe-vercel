@@ -6,57 +6,469 @@ body,
   height: 100%;
 }
 
+/*
+ * Design tokens (mirrors src/theme/tokens.js).
+ * Light is the only active theme; the [data-theme="dark"] block keeps the
+ * infrastructure ready without enabling dark mode.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ej-ink-950: #0a1a24;
+  --ej-ink-900: #0f2433;
+  --ej-ink-800: #1a3446;
+  --ej-ink-700: #2e4a5d;
+  --ej-ink-500: #4e6373;
+  --ej-ink-400: #6f8494;
+  --ej-ink-300: #8696a2;
+  --ej-ink-200: #b9c6cf;
+  --ej-ink-100: #d5dee4;
+
+  --ej-orange-800: #7e3606;
+  --ej-orange-700: #a3470a;
+  --ej-orange-600: #c4560b;
+  --ej-orange-500: #f57a1f;
+  --ej-orange-100: #ffe4cf;
+  --ej-orange-50: #fff4eb;
+
+  --ej-canvas: #f3f5f6;
+  --ej-surface: #ffffff;
+  --ej-subtle: #f7f9fa;
+  --ej-muted: #eef1f3;
+  --ej-border: #e3e8ec;
+  --ej-border-strong: #c9d2d9;
+  --ej-text: #0f2433;
+  --ej-text-secondary: #4e6373;
+
+  --ej-success: #1e7a4c;
+  --ej-success-bg: #e8f5ee;
+  --ej-warning: #8a5300;
+  --ej-warning-bg: #fff4db;
+  --ej-danger: #b42318;
+  --ej-danger-bg: #fdecea;
+  --ej-info: #1f5f99;
+  --ej-info-bg: #e8f1fa;
+
+  --ej-radius-control: 6px;
+  --ej-radius-card: 12px;
+  --ej-radius-modal: 14px;
+  --ej-shadow-overlay: 0 12px 32px rgba(15, 36, 51, 0.16);
+
+  --ej-avatar-bg: #0f2433;
+
+  --background: var(--ej-canvas);
+  --foreground: var(--ej-text);
+}
+
+:root[data-theme="dark"] {
+  --ej-canvas: #0a1a24;
+  --ej-surface: #102231;
+  --ej-subtle: #15293a;
+  --ej-muted: #1a3446;
+  --ej-border: #22394b;
+  --ej-border-strong: #2e4a5d;
+  --ej-text: #e6ecf0;
+  --ej-text-secondary: #a9b8c3;
+
+  /* Brand tints used as backgrounds/text become translucent/lighter */
+  --ej-orange-800: #ffb27a;
+  --ej-orange-700: #f7934a;
+  --ej-orange-100: rgba(245, 122, 31, 0.22);
+  --ej-orange-50: rgba(245, 122, 31, 0.14);
+
+  --ej-success: #5cc493;
+  --ej-success-bg: rgba(30, 122, 76, 0.22);
+  --ej-warning: #f2c063;
+  --ej-warning-bg: rgba(185, 137, 0, 0.2);
+  --ej-danger: #f28b82;
+  --ej-danger-bg: rgba(180, 35, 24, 0.22);
+  --ej-info: #8ec1f0;
+  --ej-info-bg: rgba(31, 95, 153, 0.25);
+
+  --ej-shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.4);
+  --ej-avatar-bg: #2e4a5d;
+}
+
+/* Dark variants of the status pills */
+:root[data-theme="dark"] .ej-status--info {
+  --ej-status-fg: #8ec1f0;
+  --ej-status-bg: rgba(31, 95, 153, 0.25);
+}
+:root[data-theme="dark"] .ej-status--waiting {
+  --ej-status-fg: #f2c063;
+  --ej-status-bg: rgba(185, 137, 0, 0.2);
+}
+:root[data-theme="dark"] .ej-status--production {
+  --ej-status-fg: #b9a6f2;
+  --ej-status-bg: rgba(91, 63, 176, 0.28);
+}
+:root[data-theme="dark"] .ej-status--printed {
+  --ej-status-fg: #a5b2f0;
+  --ej-status-bg: rgba(61, 79, 168, 0.28);
+}
+:root[data-theme="dark"] .ej-status--success {
+  --ej-status-fg: #5cc493;
+  --ej-status-bg: rgba(30, 122, 76, 0.22);
+}
+:root[data-theme="dark"] .ej-status--shipped {
+  --ej-status-fg: #63c7cc;
+  --ej-status-bg: rgba(15, 110, 115, 0.26);
+}
+:root[data-theme="dark"] .ej-status--danger {
+  --ej-status-fg: #f28b82;
+  --ej-status-bg: rgba(180, 35, 24, 0.22);
+}
+:root[data-theme="dark"] .ej-status--refund {
+  --ej-status-fg: #f0a3c3;
+  --ej-status-bg: rgba(163, 48, 95, 0.26);
+}
+:root[data-theme="dark"] .ej-status--neutral {
+  --ej-status-fg: #a9b8c3;
+  --ej-status-bg: #1a3446;
+}
+
+/* Multi-item order row tints in dark mode */
+:root[data-theme="dark"] .ant-table-row.orders-nested-row > td,
+:root[data-theme="dark"] .ant-table-row.orders-child-row > td {
+  background-color: #13283a;
+}
+:root[data-theme="dark"] .ant-table-row.orders-parent-row > td {
+  background-color: #17314a !important;
+}
+:root[data-theme="dark"] .ant-table-row.orders-parent-row:hover > td,
+:root[data-theme="dark"] .ant-table-row.orders-nested-row:hover > td {
+  background-color: #1c3a56 !important;
+}
+:root[data-theme="dark"] .ant-table-row.transfer-status-row > td {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 14%,
+    #102231
+  ) !important;
+}
+:root[data-theme="dark"] .ant-table-row.transfer-status-row:hover > td {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 22%,
+    #102231
+  ) !important;
+}
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td,
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-left,
+:root[data-theme="dark"]
+  .ant-table-row.transfer-status-row.orders-child-row
+  > td.ant-table-cell-fix-right {
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 7%,
+    #102231
+  ) !important;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-ink-950: var(--ej-ink-950);
+  --color-ink-900: var(--ej-ink-900);
+  --color-ink-800: var(--ej-ink-800);
+  --color-ink-700: var(--ej-ink-700);
+  --color-ink-500: var(--ej-ink-500);
+  --color-ink-400: var(--ej-ink-400);
+  --color-ink-300: var(--ej-ink-300);
+  --color-ink-200: var(--ej-ink-200);
+  --color-ink-100: var(--ej-ink-100);
+  --color-brand-800: var(--ej-orange-800);
+  --color-brand-700: var(--ej-orange-700);
+  --color-brand-600: var(--ej-orange-600);
+  --color-brand-500: var(--ej-orange-500);
+  --color-brand-100: var(--ej-orange-100);
+  --color-brand-50: var(--ej-orange-50);
+  --color-canvas: var(--ej-canvas);
+  --color-surface: var(--ej-surface);
+  --color-subtle: var(--ej-subtle);
+  --color-muted: var(--ej-muted);
+  --color-line: var(--ej-border);
+  --color-line-strong: var(--ej-border-strong);
+  --color-text: var(--ej-text);
+  --color-text-secondary: var(--ej-text-secondary);
+  --color-success: var(--ej-success);
+  --color-success-bg: var(--ej-success-bg);
+  --color-warning: var(--ej-warning);
+  --color-warning-bg: var(--ej-warning-bg);
+  --color-danger: var(--ej-danger);
+  --color-danger-bg: var(--ej-danger-bg);
+  --color-info: var(--ej-info);
+  --color-info-bg: var(--ej-info-bg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--ej-canvas);
+  color: var(--ej-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.ant-table-row.missing-price-row > td {
-  background-color: rgba(255, 77, 79, 0.12);
+.tabular-nums,
+.ej-mono {
+  font-variant-numeric: tabular-nums;
 }
 
-.ant-table-row.missing-price-row > td * {
-  color: #ff4d4f;
+.ej-mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-.ant-table-row.missing-price-row > td *:hover {
-  color: #ff4d4f;
+/* Initials avatar background that follows the theme */
+.ant-avatar.ej-avatar {
+  background: var(--ej-avatar-bg);
+  color: #ffffff;
 }
 
+/* Status pill (src/components/ui/StatusTag.jsx) */
+.ej-status {
+  --ej-status-fg: var(--ej-ink-500);
+  --ej-status-bg: var(--ej-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--ej-status-bg);
+  color: var(--ej-status-fg);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ej-status--sm {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.ej-status__dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ej-status--info {
+  --ej-status-fg: #1f5f99;
+  --ej-status-bg: #e8f1fa;
+}
+.ej-status--waiting {
+  --ej-status-fg: #8a5300;
+  --ej-status-bg: #fff4db;
+}
+.ej-status--production {
+  --ej-status-fg: #5b3fb0;
+  --ej-status-bg: #f1edfc;
+}
+.ej-status--printed {
+  --ej-status-fg: #3d4fa8;
+  --ej-status-bg: #eceffb;
+}
+.ej-status--success {
+  --ej-status-fg: #1e7a4c;
+  --ej-status-bg: #e8f5ee;
+}
+.ej-status--shipped {
+  --ej-status-fg: #0f6e73;
+  --ej-status-bg: #e3f4f4;
+}
+.ej-status--danger {
+  --ej-status-fg: #b42318;
+  --ej-status-bg: #fdecea;
+}
+.ej-status--refund {
+  --ej-status-fg: #a3305f;
+  --ej-status-bg: #fbeaf1;
+}
+.ej-status--neutral {
+  --ej-status-fg: #4e6373;
+  --ej-status-bg: #eef1f3;
+}
+
+/* Remaining antd tags share the pill shape of StatusTag */
+.ant-tag.ant-tag {
+  border-radius: 999px;
+  border-color: transparent;
+  padding-inline: 10px;
+  font-weight: 500;
+}
+
+/* Neutral meta chip for counts, sizes and prices (src/components/ui/TableCells.jsx) */
+.ej-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding-inline: 8px;
+  border-radius: 999px;
+  background: var(--ej-muted);
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Language flags (src/components/common/LanguageSwitcher.jsx) */
+.ej-flag {
+  display: inline-flex;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgb(15 36 51 / 0.12);
+}
+.ej-flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ant-btn.ej-language-trigger {
+  height: 36px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ej-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Design download buttons never spill outside narrow design cards */
+.ant-btn.ej-design-download {
+  max-width: 100%;
+  min-width: 0;
+}
+.ant-btn.ej-design-download > span:not(.ant-btn-icon) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Toolbar action groups wrap instead of overflowing on narrow screens */
+.ej-toolbar-actions .ant-space {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+/* Long tags and option lists stay inside mobile cards */
+.ej-mobile-card .ant-tag {
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Descriptions (detail pages): quiet labels, compact values, token borders */
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-view {
+  border-color: var(--ej-border);
+  border-radius: var(--ej-radius-card);
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-row {
+  border-color: var(--ej-border);
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-item-label {
+  background: var(--ej-subtle);
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  border-color: var(--ej-border);
+  width: 1%;
+  white-space: nowrap;
+}
+.ant-descriptions.ant-descriptions-bordered .ant-descriptions-item-content {
+  color: var(--ej-text);
+  font-size: 13px;
+  border-color: var(--ej-border);
+}
+.ant-descriptions:not(.ant-descriptions-bordered) .ant-descriptions-item-label {
+  color: var(--ej-text-secondary);
+  font-size: 12px;
+}
+.ant-descriptions .ant-descriptions-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* CrudTable surface */
+.ej-table-surface {
+  border: 1px solid var(--ej-border);
+  border-radius: var(--ej-radius-card);
+  overflow: hidden;
+  background: var(--ej-surface);
+}
+
+.ej-table-surface .ant-table-wrapper .ant-table-pagination.ant-pagination {
+  margin: 12px 16px;
+}
+
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--ej-orange-600);
+  outline-offset: 2px;
+}
+
+/* Pool items without a price: tinted row, red marker and red text, while
+   buttons, selects and tags keep their own colors. */
+.ant-table-row.missing-price-row > td,
+.ant-table-row.missing-price-row > td.ant-table-cell-fix-left,
+.ant-table-row.missing-price-row > td.ant-table-cell-fix-right {
+  background-color: #fdf1f0 !important;
+  color: var(--ej-danger);
+}
+
+.ant-table-row.missing-price-row:hover > td,
+.ant-table-row.missing-price-row:hover > td.ant-table-cell-fix-left,
+.ant-table-row.missing-price-row:hover > td.ant-table-cell-fix-right {
+  background-color: #fbe4e2 !important;
+}
+
+.ant-table-row.missing-price-row > td:first-child {
+  box-shadow: inset 3px 0 0 var(--ej-danger);
+}
+
+:root[data-theme="dark"] .ant-table-row.missing-price-row > td {
+  background-color: #2a1d24 !important;
+}
+
+:root[data-theme="dark"] .ant-table-row.missing-price-row:hover > td {
+  background-color: #33212a !important;
+}
+
+/* Multi-item orders: opaque tints so fixed columns never show content behind */
 .ant-table-row.orders-nested-row > td {
-  background-color: rgba(24, 144, 255, 0.08);
+  background-color: #f5f9fc;
 }
 .ant-table-row.orders-nested-row:hover > td {
-  background-color: rgba(24, 144, 255, 0.1) !important;
+  background-color: #edf3f9 !important;
 }
 
 .ant-table-row.orders-parent-row > td {
-  background-color: rgba(43, 156, 255, 0.2) !important;
+  background-color: #eaf1f8 !important;
 }
 
 .ant-table-row.orders-parent-row:hover > td {
-  background-color: rgba(43, 156, 255, 0.2) !important;
+  background-color: #e2ecf6 !important;
 }
 
 .ant-table-row.orders-child-row > td {
-  background-color: rgba(24, 144, 255, 0.08);
+  background-color: #f5f9fc;
 }
 
-/* Sidebar taxonomy hierarchy: categories are primary groups, subcategories are secondary. */
+/* Sidebar taxonomy hierarchy: categories are primary groups, subcategories are secondary.
+   Tuned for the dark (ink) navigation. */
 .sidebar-category-item > .ant-menu-submenu-title,
 .sidebar-subcategory-item > .ant-menu-submenu-title,
 .sidebar-subcategory-item.ant-menu-item {
@@ -69,9 +481,9 @@ body,
 
 .sidebar-category-item > .ant-menu-submenu-title {
   margin-block: 4px 2px;
-  background: #f3f7fd;
-  color: #31577d;
-  font-weight: 650;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ej-ink-100) !important;
+  font-weight: 600;
 }
 
 .sidebar-category-item > .ant-menu-submenu-title::before,
@@ -79,73 +491,109 @@ body,
 .sidebar-subcategory-item.ant-menu-item::before {
   content: "";
   position: absolute;
-  inset-block: 8px;
+  inset-block: 9px;
   inset-inline-start: 0;
   width: 2px;
   border-radius: 0 999px 999px 0;
 }
 
 .sidebar-category-item > .ant-menu-submenu-title::before {
-  background: #6b8db0;
+  background: var(--ej-orange-500);
 }
 
 .sidebar-category-item > .ant-menu-submenu-title:hover,
 .sidebar-category-item.ant-menu-submenu-open > .ant-menu-submenu-title {
-  background: #eaf1f9 !important;
-  color: #274968 !important;
+  background: var(--ej-ink-800) !important;
+  color: #ffffff !important;
 }
 
 .sidebar-subcategory-item > .ant-menu-submenu-title,
 .sidebar-subcategory-item.ant-menu-item {
   background: transparent;
-  color: #4b716e;
-  font-weight: 550;
+  color: var(--ej-ink-200);
+  font-weight: 500;
 }
 
 .sidebar-subcategory-item > .ant-menu-submenu-title::before,
 .sidebar-subcategory-item.ant-menu-item::before {
-  background: #8aaba7;
+  background: var(--ej-ink-400);
 }
 
 .sidebar-subcategory-item > .ant-menu-submenu-title .ant-menu-item-icon,
 .sidebar-subcategory-item.ant-menu-item .ant-menu-item-icon {
-  color: #688985;
+  color: var(--ej-ink-300);
 }
 
 .sidebar-subcategory-item > .ant-menu-submenu-title:hover,
 .sidebar-subcategory-item.ant-menu-submenu-open > .ant-menu-submenu-title,
 .sidebar-subcategory-item.ant-menu-item:hover,
 .sidebar-subcategory-item.ant-menu-item-selected {
-  background: #f1f7f6 !important;
-  color: #365e5a !important;
+  background: var(--ej-ink-800) !important;
+  color: #ffffff !important;
 }
 
 .sidebar-subcategory-item--other > .ant-menu-submenu-title,
 .sidebar-subcategory-item--other.ant-menu-item {
   background: transparent;
-  color: #526174;
+  color: var(--ej-ink-300);
 }
 
 .sidebar-subcategory-item--other > .ant-menu-submenu-title::before,
 .sidebar-subcategory-item--other.ant-menu-item::before {
-  background: #94a3b8;
+  background: var(--ej-ink-500);
 }
 
 .sidebar-subcategory-item--other > .ant-menu-submenu-title .ant-menu-item-icon,
 .sidebar-subcategory-item--other.ant-menu-item .ant-menu-item-icon {
-  color: #64748b;
+  color: var(--ej-ink-400);
+}
+
+/* Active route marker in the dark navigation */
+.sidebar-navigation.ant-menu-dark .ant-menu-item-selected {
+  box-shadow: inset 3px 0 0 var(--ej-orange-500);
+}
+
+.sidebar-navigation.ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon {
+  color: var(--ej-orange-500);
+}
+
+.sidebar-navigation.ant-menu-dark
+  .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
+  color: #ffffff;
+}
+
+.sidebar-navigation.ant-menu-dark .ant-menu-item-divider {
+  border-color: var(--ej-ink-800);
+}
+
+.sidebar-navigation::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-navigation::-webkit-scrollbar-thumb {
+  background: var(--ej-ink-700);
+  border-radius: 999px;
 }
 
 .ant-table-row.transfer-status-row > td,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.18) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 11%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row:hover > td,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row:hover > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.26) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 16%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row > td,
@@ -153,7 +601,11 @@ body,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row
   > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.07) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 4%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-row.orders-child-row:hover > td,
@@ -161,49 +613,53 @@ body,
   > td.ant-table-cell-fix-left,
 .ant-table-row.transfer-status-row.orders-child-row:hover
   > td.ant-table-cell-fix-right {
-  background-color: rgba(var(--transfer-status-rgb), 0.13) !important;
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--transfer-status-rgb)) 8%,
+    #ffffff
+  ) !important;
 }
 
 .ant-table-row.transfer-status-newOrder {
-  --transfer-status-rgb: 22, 119, 255;
+  --transfer-status-rgb: 31, 95, 153;
 }
 
 .ant-table-row.transfer-status-waitingForDesign {
-  --transfer-status-rgb: 250, 173, 20;
+  --transfer-status-rgb: 185, 137, 0;
 }
 
 .ant-table-row.transfer-status-readyForProduction {
-  --transfer-status-rgb: 114, 46, 209;
+  --transfer-status-rgb: 91, 63, 176;
 }
 
 .ant-table-row.transfer-status-processing {
-  --transfer-status-rgb: 47, 84, 235;
+  --transfer-status-rgb: 91, 63, 176;
 }
 
 .ant-table-row.transfer-status-downloaded,
 .ant-table-row.transfer-status-pdf {
-  --transfer-status-rgb: 19, 194, 194;
+  --transfer-status-rgb: 61, 79, 168;
 }
 
 .ant-table-row.transfer-status-printed,
 .ant-table-row.transfer-status-completed {
-  --transfer-status-rgb: 82, 196, 26;
+  --transfer-status-rgb: 30, 122, 76;
 }
 
 .ant-table-row.transfer-status-shipped {
-  --transfer-status-rgb: 250, 84, 28;
+  --transfer-status-rgb: 15, 110, 115;
 }
 
 .ant-table-row.transfer-status-cancel {
-  --transfer-status-rgb: 255, 77, 79;
+  --transfer-status-rgb: 78, 99, 115;
 }
 
 .ant-table-row.transfer-status-refund {
-  --transfer-status-rgb: 235, 47, 150;
+  --transfer-status-rgb: 163, 48, 95;
 }
 
 .ant-table-row.transfer-status-remake {
-  --transfer-status-rgb: 250, 140, 22;
+  --transfer-status-rgb: 163, 48, 95;
 }
 
 .orders-cell-strong {
@@ -350,7 +806,7 @@ body,
   overflow: hidden;
   padding: 2px 0;
   font-family:
-    "Inter",
+    var(--font-geist-sans),
     system-ui,
     -apple-system,
     sans-serif;

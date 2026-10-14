@@ -8,9 +8,8 @@ import {
   Dropdown,
   Modal,
   Popconfirm,
-  Popover,
   Space,
-  Tag,
+  Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -23,6 +22,8 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -71,6 +72,23 @@ export default function ProductColorsPage() {
     normalizeListAndMeta,
   );
 
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductColorsAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError"),
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -115,7 +133,7 @@ export default function ProductColorsPage() {
                   width: 16,
                   height: 16,
                   borderRadius: 4,
-                  border: "1px solid #d9d9d9",
+                  border: "1px solid #C9D2D9",
                   backgroundColor: normalizedHex,
                 }}
               />
@@ -140,9 +158,9 @@ export default function ProductColorsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -160,30 +178,35 @@ export default function ProductColorsPage() {
         width: 90,
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
+            <Tooltip title={t("actions.edit")}>
               <Button
+                aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               ></Button>
-            </Popover>
-            <Popover content={t("actions.delete")}>
+            </Tooltip>
+            <Tooltip title={t("actions.delete")}>
               <Popconfirm
                 title={t("actions.confirmDeleteTitle")}
                 okText={t("actions.confirmDeleteOk")}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record.id)}
               >
-                <Button icon={<DeleteOutlined />} danger></Button>
+                <Button
+                  aria-label={t("actions.delete")}
+                  icon={<DeleteOutlined />}
+                  danger
+                ></Button>
               </Popconfirm>
-            </Popover>
+            </Tooltip>
           </Space>
         ),
       },
     ],
-    [products, t, tStatus],
+    [onDelete, products, t, tStatus],
   );
 
   const onSubmit = async (values) => {
@@ -245,18 +268,6 @@ export default function ProductColorsPage() {
     } catch (error) {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
-      );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await ProductColorsAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError"),
       );
     }
   };
@@ -450,14 +461,19 @@ export default function ProductColorsPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductColorForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
+            setOpen(false);
+            setEditingRow(null);
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

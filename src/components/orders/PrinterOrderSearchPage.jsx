@@ -8,7 +8,6 @@ import {
   Card,
   Empty,
   Form,
-  Image,
   Input,
   InputNumber,
   Modal,
@@ -19,46 +18,22 @@ import {
   Typography,
 } from "antd";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import {
-  OriginalDesignButton,
-  resolveDesignThumbnailStatus,
-} from "@/components/common/media/DesignThumbnailImage";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { downloadOrderItemDesigns } from "@/utils/orderItemDesignDownloads";
-import { extractDesignAreaFromRecord } from "@/utils/designArea";
-import GroupedOrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
-
-const STATUS_COLORS = {
-  newOrder: "geekblue",
-  processing: "purple",
-  pdf: "blue",
-  completed: "green",
-  shipped: "gold",
-  waitingForDesign: "orange",
-  cancel: "red",
-};
+import GroupedOrderItemDesignPreview, {
+  PositionDesignCard,
+} from "@/components/orders/OrderItemDesignPreview";
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
+import { formatAmount } from "@/utils/formatMoney";
 
 const SCRAP_REASON_OPTIONS = [
   { value: "wrong_print", labelKey: "wrongPrint" },
   { value: "damaged_product", labelKey: "damagedProduct" },
   { value: "other", labelKey: "other" },
 ];
-
-const formatAmount = (value, fallback = "-") => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -103,139 +78,26 @@ const ItemDesignPreview = ({
   designs,
   positionMap,
   tDetail,
-  fallbackText,
   tOrders,
+  fallbackText,
 }) => {
-  const tThumbnail = useTranslations("common.designThumbnail");
   if (!designs.length) {
     return <Empty description={tDetail("designs.empty")} />;
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      {designs.map((design) => {
-        const positionId = String(design?.product_position_id || "");
-        const position = positionMap.get(positionId);
-        const designArea = position
-          ? extractDesignAreaFromRecord(position)
-          : null;
-        const positionImageUrl = position?.images?.[0]?.image_url;
-        const previewImageUrl = positionImageUrl || item?.image_url;
-        const designPreviewUrl = design?.thumbnail_url;
-        const thumbnailStatus = resolveDesignThumbnailStatus(design);
-        const thumbnailFallbackText =
-          thumbnailStatus === "pending" || thumbnailStatus === "processing"
-            ? tThumbnail("preparing")
-            : thumbnailStatus === "failed"
-              ? tThumbnail("failed")
-              : thumbnailStatus === "not_applicable"
-                ? tThumbnail("notApplicable")
-                : fallbackText;
-        const positionName =
-          position?.name ||
-          design?.product_position?.name ||
-          tDetail("designs.unknownPosition");
-
-        return (
-          <Card
-            key={design?.id || positionId}
-            title={positionName}
-            extra={
-              Number(design?.display_quantity || 1) > 1 ? (
-                <Tag color="blue">
-                  {tOrders("columns.quantity")}: {design.display_quantity}
-                </Tag>
-              ) : null
-            }
-            className="rounded-2xl border border-slate-100 shadow-sm"
-            bodyStyle={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              flex: 1,
-              padding: 16,
-            }}
-          >
-            <div className="relative flex w-full flex-1 items-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
-              {previewImageUrl ? (
-                <div className="relative w-full">
-                  <img
-                    src={previewImageUrl}
-                    alt={positionName}
-                    className="block w-full rounded-2xl object-contain"
-                    style={{
-                      backgroundColor: item?.color?.hex_code || undefined,
-                    }}
-                  />
-                  <div className="absolute inset-0">
-                    {designArea ? (
-                      <div
-                        className="absolute rounded-xl border-2 border-blue-500/70 bg-blue-500/10 shadow-inner"
-                        style={{
-                          left: `${designArea.x * 100}%`,
-                          top: `${designArea.y * 100}%`,
-                          width: `${designArea.width * 100}%`,
-                          height: `${designArea.height * 100}%`,
-                        }}
-                      >
-                        {designPreviewUrl ? (
-                          <Image
-                            src={designPreviewUrl}
-                            alt="design preview"
-                            width="100%"
-                            height="100%"
-                            preview={{ src: designPreviewUrl }}
-                            style={{ objectFit: "contain", borderRadius: 8 }}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-                            {thumbnailFallbackText}
-                          </div>
-                        )}
-                      </div>
-                    ) : designPreviewUrl ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src={designPreviewUrl}
-                          alt="design preview"
-                          width={96}
-                          height={96}
-                          preview={{ src: designPreviewUrl }}
-                          style={{ objectFit: "contain", borderRadius: 8 }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ) : designPreviewUrl ? (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Image
-                    src={designPreviewUrl}
-                    alt="design preview"
-                    width="100%"
-                    height="100%"
-                    preview={{ src: designPreviewUrl }}
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/5] items-center justify-center p-6">
-                  <Empty
-                    description={thumbnailFallbackText || tDetail("designs.noPreview")}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {tDetail("designs.positionLabel")}
-              </Typography.Text>
-              <Typography.Text>{positionName}</Typography.Text>
-              <OriginalDesignButton url={design?.design_url} block />
-            </div>
-          </Card>
-        );
-      })}
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
+      {designs.map((design) => (
+        <PositionDesignCard
+          key={design?.id || design?.product_position_id}
+          item={item}
+          design={design}
+          positionMap={positionMap}
+          tDetail={tDetail}
+          tOrders={tOrders}
+          fallbackText={fallbackText}
+        />
+      ))}
     </div>
   );
 };
@@ -277,12 +139,12 @@ const OrderItemCard = ({
 
   return (
     <Card
-      className="rounded-2xl border border-slate-100 shadow-sm"
-      bodyStyle={{ padding: 20 }}
+      className="rounded-xl border border-line"
+      styles={{ body: { padding: 20 } }}
     >
       <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="w-full max-w-[240px] rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50">
+        <div className="w-full max-w-[240px] rounded-xl border border-line bg-surface p-3">
+          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-line bg-subtle">
             {item?.image_url ? (
               <GuardedPreviewImage
                 src={item.image_url}
@@ -314,9 +176,9 @@ const OrderItemCard = ({
               {tOrders("columns.price")}:{" "}
               {formatAmount(item?.price || item?.unit_price)}
             </Tag>
-            <Tag color={STATUS_COLORS[statusKey] || "default"}>
+            <StatusTag status={statusKey}>
               {tOrders("columns.status")}: {statusLabel}
-            </Tag>
+            </StatusTag>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -355,7 +217,7 @@ const OrderItemCard = ({
                 {options.map((option, index) => (
                   <span
                     key={`${option?.name || "option"}-${index}`}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-sm text-text-secondary"
                   >
                     {option?.name || tOrders("common.none")}:{" "}
                     {option?.value || tOrders("common.none")}
@@ -804,14 +666,10 @@ export default function PrinterOrderSearchPage({
 
   return (
     <RequireRole anyOfRoles={["companyCompletedWorker", "companyadmin"]}>
-      <div className="space-y-4 p-4">
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {isReportScrapeMode
-            ? tOrders("reportScrape.title")
-            : tOrders("scanner.title")}
-        </Typography.Title>
+      <div className="space-y-4">
+        <PageHeader className="" title={isReportScrapeMode ? tOrders("reportScrape.title") : tOrders("scanner.title")} />
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-xl">
           <div className="space-y-4">
             <Space.Compact style={{ width: "100%" }}>
               <Input
@@ -833,12 +691,12 @@ export default function PrinterOrderSearchPage({
             </Space.Compact>
 
             {orderSummary?.order_number ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-subtle px-4 py-3">
                 <div className="space-y-1">
                   <Typography.Text type="secondary">
                     {tOrders("columns.orderNumber")}
                   </Typography.Text>
-                  <div className="text-base font-semibold text-slate-900">
+                  <div className="text-base font-semibold text-text">
                     #{orderSummary.order_number}
                   </div>
                 </div>
@@ -930,7 +788,7 @@ export default function PrinterOrderSearchPage({
                       <Card
                         key={field.key}
                         size="small"
-                        className="rounded-2xl border border-slate-100"
+                        className="rounded-xl border border-line"
                       >
                         <div className="mb-3 flex items-center justify-between gap-3">
                           <Typography.Text strong>

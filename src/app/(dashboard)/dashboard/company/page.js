@@ -17,6 +17,8 @@ import {
   multiplierToPercent,
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 export default function CompaniesPage() {
   const { message } = AntdApp.useApp();
@@ -139,27 +141,30 @@ export default function CompaniesPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{t("status.active")}</Tag>
+            <StatusTag status="active">{t("status.active")}</StatusTag>
           ) : (
-            <Tag color="red">{t("status.inactive")}</Tag>
+            <StatusTag status="inactive">{t("status.inactive")}</StatusTag>
           ),
       },
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingRow(record);
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditingRow(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+          />
         ),
       },
     ],
@@ -224,7 +229,7 @@ export default function CompaniesPage() {
               : {},
           }
         : { status: "active", shipment_multiplier: 0, address: {} },
-    [editingRow, open],
+    [editingRow],
   );
 
   const onSubmit = async (values) => {
@@ -307,6 +312,16 @@ export default function CompaniesPage() {
       >
         <div onChangeCapture={() => setFormDirty(true)}>
           <CompanyForm
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditingRow(null);
+                },
+              })
+            }
             onFinish={onSubmit}
             submitText={
               editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

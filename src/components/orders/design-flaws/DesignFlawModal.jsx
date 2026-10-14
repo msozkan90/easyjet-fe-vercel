@@ -102,7 +102,7 @@ export default function DesignFlawModal({
       onOk={handleSave}
       onCancel={onCancel}
       width={760}
-      destroyOnClose
+      destroyOnHidden
     >
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Typography.Text type="secondary">

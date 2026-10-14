@@ -9,7 +9,7 @@ import {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Table, Card, Space, Button, Input, Select, DatePicker } from "antd";
+import { Table, Space, Button, Input, Select, DatePicker, Grid } from "antd";
 import {
   SearchOutlined,
   FilterFilled,
@@ -17,6 +17,9 @@ import {
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import dayjs from "dayjs";
+import { palette } from "@/theme/tokens";
+import { EmptyState, ErrorState } from "@/components/ui/StateView";
+import MobileCardList from "./MobileCardList";
 
 const { RangePicker } = DatePicker;
 
@@ -29,6 +32,31 @@ const isActionsColumn = (column) => {
   return key === "actions";
 };
 
+function FilterDropdownFrame({ width, labels, onApply, onReset, onClose, applyIcon, applyLabel, children }) {
+  return (
+    <div
+      className="flex flex-col"
+      style={{ width }}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <div className="p-3">{children}</div>
+      <div className="flex items-center justify-between gap-2 border-t border-line px-3 py-2">
+        <Button type="text" size="small" onClick={onClose}>
+          {labels.close}
+        </Button>
+        <Space size={6}>
+          <Button size="small" onClick={onReset}>
+            {labels.reset}
+          </Button>
+          <Button type="primary" size="small" icon={applyIcon} onClick={onApply}>
+            {applyLabel}
+          </Button>
+        </Space>
+      </div>
+    </div>
+  );
+}
+
 function TextFilterDropdown({
   placeholder,
   labels,
@@ -39,40 +67,30 @@ function TextFilterDropdown({
   close,
 }) {
   return (
-    <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={240}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        confirm();
+      }}
+      onClose={() => close()}
+      applyIcon={<SearchOutlined />}
+      applyLabel={labels.search}
+    >
       <Input
         autoFocus
+        allowClear
+        prefix={<SearchOutlined className="text-ink-400" />}
         placeholder={placeholder}
         value={selectedKeys?.[0]}
         onChange={(e) =>
           setSelectedKeys(e.target.value ? [e.target.value] : [])
         }
         onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: "block", width: 188 }}
       />
-      <Space>
-        <Button
-          type="primary"
-          icon={<SearchOutlined />}
-          size="small"
-          onClick={() => confirm()}
-        >
-          {labels.search}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -93,7 +111,17 @@ function SelectFilterDropdown({
   const onChange = (val) =>
     setSelectedKeys(multiple ? val || [] : val ? [val] : []);
   return (
-    <div style={{ padding: 8, width }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={width}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        confirm();
+      }}
+      onClose={() => close()}
+      applyLabel={labels.apply}
+    >
       <Select
         allowClear
         showSearch
@@ -103,27 +131,11 @@ function SelectFilterDropdown({
         optionFilterProp="label"
         value={value}
         onChange={onChange}
-        style={{ width: "100%", marginBottom: 8 }}
+        style={{ width: "100%" }}
         options={options}
+        maxTagCount="responsive"
       />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.apply}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -162,33 +174,26 @@ function DateRangeFilterDropdown({
   };
 
   return (
-    <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+    <FilterDropdownFrame
+      width={300}
+      labels={labels}
+      onApply={() => confirm()}
+      onReset={() => {
+        clearFilters?.();
+        setSelectedKeys([]);
+        confirm();
+      }}
+      onClose={() => close()}
+      applyLabel={labels.apply}
+    >
       <RangePicker
         allowClear
         value={value}
         onChange={onRangeChange}
-        style={{ width: 260, marginBottom: 8 }}
+        style={{ width: "100%" }}
         placeholder={[placeholder, placeholder]}
       />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.apply}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            setSelectedKeys([]);
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-        <Button type="link" size="small" onClick={() => close()}>
-          {labels.close}
-        </Button>
-      </Space>
-    </div>
+    </FilterDropdownFrame>
   );
 }
 
@@ -221,12 +226,17 @@ const CrudTable = forwardRef(function CrudTable(
     onFiltersChange,
     showRefresh = true,
     tableProps = {},
+    // "cards" renders rows as cards on phones; "table" keeps the table.
+    mobileLayout = "cards",
   },
   ref
 ) {
   const tTable = useTranslations("common.table");
+  const screens = Grid.useBreakpoint();
+  const showCards = mobileLayout === "cards" && screens.md === false;
   const tActions = useTranslations("common.actions");
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [pageState, setPageState] = useState({
@@ -265,6 +275,9 @@ const CrudTable = forwardRef(function CrudTable(
 
       setRows(list || []);
       setTotal(nextTotal);
+      setLoadError(null);
+    } catch (error) {
+      setLoadError(error || new Error("load failed"));
     } finally {
       setLoading(false);
     }
@@ -410,7 +423,9 @@ const CrudTable = forwardRef(function CrudTable(
           : {}),
         filterDropdown,
         filterIcon: (filtered) => (
-          <FilterFilled style={{ color: filtered ? "#1677ff" : undefined }} />
+          <FilterFilled
+            style={{ color: filtered ? palette.orange600 : undefined }}
+          />
         ),
         filteredValue,
         sortOrder:
@@ -464,28 +479,70 @@ const CrudTable = forwardRef(function CrudTable(
     setFilters(next);
   };
 
+  const { locale: tableLocale, ...restTableProps } = tableProps || {};
+  const customEmpty = tableLocale?.emptyText;
+  const emptyText =
+    customEmpty === undefined ||
+    typeof customEmpty === "string" ||
+    typeof customEmpty === "number" ? (
+      <EmptyState compact title={customEmpty} />
+    ) : (
+      customEmpty
+    );
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Toolbar */}
+    <div className="flex flex-col gap-3">
+      {/* Toolbar: filters and actions share one panel */}
       {showRefresh || toolbarLeft || toolbarRight ? (
-        <Card className="shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
+        <div
+          className={`flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between ${
+            toolbarLeft ? "rounded-xl border border-line bg-subtle p-2" : ""
+          }`}
+        >
+          {toolbarLeft ? (
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               {toolbarLeft}
             </div>
-            <Space wrap>
-              {showRefresh ? (
-                <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
-                  {tActions("refresh")}
-                </Button>
-              ) : null}
-              {toolbarRight}
-            </Space>
+          ) : (
+            <div className="flex-1" />
+          )}
+          <div className="ej-toolbar-actions flex min-w-0 max-w-full flex-wrap items-center gap-2 lg:shrink-0 lg:justify-end">
+            {showRefresh ? (
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => fetchData()}
+                loading={loading}
+              >
+                {tActions("refresh")}
+              </Button>
+            ) : null}
+            {toolbarRight}
           </div>
-        </Card>
+        </div>
       ) : null}
       {/* Table */}
-      <Card className="shadow-sm">
+      <div className={showCards ? "" : "ej-table-surface"}>
+        {loadError && !loading ? (
+          <div className="border-b border-line">
+            <ErrorState compact onRetry={() => fetchData()} />
+          </div>
+        ) : null}
+        {showCards ? (
+          <MobileCardList
+            columns={effectiveColumns}
+            rows={rows}
+            rowKey={rowKey}
+            loading={loading}
+            emptyText={emptyText}
+            rowSelection={restTableProps.rowSelection}
+            pagination={{
+              current: pageState.page,
+              pageSize: pageState.pageSize,
+              total,
+              onChange: (page) => setPageState((prev) => ({ ...prev, page })),
+            }}
+          />
+        ) : (
         <Table
           rowKey={rowKey}
           loading={loading}
@@ -500,12 +557,14 @@ const CrudTable = forwardRef(function CrudTable(
             showSizeChanger: true,
             responsive: true,
             showTotal: (count) => tTable("totalItems", { count }),
-            pageSizeOptions: [2, 10, 20, 50, 100],
+            pageSizeOptions: [10, 20, 50, 100],
           }}
           scroll={{ x: true }}
-          {...tableProps}
+          {...restTableProps}
+          locale={{ ...(tableLocale || {}), emptyText }}
         />
-      </Card>
+        )}
+      </div>
     </div>
   );
 });

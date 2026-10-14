@@ -29,6 +29,9 @@ import CrudTable from "@/components/common/table/CrudTable";
 import { AuditLogsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { RoleEnum } from "@/utils/consts";
+import StatusTag from "@/components/ui/StatusTag";
+import PageHeader from "@/components/ui/PageHeader";
+import StatCard from "@/components/ui/StatCard";
 
 const { RangePicker } = DatePicker;
 
@@ -41,13 +44,6 @@ const createDateBounds = (now = dayjs()) => ({
 const createDefaultRange = () => {
   const now = dayjs();
   return [now.startOf("month"), now.endOf("day")];
-};
-
-const STATUS_COLORS = {
-  active: "green",
-  inactive: "red",
-  pending: "gold",
-  blocked: "default",
 };
 
 const METRIC_TAG_COLORS = {
@@ -278,9 +274,9 @@ export default function CompanyUserMetricsPage() {
           width: 220,
         },
         render: (value) => (
-          <Tag color={STATUS_COLORS[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value || "inactive")}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -533,58 +529,63 @@ export default function CompanyUserMetricsPage() {
 
   return (
     <RequireRole anyOfRoles={["companyadmin"]}>
-      <div className="space-y-4 p-4">
-        <Card className="rounded-2xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-1">
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                {t("title")}
-              </Typography.Title>
-              <Typography.Text type="secondary">
-                {t("subtitle")}
-              </Typography.Text>
-            </div>
-            <Space wrap>
-              <RangePicker
-                value={dateRange}
-                allowClear={false}
-                format="DD/MM/YYYY"
-                presets={datePresets}
-                disabledDate={(current) =>
-                  Boolean(
-                    current &&
-                      (current.isBefore(dateBoundsRef.current.earliest, "day") ||
-                        current.isAfter(dateBoundsRef.current.latest, "day")),
-                  )
-                }
-                onChange={handleDateRangeChange}
-              />
-            </Space>
-          </div>
-        </Card>
+      <div className="space-y-4">
+        <PageHeader
+          className=""
+          title={t("title")}
+          description={t("subtitle")}
+          extra={
+            <RangePicker
+              value={dateRange}
+              allowClear={false}
+              format="DD/MM/YYYY"
+              presets={datePresets}
+              disabledDate={(current) =>
+                Boolean(
+                  current &&
+                    (current.isBefore(dateBoundsRef.current.earliest, "day") ||
+                      current.isAfter(dateBoundsRef.current.latest, "day")),
+                )
+              }
+              onChange={handleDateRangeChange}
+            />
+          }
+        />
 
         <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.total")} value={totals.total} />
-          </Card>
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.completed")} value={totals.completed} />
-          </Card>
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.shipped")} value={totals.shipped} />
-          </Card>
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.scrap")} value={totals.scrap} />
-          </Card>
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.remake")} value={totals.remake} />
-          </Card>
-          <Card className="rounded-2xl" loading={loading}>
-            <Statistic title={t("stats.refund")} value={totals.refund} />
-          </Card>
+          <StatCard
+            loading={loading}
+            label={t("stats.total")}
+            value={totals.total}
+          />
+          <StatCard
+            loading={loading}
+            label={t("stats.completed")}
+            value={totals.completed}
+          />
+          <StatCard
+            loading={loading}
+            label={t("stats.shipped")}
+            value={totals.shipped}
+          />
+          <StatCard
+            loading={loading}
+            label={t("stats.scrap")}
+            value={totals.scrap}
+          />
+          <StatCard
+            loading={loading}
+            label={t("stats.remake")}
+            value={totals.remake}
+          />
+          <StatCard
+            loading={loading}
+            label={t("stats.refund")}
+            value={totals.refund}
+          />
         </div>
 
-        <Card className="rounded-2xl">
+        <div>
           {error ? (
             <Alert type="error" showIcon message={error} className="mb-4" />
           ) : null}
@@ -608,11 +609,11 @@ export default function CompanyUserMetricsPage() {
               initialSort={{ orderBy: "total_count", orderDir: "desc" }}
               tableProps={{
                 locale: { emptyText: t("messages.empty") },
-                scroll: { x: 980 },
+                scroll: { x: 1180 },
               }}
             />
           ) : null}
-        </Card>
+        </div>
 
         <Modal
           open={Boolean(selectedUser)}
@@ -636,37 +637,37 @@ export default function CompanyUserMetricsPage() {
           {selectedUser ? (
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.total")}
                     value={detailSummary.total_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.completed")}
                     value={detailSummary.completed_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.shipped")}
                     value={detailSummary.shipped_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.scrap")}
                     value={detailSummary.scrap_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.remake")}
                     value={detailSummary.remake_count}
                   />
                 </Card>
-                <Card size="small" className="rounded-2xl">
+                <Card size="small" className="rounded-xl">
                   <Statistic
                     title={t("stats.refund")}
                     value={detailSummary.refund_count}
@@ -679,7 +680,7 @@ export default function CompanyUserMetricsPage() {
                   <Typography.Text strong>
                     {selectedUser.full_name || "-"}
                   </Typography.Text>
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-text-secondary">
                     {selectedUser.email || "-"}
                   </div>
                 </div>

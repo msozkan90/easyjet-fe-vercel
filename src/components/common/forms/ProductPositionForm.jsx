@@ -10,6 +10,8 @@ import {
   isFilePreviewAllowed,
   openFileInNewTab,
 } from "@/components/common/media/ImagePreviewGate";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -27,10 +29,13 @@ const normFile = (event) => {
 export default function ProductPositionForm({
   initialValues,
   onFinish,
+  onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   isEdit = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const { message } = AntdApp.useApp();
   const tCommon = useTranslations("forms.common");
@@ -101,7 +106,7 @@ export default function ProductPositionForm({
   const uploadButton = (
     <button
       type="button"
-      className="flex flex-col items-center justify-center text-blue-600 hover:text-blue-700"
+      className="flex flex-col items-center justify-center text-brand-700 hover:text-brand-800"
     >
       <PlusOutlined />
       <span className="mt-1 text-xs font-medium">
@@ -116,7 +121,8 @@ export default function ProductPositionForm({
         form={form}
         layout="vertical"
         initialValues={transformedInitialValues}
-        onFinish={onFinish}
+        onFinish={submitHandler}
+        onValuesChange={() => onDirtyChange?.(true)}
       >
         <Form.Item
           name="product_id"
@@ -280,12 +286,11 @@ export default function ProductPositionForm({
         </Form.Item>
 
         <Form.Item className="mb-0">
-          <button
-            type="submit"
-            className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-          >
-            {submitButtonLabel}
-          </button>
+          <FormActions
+            submitText={submitButtonLabel}
+            loading={submitting}
+            onCancel={onCancel}
+          />
         </Form.Item>
       </Form>
 

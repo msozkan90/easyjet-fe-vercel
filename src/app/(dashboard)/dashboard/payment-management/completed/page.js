@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { App as AntdApp, Button, Space, Tag, Tooltip, Typography } from "antd";
+import { App as AntdApp, Button, Space, Tag, Tooltip } from "antd";
 import { DownloadOutlined, FileSearchOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -13,21 +13,15 @@ import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
+import PageHeader from "@/components/ui/PageHeader";
+import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
 
-const { Title } = Typography;
-
-const moneyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-});
-
-const formatMoney = (value) => {
-  const number = Number(value ?? 0);
-  return moneyFormatter.format(Number.isFinite(number) ? number : 0);
-};
+const formatMoney = (value) =>
+  formatMoneyShared(value ?? 0, { fallback: formatMoneyShared(0) });
 
 export default function TransferPaymentCompletedPage() {
+  const tPm = useTranslations("dashboard.paymentManagement");
+  const tCols = useTranslations("dashboard.paymentManagement.columns");
   const { message } = AntdApp.useApp();
   const { locale } = useLocaleInfo();
   const t = useTranslations("dashboard.financial.transferPayments");
@@ -116,14 +110,14 @@ export default function TransferPaymentCompletedPage() {
     const priceColumns = isPartnerAdmin
       ? [
           {
-            title: "Base Price",
+            title: tCols("basePrice"),
             dataIndex: "base_transfer_order_price",
             width: 130,
             render: (value, record) =>
               record.__rowType === "item" ? null : formatMoney(value),
           },
           {
-            title: "Multiplier",
+            title: tCols("multiplier"),
             dataIndex: "product_multiplier",
             width: 110,
             render: (value, record) => {
@@ -134,14 +128,14 @@ export default function TransferPaymentCompletedPage() {
             },
           },
           {
-            title: "Customer Price",
+            title: tCols("customerPrice"),
             dataIndex: "customer_transfer_order_price",
             width: 140,
             render: (value, record) =>
               record.__rowType === "item" ? null : formatMoney(value),
           },
           {
-            title: "Partner Credit",
+            title: tCols("partnerCredit"),
             dataIndex: "partner_markup",
             width: 140,
             render: (value, record) =>
@@ -150,7 +144,7 @@ export default function TransferPaymentCompletedPage() {
         ]
       : [
           {
-            title: "Price",
+            title: tCols("price"),
             dataIndex: "base_transfer_order_price",
             width: 130,
             render: (value, record) =>
@@ -160,7 +154,7 @@ export default function TransferPaymentCompletedPage() {
 
     return [
       {
-        title: "Group",
+        title: tCols("group"),
         dataIndex: "group_id",
         filter: { type: "text", placeholder: "Search order/customer" },
         render: (value, record) => {
@@ -170,7 +164,7 @@ export default function TransferPaymentCompletedPage() {
         },
       },
       {
-        title: "Item",
+        title: tCols("item"),
         dataIndex: "item_name",
         render: (value, record) => {
           if (record.__rowType === "group") {
@@ -183,40 +177,40 @@ export default function TransferPaymentCompletedPage() {
         },
       },
       {
-        title: "Product",
+        title: tCols("product"),
         dataIndex: "product_name",
         render: (value, record) =>
           record.__rowType === "item" ? value || "-" : null,
       },
       {
-        title: "Qty",
+        title: tCols("quantity"),
         dataIndex: "quantity",
         width: 80,
         render: (value, record) =>
           record.__rowType === "item" ? (value ?? "-") : null,
       },
       {
-        title: "Customer",
+        title: tCols("customer"),
         dataIndex: "customer_id",
         render: (_, record) =>
           record.__rowType === "item" ? null : record?.customer?.name || "-",
       },
       {
-        title: "Partner",
+        title: tCols("partner"),
         dataIndex: "partner_id",
         render: (_, record) =>
           record.__rowType === "item" ? null : record?.partner?.name || "-",
       },
       ...priceColumns,
       {
-        title: "Shipment",
+        title: tCols("shipment"),
         dataIndex: "shipment_price",
         width: 120,
         render: (value, record) =>
           record.__rowType === "item" ? null : formatMoney(value),
       },
       {
-        title: "Status",
+        title: tCols("status"),
         dataIndex: "status",
         width: 120,
         render: (value, record) => {
@@ -225,7 +219,7 @@ export default function TransferPaymentCompletedPage() {
         },
       },
       {
-        title: "Created",
+        title: tCols("created"),
         dataIndex: "created_at",
         sorter: true,
         filter: { type: "dateRange", placeholder: "Created date" },
@@ -237,7 +231,7 @@ export default function TransferPaymentCompletedPage() {
               : "-",
       },
       {
-        title: "Actions",
+        title: tCols("actions"),
         key: "actions",
         width: 120,
         render: (_, record) => {
@@ -255,7 +249,7 @@ export default function TransferPaymentCompletedPage() {
           if (record.__rowType !== "order" || !record?.transfer_order_id)
             return null;
           return (
-            <Tooltip title="Detail">
+            <Tooltip title={tPm("detail")}>
               <Link
                 href={`/dashboard/transfer-orders/orders/${encodeURIComponent(
                   record.transfer_order_id,
@@ -268,14 +262,19 @@ export default function TransferPaymentCompletedPage() {
         },
       },
     ];
-  }, [downloadingGroupId, handleDownloadInvoice, isPartnerAdmin, t]);
+  }, [
+    downloadingGroupId,
+    handleDownloadInvoice,
+    isPartnerAdmin,
+    t,
+    tCols,
+    tPm,
+  ]);
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("completedCompanyTitle")}
-        </Title>
+        <PageHeader title={t("completedCompanyTitle")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"

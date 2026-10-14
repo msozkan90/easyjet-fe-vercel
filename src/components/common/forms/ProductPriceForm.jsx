@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Form, Input, InputNumber, Select } from "antd";
 import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 const DEFAULT_OPTION_NAMES = new Set(["standart", "standard"]);
 
@@ -14,12 +16,15 @@ const isDefaultOptionName = (value) =>
 export default function ProductPriceForm({
   initialValues,
   onFinish,
+  onCancel,
+  onDirtyChange,
   submitText,
   products = [],
   customers = [],
   partners = [],
   isEdit = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const tCommon = useTranslations("forms.common");
   const tForm = useTranslations("forms.productPrice");
@@ -178,7 +183,8 @@ export default function ProductPriceForm({
       form={form}
       layout="vertical"
       initialValues={mergedInitialValues}
-      onFinish={onFinish}
+      onFinish={submitHandler}
+      onValuesChange={() => onDirtyChange?.(true)}
     >
       <Form.Item
         name="product_id"
@@ -362,12 +368,11 @@ export default function ProductPriceForm({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <button
-          type="submit"
-          className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-        >
-          {submitButtonLabel}
-        </button>
+        <FormActions
+          submitText={submitButtonLabel}
+          loading={submitting}
+          onCancel={onCancel}
+        />
       </Form.Item>
     </Form>
   );

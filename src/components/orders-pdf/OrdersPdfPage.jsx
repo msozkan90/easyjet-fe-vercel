@@ -27,6 +27,9 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
 import { useOrdersPdfDesignUploadQueue } from "./OrdersPdfDesignUploadQueueProvider";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -288,11 +291,11 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       title: t("fields.pdfStatus"),
       dataIndex: "pdf_status",
       render: (value) => (
-        <Tag color={value === "pdf_downloaded" ? "success" : "processing"}>
+        <StatusTag tone={value === "pdf_downloaded" ? "success" : "info"}>
           {value === "pdf_downloaded"
             ? t("status.pdfDownloaded")
             : t("status.pdfReady")}
-        </Tag>
+        </StatusTag>
       ),
       width: 150,
     },
@@ -307,59 +310,74 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
       title: t("fields.downloaded"),
       dataIndex: "is_downloaded",
       render: (value) => (
-        <Tag color={value ? "success" : "default"}>
+        <StatusTag tone={value ? "success" : "neutral"}>
           {value ? t("status.downloaded") : t("status.uploaded")}
-        </Tag>
+        </StatusTag>
       ),
       width: 140,
     },
     {
       title: t("fields.createdAt"),
       dataIndex: "created_at",
-      render: formatDate,
+      render: (value) => (
+        <span className="whitespace-nowrap">{formatDate(value)}</span>
+      ),
+      width: 180,
       responsive: ["lg"],
     },
     {
       title: t("fields.actions"),
       key: "actions",
-      width: 440,
+      fixed: "right",
+      width: 96,
       render: (_, row) => (
-        <Space wrap>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setSelectedPdf(row);
-              void loadDesigns(row);
-            }}
-          >
-            {tActions("detail")}
-          </Button>
-          <Button
-            icon={<DownloadOutlined />}
-            loading={isDownloading(`orders-pdf:order-item-designs:${row.id}`)}
-            disabled={!Array.isArray(row.design_ids) || !row.design_ids.length}
-            onClick={() => handleDownloadOrderItemDesigns(row)}
-          >
-            {t("actions.downloadOrderItemDesigns")}
-          </Button>
-          <Upload
-            multiple
-            showUploadList={false}
-            beforeUpload={(file, fileList) => {
-              if (file?.uid === fileList?.[0]?.uid) handleUpload(row, fileList);
-              return false;
-            }}
-          >
-            <Button icon={<UploadOutlined />}>{t("actions.addDesign")}</Button>
-          </Upload>
-          <Popconfirm
-            title={t("confirm.deleteTitle")}
-            description={t("confirm.deleteDescription")}
-            onConfirm={() => handleDeletePdf(row)}
-          >
-            <Button danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+        <RowActions
+          actions={[
+            {
+              key: "detail",
+              iconOnly: true,
+              icon: <EyeOutlined />,
+              label: tActions("detail"),
+              onClick: () => {
+                setSelectedPdf(row);
+                void loadDesigns(row);
+              },
+            },
+          ]}
+          menuItems={[
+            {
+              key: "download",
+              icon: <DownloadOutlined />,
+              label: t("actions.downloadOrderItemDesigns"),
+              disabled:
+                !Array.isArray(row.design_ids) ||
+                !row.design_ids.length ||
+                isDownloading(`orders-pdf:order-item-designs:${row.id}`),
+              onClick: () => handleDownloadOrderItemDesigns(row),
+            },
+            {
+              key: "upload",
+              icon: <UploadOutlined />,
+              label: t("actions.addDesign"),
+              pickFiles: {
+                multiple: true,
+                onPick: (files) => handleUpload(row, files),
+              },
+            },
+            { type: "divider" },
+            {
+              key: "delete",
+              icon: <DeleteOutlined />,
+              danger: true,
+              label: tActions("delete"),
+              confirm: {
+                title: t("confirm.deleteTitle"),
+                description: t("confirm.deleteDescription"),
+              },
+              onClick: () => handleDeletePdf(row),
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -431,36 +449,39 @@ export default function OrdersPdfPage({ categoryId, subCategoryId }) {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "companyCompletedWorker"]}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        <Space style={{ width: "100%", justifyContent: "space-between" }} wrap>
-          <div>
-            <Space size="small" wrap style={{ marginBottom: 4 }}>
-              <Typography.Title level={3} style={{ margin: 0 }}>
-                {t("title")}
-              </Typography.Title>
-              <Tag color={subCategoryId ? "blue" : "default"}>{scopeLabel}</Tag>
-            </Space>
-            <Typography.Text type="secondary">{t("subtitle")}</Typography.Text>
-          </div>
-          <Space wrap>
-            <Typography.Text type="secondary">
-              {t("summary.total", { count: total })}
-            </Typography.Text>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => loadRows()}
-              loading={loading}
-            >
-              {tActions("refresh")}
-            </Button>
-          </Space>
-        </Space>
+        <PageHeader
+          className=""
+          title={t("title")}
+          meta={
+            <StatusTag tone={subCategoryId ? "info" : "neutral"}>
+              {scopeLabel}
+            </StatusTag>
+          }
+          description={t("subtitle")}
+          extra={
+            <>
+              <Typography.Text type="secondary">
+                {t("summary.total", { count: total })}
+              </Typography.Text>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => loadRows()}
+                loading={loading}
+              >
+                {tActions("refresh")}
+              </Button>
+            </>
+          }
+        />
 
         <Table
+          className="ej-table-surface"
           rowKey="id"
           columns={columns}
           dataSource={rows}
           loading={loading}
           size="middle"
+          scroll={{ x: "max-content" }}
           locale={{ emptyText: t("empty.pdfs") }}
           pagination={{
             ...pagination,

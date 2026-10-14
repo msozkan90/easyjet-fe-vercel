@@ -8,9 +8,9 @@ import {
   Dropdown,
   Modal,
   Popconfirm,
-  Popover,
   Space,
   Tag,
+  Tooltip,
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -23,6 +23,8 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const normalizeMapperNames = (value) =>
   Array.isArray(value)
@@ -102,6 +104,23 @@ export default function ProductMapperProductsPage() {
     [products]
   );
 
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await ProductMappersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -139,9 +158,9 @@ export default function ProductMapperProductsPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
@@ -159,30 +178,30 @@ export default function ProductMapperProductsPage() {
         fixed: "right",
         render: (_, record) => (
           <Space>
-            <Popover content={t("actions.edit")}>
-              <Button
+            <Tooltip title={t("actions.edit")}>
+              <Button aria-label={t("actions.edit")}
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingRow(record);
                   setOpen(true);
                 }}
               />
-            </Popover>
-            <Popover content={t("actions.delete")}>
+            </Tooltip>
+            <Tooltip title={t("actions.delete")}>
               <Popconfirm
                 title={t("actions.confirmDeleteTitle")}
                 okText={t("actions.confirmDeleteOk")}
                 okButtonProps={{ danger: true }}
                 onConfirm={() => onDelete(record.id)}
               >
-                <Button icon={<DeleteOutlined />} danger />
+                <Button aria-label={t("actions.delete")} icon={<DeleteOutlined />} danger />
               </Popconfirm>
-            </Popover>
+            </Tooltip>
           </Space>
         ),
       },
     ],
-    [productOptions, t, tStatus]
+    [onDelete, productOptions, t, tStatus]
   );
 
   const onSubmit = async (values) => {
@@ -206,17 +225,6 @@ export default function ProductMapperProductsPage() {
     }
   };
 
-  const onDelete = async (id) => {
-    try {
-      await ProductMappersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
 
   const handleExistingDownload = async (format) => {
     setExistingLoading(true);
@@ -409,14 +417,19 @@ export default function ProductMapperProductsPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
         <ProductMapperForm
+          onDirtyChange={onDirtyChange}
+          onCancel={guardClose(() => {
+            setOpen(false);
+            setEditingRow(null);
+          })}
           onFinish={onSubmit}
           submitText={
             editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

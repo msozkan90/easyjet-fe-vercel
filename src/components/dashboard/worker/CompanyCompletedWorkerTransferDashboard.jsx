@@ -20,7 +20,7 @@ import DashboardSubCategoryFilter from "../DashboardSubCategoryFilter";
 
 const Pie = dynamic(() => import("@ant-design/charts").then((mod) => mod.Pie), { ssr: false });
 const Column = dynamic(() => import("@ant-design/charts").then((mod) => mod.Column), { ssr: false });
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const DASHBOARD_CONFIGS = {
   completed: {
     statuses: ["processing", "downloaded", "printed"],
@@ -107,10 +107,10 @@ export function TransferWorkerDashboard({ variant = "completed" }) {
 
   return (
     <Space direction="vertical" size={24} style={{ width: "100%" }}>
-      <Card bordered={false} style={{ background: `linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorBgContainer})` }}>
+      <Card>
         <Row gutter={[24, 20]} align="middle" justify="space-between">
           <Col xs={24} lg={14}>
-            <Title level={2} style={{ margin: 0 }}>{t(config.titleKey)}</Title>
+            <h2 className="m-0 text-xl font-semibold">{t(config.titleKey)}</h2>
             <Text type="secondary">{t(config.subtitleKey)}</Text>
             {data?.meta?.generated_at ? (
               <div><Text type="secondary" style={{ fontSize: 12 }}>{t("lastUpdated", { date: dayjs(data.meta.generated_at).format("DD.MM.YYYY HH:mm") })}</Text></div>
@@ -147,10 +147,10 @@ export function TransferWorkerDashboard({ variant = "completed" }) {
 
           {hasData ? (
             <Row gutter={[16, 16]}>
-              <Col xs={24} xl={9}><Card title={t("charts.distribution")} bordered={false}><Pie data={distribution} angleField="value" colorField="label" color={statusColorList} innerRadius={0.64} height={320} label={{ text: "value", position: "outside" }} legend={{ color: { position: "bottom" } }} /></Card></Col>
-              <Col xs={24} xl={15}><Card title={t(config.trendTitleKey)} bordered={false}><Column data={trend} xField="date" yField="value" colorField="label" color={statusColorList} stack height={320} axis={{ x: { labelAutoHide: true, labelAutoRotate: true }, y: { title: suffix } }} legend={{ color: { position: "bottom" } }} /></Card></Col>
+              <Col xs={24} xl={9}><Card title={t("charts.distribution")} variant="borderless"><Pie data={distribution} angleField="value" colorField="label" color={statusColorList} innerRadius={0.64} height={320} label={{ text: "value", position: "outside" }} legend={{ color: { position: "bottom" } }} /></Card></Col>
+              <Col xs={24} xl={15}><Card title={t(config.trendTitleKey)} variant="borderless"><Column data={trend} xField="date" yField="value" colorField="label" color={statusColorList} stack height={320} axis={{ x: { labelAutoHide: true, labelAutoRotate: true }, y: { title: suffix } }} legend={{ color: { position: "bottom" } }} /></Card></Col>
             </Row>
-          ) : <Card bordered={false}><Empty description={t("messages.empty")} /></Card>}
+          ) : <Card variant="borderless"><Empty description={t("messages.empty")} /></Card>}
         </>
       )}
     </Space>

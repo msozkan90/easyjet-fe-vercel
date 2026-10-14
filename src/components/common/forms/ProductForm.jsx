@@ -18,15 +18,20 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import { SubCategoriesAPI } from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import FormActions from "@/components/ui/FormActions";
+import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
 export default function ProductForm({
   initialValues,
   onFinish,
+  onCancel,
+  onDirtyChange,
   submitText,
   categories = [],
   showWithoutDesign = false,
   multipleSubCategories = false,
 }) {
+  const [submitHandler, submitting] = useSubmitHandler(onFinish);
   const [form] = Form.useForm();
   const [manageForm] = Form.useForm();
   const [messageApi, messageContextHolder] = message.useMessage();
@@ -453,7 +458,8 @@ export default function ProductForm({
         form={form}
         layout="vertical"
         initialValues={{ status: "active", ...(initialValues || {}) }}
-        onFinish={onFinish}
+        onFinish={submitHandler}
+        onValuesChange={() => onDirtyChange?.(true)}
       >
         <Form.Item
           name="name"
@@ -622,12 +628,11 @@ export default function ProductForm({
         ) : null}
 
         <Form.Item className="mb-0">
-          <button
-            type="submit"
-            className="w-full rounded-md px-4 py-2 bg-blue-600 text-white transition hover:bg-blue-700"
-          >
-            {submitButtonLabel}
-          </button>
+          <FormActions
+            submitText={submitButtonLabel}
+            loading={submitting}
+            onCancel={onCancel}
+          />
         </Form.Item>
       </Form>
 
@@ -686,7 +691,7 @@ export default function ProductForm({
             {sortedSubCategories.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded border border-gray-200 px-2 py-1"
+                className="flex items-center justify-between rounded border border-line px-2 py-1"
               >
                 <Space size="small">
                   <Typography.Text>{item.name}</Typography.Text>

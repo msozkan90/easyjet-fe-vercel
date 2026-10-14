@@ -5,8 +5,6 @@ import dayjs from "dayjs";
 import {
   Button,
   Space,
-  Tag,
-  Popconfirm,
   Modal,
   Form,
   Input,
@@ -23,11 +21,10 @@ import {
   pickFundingAccountDetails,
 } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
-
-const statusColor = {
-  active: "green",
-  inactive: "red",
-};
+import PageHeader from "@/components/ui/PageHeader";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 const { Title } = Typography;
 
@@ -136,17 +133,22 @@ export default function FundingAccountsAdminPage() {
     }
   };
 
-  const handleDelete = async (record) => {
-    try {
-      await FundingAccountsAPI.delete(record.id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.deleteError")
-      );
-    }
-  };
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const handleDelete = useCallback(
+    async (record) => {
+      try {
+        await FundingAccountsAPI.delete(record.id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.deleteError")
+        );
+      }
+    },
+    [message, t],
+  );
 
   const columns = useMemo(
     () => [
@@ -178,9 +180,9 @@ export default function FundingAccountsAdminPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -192,47 +194,51 @@ export default function FundingAccountsAdminPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 180,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingRow(record);
-                form.setFieldsValue({
-                  display_name: record?.display_name,
-                  type: record?.type,
-                  details: pickFundingAccountDetails(record?.type, record?.details),
-                  status: record?.status || "active",
-                });
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-            <Popconfirm
-              title={t("actions.confirmDeleteTitle")}
-              okText={t("actions.confirmDeleteOk")}
-              cancelText={tCommon("cancel")}
-              onConfirm={() => handleDelete(record)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t("actions.delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditingRow(record);
+                  form.setFieldsValue({
+                    display_name: record?.display_name,
+                    type: record?.type,
+                    details: pickFundingAccountDetails(record?.type, record?.details),
+                    status: record?.status || "active",
+                  });
+                  setOpen(true);
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: t("actions.delete"),
+                confirm: {
+                  title: t("actions.confirmDeleteTitle"),
+                  okText: t("actions.confirmDeleteOk"),
+                },
+                onClick: () => handleDelete(record),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [form, handleDelete, t, tCommon, tStatus, typeOptions]
+    [form, handleDelete, t, tStatus, typeOptions]
   );
 
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("title")}
-        </Title>
+        <PageHeader title={t("title")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"
@@ -272,14 +278,14 @@ export default function FundingAccountsAdminPage() {
             : t("modal.createTitle")
         }
         open={open}
-        onCancel={() => {
+        onCancel={guardClose(() => {
           setOpen(false);
           setEditingRow(null);
-        }}
+        })}
         footer={null}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form onValuesChange={() => onDirtyChange(true)} form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
             label={t("fields.displayName")}
             name="display_name"

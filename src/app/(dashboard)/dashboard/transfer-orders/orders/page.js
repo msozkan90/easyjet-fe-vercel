@@ -12,8 +12,6 @@ import {
   Input,
   InputNumber,
   Modal,
-  Popconfirm,
-  Popover,
   Select,
   Space,
   Switch,
@@ -33,6 +31,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
 import TransferProductionModal from "@/components/modals/TransferProductionModal";
+import RowActions from "@/components/ui/RowActions";
 import { TransferOrdersAPI } from "@/utils/api";
 import { isValidOrderNumber } from "@/utils/orderNumberValidation";
 import {
@@ -486,7 +485,7 @@ export default function TransferOrdersPage() {
             return (
               <span
                 style={{
-                  color: allPrepared ? "#16a34a" : "#64748b",
+                  color: allPrepared ? "#1E7A4C" : "#4E6373",
                   fontWeight: 600,
                 }}
               >
@@ -528,7 +527,7 @@ export default function TransferOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 220,
+        width: 96,
         render: (_, record) => {
           const isParentRow =
             Boolean(record?.__hasChildren) && !record?.__isChild;
@@ -563,133 +562,102 @@ export default function TransferOrdersPage() {
             : "";
 
           return (
-            <Space wrap>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
-                  icon={<FileSearchOutlined />}
-                  type="default"
-                  disabled={!canViewDetail}
-                  onClick={() => {
+            <RowActions
+              actions={[
+                {
+                  key: "detail",
+                  iconOnly: true,
+                  icon: <FileSearchOutlined />,
+                  label: t("actions.viewDetail"),
+                  disabled: !canViewDetail,
+                  onClick: () => {
                     if (!canViewDetail) return;
                     window.open(detailHref, "_blank", "noopener,noreferrer");
-                  }}
-                />
-              </Popover>
-              <Popover content={t("actions.editAddress")}>
-                <Button
-                  icon={<EditOutlined />}
-                  type="default"
-                  disabled={!canEditRecord}
-                  onClick={() => handleOpenAddressEditor(record)}
-                />
-              </Popover>
-              {isParentRow ? (
-                <Popover content={t("actions.designUpload")}>
-                  <Button
-                    icon={<UploadOutlined />}
-                    type="default"
-                    disabled={!canUploadDesign}
-                    onClick={() => handleOpenDesignUpload(record)}
-                  />
-                </Popover>
-              ) : null}
-              {isParentRow ? (
-                <Popover content={t("actions.sendToProduction")}>
-                  <Button
-                    icon={<CheckCircleOutlined />}
-                    type="primary"
-                    disabled={!canSendToProduction}
-                    loading={isRowActionLoading(record.id, "production")}
-                    onClick={async () => {
-                      if (!canSendToProduction) return;
-                      setRowActionLoadingState(record.id, "production", true);
-                      try {
-                        await TransferOrdersAPI.validateProduction({
-                          transfer_order_id: record.transfer_order_id,
-                          label_purchase_option: "label_purchase",
-                        });
-                        const response = await TransferOrdersAPI.detail(
-                          record.order_number,
-                        );
-                        setProductionRecord(response?.data || record);
-                        setProductionModalOpen(true);
-                      } catch (error) {
-                        message.error(
-                          error?.response?.data?.error?.message ||
-                            t("productionModal.messages.error"),
-                        );
-                      } finally {
-                        setRowActionLoadingState(
-                          record.id,
-                          "production",
-                          false,
-                        );
-                      }
-                    }}
-                  />
-                </Popover>
-              ) : null}
-              <Popover content={t("actions.cancel")}>
-                <Popconfirm
-                  title={t("actions.confirmCancelTitle")}
-                  okText={t("actions.confirmCancelOk")}
-                  okButtonProps={{ danger: true, loading: cancelLoading }}
-                  disabled={disableActions}
-                  onConfirm={() => handleStatusUpdate(record, "cancel")}
-                >
-                  <Button
-                    icon={<CloseOutlined />}
-                    type="primary"
-                    danger
-                    loading={cancelLoading}
-                    disabled={disableActions}
-                  />
-                </Popconfirm>
-              </Popover>
-              {showWaitingAction ? (
-                <Popover content={t("actions.waitingForDesign")}>
-                  <Popconfirm
-                    title={t("actions.confirmWaitingTitle")}
-                    okText={t("actions.confirmWaitingOk")}
-                    okButtonProps={{ type: "primary", loading: waitingLoading }}
-                    disabled={disableActions}
-                    onConfirm={() =>
-                      handleStatusUpdate(record, "waitingForDesign")
+                  },
+                },
+              ]}
+              menuItems={[
+                {
+                  key: "address",
+                  icon: <EditOutlined />,
+                  label: t("actions.editAddress"),
+                  disabled: !canEditRecord,
+                  onClick: () => handleOpenAddressEditor(record),
+                },
+                isParentRow && {
+                  key: "designUpload",
+                  icon: <UploadOutlined />,
+                  label: t("actions.designUpload"),
+                  disabled: !canUploadDesign,
+                  onClick: () => handleOpenDesignUpload(record),
+                },
+                isParentRow && {
+                  key: "production",
+                  icon: <CheckCircleOutlined />,
+                  label: t("actions.sendToProduction"),
+                  disabled:
+                    !canSendToProduction ||
+                    isRowActionLoading(record.id, "production"),
+                  onClick: async () => {
+                    if (!canSendToProduction) return;
+                    setRowActionLoadingState(record.id, "production", true);
+                    try {
+                      await TransferOrdersAPI.validateProduction({
+                        transfer_order_id: record.transfer_order_id,
+                        label_purchase_option: "label_purchase",
+                      });
+                      const response = await TransferOrdersAPI.detail(
+                        record.order_number,
+                      );
+                      setProductionRecord(response?.data || record);
+                      setProductionModalOpen(true);
+                    } catch (error) {
+                      message.error(
+                        error?.response?.data?.error?.message ||
+                          t("productionModal.messages.error"),
+                      );
+                    } finally {
+                      setRowActionLoadingState(record.id, "production", false);
                     }
-                  >
-                    <Button
-                      icon={<ClockCircleOutlined />}
-                      type="primary"
-                      color="orange"
-                      variant="solid"
-                      loading={waitingLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
-              {showNewOrderAction ? (
-                <Popover content={t("actions.newOrder")}>
-                  <Popconfirm
-                    title={t("actions.confirmNewOrderTitle")}
-                    okText={t("actions.confirmNewOrderOk")}
-                    okButtonProps={{
-                      type: "primary",
-                      loading: newOrderLoading,
-                    }}
-                    disabled={disableActions}
-                    onConfirm={() => handleStatusUpdate(record, "newOrder")}
-                  >
-                    <Button
-                      icon={<PlusOutlined />}
-                      type="primary"
-                      loading={newOrderLoading}
-                      disabled={disableActions}
-                    />
-                  </Popconfirm>
-                </Popover>
-              ) : null}
-            </Space>
+                  },
+                },
+                showWaitingAction && {
+                  key: "waitingForDesign",
+                  icon: <ClockCircleOutlined />,
+                  label: t("actions.waitingForDesign"),
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmWaitingTitle"),
+                    okText: t("actions.confirmWaitingOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "waitingForDesign"),
+                },
+                showNewOrderAction && {
+                  key: "newOrder",
+                  icon: <PlusOutlined />,
+                  label: t("actions.newOrder"),
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmNewOrderTitle"),
+                    okText: t("actions.confirmNewOrderOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "newOrder"),
+                },
+                { type: "divider" },
+                {
+                  key: "cancel",
+                  icon: <CloseOutlined />,
+                  label: t("actions.cancel"),
+                  danger: true,
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmCancelTitle"),
+                    okText: t("actions.confirmCancelOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "cancel"),
+                },
+              ]}
+            />
           );
         },
       },
@@ -941,12 +909,15 @@ export default function TransferOrdersPage() {
         onSave={handleSaveManualAddress}
         editForm={manualAddressForm}
         editingOrder={{
-          order_number: manualOrderForm.getFieldValue("order_number") || "-",
-          order_date: manualOrderForm.getFieldValue("order_date")
-            ? dayjs(manualOrderForm.getFieldValue("order_date")).format(
-                "YYYY-MM-DD HH:mm:ss",
-              )
-            : "-",
+          order_number:
+            (manualModalOpen && manualOrderForm.getFieldValue("order_number")) ||
+            "-",
+          order_date:
+            manualModalOpen && manualOrderForm.getFieldValue("order_date")
+              ? dayjs(manualOrderForm.getFieldValue("order_date")).format(
+                  "YYYY-MM-DD HH:mm:ss",
+                )
+              : "-",
           bill_to_name: "-",
         }}
         onAddressSelect={handleManualAddressSelect}
@@ -981,7 +952,7 @@ export default function TransferOrdersPage() {
               <div
                 key={entry.id}
                 style={{
-                  border: "1px solid #f0f0f0",
+                  border: "1px solid #E3E8EC",
                   borderRadius: 8,
                   padding: 12,
                 }}
@@ -1114,7 +1085,7 @@ export default function TransferOrdersPage() {
               <Switch />
             </Form.Item>
           </div>
-          <div className="mb-3 rounded border border-slate-200 p-3">
+          <div className="mb-3 rounded border border-line p-3">
             <div className="mb-2 flex items-center justify-between">
               <div className="font-medium">
                 {t("manualOrderModal.fields.address")}
@@ -1123,11 +1094,11 @@ export default function TransferOrdersPage() {
                 {t("actions.editAddress")}
               </Button>
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {manualShipToName || "-"}{" "}
               {manualShipToCompany ? `(${manualShipToCompany})` : ""}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {[
                 manualShipToStreet1,
                 manualShipToStreet2,
@@ -1139,7 +1110,7 @@ export default function TransferOrdersPage() {
                 .filter(Boolean)
                 .join(", ") || "-"}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-text-secondary">
               {manualShipToPhone || "-"}
             </div>
           </div>
@@ -1192,7 +1163,7 @@ export default function TransferOrdersPage() {
                 {fields.map((field) => (
                   <div
                     key={field.key}
-                    className="grid grid-cols-1 gap-3 rounded border border-slate-200 p-3 md:grid-cols-[1fr_1fr_auto]"
+                    className="grid grid-cols-1 gap-3 rounded border border-line p-3 md:grid-cols-[1fr_1fr_auto]"
                   >
                     <Form.Item
                       {...field}

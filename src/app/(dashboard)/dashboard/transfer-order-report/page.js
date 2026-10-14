@@ -18,7 +18,6 @@ import {
   DatePicker,
   Drawer,
   Empty,
-  Input,
   Row,
   Select,
   Space,
@@ -45,11 +44,23 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useLocaleInfo, useTranslations } from "@/i18n/use-translations";
 import { getBlobErrorMessage, saveBlobAsFile } from "@/utils/apiHelpers";
 import ReportExportButton from "@/components/reports/ReportExportButton";
+import PageHeader from "@/components/ui/PageHeader";
+import StatCard from "@/components/ui/StatCard";
+import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
+import TextColumnFilter from "@/components/reports/TextColumnFilter";
+import {
+  ALL_ENTITIES_VALUE,
+  createDefaultRange,
+  extractPayload,
+  formatCount,
+  getTextValue,
+  isTransferCategory,
+  normalizeCategoryList,
+} from "@/components/reports/reportHelpers";
 
 const { RangePicker } = DatePicker;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-const ALL_ENTITIES_VALUE = "__all_entities__";
 const TRANSFER_ORDER_STATUS_KEYS = [
   "newOrder",
   "processing",
@@ -62,8 +73,6 @@ const TRANSFER_ORDER_STATUS_KEYS = [
   "remake",
 ];
 
-const createDefaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
-
 const createDefaultFilters = () => ({
   entity_ids: [],
   transfer_product_id: undefined,
@@ -71,36 +80,13 @@ const createDefaultFilters = () => ({
   date_range: createDefaultRange(),
 });
 
-const extractPayload = (response) => response?.data ?? response ?? {};
-const normalizeCategoryList = (response) => {
-  const payload = extractPayload(response);
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.items)) return payload.items;
-  if (Array.isArray(payload?.data)) return payload.data;
-  return [];
-};
-
-const formatMoney = (value) =>
-  `${Number(value || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} $`;
-
-const formatCount = (value) => Number(value || 0).toLocaleString();
+const formatMoney = (value) => formatMoneyShared(Number(value || 0));
 
 const formatLength = (value) =>
   `${Number(value || 0).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} in`;
-
-const getTextValue = (value) => String(value || "").toLowerCase();
-const isTransferCategory = (category) => {
-  const name = String(category?.name || "")
-    .trim()
-    .toLowerCase();
-  return name === "transfer" || name === "transfers";
-};
 
 const buildReportPayload = (filters, entityOptionsMap) => {
   const [from, to] = filters?.date_range || [];
@@ -127,44 +113,6 @@ const buildReportPayload = (filters, entityOptionsMap) => {
     date_to: to?.endOf("day").toISOString(),
   };
 };
-
-function TextColumnFilter({
-  placeholder,
-  selectedKeys,
-  setSelectedKeys,
-  confirm,
-  clearFilters,
-  labels,
-}) {
-  return (
-    <div style={{ padding: 8 }} onKeyDown={(event) => event.stopPropagation()}>
-      <Input
-        autoFocus
-        placeholder={placeholder}
-        value={selectedKeys?.[0]}
-        onChange={(event) =>
-          setSelectedKeys(event.target.value ? [event.target.value] : [])
-        }
-        onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: "block", width: 220 }}
-      />
-      <Space>
-        <Button type="primary" size="small" onClick={() => confirm()}>
-          {labels.search}
-        </Button>
-        <Button
-          size="small"
-          onClick={() => {
-            clearFilters?.();
-            confirm();
-          }}
-        >
-          {labels.reset}
-        </Button>
-      </Space>
-    </div>
-  );
-}
 
 export default function TransferOrderReportPage() {
   const user = useSelector((state) => state.auth.user);
@@ -460,7 +408,7 @@ export default function TransferOrderReportPage() {
         />
       ),
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+        <SearchOutlined style={{ color: filtered ? "#C4560B" : undefined }} />
       ),
       onFilter: (value, record) =>
         getTextValue(accessor(record)).includes(getTextValue(value)),
@@ -596,31 +544,31 @@ export default function TransferOrderReportPage() {
         key: "total_orders",
         title: t("summary.totalOrders"),
         value: formatCount(reportData?.summary?.total_orders),
-        accent: "linear-gradient(135deg, #102a56 0%, #295fbf 100%)",
+        dot: "#1F5F99",
       },
       {
         key: "total_design_quantity",
         title: t("summary.totalDesignQuantity"),
         value: formatCount(reportData?.summary?.total_design_quantity),
-        accent: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
+        dot: "#0F6E73",
       },
       {
         key: "total_length_inches",
         title: t("summary.totalLengthInches"),
         value: formatLength(reportData?.summary?.total_length_inches),
-        accent: "linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)",
+        dot: "#C4560B",
       },
       {
         key: "total_revenue",
         title: t("summary.totalRevenue"),
         value: formatMoney(reportData?.summary?.total_revenue),
-        accent: "linear-gradient(135deg, #6d28d9 0%, #9333ea 100%)",
+        dot: "#5B3FB0",
       },
       {
         key: "total_days",
         title: t("summary.totalDays"),
         value: formatCount(reportData?.summary?.total_days),
-        accent: "linear-gradient(135deg, #1d4ed8 0%, #60a5fa 100%)",
+        dot: "#3D4FA8",
       },
     ],
     [reportData?.summary, t],
@@ -629,66 +577,39 @@ export default function TransferOrderReportPage() {
   return (
     <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={18} style={{ width: "100%" }}>
-        <Card
-          bordered={false}
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(250,204,21,0.18), transparent 28%), radial-gradient(circle at right center, rgba(59,130,246,0.12), transparent 24%), linear-gradient(135deg, #f8fafc 0%, #eef6ff 100%)",
-            border: "1px solid rgba(37, 99, 235, 0.12)",
-            borderRadius: 24,
-          }}
-        >
-          <Space direction="vertical" size={6}>
-            <Tag color="cyan" style={{ width: "fit-content", borderRadius: 999 }}>
-              {t("heroBadge")}
-            </Tag>
-            <Title level={3} style={{ margin: 0 }}>
-              {t("title")}
-            </Title>
-            <Text type="secondary">{t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}</Text>
-            {reportData?.applied_range ? (
-              <Text type="secondary">
-                {t("rangeLabel", {
-                  from: dayjs(reportData.applied_range.date_from).format("DD/MM/YYYY"),
-                  to: dayjs(reportData.applied_range.date_to).format("DD/MM/YYYY"),
-                })}
-              </Text>
-            ) : null}
-          </Space>
-        </Card>
+        <PageHeader
+          className=""
+          title={t("title")}
+          description={
+            <>
+              {t(isCustomerAdmin ? "customerSubtitle" : "subtitle")}
+              {reportData?.applied_range ? (
+                <span className="block text-xs">
+                  {t("rangeLabel", {
+                    from: dayjs(reportData.applied_range.date_from).format("DD/MM/YYYY"),
+                    to: dayjs(reportData.applied_range.date_to).format("DD/MM/YYYY"),
+                  })}
+                </span>
+              ) : null}
+            </>
+          }
+        />
 
         <Row gutter={[16, 16]}>
           {summaryCards.map((card) => (
             <Col xs={24} sm={12} xl={card.key === "total_days" ? 24 : 6} key={card.key}>
-              <Card
+              <StatCard
                 loading={loading}
-                style={{
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  border: "none",
-                  background: card.accent,
-                  color: "#fff",
-                  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
-                }}
-              >
-                <Statistic
-                  title={<span style={{ color: "rgba(255,255,255,0.84)" }}>{card.title}</span>}
-                  value={card.value}
-                  valueStyle={{ color: "#fff" }}
-                />
-              </Card>
+                label={card.title}
+                value={card.value}
+                accent={card.dot}
+              />
             </Col>
           ))}
         </Row>
 
         <Card
           title={t("filters.title")}
-          bordered={false}
-          style={{
-            borderRadius: 24,
-            background: "linear-gradient(180deg, #ffffff 0%, #f7fbff 100%)",
-            boxShadow: "0 14px 34px rgba(15, 23, 42, 0.06)",
-          }}
           extra={
             <Space>
               <Button icon={<ReloadOutlined />} onClick={handleReset}>
@@ -768,8 +689,8 @@ export default function TransferOrderReportPage() {
 
         <Card
           title={t("table.title")}
-          bordered={false}
-          style={{ borderRadius: 24, boxShadow: "0 14px 34px rgba(15, 23, 42, 0.06)" }}
+          variant="borderless"
+          
         >
           <Table
             rowKey="date"
@@ -796,12 +717,12 @@ export default function TransferOrderReportPage() {
             setDrawerOpen(false);
             setDetailData(null);
           }}
-          destroyOnClose
+          destroyOnHidden
         >
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} lg={6}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalOrders")}
                     value={formatCount(detailData?.summary?.total_orders)}
@@ -809,7 +730,7 @@ export default function TransferOrderReportPage() {
                 </Card>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalDesignQuantity")}
                     value={formatCount(detailData?.summary?.total_design_quantity)}
@@ -817,7 +738,7 @@ export default function TransferOrderReportPage() {
                 </Card>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalLengthInches")}
                     value={formatLength(detailData?.summary?.total_length_inches)}
@@ -825,7 +746,7 @@ export default function TransferOrderReportPage() {
                 </Card>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card loading={detailLoading} style={{ borderRadius: 18 }}>
+                <Card loading={detailLoading}>
                   <Statistic
                     title={t("drawer.totalRevenue")}
                     value={formatMoney(detailData?.summary?.total_revenue)}

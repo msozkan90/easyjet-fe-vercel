@@ -11,14 +11,14 @@ import {
   Modal,
   Select,
   Space,
-  Tag,
-  Popconfirm,
   Upload,
   App as AntdApp,
-  Typography,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import Link from "next/link";
+import {
+  CloseCircleOutlined,
+  EyeOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -29,15 +29,11 @@ import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { getFundingAccountDetailFields } from "@/utils/fundingAccountDetails";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
+import PageHeader from "@/components/ui/PageHeader";
+import RowActions from "@/components/ui/RowActions";
+import MoneyText from "@/components/ui/MoneyText";
+import StatusTag from "@/components/ui/StatusTag";
+import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
 export default function WalletTopupsListPage() {
   const { message } = AntdApp.useApp();
@@ -153,20 +149,25 @@ export default function WalletTopupsListPage() {
     }
   };
 
-  const handleCancel = async (record) => {
-    try {
-      setActionLoading(true);
-      await WalletTopupsAPI.cancel(record.id, {});
-      message.success(t("messages.cancelSuccess"));
-      tableRef.current?.reload();
-    } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || t("messages.cancelError")
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const { onDirtyChange, guardClose } = useDirtyGuard(open);
+
+  const handleCancel = useCallback(
+    async (record) => {
+      try {
+        setActionLoading(true);
+        await WalletTopupsAPI.cancel(record.id, {});
+        message.success(t("messages.cancelSuccess"));
+        tableRef.current?.reload();
+      } catch (error) {
+        message.error(
+          error?.response?.data?.error?.message || t("messages.cancelError")
+        );
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [message, t],
+  );
 
   const columns = useMemo(
     () => [
@@ -174,11 +175,18 @@ export default function WalletTopupsListPage() {
         title: t("columns.amount"),
         dataIndex: "amount",
         sorter: true,
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.approvedAmount"),
         dataIndex: "approved_amount",
-        render: (value) => (value ?? "-"),
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.currency"),
@@ -214,9 +222,9 @@ export default function WalletTopupsListPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -232,39 +240,43 @@ export default function WalletTopupsListPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 200,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button type="link">
-              <Link href={`/dashboard/financial/topups/${record.id}`}>
-                {t("actions.view")}
-              </Link>
-            </Button>
-            {record.status === "pending" ? (
-              <Popconfirm
-                title={t("actions.confirmCancel")}
-                okText={t("actions.confirmOk")}
-                cancelText={tCommon("cancel")}
-                onConfirm={() => handleCancel(record)}
-              >
-                <Button danger loading={actionLoading}>
-                  {t("actions.cancel")}
-                </Button>
-              </Popconfirm>
-            ) : null}
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "view",
+                iconOnly: true,
+                icon: <EyeOutlined />,
+                label: t("actions.view"),
+                href: `/dashboard/financial/topups/${record.id}`,
+              },
+            ]}
+            menuItems={[
+              record.status === "pending" && {
+                key: "cancel",
+                icon: <CloseCircleOutlined />,
+                danger: true,
+                label: t("actions.cancel"),
+                disabled: actionLoading,
+                confirm: {
+                  title: t("actions.confirmCancel"),
+                  okText: t("actions.confirmOk"),
+                },
+                onClick: () => handleCancel(record),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [fundingOptions, handleCancel, t, tCommon, tStatus, actionLoading]
+    [fundingOptions, handleCancel, t, tStatus, actionLoading]
   );
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("topupList.title")}
-        </Title>
+        <PageHeader title={t("topupList.title")} className="" />
         <CrudTable
           ref={tableRef}
           rowKey="id"
@@ -279,11 +291,11 @@ export default function WalletTopupsListPage() {
         <Modal
           title={t("form.title")}
           open={open}
-          onCancel={() => setOpen(false)}
+          onCancel={guardClose(() => setOpen(false))}
           footer={null}
           destroyOnHidden
         >
-          <Form
+          <Form onValuesChange={() => onDirtyChange(true)}
             form={form}
             layout="vertical"
             initialValues={{ currency: "USD" }}

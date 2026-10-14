@@ -8,10 +8,8 @@ import {
   Space,
   App as AntdApp,
   Select,
-  Tag,
   Tooltip,
   Popconfirm,
-  Popover,
 } from "antd";
 import RequireRole from "@/components/common/Access/RequireRole";
 import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
@@ -27,6 +25,7 @@ import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
 import { useTranslations } from "@/i18n/use-translations";
 import { CheckOutlined, CloseOutlined, UndoOutlined } from "@ant-design/icons";
+import StatusTag from "@/components/ui/StatusTag";
 
 const normalizeId = (value) => value ?? null;
 const toSelectValue = (value) => (value === null ? undefined : value);
@@ -153,7 +152,13 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
           numericArrayKeys: [""],
           filterTransform: (filters = {}) => {
             const next = { ...filters };
-            next.item_state = isCancelledView ? "cancelled" : "pending";
+            // Pending is the backend default. Sending it counts as an active
+            // filter there and disables the "missing price first" ordering.
+            if (isCancelledView) {
+              next.item_state = "cancelled";
+            } else {
+              delete next.item_state;
+            }
             const orderDate = next.order_date;
             if (orderDate?.gte || orderDate?.lte) {
               next.date_from = orderDate?.gte;
@@ -634,13 +639,18 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
 
           return (
             <Space size={[4, 4]} wrap>
-              <Tag color={pendingCount > 0 ? "orange" : "green"}>
+              <StatusTag
+                tone={pendingCount > 0 ? "waiting" : "success"}
+                size="small"
+              >
                 {pendingCount > 0
                   ? t("badges.pendingItems", { count: pendingCount })
                   : t("badges.complete")}
-              </Tag>
+              </StatusTag>
               {pendingCount > 0 && hasLockedLinkedOrder ? (
-                <Tag color="volcano">{t("badges.progressBlocked")}</Tag>
+                <StatusTag tone="danger" size="small">
+                  {t("badges.progressBlocked")}
+                </StatusTag>
               ) : null}
             </Space>
           );
@@ -687,12 +697,12 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 120,
+        width: 136,
         render: (_, record) => {
           if (isCancelledView) {
             const restoreLoading = isRowActionLoading(record.id, "restore");
             return (
-              <Popover content={t("actions.restore")}>
+              <Tooltip title={t("actions.restore")}>
                 <Popconfirm
                   title={t("actions.confirmRestoreTitle")}
                   okText={t("actions.confirmRestoreOk")}
@@ -701,13 +711,14 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => restoreOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.restore")}
                     icon={<UndoOutlined />}
                     type="primary"
                     loading={restoreLoading}
                     disabled={restoreLoading}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             );
           }
           const approveLoading = isRowActionLoading(record.id, "approve");
@@ -716,7 +727,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
             bulkApproving || bulkCancelling || approveLoading || cancelLoading;
           return (
             <Space>
-              <Popover content={t("actions.approve")}>
+              <Tooltip title={t("actions.approve")}>
                 <Popconfirm
                   title={t("actions.confirmApproveTitle")}
                   okText={t("actions.confirmApproveOk")}
@@ -725,14 +736,15 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => handleSingleApprove(record)}
                 >
                   <Button
+                    aria-label={t("actions.approve")}
                     icon={<CheckOutlined />}
                     type="primary"
                     loading={approveLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
-              <Popover content={t("actions.cancel")}>
+              </Tooltip>
+              <Tooltip title={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
                   okText={t("actions.confirmCancelOk")}
@@ -741,13 +753,14 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
                   onConfirm={() => handleCancelOrder(record)}
                 >
                   <Button
+                    aria-label={t("actions.cancel")}
                     icon={<CloseOutlined />}
                     danger
                     loading={cancelLoading}
                     disabled={disableActions}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },
@@ -899,6 +912,7 @@ export default function TransferOrderPoolListPage({ mode = "pending" }) {
           cancelling={bulkCancelling}
           onApprove={handleBulkApprove}
           onCancel={handleBulkCancel}
+          onClearSelection={() => setSelectedRowMap({})}
         />
       ) : null}
     </RequireRole>

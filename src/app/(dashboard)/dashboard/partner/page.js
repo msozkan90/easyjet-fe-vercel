@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
-import { Space, Tag, Button, Modal, App as AntdApp, Popconfirm } from "antd";
+import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -18,6 +18,8 @@ import {
   multiplierToPercent,
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 export default function PartnersPage() {
   const { message } = AntdApp.useApp();
@@ -67,6 +69,19 @@ export default function PartnersPage() {
       fixedFilters: {},
     },
     normalizeListAndMeta,
+  );
+
+  const onDelete = useCallback(
+    async (id) => {
+      try {
+        await PartnersAPI.remove(id);
+        message.success(t("messages.deleteSuccess"));
+        tableRef.current?.reload();
+      } catch {
+        message.error(t("messages.deleteError"));
+      }
+    },
+    [message, t],
   );
 
   const columns = useMemo(
@@ -157,41 +172,47 @@ export default function PartnersPage() {
         },
         render: (value) =>
           value === "active" ? (
-            <Tag color="green">{tStatus("active")}</Tag>
+            <StatusTag status="active">{tStatus("active")}</StatusTag>
           ) : (
-            <Tag color="red">{tStatus("inactive")}</Tag>
+            <StatusTag status="inactive">{tStatus("inactive")}</StatusTag>
           ),
       },
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 220,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingRow(record);
-                setOpen(true);
-              }}
-            >
-              {t("actions.edit")}
-            </Button>
-            <Popconfirm
-              title={t("actions.confirmDeleteTitle")}
-              okText={t("actions.confirmDeleteOk")}
-              okButtonProps={{ danger: true }}
-              onConfirm={() => onDelete(record.id)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t("actions.delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setEditingRow(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: t("actions.delete"),
+                confirm: {
+                  title: t("actions.confirmDeleteTitle"),
+                  okText: t("actions.confirmDeleteOk"),
+                },
+                onClick: () => onDelete(record.id),
+              },
+            ]}
+          />
         ),
       },
     ],
-    [categories, t, isShippingOwner, tStatus],
+    [categories, isShippingOwner, onDelete, t, tStatus],
   );
 
   const buildPayload = (values) => {
@@ -238,16 +259,6 @@ export default function PartnersPage() {
       message.error(
         error?.response?.data?.error?.message || t("messages.operationFailed"),
       );
-    }
-  };
-
-  const onDelete = async (id) => {
-    try {
-      await PartnersAPI.remove(id);
-      message.success(t("messages.deleteSuccess"));
-      tableRef.current?.reload();
-    } catch {
-      message.error(t("messages.deleteError"));
     }
   };
 
@@ -308,6 +319,16 @@ export default function PartnersPage() {
       >
         <div onChangeCapture={() => setFormDirty(true)}>
           <PartnerForm
+            onCancel={() =>
+              confirmIfDirty({
+                isDirty: formDirty,
+                onDiscard: () => {
+                  setFormDirty(false);
+                  setOpen(false);
+                  setEditingRow(null);
+                },
+              })
+            }
             onFinish={onSubmit}
             submitText={
               editingRow ? t("modal.submitUpdate") : t("modal.submitCreate")

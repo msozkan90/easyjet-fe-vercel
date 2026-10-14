@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Button, Form, Popconfirm, Popover, Space } from "antd";
+import { App as AntdApp, Form } from "antd";
 import { EditOutlined, FileSearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import AddressEditorModal from "@/components/modals/AddressEditorModal";
+import RowActions from "@/components/ui/RowActions";
 import { TransferOrdersAPI } from "@/utils/api";
 import TransferOrdersStatusListPage from "../TransferOrdersStatusListPage";
 
@@ -151,7 +152,7 @@ export default function CancelTransferOrdersPage() {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 150,
+        width: 96,
         render: (_, record) => {
           const isParentRow = Boolean(record?.__hasChildren) && !record?.__isChild;
           const rowId = record?.id;
@@ -161,42 +162,41 @@ export default function CancelTransferOrdersPage() {
           const canEditRecord = Boolean(record?.transfer_order_id);
           const orderNumber = record?.order_number;
           return (
-            <Space wrap>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
-                  icon={<FileSearchOutlined />}
-                  type="default"
-                  disabled={!orderNumber}
-                  href={orderNumber ? `/dashboard/transfer-orders/orders/${orderNumber}` : ""}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              </Popover>
-              <Popover content={t("actions.editAddress")}>
-                <Button
-                  icon={<EditOutlined />}
-                  type="default"
-                  disabled={!canEditRecord}
-                  onClick={() => handleOpenAddressEditor(record)}
-                />
-              </Popover>
-              <Popover content={t("actions.newOrder")}>
-                <Popconfirm
-                  title={t("actions.confirmNewOrderTitle")}
-                  okText={t("actions.confirmNewOrderOk")}
-                  okButtonProps={{ type: "primary", loading: newOrderLoading }}
-                  disabled={disableActions}
-                  onConfirm={() => handleStatusUpdate(record, "newOrder")}
-                >
-                  <Button
-                    icon={<PlusOutlined />}
-                    type="primary"
-                    loading={newOrderLoading}
-                    disabled={disableActions}
-                  />
-                </Popconfirm>
-              </Popover>
-            </Space>
+            <RowActions
+              actions={[
+                {
+                  key: "detail",
+                  iconOnly: true,
+                  icon: <FileSearchOutlined />,
+                  label: t("actions.viewDetail"),
+                  disabled: !orderNumber,
+                  href: orderNumber
+                    ? `/dashboard/transfer-orders/orders/${orderNumber}`
+                    : undefined,
+                  target: "_blank",
+                },
+              ]}
+              menuItems={[
+                {
+                  key: "address",
+                  icon: <EditOutlined />,
+                  label: t("actions.editAddress"),
+                  disabled: !canEditRecord,
+                  onClick: () => handleOpenAddressEditor(record),
+                },
+                {
+                  key: "newOrder",
+                  icon: <PlusOutlined />,
+                  label: t("actions.newOrder"),
+                  disabled: disableActions,
+                  confirm: {
+                    title: t("actions.confirmNewOrderTitle"),
+                    okText: t("actions.confirmNewOrderOk"),
+                  },
+                  onClick: () => handleStatusUpdate(record, "newOrder"),
+                },
+              ]}
+            />
           );
         },
       },

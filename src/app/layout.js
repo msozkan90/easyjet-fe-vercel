@@ -1,16 +1,21 @@
 // src/app/layout.js
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { App as AntdApp, ConfigProvider } from "antd";
-import { Roboto_Flex } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/server";
 import { Providers } from "./providers";
+import { THEME_INIT_SCRIPT } from "@/theme/themeScript";
 
-const robotoFlex = Roboto_Flex({
-  subsets: ["latin"],
-  variable: "--font-roboto-flex",
+const geistSans = Geist({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-geist-sans",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata = {
@@ -23,31 +28,20 @@ export default async function RootLayout({ children }) {
   const dictionary = await getDictionary(locale);
 
   return (
-    <html lang={locale} className={`${robotoFlex.variable}`}>
+    <html
+      lang={locale}
+      data-theme="light"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body suppressHydrationWarning>
         <AntdRegistry>
-          <ConfigProvider
-            theme={{
-              token: {
-                fontFamily: "var(--font-roboto-flex)",
-                colorPrimary: "#1677ff",
-                colorBgLayout: "#f5f7fa",
-                borderRadius: 10,
-              },
-              components: {
-                Layout: {
-                  headerBg: "#071E2B",
-                  headerHeight: 56,
-                },
-              },
-            }}
-          >
-            <AntdApp>
-              <I18nProvider locale={locale} dictionary={dictionary}>
-                <Providers>{children}</Providers>
-              </I18nProvider>
-            </AntdApp>
-          </ConfigProvider>
+          <I18nProvider locale={locale} dictionary={dictionary}>
+            <Providers>{children}</Providers>
+          </I18nProvider>
         </AntdRegistry>
       </body>
     </html>

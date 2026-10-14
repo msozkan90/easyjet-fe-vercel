@@ -9,9 +9,7 @@ import {
   DatePicker,
   Input,
   Popconfirm,
-  Popover,
   Space,
-  Tag,
   Tooltip,
 } from "antd";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -28,7 +26,8 @@ import {
   FileSearchOutlined,
 } from "@ant-design/icons";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { STATUS_COLORS } from "../statusConstants";
+import StatusTag from "@/components/ui/StatusTag";
+import { formatAmount } from "@/utils/formatMoney";
 
 const { RangePicker } = DatePicker;
 
@@ -37,20 +36,6 @@ const createDefaultToolbarFilters = () => ({
   sku: "",
   order_date: undefined,
 });
-
-const formatAmount = (value, fallback) => {
-  if (value === null || value === undefined || value === "") {
-    return fallback;
-  }
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return value;
-  }
-  return numericValue.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
 
 export default function CancelOrdersPage() {
   const { message } = AntdApp.useApp();
@@ -190,8 +175,10 @@ export default function CancelOrdersPage() {
     [annotateRows, baseRequest]
   );
 
-  const formatDateTime = (value) =>
-    value ? moment(value).format("LLL") : t("common.none");
+  const formatDateTime = useCallback(
+    (value) => (value ? moment(value).format("LLL") : t("common.none")),
+    [t],
+  );
 
   const applyFilterPatch = useCallback(
     (patch) => {
@@ -336,6 +323,7 @@ export default function CancelOrdersPage() {
         title: t("columns.image"),
         dataIndex: "image_url",
         width: 80,
+        fixed: "left",
         render: (value) =>
           value ? (
             <GuardedPreviewImage
@@ -358,6 +346,8 @@ export default function CancelOrdersPage() {
       {
         title: t("columns.orderNumber"),
         dataIndex: "order_number",
+        fixed: "left",
+        width: 140,
         filter: {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
@@ -407,8 +397,7 @@ export default function CancelOrdersPage() {
         render: (value) => {
           if (!value) return t("common.none");
           const label = statusLabels[value] || value;
-          const color = STATUS_COLORS[value] || "default";
-          return <Tag color={color}>{label}</Tag>;
+          return <StatusTag status={value}>{label}</StatusTag>;
         },
       },
       {
@@ -517,15 +506,15 @@ export default function CancelOrdersPage() {
             : "";
           return (
             <Space>
-              <Popover content={t("actions.viewDetail")}>
-                <Button
+              <Tooltip title={t("actions.viewDetail")}>
+                <Button aria-label={t("actions.viewDetail")}
                   icon={<FileSearchOutlined />}
                   type="default"
                   disabled={!canViewDetail}
                   href={detailHref}
                 />
-              </Popover>
-              <Popover content={t("actions.newOrder")}>
+              </Tooltip>
+              <Tooltip title={t("actions.newOrder")}>
                 <Popconfirm
                   title={t("actions.confirmNewOrderTitle")}
                   okText={t("actions.confirmNewOrderOk")}
@@ -536,14 +525,14 @@ export default function CancelOrdersPage() {
                   disabled={disabled}
                   onConfirm={() => handleStatusUpdate(record, "newOrder")}
                 >
-                  <Button
+                  <Button aria-label={t("actions.newOrder")}
                     icon={<PlusOutlined />}
                     type="primary"
                     loading={newOrderLoading}
                     disabled={disabled}
                   />
                 </Popconfirm>
-              </Popover>
+              </Tooltip>
             </Space>
           );
         },
@@ -563,6 +552,7 @@ export default function CancelOrdersPage() {
     ];
   }, [
     colorOptions,
+    formatDateTime,
     productOptions,
     sizeOptions,
     statusLabels,
@@ -589,6 +579,7 @@ export default function CancelOrdersPage() {
     () => ({
       locale: { emptyText: t("table.noData") },
       expandable: {
+        fixed: "left",
         expandIconColumnIndex: 0,
         columnWidth: 36,
       },
@@ -617,6 +608,7 @@ export default function CancelOrdersPage() {
           <Space wrap size="middle">
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchOrderNumber")}
               value={quickFilters.order_number}
               onChange={handleOrderNumberChange}
@@ -624,6 +616,7 @@ export default function CancelOrdersPage() {
             />
             <Input
               allowClear
+              prefix={<SearchOutlined className="text-ink-400" />}
               placeholder={t("filters.searchSku")}
               value={quickFilters.sku}
               onChange={handleSkuChange}

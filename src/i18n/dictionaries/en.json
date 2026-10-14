@@ -1,7 +1,7 @@
 {
   "common": {
     "language": "Language",
-    "languageChanged": "Dil {language} olarak güncellendi.",
+    "languageChanged": "Language changed to {language}.",
     "languageChangeError": "We couldn't update the language. Please try again.",
     "unsavedChanges": {
       "title": "You have unsaved changes",
@@ -25,7 +25,14 @@
       "orderTypes": {
         "order": "Order",
         "transferOrder": "Transfer Order"
-      }
+      },
+      "toggleSidebar": "Collapse / expand menu",
+      "openNavigation": "Open menu",
+      "balance": "Balance",
+      "userMenu": "User menu",
+      "search": "Search",
+      "darkMode": "Dark mode",
+      "lightMode": "Light mode"
     },
     "actions": {
       "search": "Search",
@@ -41,7 +48,10 @@
       "delete": "Delete",
       "detail": "Detail",
       "open": "Open",
-      "backToTop": "Back to top"
+      "backToTop": "Back to top",
+      "moreActions": "More actions",
+      "retry": "Try again",
+      "clearSelection": "Clear all selections"
     },
     "status": {
       "active": "Active",
@@ -66,9 +76,45 @@
       "failed": "Preview could not be generated.",
       "notApplicable": "This file type cannot be previewed.",
       "empty": "No preview",
-      "openOriginal": "Download original"
+      "download": "Download",
+      "openOriginal": "Download original design"
     },
-    "none": "-"
+    "none": "-",
+    "states": {
+      "emptyTitle": "No records found",
+      "emptyDescription": "Try adjusting your filters.",
+      "errorTitle": "Could not load the list",
+      "errorDescription": "Check your connection and try again. Your filters are kept."
+    },
+    "errorPage": {
+      "title": "Something went wrong",
+      "body": "There was a problem loading this page. You can try again or go back to the panel.",
+      "retry": "Try again",
+      "home": "Back to panel"
+    },
+    "entityPermissions": {
+      "enabledCount": "{enabled}/{total} on",
+      "on": "On",
+      "off": "Off",
+      "default": "Default",
+      "defaultValue": "Default: {value}",
+      "modalDescription": "Switch a permission to override the default for this account. Locked permissions cannot be changed.",
+      "empty": "No permissions defined.",
+      "keys": {
+        "CAN_USE_SS_SHIPMENT": "ShipStation shipping",
+        "CAN_USE_NS_SHIPMENT": "NestShipper shipping"
+      }
+    },
+    "entityTypes": {
+      "company": "Company",
+      "partner": "Partner",
+      "customer": "Customer",
+      "system": "System"
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    }
   },
   "home": {
     "title": "Welcome to EasyJet",
@@ -98,8 +144,25 @@
       "messages": {
         "welcome": "Welcome!",
         "loginFailed": "Login failed",
-        "invalidCredentials": "Invalid username or password"
+        "invalidCredentials": "Incorrect email or password. Please try again."
+      },
+      "brand": {
+        "headline": "From order to shipment, one panel.",
+        "body": "Track design, production, shipping and balance in one place."
       }
+    },
+    "verify": {
+      "successTitle": "Email verified",
+      "successBody": "Your account is active; you can sign in now.",
+      "successBodyWithEmail": "{email} has been verified. Your account is active; you can sign in now.",
+      "failedTitle": "Verification failed",
+      "expiredBody": "The verification link has expired. Please request a new one.",
+      "expiredBodyWithEmail": "The verification link has expired. Request a new one for {email}.",
+      "invalidBody": "The verification link is invalid or has already been used.",
+      "invalidBodyWithEmail": "The verification link is invalid or has already been used. Request a new one for {email}.",
+      "goToLogin": "Go to sign in",
+      "home": "Home",
+      "redirectNote": "You will be redirected to the sign-in page in a few seconds."
     }
   },
   "dashboard": {
@@ -196,7 +259,8 @@
           "refresh": "Refresh",
           "retry": "Retry"
         }
-      }
+      },
+      "welcomeDescription": "Use the menu on the left to get started."
     },
     "table": {
       "title": "Latest Orders",
@@ -351,7 +415,12 @@
         "rejectTitle": "Reject Top-Up",
         "approvedAmount": "Approved Amount",
         "rejectReason": "Reject Reason",
-        "reject": "Reject"
+        "reject": "Reject",
+        "approve": "Approve",
+        "confirmApproveTitle": "Approve this top-up?",
+        "confirmApproveBody": "The approved amount will be added to the requester’s balance.",
+        "confirmRejectTitle": "Reject this top-up?",
+        "confirmRejectBody": "The requester will see the reason. This cannot be undone."
       },
       "messages": {
         "loadFundingError": "Funding accounts could not be loaded.",
@@ -2290,7 +2359,8 @@
           "waitingForDesign": "Waiting for Design",
           "cancel": "Cancelled",
           "refund": "Refund",
-          "remake": "Remake"
+          "remake": "Remake",
+          "readyForProduction": "Ready for Production"
         }
       },
       "actions": {
@@ -2358,7 +2428,8 @@
         "noData": "No data"
       },
       "values": {
-        "noOptions": "No options"
+        "noOptions": "No options",
+        "reordered": "Re-ordered"
       },
       "common": {
         "none": "-"
@@ -2951,6 +3022,22 @@
             "orderIdMissing": "Order information is missing.",
             "invalidItem": "Selected item does not have a valid variant."
           }
+        },
+        "progress": {
+          "received": "Order received",
+          "preparation": "Design & preparation",
+          "production": "Production",
+          "completed": "Completed",
+          "shipped": "Shipped",
+          "ariaLabel": "Order progress"
+        },
+        "shipments": {
+          "title": "Shipments",
+          "canceledTitle": "Canceled shipment history",
+          "fallbackName": "Shipment {sequence}",
+          "itemsSummary": "{count} items • {amount}",
+          "labelsSummary": "{labels} labels • {voids} voids",
+          "canceled": "Canceled"
         }
       },
       "addressEditor": {
@@ -3232,7 +3319,8 @@
           "notFound": "Transfer order not found",
           "noUploadedDesigns": "No uploaded designs",
           "poolIncomplete": "Pool incomplete: {count} items are still pending in the source pool order."
-        }
+        },
+        "checklistRequired": "Please complete the shipping checklist."
       },
       "pool": {
         "pendingItems": "{count} pending pre-order items",
@@ -3602,6 +3690,11 @@
           "confirmSendDescription": "This will move the transfer order into production.",
           "confirmSendOk": "Send to production"
         }
+      },
+      "transferCopy": {
+        "tooltip": "Copy transfer order id",
+        "success": "Transfer order id copied.",
+        "error": "Transfer order id could not be copied."
       }
     },
     "refundRemake": {
@@ -4091,6 +4184,46 @@
         "verificationMissing": "Provide both API Key and API Secret to verify.",
         "verificationSuccess": "API Key and API Secret verified.",
         "verificationError": "Verification failed."
+      }
+    },
+    "paymentManagement": {
+      "title": "Transfer Payment Management",
+      "selectedSummary": "Selected: {count} / {total}",
+      "filterLoadError": "Filter options could not be loaded",
+      "selectEntity": "Select one customer or partner",
+      "selectOrders": "Select at least one transfer order",
+      "createSuccess": "Payment request created. Group: {group}",
+      "createError": "Payment request could not be created",
+      "entityPlaceholder": "Select customer or partner",
+      "confirmCreate": "Create payment request for selected transfer orders?",
+      "confirmOk": "Create",
+      "createButton": "Create payment request",
+      "itemCount": "{count} items",
+      "detail": "Detail",
+      "columns": {
+        "order": "Order",
+        "item": "Item",
+        "product": "Product",
+        "quantity": "Qty",
+        "customer": "Customer",
+        "partner": "Partner",
+        "orderPrice": "Order Price",
+        "shipmentPrice": "Shipment Price",
+        "status": "Status",
+        "orderDate": "Order Date",
+        "actions": "Actions",
+        "group": "Group",
+        "shipment": "Shipment",
+        "created": "Created",
+        "basePrice": "Base Price",
+        "multiplier": "Multiplier",
+        "customerPrice": "Customer Price",
+        "partnerCredit": "Partner Credit",
+        "price": "Price"
+      },
+      "filters": {
+        "orderSearch": "Search order/customer",
+        "orderDate": "Order date"
       }
     }
   },

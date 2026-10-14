@@ -93,7 +93,7 @@ const AddressEditorModal = ({
         cancelText={tCommonActions("cancel")}
         confirmLoading={saving}
         width={820}
-        destroyOnClose={false}
+        destroyOnHidden={false}
         zIndex={zIndex}
       >
         {loading ? (

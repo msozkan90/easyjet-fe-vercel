@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Button, Space, Tag, App as AntdApp, Typography } from "antd";
-import Link from "next/link";
+import { Space, App as AntdApp } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -12,15 +12,10 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { refreshWalletBalance } from "@/utils/walletBalance";
 import { useTranslations } from "@/i18n/use-translations";
-
-const { Title } = Typography;
-
-const statusColor = {
-  pending: "gold",
-  approved: "green",
-  rejected: "red",
-  canceled: "default",
-};
+import PageHeader from "@/components/ui/PageHeader";
+import MoneyText from "@/components/ui/MoneyText";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const resolveOwnerName = (record) => {
   if (!record) return "-";
@@ -185,11 +180,18 @@ export default function WalletTopupsAdminListPage() {
         title: t("columns.amount"),
         dataIndex: "amount",
         sorter: true,
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.approvedAmount"),
         dataIndex: "approved_amount",
-        render: (value) => (value ?? "-"),
+        align: "right",
+        render: (value, record) => (
+          <MoneyText value={value} currency={record?.currency} />
+        ),
       },
       {
         title: t("columns.currency"),
@@ -225,9 +227,9 @@ export default function WalletTopupsAdminListPage() {
           ],
         },
         render: (value) => (
-          <Tag color={statusColor[value] || "default"}>
+          <StatusTag status={value}>
             {tStatus(value) || value}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -243,13 +245,19 @@ export default function WalletTopupsAdminListPage() {
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 160,
+        width: 96,
         render: (_, record) => (
-          <Button type="link">
-            <Link href={`/dashboard/financial/admin/topups/${record.id}`}>
-              {t("actions.view")}
-            </Link>
-          </Button>
+          <RowActions
+            actions={[
+              {
+                key: "view",
+                iconOnly: true,
+                icon: <EyeOutlined />,
+                label: t("actions.view"),
+                href: `/dashboard/financial/admin/topups/${record.id}`,
+              },
+            ]}
+          />
         ),
       },
     ],
@@ -259,9 +267,7 @@ export default function WalletTopupsAdminListPage() {
   return (
     <RequireRole anyOfRoles={["systemadmin"]}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          {t("adminTopups.title")}
-        </Title>
+        <PageHeader title={t("adminTopups.title")} className="" />
         <CrudTable rowKey="id" columns={columns} request={request} />
       </Space>
     </RequireRole>

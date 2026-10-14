@@ -1,18 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  App as AntdApp,
-  Button,
-  Modal,
-  Space,
-  Switch,
-  Table,
-  Tag,
-  Spin,
-} from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { App as AntdApp, Empty, Modal, Switch, Spin } from "antd";
+import { EditOutlined, LockOutlined } from "@ant-design/icons";
 import CrudTable from "@/components/common/table/CrudTable";
+import RowActions from "@/components/ui/RowActions";
+import StatusTag from "@/components/ui/StatusTag";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
@@ -23,6 +16,18 @@ const normalizePermissions = (payload) => {
   if (Array.isArray(payload?.data)) return payload.data;
   if (Array.isArray(payload?.data?.permissions)) return payload.data.permissions;
   return [];
+};
+
+// "CAN_USE_SS_SHIPMENT" -> "Use ss shipment" when no translation exists.
+const humanizeKey = (key) => {
+  const words = String(key || "")
+    .replace(/^CAN_/, "")
+    .split(/[_.\s]+/)
+    .filter(Boolean)
+    .map((word) => word.toLowerCase());
+  if (!words.length) return String(key || "");
+  words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  return words.join(" ");
 };
 
 const buildUpdatePayload = (permissions) => ({
@@ -42,6 +47,7 @@ export default function EntityPermissionsPage({
 }) {
   const { message } = AntdApp.useApp();
   const t = useTranslations(translationKey);
+  const tPerm = useTranslations("common.entityPermissions");
   const tableRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [activeEntity, setActiveEntity] = useState(null);
@@ -62,6 +68,16 @@ export default function EntityPermissionsPage({
     [listApi]
   );
 
+  const permissionLabel = useCallback(
+    (key) => {
+      const translated = tPerm(`keys.${key}`);
+      return translated === `common.entityPermissions.keys.${key}`
+        ? humanizeKey(key)
+        : translated;
+    },
+    [tPerm],
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -69,6 +85,9 @@ export default function EntityPermissionsPage({
         dataIndex: "name",
         sorter: true,
         filter: { type: "text", placeholder: t("filters.searchName") },
+        render: (value) => (
+          <span className="font-medium text-text">{value || "-"}</span>
+        ),
       },
       {
         title: t("columns.permissions"),
@@ -76,38 +95,54 @@ export default function EntityPermissionsPage({
         render: (items) => {
           const list = Array.isArray(items) ? items : [];
           if (!list.length) return t("common.none");
+          const enabled = list.filter((perm) => perm.value_bool).length;
+          // Enabled permissions first so the meaningful ones lead the row.
+          const sorted = [...list].sort(
+            (a, b) => Number(!!b.value_bool) - Number(!!a.value_bool),
+          );
           return (
-            <Space wrap>
-              {list.map((perm) => (
-                <Tag
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="ej-mono mr-1 text-xs text-text-secondary">
+                {tPerm("enabledCount", { enabled, total: list.length })}
+              </span>
+              {sorted.map((perm) => (
+                <StatusTag
                   key={perm.permission_id || perm.key}
-                  color={perm.value_bool ? "green" : "red"}
+                  tone={perm.value_bool ? "success" : "neutral"}
+                  size="small"
+                  title={`${perm.key}: ${perm.value_bool ? tPerm("on") : tPerm("off")}`}
+                  className={perm.value_bool ? "" : "opacity-70"}
                 >
-                  {perm.key}
-                </Tag>
+                  {permissionLabel(perm.key)}
+                </StatusTag>
               ))}
-            </Space>
+            </div>
           );
         },
       },
       {
         title: t("columns.actions"),
         key: "actions",
-        width: 160,
+        width: 72,
         render: (_, record) => (
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => {
-              setActiveEntity(record);
-              setOpen(true);
-            }}
-          >
-            {t("actions.edit")}
-          </Button>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: t("actions.edit"),
+                onClick: () => {
+                  setActiveEntity(record);
+                  setOpen(true);
+                },
+              },
+            ]}
+          />
         ),
       },
     ],
-    [t]
+    [permissionLabel, t, tPerm],
   );
 
   const updatePermissionValue = useCallback((record, checked) => {
@@ -121,46 +156,6 @@ export default function EntityPermissionsPage({
       })
     );
   }, []);
-
-  const permissionColumns = useMemo(
-    () => [
-      {
-        title: t("modal.columns.permission"),
-        dataIndex: "key",
-        width: 280,
-      },
-      {
-        title: t("modal.columns.value"),
-        key: "value",
-        width: 140,
-        render: (_, record) => (
-          <Switch
-            checked={!!record.value_bool}
-            disabled={record.is_locked}
-            onChange={(checked) => updatePermissionValue(record, checked)}
-          />
-        ),
-      },
-      {
-        title: t("modal.columns.flags"),
-        key: "flags",
-        render: (_, record) => (
-          <Space wrap>
-            {record.inherited_bool ? (
-              <Tag color="blue">{t("labels.inherited")}</Tag>
-            ) : null}
-            {record.is_overridden ? (
-              <Tag color="gold">{t("labels.overridden")}</Tag>
-            ) : null}
-            {record.is_locked ? (
-              <Tag color="red">{t("labels.locked")}</Tag>
-            ) : null}
-          </Space>
-        ),
-      },
-    ],
-    [t, updatePermissionValue]
-  );
 
   useEffect(() => {
     if (!open || !activeEntity?.id) return;
@@ -232,21 +227,72 @@ export default function EntityPermissionsPage({
         okText={t("actions.update")}
         confirmLoading={saving}
         destroyOnHidden
-        width={760}
+        width={640}
       >
         {loading ? (
           <div className="flex justify-center py-8">
             <Spin />
           </div>
         ) : (
-          <Table
-            dataSource={permissions}
-            columns={permissionColumns}
-            rowKey={(row) => row.permission_id || row.key}
-            pagination={false}
-            size="small"
-            locale={{ emptyText: t("table.noData") }}
-          />
+          <div className="flex flex-col gap-3">
+            <p className="m-0 text-[13px] text-text-secondary">
+              {tPerm("modalDescription")}
+            </p>
+            {permissions.length ? (
+              <ul className="m-0 list-none divide-y divide-[var(--ej-border)] rounded-xl border border-line p-0">
+                {permissions.map((perm) => {
+                  const label = permissionLabel(perm.key);
+                  return (
+                    <li
+                      key={perm.permission_id || perm.key}
+                      className="flex items-center gap-4 px-4 py-3"
+                    >
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span className="text-sm font-medium text-text">
+                          {label}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="ej-mono truncate text-xs text-text-secondary">
+                            {perm.key}
+                          </span>
+                          <StatusTag tone="neutral" size="small">
+                            {tPerm("defaultValue", {
+                              value: perm.inherited_bool
+                                ? tPerm("on")
+                                : tPerm("off"),
+                            })}
+                          </StatusTag>
+                          {perm.is_overridden ? (
+                            <StatusTag tone="waiting" size="small">
+                              {t("labels.overridden")}
+                            </StatusTag>
+                          ) : null}
+                          {perm.is_locked ? (
+                            <StatusTag tone="danger" size="small">
+                              <LockOutlined /> {t("labels.locked")}
+                            </StatusTag>
+                          ) : null}
+                        </div>
+                      </div>
+                      <Switch
+                        checked={!!perm.value_bool}
+                        disabled={perm.is_locked}
+                        onChange={(checked) =>
+                          updatePermissionValue(perm, checked)
+                        }
+                        aria-label={label}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={tPerm("empty")}
+              />
+            )}
+          </div>
         )}
       </Modal>
     </>

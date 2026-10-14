@@ -9,7 +9,6 @@ import {
   Form,
   InputNumber,
   Modal,
-  Popconfirm,
   Select,
   Space,
   Tag,
@@ -22,6 +21,8 @@ import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { useTranslations } from "@/i18n/use-translations";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
+import StatusTag from "@/components/ui/StatusTag";
+import RowActions from "@/components/ui/RowActions";
 
 const extractList = (resp) => {
   const payload = resp?.data ?? resp;
@@ -392,11 +393,13 @@ export default function NotificationSettingsTable({ tSettings }) {
         render: (value) => {
           const normalized = String(value || "").toLowerCase();
           return normalized === "active" ? (
-            <Tag color="green">{translateOrFallback(tCommonStatus, "active", "Active")}</Tag>
+            <StatusTag status="active">
+              {translateOrFallback(tCommonStatus, "active", "Active")}
+            </StatusTag>
           ) : (
-            <Tag color="red">
+            <StatusTag status="inactive">
               {translateOrFallback(tCommonStatus, "inactive", "Inactive")}
-            </Tag>
+            </StatusTag>
           );
         },
       },
@@ -428,27 +431,36 @@ export default function NotificationSettingsTable({ tSettings }) {
           "Actions"
         ),
         key: "actions",
-        width: 220,
+        width: 96,
         render: (_, record) => (
-          <Space>
-            <Button icon={<EditOutlined />} onClick={() => handleEditClick(record)}>
-              {translateOrFallback(tCommonActions, "edit", "Edit")}
-            </Button>
-            <Popconfirm
-              title={translateOrFallback(
-                tSettings,
-                "notification.actions.confirmDelete",
-                "Delete this notification rule?"
-              )}
-              okText={translateOrFallback(tCommonActions, "delete", "Delete")}
-              cancelText={translateOrFallback(tCommonActions, "cancel", "Cancel")}
-              onConfirm={() => handleDelete(record)}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {translateOrFallback(tCommonActions, "delete", "Delete")}
-              </Button>
-            </Popconfirm>
-          </Space>
+          <RowActions
+            actions={[
+              {
+                key: "edit",
+                iconOnly: true,
+                icon: <EditOutlined />,
+                label: translateOrFallback(tCommonActions, "edit", "Edit"),
+                onClick: () => handleEditClick(record),
+              },
+            ]}
+            menuItems={[
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                label: translateOrFallback(tCommonActions, "delete", "Delete"),
+                confirm: {
+                  title: translateOrFallback(
+                    tSettings,
+                    "notification.actions.confirmDelete",
+                    "Delete this notification rule?"
+                  ),
+                  okText: translateOrFallback(tCommonActions, "delete", "Delete"),
+                },
+                onClick: () => handleDelete(record),
+              },
+            ]}
+          />
         ),
       },
     ],

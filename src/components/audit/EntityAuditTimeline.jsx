@@ -20,15 +20,11 @@ import {
 import { FileSearchOutlined } from "@ant-design/icons";
 import { AuditLogsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
+import StatusTag from "@/components/ui/StatusTag";
 
 const PAGE_SIZE = 10;
 const STATUS_OPTIONS = ["success", "failed"];
 const ACTION_OPTIONS = ["create", "update", "replace", "delete"];
-const STATUS_COLORS = {
-  success: "green",
-  failed: "red",
-};
-
 function normalizeText(value, fallback = "-") {
   if (value === null || value === undefined || value === "") {
     return fallback;
@@ -55,11 +51,11 @@ function JsonPreview({ title, value, emptyText, onCopy, copyLabel }) {
         ) : null}
       </div>
       {hasValue ? (
-        <pre className="max-h-72 overflow-auto rounded-2xl bg-slate-950 p-4 text-xs text-slate-100">
+        <pre className="max-h-72 overflow-auto rounded-xl bg-ink-950 p-4 text-xs text-ink-100">
           {JSON.stringify(value, null, 2)}
         </pre>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-line bg-subtle px-4 py-6 text-sm text-text-secondary">
           {emptyText}
         </div>
       )}
@@ -197,9 +193,9 @@ export default function EntityAuditTimeline({
         key: "status",
         width: 120,
         render: (value) => (
-          <Tag color={STATUS_COLORS[value] || "default"}>
+          <StatusTag status={value}>
             {t(`status.${value || "success"}`)}
-          </Tag>
+          </StatusTag>
         ),
       },
       {
@@ -260,7 +256,7 @@ export default function EntityAuditTimeline({
             />
           </Space>
         }
-        className="rounded-2xl border border-slate-100 shadow-sm"
+        className="rounded-xl border border-line"
         styles={{ body: { padding: 20 } }}
       >
         <div className="mb-4 flex flex-col gap-1">
@@ -331,9 +327,9 @@ export default function EntityAuditTimeline({
                 )}
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.status")}>
-                <Tag color={STATUS_COLORS[selectedEntry?.status] || "default"}>
+                <StatusTag status={selectedEntry?.status}>
                   {t(`status.${selectedEntry?.status || "success"}`)}
-                </Tag>
+                </StatusTag>
               </Descriptions.Item>
               <Descriptions.Item label={t("detailModal.fields.action")}>
                 {t(`actions.${selectedEntry?.action || "update"}`)}
@@ -424,7 +420,7 @@ export default function EntityAuditTimeline({
 
             {selectedEntry?.external_api_request != null ||
             selectedEntry?.external_api_response != null ? (
-              <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
+              <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
                 <Typography.Text strong>
                   {t("detailModal.sections.externalApi")}
                 </Typography.Text>
