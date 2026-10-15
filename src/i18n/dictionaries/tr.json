@@ -2680,7 +2680,8 @@
           "labelShippingCharged": "Tahsil edilen kargo",
           "labelTracking": "Takip Numarası",
           "labelCreatedAt": "Oluşturma Tarihi",
-          "labels": "Etiketler"
+          "labels": "Etiketler",
+          "customerEntity": "Müşteri hesabı"
         },
         "designs": {
           "title": "Tasarımlar",
@@ -3047,21 +3048,30 @@
           "currency": "Para Birimi",
           "orderTotal": "Sipariş Toplamı",
           "requestLink": "Talep Linki",
-          "orderLink": "Sipariş Linki"
+          "orderLink": "Sipariş Linki",
+          "labelPrice": "Etiket fiyatı",
+          "withMultiplier": "Çarpanlı",
+          "customerNotes": "Müşteri notları",
+          "designerNotes": "Tasarımcı notları"
         },
         "sections": {
           "priceSummary": "Fiyat Özeti",
           "items": "Kalemler",
           "uploadedDesigns": "Yüklenen Tasarımlar",
           "remakeRequest": "Remake Talebi",
-          "originalTransferOrder": "Orijinal Transfer Siparişi"
+          "originalTransferOrder": "Orijinal Transfer Siparişi",
+          "delivery": "Teslimat",
+          "notes": "Notlar",
+          "label": "Kargo etiketi",
+          "totals": "Toplamlar"
         },
         "tabs": {
           "overview": "Genel Bakış",
           "itemsAndDesigns": "Kalemler ve Tasarımlar",
           "labelsAndPricing": "Etiket ve Fiyatlama",
           "remakedOrder": "Remaked Order",
-          "activity": "Aktivite"
+          "activity": "Aktivite",
+          "labels": "Etiketler"
         },
         "priceSummary": {
           "itemPrices": "Ürün Fiyatları",
@@ -3098,9 +3108,12 @@
           "designerNotesSaveError": "Tasarımcı notları kaydedilemedi.",
           "notFound": "Transfer siparişi bulunamadı.",
           "noUploadedDesigns": "Yüklenmiş tasarım bulunamadı.",
-          "poolIncomplete": "Pool eksik: kaynak pool siparişinde hâlâ {count} bekleyen kalem var."
+          "poolIncomplete": "Pool eksik: kaynak pool siparişinde hâlâ {count} bekleyen kalem var.",
+          "noLabel": "Henüz kargo etiketi yok.",
+          "remakeOf": "#{orderNumber} siparişinin yeniden üretimi."
         },
-        "checklistRequired": "Lütfen kargo kontrol listesini tamamlayın."
+        "checklistRequired": "Lütfen kargo kontrol listesini tamamlayın.",
+        "breadcrumb": "Transfer siparişleri"
       },
       "pool": {
         "pendingItems": "{count} bekleyen pre-order kalemi",

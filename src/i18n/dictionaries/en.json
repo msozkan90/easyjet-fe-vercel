@@ -2900,7 +2900,8 @@
           "labelShippingCharged": "Shipping charged",
           "labelTracking": "Tracking Number",
           "labelCreatedAt": "Created At",
-          "labels": "Labels"
+          "labels": "Labels",
+          "customerEntity": "Customer account"
         },
         "designs": {
           "title": "Designs",
@@ -3267,21 +3268,30 @@
           "currency": "Currency",
           "orderTotal": "Order Total",
           "requestLink": "Request Link",
-          "orderLink": "Order Link"
+          "orderLink": "Order Link",
+          "labelPrice": "Label price",
+          "withMultiplier": "With multiplier",
+          "customerNotes": "Customer notes",
+          "designerNotes": "Designer notes"
         },
         "sections": {
           "priceSummary": "Price Summary",
           "items": "Items",
           "uploadedDesigns": "Uploaded Designs",
           "remakeRequest": "Remake Request",
-          "originalTransferOrder": "Original Transfer Order"
+          "originalTransferOrder": "Original Transfer Order",
+          "delivery": "Delivery",
+          "notes": "Notes",
+          "label": "Shipping label",
+          "totals": "Totals"
         },
         "tabs": {
           "overview": "Overview",
           "itemsAndDesigns": "Items & Designs",
           "labelsAndPricing": "Labels & Pricing",
           "remakedOrder": "Remaked Order",
-          "activity": "Activity"
+          "activity": "Activity",
+          "labels": "Labels"
         },
         "priceSummary": {
           "itemPrices": "Item Prices",
@@ -3318,9 +3328,12 @@
           "designerNotesSaveError": "Failed to save designer notes",
           "notFound": "Transfer order not found",
           "noUploadedDesigns": "No uploaded designs",
-          "poolIncomplete": "Pool incomplete: {count} items are still pending in the source pool order."
+          "poolIncomplete": "Pool incomplete: {count} items are still pending in the source pool order.",
+          "noLabel": "No shipping label yet.",
+          "remakeOf": "Remake of order #{orderNumber}."
         },
-        "checklistRequired": "Please complete the shipping checklist."
+        "checklistRequired": "Please complete the shipping checklist.",
+        "breadcrumb": "Transfer orders"
       },
       "pool": {
         "pendingItems": "{count} pending pre-order items",
