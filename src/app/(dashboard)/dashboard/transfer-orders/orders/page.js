@@ -315,7 +315,6 @@ export default function TransferOrdersPage() {
       const list = await fetchGenericList("transfer_product", {
         filters: {
           status: "active",
-          sub_category_id: subCategoryId,
         },
       });
       setManualProducts(Array.isArray(list) ? list : []);
