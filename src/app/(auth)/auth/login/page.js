@@ -75,12 +75,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-wrap bg-surface">
       <section className="relative flex flex-[1_1_420px] flex-col gap-12 overflow-hidden bg-ink-900 px-6 py-5 text-white md:px-14 md:py-12">
         <Image
-          src="/white_text_logo.png"
-          alt="EasyJet"
-          width={168}
-          height={39}
+          src="/sidebar_logo.png"
+          alt="EasyJet Connect"
+          width={240}
+          height={40}
           priority
-          className="relative h-auto w-[168px]"
+          className="relative h-auto w-[200px] md:w-[240px]"
         />
         <div
           aria-hidden="true"

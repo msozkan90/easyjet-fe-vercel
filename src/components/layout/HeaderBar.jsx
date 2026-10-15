@@ -23,6 +23,9 @@ import {
   SearchOutlined,
   MoonOutlined,
   SunOutlined,
+  ArrowRightOutlined,
+  LoadingOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleMobileNav, toggleSidebar } from "@/redux/features/uiSlice";
@@ -31,7 +34,7 @@ import { logoutLocal } from "@/redux/features/authSlice";
 import { setBalance } from "@/redux/features/balanceSlice";
 import { resetCategories } from "@/redux/features/categoriesSlice";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useLanguageMenuItem } from "@/components/common/LanguageSwitcher";
 import { useTranslations } from "@/i18n/use-translations";
@@ -58,6 +61,14 @@ export default function HeaderBar({ isMobile = false }) {
   const [orderSearchLoading, setOrderSearchLoading] = useState(false);
   const [orderSearchMatches, setOrderSearchMatches] = useState([]);
   const [orderSearchModalOpen, setOrderSearchModalOpen] = useState(false);
+  const searchInputRef = useRef(null);
+  // Platform-specific hint is resolved after mount to keep SSR markup stable.
+  const [searchShortcut, setSearchShortcut] = useState("Ctrl K");
+  useEffect(() => {
+    if (/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent)) {
+      setSearchShortcut("⌘K");
+    }
+  }, []);
 
   const formattedBalance = useMemo(() => {
     const numericBalance = Number(balance);
@@ -116,9 +127,23 @@ export default function HeaderBar({ isMobile = false }) {
 
   useEffect(() => {
     const onKey = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
+      const key = event.key.toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && key === "b") {
         event.preventDefault();
         dispatch(isMobile ? toggleMobileNav() : toggleSidebar());
+        return;
+      }
+      // Ctrl/⌘+K anywhere, or "/" outside text fields, jumps to order search.
+      const target = event.target;
+      const typing =
+        target?.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName);
+      if (
+        ((event.ctrlKey || event.metaKey) && key === "k") ||
+        (key === "/" && !typing && !event.ctrlKey && !event.metaKey)
+      ) {
+        event.preventDefault();
+        searchInputRef.current?.focus({ cursor: "all" });
       }
     };
     window.addEventListener("keydown", onKey);
@@ -206,15 +231,15 @@ export default function HeaderBar({ isMobile = false }) {
 
   return (
     <Header
+      className="ej-topbar"
       style={{
         background: "var(--ej-surface)",
-        height: 60,
+        height: 64,
         lineHeight: "normal",
         display: "flex",
         alignItems: "center",
-        gap: isMobile ? 8 : 12,
+        gap: isMobile ? 8 : 14,
         padding: isMobile ? "0 12px" : "0 24px",
-        borderBottom: "1px solid var(--ej-border)",
       }}
     >
       <Button
@@ -235,27 +260,38 @@ export default function HeaderBar({ isMobile = false }) {
         title={isMobile ? tNavbar("openNavigation") : tNavbar("toggleSidebar")}
       />
 
-      <div className="min-w-0 flex-1" style={{ maxWidth: 440 }}>
-        <Space.Compact block>
-          <Input
-            value={orderSearch}
-            onChange={(event) => setOrderSearch(event.target.value)}
-            onPressEnter={() => handleOrderSearch(orderSearch)}
-            allowClear
-            disabled={orderSearchLoading}
-            prefix={<SearchOutlined className="text-ink-400" />}
-            placeholder={tNavbar("orderSearchPlaceholder")}
-            aria-label={tNavbar("orderSearchAria")}
-          />
-          <Button
-            loading={orderSearchLoading}
-            onClick={() => handleOrderSearch(orderSearch)}
-            aria-label={tNavbar("orderSearchAria")}
-            icon={isMobile ? <SearchOutlined /> : undefined}
-          >
-            {isMobile ? null : tNavbar("search")}
-          </Button>
-        </Space.Compact>
+      <div className="min-w-0 flex-1" style={{ maxWidth: 480 }}>
+        <Input
+          ref={searchInputRef}
+          className="ej-command-search"
+          value={orderSearch}
+          onChange={(event) => setOrderSearch(event.target.value)}
+          onPressEnter={() => handleOrderSearch(orderSearch)}
+          readOnly={orderSearchLoading}
+          prefix={<SearchOutlined className="ej-command-search__icon" />}
+          suffix={
+            orderSearchLoading ? (
+              <LoadingOutlined className="text-brand-600" />
+            ) : orderSearch.trim() ? (
+              <Button
+                type="text"
+                size="small"
+                className="ej-command-search__go"
+                icon={<ArrowRightOutlined />}
+                onClick={() => handleOrderSearch(orderSearch)}
+                aria-label={tNavbar("search")}
+                title={tNavbar("search")}
+              />
+            ) : !isMobile ? (
+              <kbd className="ej-kbd" aria-hidden="true">
+                {searchShortcut}
+              </kbd>
+            ) : null
+          }
+          placeholder={tNavbar("orderSearchPlaceholder")}
+          aria-label={tNavbar("orderSearchAria")}
+          aria-keyshortcuts="Control+K Meta+K /"
+        />
       </div>
 
       <div
@@ -319,13 +355,21 @@ export default function HeaderBar({ isMobile = false }) {
         {canSeeBalance ? (
           <Link
             href="/dashboard/wallet-transactions"
-            className="hidden h-9 items-center gap-2 rounded-full bg-brand-50 px-3 text-sm text-brand-800 no-underline transition-colors hover:bg-brand-100 sm:flex"
+            className="ej-balance-ticket hidden items-center gap-2 text-sm no-underline sm:flex"
             aria-label={`${tNavbar("walletTransactions")}: ${formattedBalance}`}
             title={tNavbar("walletTransactions")}
           >
-            {!isMobile ? <span>{tNavbar("balance")}</span> : null}
+            <WalletOutlined className="ej-balance-ticket__icon" />
+            {!isMobile ? (
+              <span className="ej-balance-ticket__label">
+                {tNavbar("balance")}
+              </span>
+            ) : null}
             <span className="ej-mono font-semibold">{formattedBalance}</span>
           </Link>
+        ) : null}
+        {!isMobile ? (
+          <span className="ej-topbar__divider" aria-hidden="true" />
         ) : null}
         <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
           <Button
@@ -340,8 +384,8 @@ export default function HeaderBar({ isMobile = false }) {
             }}
           >
             <Avatar
-              className="ej-avatar"
-              size={32}
+              className="ej-avatar ej-hex"
+              size={34}
               src={user?.avatar_url || undefined}
               icon={!userInitials ? <UserOutlined /> : undefined}
               style={{

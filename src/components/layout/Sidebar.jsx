@@ -1360,11 +1360,12 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
       aria-label={[userDisplayName, userEntityName, userRoleLabel]
         .filter(Boolean)
         .join(" - ")}
-      className="flex min-w-0 items-center gap-2.5 rounded-lg p-1.5 text-inherit no-underline transition-colors hover:bg-ink-800"
+      className="ej-usercard flex min-w-0 items-center gap-2.5 p-2 text-inherit no-underline"
       style={{ justifyContent: isCollapsed ? "center" : "flex-start" }}
     >
       <Avatar
-        size={34}
+        size={36}
+        className="ej-hex"
         src={user?.avatar_url || undefined}
         icon={!userInitials ? <UserOutlined /> : undefined}
         style={{
@@ -1404,23 +1405,24 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
   );
 
   const content = (
-    <div className="flex h-full flex-col bg-ink-900">
-      <div className="flex h-[60px] shrink-0 items-center border-b border-ink-800 px-4">
+    <div className="ej-sidenav flex h-full flex-col">
+      <div className="ej-sidenav__brand flex h-[64px] shrink-0 items-center justify-center px-4">
         <Link
           href="/dashboard"
           onClick={onNavigate}
           aria-label={tSidebar("dashboard")}
-          className="flex items-center"
-          style={{ margin: isCollapsed ? "0 auto" : undefined }}
+          className="flex items-center justify-center"
         >
           {isCollapsed ? (
             <Image src="/logo.png" alt="EasyJet" width={30} height={30} />
           ) : (
+            // Sidebar-only lockup: same artwork as white_text_logo.png with the
+            // wordmark enlarged to ~36% of the mark height (was ~23%).
             <Image
-              src="/white_text_logo.png"
-              alt="EasyJet"
-              height={30}
-              width={128}
+              src="/sidebar_logo.png"
+              alt="EasyJet Connect"
+              width={204}
+              height={34}
               priority
             />
           )}
@@ -1450,8 +1452,8 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
         <div className="flex-1" />
       )}
       <div
-        className="shrink-0 border-t border-ink-800"
-        style={{ padding: isCollapsed ? "10px 8px" : "10px 10px" }}
+        className="shrink-0"
+        style={{ padding: isCollapsed ? "10px 8px 12px" : "10px 12px 14px" }}
       >
         {isCollapsed ? (
           <Tooltip
