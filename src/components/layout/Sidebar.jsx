@@ -1405,22 +1405,23 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
 
   const content = (
     <div className="flex h-full flex-col bg-ink-900">
-      <div className="flex h-[60px] shrink-0 items-center border-b border-ink-800 px-4">
+      <div className="flex h-[60px] shrink-0 items-center justify-center border-b border-ink-800 px-4">
         <Link
           href="/dashboard"
           onClick={onNavigate}
           aria-label={tSidebar("dashboard")}
-          className="flex items-center"
-          style={{ margin: isCollapsed ? "0 auto" : undefined }}
+          className="flex items-center justify-center"
         >
           {isCollapsed ? (
             <Image src="/logo.png" alt="EasyJet" width={30} height={30} />
           ) : (
+            // Sidebar-only lockup: same artwork as white_text_logo.png with the
+            // wordmark enlarged to ~36% of the mark height (was ~23%).
             <Image
-              src="/white_text_logo.png"
-              alt="EasyJet"
-              height={30}
-              width={128}
+              src="/sidebar_logo.png"
+              alt="EasyJet Connect"
+              width={204}
+              height={34}
               priority
             />
           )}
