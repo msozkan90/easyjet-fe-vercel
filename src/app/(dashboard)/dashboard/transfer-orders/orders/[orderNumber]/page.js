@@ -9,25 +9,14 @@ import {
   Alert,
   App as AntdApp,
   Button,
-  Card,
-  Col,
-  Descriptions,
-  Empty,
   Input,
   Popover,
   Popconfirm,
-  Row,
-  Space,
   Spin,
-  Statistic,
-  Table,
+  Steps,
   Tabs,
-  Typography,
+  Tooltip,
 } from "antd";
-import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
-import RequireRole from "@/components/common/Access/RequireRole";
-import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
-import { TransferOrdersAPI } from "@/utils/api";
 import {
   DeleteOutlined,
   ExportOutlined,
@@ -35,11 +24,26 @@ import {
   ProfileOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
+import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
+import RequireRole from "@/components/common/Access/RequireRole";
+import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
+import {
+  AddressCard,
+  KeyValueList,
+  SectionEmpty,
+  SectionHeader,
+  SideCard,
+} from "@/components/orders/detail/DetailBlocks";
+import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { hasAnyRole } from "@/utils/rbac";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
+import { MetaChip, YesNoCell } from "@/components/ui/TableCells";
 import { formatAmount, formatCurrency } from "@/utils/formatMoney";
+
+const formatDateTime = (value, fallback = "-") =>
+  value ? moment(value).format("LLL") : fallback;
 
 const normalizeOptions = (rawOptions) => {
   if (Array.isArray(rawOptions)) {
@@ -166,62 +170,6 @@ export default function TransferOrderDetailPage() {
     [loadDetail, message, tDetail],
   );
 
-  const itemColumns = useMemo(
-    () => [
-      {
-        title: tOrders("columns.item"),
-        dataIndex: "name",
-        render: (value) => value || tOrders("common.none"),
-      },
-      {
-        title: tOrders("columns.options"),
-        dataIndex: "options",
-        width: 140,
-        render: (value) => {
-          const options = normalizeOptions(value);
-          if (!options.length) return tOrders("values.noOptions");
-
-          return (
-            <Popover
-              trigger="hover"
-              placement="rightTop"
-              content={renderOptionsSummary(options, tOrders("common.none"))}
-            >
-              <button type="button" className="order-options-trigger">
-                <ProfileOutlined />
-                <span>{tOrders("columns.options")}</span>
-                <span className="order-options-count">{options.length}</span>
-              </button>
-            </Popover>
-          );
-        },
-      },
-      {
-        title: tOrders("columns.product"),
-        dataIndex: "transfer_product",
-        render: (_, record) =>
-          record?.transfer_product?.name || tOrders("common.none"),
-      },
-      {
-        title: tOrders("columns.quantity"),
-        dataIndex: "quantity",
-        width: 80,
-      },
-      {
-        title: tOrders("columns.status"),
-        dataIndex: "status",
-        render: (value) => (
-          <StatusTag status={value}>
-            {value
-              ? tOrders(`status.values.${value}`) || value
-              : tOrders("common.none")}
-          </StatusTag>
-        ),
-      },
-    ],
-    [tOrders],
-  );
-
   const handleSaveDesignerNotes = useCallback(async () => {
     if (!detail?.id) return;
     setSavingDesignerNotes(true);
@@ -322,356 +270,465 @@ export default function TransferOrderDetailPage() {
     [remakeContext?.is_remake_child],
   );
 
+  const tDesign = useTranslations("dashboard.orders.detail");
+  const none = tOrders("common.none");
+  const currency = detail?.currency;
+  const statusText = (value) =>
+    value ? tOrders(`status.values.${value}`) || value : none;
+  const items = Array.isArray(detail?.items) ? detail.items : [];
+  const designCount = designGroups.reduce(
+    (sum, group) =>
+      sum + (Array.isArray(group?.designs) ? group.designs.length : 0),
+    0,
+  );
+
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
-        <Spin />
+      <div className="flex justify-center py-12">
+        <Spin size="large" />
       </div>
     );
   }
 
   if (!detail) {
-    return <Empty description={tDetail("messages.notFound")} />;
+    return <Alert type="error" showIcon message={tDetail("messages.notFound")} />;
   }
+
+  const orderDate = formatDateTime(detail?.order_date, none);
+  const progressStep = (() => {
+    switch (String(detail?.order_status || "")) {
+      case "newOrder":
+      case "waitingForDesign":
+        return 1;
+      case "processing":
+      case "downloaded":
+        return 2;
+      case "printed":
+        return 3;
+      case "shipped":
+        return 5;
+      default:
+        return null;
+    }
+  })();
+  const progressItems = [
+    "received",
+    "preparation",
+    "production",
+    "completed",
+    "shipped",
+  ].map((key) => ({ key, title: tDesign(`progress.${key}`) }));
+
+  const labelRows = transferLabel
+    ? [
+        {
+          label: tOrders("detail.fields.labelSource"),
+          value: transferLabel?.source || none,
+        },
+        ...(transferLabel?.base_shipping_price != null
+          ? [
+              {
+                label: tDetail("fields.labelPrice"),
+                value: (
+                  <span className="ej-mono">
+                    {formatCurrency(transferLabel.base_shipping_price, currency)}
+                  </span>
+                ),
+              },
+              transferLabel?.source === "shipStationCompany"
+                ? {
+                    label: tDetail("fields.withMultiplier"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatCurrency(
+                          transferLabel.shipment_total_price ??
+                            transferLabel.shipping_price,
+                          currency,
+                        )}
+                      </span>
+                    ),
+                  }
+                : null,
+            ]
+          : [
+              {
+                label: tOrders("detail.fields.labelRate"),
+                value:
+                  transferLabel?.shipping_price != null ? (
+                    <span className="ej-mono">
+                      {formatCurrency(transferLabel.shipping_price, currency)}
+                    </span>
+                  ) : (
+                    none
+                  ),
+              },
+            ]),
+        transferLabel?.source === "easyjet" &&
+        transferLabel?.postage_fee != null
+          ? {
+              label: tOrders("detail.fields.labelPostageFee"),
+              value: (
+                <span className="ej-mono">
+                  {formatCurrency(transferLabel.postage_fee, currency)}
+                </span>
+              ),
+            }
+          : null,
+        {
+          label: tOrders("detail.fields.labelCreatedAt"),
+          value: formatDateTime(transferLabel?.created_at, none),
+        },
+      ]
+    : [];
 
   const detailTabs = [
     {
       key: "overview",
       label: tDetail("tabs.overview"),
       children: (
-        <div className="space-y-6">
-          {pendingPoolItems > 0 ? (
-            <Alert
-              type="warning"
-              showIcon
-              message={tDetail("messages.poolIncomplete", { count: pendingPoolItems })}
-            />
-          ) : null}
-          <Card title={tDetail("tabs.overview")}>
-            <Descriptions
-              column={{ xs: 1, sm: 2, md: 3 }}
-              bordered
-              size="small"
-            >
-              <Descriptions.Item label={tDetail("fields.orderName")}>
-                {detail?.order_name || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.status")}>
-                <StatusTag status={detail?.order_status}>
-                  {detail?.order_status
-                    ? tOrders(`status.values.${detail?.order_status}`) ||
-                      detail?.order_status
-                    : tOrders("common.none")}
-                </StatusTag>
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.customerName")}>
-                {detail?.bill_to_name || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.orderDate")}>
-                {detail?.order_date
-                  ? moment(detail.order_date).format("LLL")
-                  : "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tDetail("fields.currency")}>
-                {detail?.currency || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tDetail("fields.orderTotal")}>
-                {formatAmount(detail?.order_total)}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.notes")}>
-                {detail?.notes || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label={tOrders("columns.designerNotes")}
-                span={2}
-              >
-                {detail?.designer_notes || "-"}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-
-          <Card title={tOrders("columns.designerNotes")}>
-            <Space direction="vertical" style={{ width: "100%" }} size={12}>
-              <Input.TextArea
-                rows={4}
-                value={designerNotesDraft}
-                onChange={(event) =>
-                  setDesignerNotesDraft(event?.target?.value || "")
-                }
-                placeholder={tDetail("placeholders.designerNotes")}
+        <div className="flex flex-wrap items-start gap-5">
+          <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-5">
+            {pendingPoolItems > 0 ? (
+              <Alert
+                type="warning"
+                showIcon
+                message={tDetail("messages.poolIncomplete", {
+                  count: pendingPoolItems,
+                })}
               />
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  type="primary"
-                  icon={<SaveOutlined />}
-                  onClick={handleSaveDesignerNotes}
-                  loading={savingDesignerNotes}
-                >
-                  {tDetail("actions.saveNotes")}
-                </Button>
-              </div>
-            </Space>
-          </Card>
-        </div>
-      ),
-    },
-    {
-      key: "items",
-      label: tDetail("tabs.itemsAndDesigns"),
-      children: (
-        <div className="space-y-6">
-          <Card title={tDetail("sections.items")}>
-            <Table
-              rowKey="id"
-              columns={itemColumns}
-              dataSource={Array.isArray(detail?.items) ? detail.items : []}
-              pagination={false}
-            />
-          </Card>
+            ) : null}
 
-          <Card title={tDetail("sections.uploadedDesigns")}>
-            {!designGroups.length ? (
-              <Empty description={tDetail("messages.noUploadedDesigns")} />
+            <SectionHeader title={tDetail("sections.items")} count={items.length} />
+            {items.length ? (
+              <ul className="m-0 list-none divide-y divide-[var(--ej-border)] rounded-xl border border-line bg-surface p-0">
+                {items.map((item) => {
+                  const options = normalizeOptions(item?.options);
+                  return (
+                    <li
+                      key={item?.id}
+                      className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
+                    >
+                      <div className="flex min-w-0 flex-[1_1_220px] flex-col gap-0.5">
+                        <span className="break-words text-sm font-medium text-text">
+                          {item?.name || none}
+                        </span>
+                        <span className="text-xs text-text-secondary">
+                          {item?.transfer_product?.name || none}
+                        </span>
+                      </div>
+                      {options.length ? (
+                        <Popover
+                          trigger="hover"
+                          placement="bottomLeft"
+                          content={renderOptionsSummary(options, none)}
+                        >
+                          <button
+                            type="button"
+                            className="order-options-trigger"
+                          >
+                            <ProfileOutlined />
+                            <span>{tOrders("columns.options")}</span>
+                            <span className="order-options-count">
+                              {options.length}
+                            </span>
+                          </button>
+                        </Popover>
+                      ) : null}
+                      <MetaChip>
+                        {tDetail("designCard.quantity")}: {item?.quantity ?? 1}
+                      </MetaChip>
+                      <span className="ej-mono min-w-[72px] text-right text-[13px] font-medium text-text">
+                        {formatCurrency(item?.price, currency)}
+                      </span>
+                      <StatusTag status={item?.status} size="small">
+                        {statusText(item?.status)}
+                      </StatusTag>
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
-              <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              <SectionEmpty>{tDesign("messages.noItems")}</SectionEmpty>
+            )}
+
+            <SectionHeader
+              title={tDetail("sections.uploadedDesigns")}
+              count={designCount}
+              extra={
+                designGroups.length ? (
+                  <span className="ej-mono text-sm font-semibold text-text">
+                    {formatCurrency(designTotalPrice, currency)}
+                  </span>
+                ) : null
+              }
+            />
+            {designGroups.length ? (
+              <div className="flex flex-col gap-4">
                 {designGroups.map((group, groupIndex) => (
-                  <Card
+                  <section
                     key={group?.sub_category_id || `group-${groupIndex}`}
-                    type="inner"
-                    title={group?.sub_category_name || "-"}
-                    extra={
-                      <Typography.Text strong>
-                        {formatCurrency(group?.total_price, detail?.currency)}
-                      </Typography.Text>
-                    }
+                    className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4"
                   >
-                    <Row gutter={[12, 12]}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="m-0 text-sm font-semibold text-text">
+                        {group?.sub_category_name || none}
+                      </h3>
+                      <span className="ej-mono text-[13px] font-semibold text-text">
+                        {formatCurrency(group?.total_price, currency)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-3">
                       {(Array.isArray(group?.designs) ? group.designs : []).map(
                         (design) => (
-                          <Col xs={24} sm={12} md={8} lg={6} key={design?.id}>
-                            <Card
-                              size="small"
-                              styles={{ body: { padding: 10 } }}
-                            >
-                              <Space
-                                direction="vertical"
-                                size={8}
-                                style={{ width: "100%" }}
-                              >
-                                <DesignThumbnailImage
-                                  design={design}
-                                  alt={`design-${design?.id}`}
-                                />
-                                <Typography.Text
-                                  type="secondary"
-                                  style={{ fontSize: 12 }}
-                                >
-                                  {tDetail("designCard.quantity")}:{" "}
-                                  {design?.quantity ?? 1}
-                                </Typography.Text>
-                                <Typography.Text
-                                  type="secondary"
-                                  style={{ fontSize: 12 }}
-                                >
-                                  {tDetail("designCard.size")}:{" "}
-                                  {formatAmount(design?.width)}&quot; x{" "}
-                                  {formatAmount(design?.height)}&quot;
-                                </Typography.Text>
-                                <Typography.Text strong>
-                                  {tDetail("designCard.price")}:{" "}
-                                  {formatCurrency(
-                                    design?.price,
-                                    detail?.currency,
+                          <div
+                            key={design?.id}
+                            className="flex min-w-0 flex-col gap-2 rounded-xl border border-line p-3"
+                          >
+                            <DesignThumbnailImage
+                              design={design}
+                              alt={`design-${design?.id}`}
+                            />
+                            <div className="flex flex-wrap gap-1.5">
+                              <MetaChip>
+                                {tDetail("designCard.quantity")}:{" "}
+                                {design?.quantity ?? 1}
+                              </MetaChip>
+                              <MetaChip>
+                                {formatAmount(design?.width)}&quot; ×{" "}
+                                {formatAmount(design?.height)}&quot;
+                              </MetaChip>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 flex-col">
+                                <span className="ej-mono text-[13px] font-semibold text-text">
+                                  {formatCurrency(design?.price, currency)}
+                                </span>
+                                <span className="text-xs text-text-secondary">
+                                  {formatDateTime(design?.created_at, none)}
+                                </span>
+                              </div>
+                              {canDeleteDesign ? (
+                                <Popconfirm
+                                  title={tDetail("actions.deleteConfirmTitle")}
+                                  description={tDetail(
+                                    "actions.deleteConfirmDescription",
                                   )}
-                                </Typography.Text>
-                                <Typography.Text
-                                  type="secondary"
-                                  style={{ fontSize: 12 }}
-                                >
-                                  {design?.created_at
-                                    ? moment(design.created_at).format("LLL")
-                                    : "-"}
-                                </Typography.Text>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "flex-end",
+                                  okText={tDetail("actions.delete")}
+                                  okButtonProps={{
+                                    danger: true,
+                                    loading: deletingDesignId === design?.id,
                                   }}
+                                  onConfirm={() => handleDeleteDesign(design?.id)}
                                 >
-                                  <Space>
-                                    {canDeleteDesign ? (
-                                      <Popconfirm
-                                        title={tDetail(
-                                          "actions.deleteConfirmTitle",
-                                        )}
-                                        description={tDetail(
-                                          "actions.deleteConfirmDescription",
-                                        )}
-                                        okText={tDetail("actions.delete")}
-                                        okButtonProps={{
-                                          danger: true,
-                                          loading:
-                                            deletingDesignId === design?.id,
-                                        }}
-                                        onConfirm={() =>
-                                          handleDeleteDesign(design?.id)
-                                        }
-                                      >
-                                        <Button
-                                          danger
-                                          size="small"
-                                          icon={<DeleteOutlined />}
-                                          loading={
-                                            deletingDesignId === design?.id
-                                          }
-                                        >
-                                          {tDetail("actions.delete")}
-                                        </Button>
-                                      </Popconfirm>
-                                    ) : null}
-                                  </Space>
-                                </div>
-                              </Space>
-                            </Card>
-                          </Col>
+                                  <Tooltip title={tDetail("actions.delete")}>
+                                    <Button
+                                      danger
+                                      type="text"
+                                      size="small"
+                                      icon={<DeleteOutlined />}
+                                      loading={deletingDesignId === design?.id}
+                                      aria-label={tDetail("actions.delete")}
+                                    />
+                                  </Tooltip>
+                                </Popconfirm>
+                              ) : null}
+                            </div>
+                          </div>
                         ),
                       )}
-                    </Row>
-                  </Card>
+                    </div>
+                  </section>
                 ))}
-              </Space>
+              </div>
+            ) : (
+              <SectionEmpty>{tDetail("messages.noUploadedDesigns")}</SectionEmpty>
             )}
-          </Card>
+
+            <SideCard title={tDetail("sections.notes")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDetail("fields.customerNotes"),
+                    value: detail?.notes || none,
+                  },
+                ]}
+              />
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="transfer-designer-notes"
+                  className="text-xs text-text-secondary"
+                >
+                  {tDetail("fields.designerNotes")}
+                </label>
+                <Input.TextArea
+                  id="transfer-designer-notes"
+                  autoSize={{ minRows: 3, maxRows: 8 }}
+                  value={designerNotesDraft}
+                  onChange={(event) =>
+                    setDesignerNotesDraft(event?.target?.value || "")
+                  }
+                  placeholder={tDetail("placeholders.designerNotes")}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={handleSaveDesignerNotes}
+                    loading={savingDesignerNotes}
+                    disabled={
+                      designerNotesDraft.trim() ===
+                      String(detail?.designer_notes || "").trim()
+                    }
+                  >
+                    {tDetail("actions.saveNotes")}
+                  </Button>
+                </div>
+              </div>
+            </SideCard>
+          </div>
+
+          <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
+            <SideCard title={tDetail("sections.totals")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDetail("priceSummary.itemPrices"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatCurrency(itemTotalPrice, currency)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDetail("priceSummary.designPrices"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatCurrency(designTotalPrice, currency)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDetail("priceSummary.combined"),
+                    value: (
+                      <span className="ej-mono font-semibold">
+                        {formatCurrency(
+                          itemTotalPrice + designTotalPrice,
+                          currency,
+                        )}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDetail("fields.orderTotal"),
+                    value: (
+                      <span className="ej-mono">
+                        {formatAmount(detail?.order_total)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: tDetail("fields.currency"),
+                    value: currency || none,
+                  },
+                  { label: tDesign("fields.orderDate"), value: orderDate },
+                ]}
+              />
+            </SideCard>
+            <SideCard title={tDesign("sections.customer")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tDesign("fields.customerName"),
+                    value: detail?.bill_to_name || none,
+                  },
+                  {
+                    label: tDesign("fields.customerEmail"),
+                    value: detail?.customer_email || none,
+                  },
+                  {
+                    label: tDetail("fields.orderName"),
+                    value: detail?.order_name || none,
+                  },
+                ]}
+              />
+            </SideCard>
+            <SideCard title={tDetail("sections.delivery")}>
+              <KeyValueList
+                rows={[
+                  {
+                    label: tOrders("columns.deliveryMethod"),
+                    value: detail?.delivery_method || none,
+                  },
+                  {
+                    label: tOrders("columns.localPickup"),
+                    value: <YesNoCell value={Boolean(detail?.local_pickup)} />,
+                  },
+                ]}
+              />
+            </SideCard>
+            <AddressCard
+              title={tDesign("sections.shippingAddress")}
+              order={detail}
+              prefix="ship_to"
+              emptyText={none}
+            />
+            <AddressCard
+              title={tDesign("sections.billing")}
+              order={detail}
+              prefix="bill_to"
+              emptyText={none}
+            />
+          </aside>
         </div>
       ),
     },
     {
-      key: "operations",
-      label: tDetail("tabs.labelsAndPricing"),
+      key: "labels",
+      label: tDetail("tabs.labels"),
       children: (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-3">
+          <SectionHeader
+            title={tDetail("sections.label")}
+            count={transferLabel ? 1 : 0}
+          />
           {transferLabel ? (
-            <Card title={tOrders("detail.fields.labels")}>
-              <Descriptions
-                column={{ xs: 1, sm: 2, md: 3 }}
-                bordered
-                size="small"
-              >
-                <Descriptions.Item label={tOrders("detail.fields.labelSource")}>
-                  {transferLabel?.source || tOrders("common.none")}
-                </Descriptions.Item>
-                <Descriptions.Item label={tOrders("detail.fields.labelRate")}>
-                  {transferLabel?.base_shipping_price != null ? (
-                    <Space direction="vertical" size={0}>
-                      <Typography.Text>
-                        Label Price:{" "}
-                        {formatCurrency(
-                          transferLabel.base_shipping_price,
-                          detail?.currency,
-                        )}
-                      </Typography.Text>
-                      {transferLabel?.source === "shipStationCompany" ? (
-                        <Typography.Text>
-                          With Multiplier:{" "}
-                          {formatCurrency(
-                            transferLabel.shipment_total_price ??
-                              transferLabel.shipping_price,
-                            detail?.currency,
-                          )}
-                        </Typography.Text>
-                      ) : null}
-                    </Space>
-                  ) : transferLabel?.shipping_price != null ? (
-                    formatCurrency(
-                      transferLabel.shipping_price,
-                      detail?.currency,
-                    )
-                  ) : (
-                    tOrders("common.none")
-                  )}
-                </Descriptions.Item>
-                {transferLabel?.source === "easyjet" && transferLabel?.postage_fee != null ? (
-                  <Descriptions.Item label={tOrders("detail.fields.labelPostageFee")}>
-                    {formatCurrency(transferLabel.postage_fee, detail?.currency)}
-                  </Descriptions.Item>
+            <section className="flex max-w-2xl flex-col gap-4 rounded-xl border border-line bg-surface p-4">
+              <KeyValueList rows={labelRows} />
+              <div className="flex flex-wrap justify-end gap-2">
+                {canVoidTransferLabel ? (
+                  <Popconfirm
+                    title={tOrders("detail.actions.voidLabelConfirmTitle")}
+                    okText={tOrders("detail.actions.voidLabelConfirmOk")}
+                    okButtonProps={{
+                      danger: true,
+                      loading: voidingLabelId === String(transferLabelId),
+                    }}
+                    onConfirm={handleVoidLabel}
+                  >
+                    <Button
+                      danger
+                      loading={voidingLabelId === String(transferLabelId)}
+                    >
+                      {tOrders("detail.actions.voidLabel")}
+                    </Button>
+                  </Popconfirm>
                 ) : null}
-                <Descriptions.Item
-                  label={tOrders("detail.fields.labelCreatedAt")}
-                >
-                  {transferLabel?.created_at
-                    ? moment(transferLabel.created_at).format("LLL")
-                    : tOrders("common.none")}
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={tOrders("detail.actions.viewLabel")}
-                  span={3}
-                >
-                  <Space wrap>
-                    {transferLabel?.label_url ? (
-                      <Button
-                        icon={<ExportOutlined />}
-                        onClick={() => {
-                          window.open(
-                            transferLabel.label_url,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }}
-                      >
-                        {tOrders("actions.download")}
-                      </Button>
-                    ) : (
-                      tOrders("common.none")
-                    )}
-                    {canVoidTransferLabel ? (
-                      <Popconfirm
-                        title={tOrders("detail.actions.voidLabelConfirmTitle")}
-                        okText={tOrders("detail.actions.voidLabelConfirmOk")}
-                        okButtonProps={{
-                          danger: true,
-                          loading: voidingLabelId === String(transferLabelId),
-                        }}
-                        onConfirm={handleVoidLabel}
-                      >
-                        <Button
-                          danger
-                          loading={voidingLabelId === String(transferLabelId)}
-                        >
-                          {tOrders("detail.actions.voidLabel")}
-                        </Button>
-                      </Popconfirm>
-                    ) : null}
-                  </Space>
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          ) : null}
-
-          <Card title={tDetail("sections.priceSummary")}>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.itemPrices")}
-                  value={formatCurrency(itemTotalPrice, detail?.currency)}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.designPrices")}
-                  value={formatCurrency(designTotalPrice, detail?.currency)}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={tDetail("priceSummary.combined")}
-                  value={formatCurrency(
-                    itemTotalPrice + designTotalPrice,
-                    detail?.currency,
-                  )}
-                />
-              </Col>
-            </Row>
-          </Card>
+                {transferLabel?.label_url ? (
+                  <Button
+                    type="primary"
+                    icon={<ExportOutlined />}
+                    href={transferLabel.label_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {tOrders("actions.download")}
+                  </Button>
+                ) : null}
+              </div>
+            </section>
+          ) : (
+            <SectionEmpty>{tDetail("messages.noLabel")}</SectionEmpty>
+          )}
         </div>
       ),
     },
@@ -681,145 +738,146 @@ export default function TransferOrderDetailPage() {
             key: "remaked-order",
             label: tDetail("tabs.remakedOrder"),
             children: (
-              <div className="space-y-6">
-                <Card title={tDetail("sections.remakeRequest")}>
-                  <Descriptions
-                    column={{ xs: 1, sm: 2, md: 3 }}
-                    bordered
-                    size="small"
-                  >
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.requestType")}
-                    >
-                      {remakeContext?.request?.request_type
-                        ? tRefundRemake(
-                            `requestType.${remakeContext.request.request_type}`,
-                          ) || remakeContext.request.request_type
-                        : "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.status")}
-                    >
-                      {remakeContext?.request?.status ? (
-                        <StatusTag status={remakeContext.request.status}>
-                          {tRefundRemake(
-                            `status.${remakeContext.request.status}`,
-                          ) || remakeContext.request.status}
-                        </StatusTag>
-                      ) : (
-                        "-"
-                      )}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.responsibleEntity")}
-                    >
-                      {remakeContext?.request?.responsible_entity_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.company")}
-                    >
-                      {remakeContext?.request?.company_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.customer")}
-                    >
-                      {remakeContext?.request?.customer_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.createdAt")}
-                    >
-                      {remakeContext?.request?.created_at
-                        ? moment(remakeContext.request.created_at).format("LLL")
-                        : "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.updatedAt")}
-                    >
-                      {remakeContext?.request?.updated_at
-                        ? moment(remakeContext.request.updated_at).format("LLL")
-                        : "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tDetail("fields.requestLink")}>
-                      {remakeContext?.request?.id ? (
-                        <Link
-                          href={`/dashboard/transfer-orders/orders/refund-remake/${remakeContext.request.id}`}
-                        >
-                          <Button icon={<ExportOutlined />}>
-                            {tDetail("actions.viewRequest")}
-                          </Button>
-                        </Link>
-                      ) : (
-                        "-"
-                      )}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tRefundRemake("detail.fields.description")}
-                      span={3}
-                    >
-                      {remakeContext?.request?.description || "-"}
-                    </Descriptions.Item>
-                  </Descriptions>
-                </Card>
+              <div className="grid items-start gap-4 lg:grid-cols-2">
+                <SideCard title={tDetail("sections.remakeRequest")}>
+                  <KeyValueList
+                    rows={[
+                      {
+                        label: tRefundRemake("detail.fields.requestType"),
+                        value: remakeContext?.request?.request_type
+                          ? tRefundRemake(
+                              `requestType.${remakeContext.request.request_type}`,
+                            ) || remakeContext.request.request_type
+                          : none,
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.status"),
+                        value: remakeContext?.request?.status ? (
+                          <StatusTag status={remakeContext.request.status}>
+                            {tRefundRemake(
+                              `status.${remakeContext.request.status}`,
+                            ) || remakeContext.request.status}
+                          </StatusTag>
+                        ) : (
+                          none
+                        ),
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.responsibleEntity"),
+                        value:
+                          remakeContext?.request?.responsible_entity_name ||
+                          none,
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.company"),
+                        value: remakeContext?.request?.company_name || none,
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.customer"),
+                        value: remakeContext?.request?.customer_name || none,
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.createdAt"),
+                        value: formatDateTime(
+                          remakeContext?.request?.created_at,
+                          none,
+                        ),
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.updatedAt"),
+                        value: formatDateTime(
+                          remakeContext?.request?.updated_at,
+                          none,
+                        ),
+                      },
+                      {
+                        label: tRefundRemake("detail.fields.description"),
+                        value: remakeContext?.request?.description || none,
+                      },
+                    ]}
+                  />
+                  {remakeContext?.request?.id ? (
+                    <div className="flex justify-end">
+                      <Link
+                        href={`/dashboard/transfer-orders/orders/refund-remake/${remakeContext.request.id}`}
+                      >
+                        <Button icon={<ExportOutlined />}>
+                          {tDetail("actions.viewRequest")}
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : null}
+                </SideCard>
 
-                <Card title={tDetail("sections.originalTransferOrder")}>
-                  <Descriptions
-                    column={{ xs: 1, sm: 2, md: 3 }}
-                    bordered
-                    size="small"
-                  >
-                    <Descriptions.Item label={tOrders("columns.orderNumber")}>
-                      {remakeContext?.source_order?.order_number || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tDetail("fields.orderName")}>
-                      {remakeContext?.source_order?.order_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tOrders("columns.status")}>
-                      {remakeContext?.source_order?.order_status ? (
-                        <StatusTag status={remakeContext.source_order.order_status}>
-                          {tOrders(
-                            `status.values.${remakeContext.source_order.order_status}`,
-                          ) || remakeContext.source_order.order_status}
-                        </StatusTag>
-                      ) : (
-                        "-"
-                      )}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tOrders("columns.orderDate")}>
-                      {remakeContext?.source_order?.order_date
-                        ? moment(remakeContext.source_order.order_date).format(
-                            "LLL",
-                          )
-                        : "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item
-                      label={tOrders("columns.customerName")}
-                    >
-                      {remakeContext?.source_order?.bill_to_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tDetail("fields.currency")}>
-                      {remakeContext?.source_order?.currency || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tDetail("fields.orderTotal")}>
-                      {formatCurrency(
-                        remakeContext?.source_order?.order_total,
-                        remakeContext?.source_order?.currency,
-                      )}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={tDetail("fields.orderLink")}>
-                      {remakeContext?.source_order?.order_number ? (
-                        <Link
-                          href={`/dashboard/transfer-orders/orders/${encodeURIComponent(remakeContext.source_order.order_number)}`}
-                        >
-                          <Button icon={<ExportOutlined />}>
-                            {tDetail("actions.openOrder")}
-                          </Button>
-                        </Link>
-                      ) : (
-                        "-"
-                      )}
-                    </Descriptions.Item>
-                  </Descriptions>
-                </Card>
+                <SideCard title={tDetail("sections.originalTransferOrder")}>
+                  <KeyValueList
+                    rows={[
+                      {
+                        label: tOrders("columns.orderNumber"),
+                        value: remakeContext?.source_order?.order_number ? (
+                          <span className="ej-mono">
+                            #{remakeContext.source_order.order_number}
+                          </span>
+                        ) : (
+                          none
+                        ),
+                      },
+                      {
+                        label: tDetail("fields.orderName"),
+                        value: remakeContext?.source_order?.order_name || none,
+                      },
+                      {
+                        label: tOrders("columns.status"),
+                        value: remakeContext?.source_order?.order_status ? (
+                          <StatusTag
+                            status={remakeContext.source_order.order_status}
+                          >
+                            {statusText(remakeContext.source_order.order_status)}
+                          </StatusTag>
+                        ) : (
+                          none
+                        ),
+                      },
+                      {
+                        label: tOrders("columns.orderDate"),
+                        value: formatDateTime(
+                          remakeContext?.source_order?.order_date,
+                          none,
+                        ),
+                      },
+                      {
+                        label: tOrders("columns.customerName"),
+                        value: remakeContext?.source_order?.bill_to_name || none,
+                      },
+                      {
+                        label: tDetail("fields.currency"),
+                        value: remakeContext?.source_order?.currency || none,
+                      },
+                      {
+                        label: tDetail("fields.orderTotal"),
+                        value: (
+                          <span className="ej-mono">
+                            {formatCurrency(
+                              remakeContext?.source_order?.order_total,
+                              remakeContext?.source_order?.currency,
+                            )}
+                          </span>
+                        ),
+                      },
+                    ]}
+                  />
+                  {remakeContext?.source_order?.order_number ? (
+                    <div className="flex justify-end">
+                      <Link
+                        href={`/dashboard/transfer-orders/orders/${encodeURIComponent(remakeContext.source_order.order_number)}`}
+                      >
+                        <Button icon={<ExportOutlined />}>
+                          {tDetail("actions.openOrder")}
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : null}
+                </SideCard>
               </div>
             ),
           },
@@ -842,6 +900,8 @@ export default function TransferOrderDetailPage() {
       : []),
   ];
 
+  const sourceOrderNumber = remakeContext?.source_order?.order_number;
+
   return (
     <RequireRole
       anyOfRoles={[
@@ -853,75 +913,56 @@ export default function TransferOrderDetailPage() {
       ]}
       anyOfCategories={["Transfers"]}
     >
-      <div>
-        <div className="space-y-5">
-          <PageHeader
-            className=""
-            breadcrumb={[
-              { title: tOrders("title") },
-              { title: `#${detail?.order_number || "-"}` },
-            ]}
-            title={
-              <span className="ej-mono">#{detail?.order_number || "-"}</span>
-            }
-            meta={
-              detail?.order_status ? (
+      <div className="space-y-5">
+        <PageHeader
+          className=""
+          breadcrumb={[
+            { title: tDetail("breadcrumb") },
+            { title: `#${detail?.order_number || none}` },
+          ]}
+          title={<span className="ej-mono">#{detail?.order_number || none}</span>}
+          meta={
+            detail?.order_status ? (
+              <>
                 <StatusTag status={detail.order_status}>
-                  {tOrders(`status.values.${detail.order_status}`) ||
-                    detail.order_status}
+                  {statusText(detail.order_status)}
                 </StatusTag>
-              ) : null
-            }
-            description={
-              detail?.order_date
-                ? `${tOrders("columns.orderDate")}: ${moment(detail.order_date).format("LLL")}`
-                : undefined
-            }
+                {showRemakeTab ? (
+                  <StatusTag tone="refund">{tOrders("status.values.remake")}</StatusTag>
+                ) : null}
+              </>
+            ) : null
+          }
+          description={[
+            detail?.order_name
+              ? `${tDetail("fields.orderName")}: ${detail.order_name}`
+              : null,
+            `${tDesign("fields.orderDate")}: ${orderDate}`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        />
+        {showRemakeTab && sourceOrderNumber ? (
+          <Alert
+            type="info"
+            showIcon
+            message={tDetail("messages.remakeOf", {
+              orderNumber: sourceOrderNumber,
+            })}
           />
-          <Card className="rounded-xl border border-line">
-            <Descriptions
-              column={{ xs: 1, sm: 2, md: 3 }}
-              bordered
+        ) : null}
+        {progressStep !== null ? (
+          <div className="rounded-xl border border-line px-5 py-4">
+            <Steps
               size="small"
-            >
-              <Descriptions.Item label={tDetail("fields.orderName")}>
-                {detail?.order_name || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.status")}>
-                <StatusTag status={detail?.order_status}>
-                  {detail?.order_status
-                    ? tOrders(`status.values.${detail?.order_status}`) ||
-                      detail?.order_status
-                    : tOrders("common.none")}
-                </StatusTag>
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.customerName")}>
-                {detail?.bill_to_name || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.orderDate")}>
-                {detail?.order_date
-                  ? moment(detail.order_date).format("LLL")
-                  : "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tDetail("fields.currency")}>
-                {detail?.currency || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item label={tDetail("fields.orderTotal")}>
-                {formatAmount(detail?.order_total)}
-              </Descriptions.Item>
-              <Descriptions.Item label={tOrders("columns.notes")}>
-                {detail?.notes || "-"}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label={tOrders("columns.designerNotes")}
-                span={2}
-              >
-                {detail?.designer_notes || "-"}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-          <Tabs defaultActiveKey="overview" items={detailTabs} />
-        </div>
+              current={progressStep}
+              status="process"
+              items={progressItems}
+              aria-label={tDesign("progress.ariaLabel")}
+            />
+          </div>
+        ) : null}
+        <Tabs defaultActiveKey="overview" items={detailTabs} />
       </div>
     </RequireRole>
   );
