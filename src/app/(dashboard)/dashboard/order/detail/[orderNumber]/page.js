@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
-import { FileSearchOutlined } from "@ant-design/icons";
+import { FileSearchOutlined, ShopOutlined } from "@ant-design/icons";
 import {
   Alert,
   App as AntdApp,
@@ -37,6 +37,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
 import {
   AddressCard,
+  HeaderFacts,
   InfoField,
   KeyValueList,
   SectionEmpty,
@@ -1093,6 +1094,7 @@ export default function OrderDetailPage() {
   );
 
   const fallbackText = tDesign("designs.designAreaPlaceholder");
+  const customerEntityName = orderDetail?.customer?.name || "";
   const pendingPoolItems = Number(
     orderDetail?.pool_completion_summary?.pending_items || 0,
   );
@@ -1244,6 +1246,10 @@ export default function OrderDetailPage() {
             <SideCard title={tDesign("sections.customer")}>
               <KeyValueList
                 rows={[
+                  {
+                    label: tDesign("fields.customerEntity"),
+                    value: customerEntityName || tOrders("common.none"),
+                  },
                   {
                     label: tDesign("fields.customerName"),
                     value: orderDetail?.bill_to_name || tOrders("common.none"),
@@ -1557,7 +1563,20 @@ export default function OrderDetailPage() {
                   </>
                 ) : null
               }
-              description={`${tDesign("fields.orderDate")}: ${orderDate}`}
+              description={
+                <HeaderFacts
+                  items={[
+                    customerEntityName
+                      ? {
+                          label: tDesign("fields.customerEntity"),
+                          value: customerEntityName,
+                          icon: <ShopOutlined aria-hidden="true" />,
+                        }
+                      : null,
+                    { label: tDesign("fields.orderDate"), value: orderDate },
+                  ]}
+                />
+              }
             />
             {progressStep !== null ? (
               <div className="rounded-xl border border-line px-5 py-4">

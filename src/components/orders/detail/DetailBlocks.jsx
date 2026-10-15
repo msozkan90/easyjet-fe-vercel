@@ -96,3 +96,21 @@ export const AddressCard = ({ title, order, prefix, emptyText }) => {
     </SideCard>
   );
 };
+
+// Header description line: "Label: value · Label: value" with values emphasised.
+export const HeaderFacts = ({ items }) => (
+  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+    {items.filter(Boolean).map((item, index) => (
+      <span key={item.label} className="inline-flex items-center gap-1">
+        {index > 0 ? (
+          <span aria-hidden="true" className="mr-1 text-ink-300">
+            ·
+          </span>
+        ) : null}
+        {item.icon}
+        <span>{item.label}:</span>
+        <span className="font-medium text-text">{item.value}</span>
+      </span>
+    ))}
+  </span>
+);

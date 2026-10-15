@@ -23,12 +23,14 @@ import {
   LinkOutlined,
   ProfileOutlined,
   SaveOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage";
 import {
   AddressCard,
+  HeaderFacts,
   KeyValueList,
   SectionEmpty,
   SectionHeader,
@@ -271,6 +273,7 @@ export default function TransferOrderDetailPage() {
   );
 
   const tDesign = useTranslations("dashboard.orders.detail");
+  const tEntityTypes = useTranslations("common.entityTypes");
   const none = tOrders("common.none");
   const currency = detail?.currency;
   const statusText = (value) =>
@@ -295,6 +298,12 @@ export default function TransferOrderDetailPage() {
   }
 
   const orderDate = formatDateTime(detail?.order_date, none);
+  // Filled once the detail API returns the customer entity (see owner_entity
+  // on the list endpoint); hidden while it is absent.
+  const customerEntityName =
+    detail?.customer_entity?.name || detail?.customer?.name || "";
+  const partnerName =
+    detail?.owner_entity?.type === "partner" ? detail.owner_entity.name : "";
   const progressStep = (() => {
     switch (String(detail?.order_status || "")) {
       case "newOrder":
@@ -638,6 +647,13 @@ export default function TransferOrderDetailPage() {
               <KeyValueList
                 rows={[
                   {
+                    label: tDesign("fields.customerEntity"),
+                    value: customerEntityName || none,
+                  },
+                  partnerName
+                    ? { label: tEntityTypes("partner"), value: partnerName }
+                    : null,
+                  {
                     label: tDesign("fields.customerName"),
                     value: detail?.bill_to_name || none,
                   },
@@ -933,14 +949,25 @@ export default function TransferOrderDetailPage() {
               </>
             ) : null
           }
-          description={[
-            detail?.order_name
-              ? `${tDetail("fields.orderName")}: ${detail.order_name}`
-              : null,
-            `${tDesign("fields.orderDate")}: ${orderDate}`,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+          description={
+            <HeaderFacts
+              items={[
+                customerEntityName
+                  ? {
+                      label: tDesign("fields.customerEntity"),
+                      value: partnerName
+                        ? `${customerEntityName} (${partnerName})`
+                        : customerEntityName,
+                      icon: <ShopOutlined aria-hidden="true" />,
+                    }
+                  : null,
+                detail?.order_name
+                  ? { label: tDetail("fields.orderName"), value: detail.order_name }
+                  : null,
+                { label: tDesign("fields.orderDate"), value: orderDate },
+              ]}
+            />
+          }
         />
         {showRemakeTab && sourceOrderNumber ? (
           <Alert

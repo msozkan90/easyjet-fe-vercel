@@ -2900,7 +2900,8 @@
           "labelShippingCharged": "Shipping charged",
           "labelTracking": "Tracking Number",
           "labelCreatedAt": "Created At",
-          "labels": "Labels"
+          "labels": "Labels",
+          "customerEntity": "Customer account"
         },
         "designs": {
           "title": "Designs",

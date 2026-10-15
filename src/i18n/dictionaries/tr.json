@@ -2680,7 +2680,8 @@
           "labelShippingCharged": "Tahsil edilen kargo",
           "labelTracking": "Takip Numarası",
           "labelCreatedAt": "Oluşturma Tarihi",
-          "labels": "Etiketler"
+          "labels": "Etiketler",
+          "customerEntity": "Müşteri hesabı"
         },
         "designs": {
           "title": "Tasarımlar",
