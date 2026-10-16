@@ -13,6 +13,7 @@ import { getBlobErrorMessage } from "@/utils/apiHelpers";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import { useTranslations } from "@/i18n/use-translations";
 import { useDownloadQueue } from "@/components/downloads/DownloadQueueProvider";
+import OrderItemPackingSlipButton from "@/components/orders/OrderItemPackingSlipButton";
 import DesignFlawModal from "@/components/orders/design-flaws/DesignFlawModal";
 
 const fetchProducts = () => fetchGenericList("product");
@@ -87,7 +88,7 @@ export default function SubCategoryViewOrderPage({ params }) {
         title: tDesignFlaws("fields.actions"),
         key: "actions",
         fixed: "right",
-        width: 120,
+        width: 160,
         render: (_, record) => {
           const orderNumber =
             record?.order?.order_number || record?.order_number;
@@ -101,6 +102,11 @@ export default function SubCategoryViewOrderPage({ params }) {
                   />
                 </Tooltip>
               ) : null}
+              <OrderItemPackingSlipButton
+                orderItem={record}
+                categoryId={categoryId}
+                subCategoryId={subCategoryId}
+              />
               {["pdf", "completed"].includes(record?.status) ? (
                 <Tooltip title={tDesignFlaws("actions.mark")}>
                   <Button
@@ -115,7 +121,7 @@ export default function SubCategoryViewOrderPage({ params }) {
         },
       },
     ],
-    [tDesignFlaws],
+    [categoryId, subCategoryId, tDesignFlaws],
   );
 
   return (
