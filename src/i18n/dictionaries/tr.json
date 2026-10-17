@@ -3687,7 +3687,8 @@
         "stock": "Stok",
         "prices": "Fiyatlar",
         "partnerToCustomerPrices": "Müşteri Fiyatları",
-        "partnerPrices": "Partner Fiyatları"
+        "partnerPrices": "Partner Fiyatları",
+        "catalog": "Catalog"
       },
       "transferProductVariation": {
         "title": "Transfer Ürün Varyasyonları",
@@ -3742,7 +3743,8 @@
         "settings": "Şirket Ayarları",
         "userMetrics": "Kullanıcı Metrikleri"
       },
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "productPrice": "Product Price"
     },
     "settings": {
       "header": {
@@ -4239,6 +4241,36 @@
         "orderSearch": "Sipariş / müşteri ara",
         "orderDate": "Sipariş tarihi"
       }
+    },
+    "productCatalog": {
+      "title": "Catalog",
+      "customerTitle": "Product Price",
+      "image": "Görsel",
+      "product": "Ürün",
+      "size": "Beden",
+      "color": "Renk",
+      "price": "Birim Fiyat",
+      "actions": "İşlemler",
+      "edit": "Düzenle",
+      "save": "Kaydet",
+      "cancel": "İptal",
+      "upload": "Görsel seç",
+      "editTitle": "Katalog görselini düzenle",
+      "noImage": "Görsel yok",
+      "invalidImage": "En fazla 5 MB boyutunda tek bir PNG, JPEG veya WebP görsel seçin.",
+      "saved": "Katalog görseli kaydedildi.",
+      "saveError": "Görsel kaydedilemedi.",
+      "selectImage": "Kaydetmeden önce bir görsel seçin.",
+      "open": "Aç",
+      "search": "Ara",
+      "selectProduct": "Ürün seçin",
+      "selectSize": "Beden seçin",
+      "selectColor": "Renk seçin",
+      "loadFiltersError": "Filtre seçenekleri yüklenemedi.",
+      "customer": "Müşteri",
+      "selectCustomer": "Müşteri seçin",
+      "selectCustomerToView": "Ürün fiyatlarını görmek için bir müşteri seçin.",
+      "loadCustomersError": "Müşteriler yüklenemedi."
     }
   },
   "forms": {
