@@ -3907,7 +3907,8 @@
         "stock": "Stock",
         "prices": "Prices",
         "partnerToCustomerPrices": "Customer Prices",
-        "partnerPrices": "Partner Prices"
+        "partnerPrices": "Partner Prices",
+        "catalog": "Catalog"
       },
       "transferProductVariation": {
         "title": "Transfer Products Variation",
@@ -3962,7 +3963,8 @@
         "settings": "Company Settings",
         "userMetrics": "User Metrics"
       },
-      "settings": "Settings"
+      "settings": "Settings",
+      "productPrice": "Product Price"
     },
     "settings": {
       "header": {
@@ -4239,6 +4241,36 @@
         "orderSearch": "Search order/customer",
         "orderDate": "Order date"
       }
+    },
+    "productCatalog": {
+      "title": "Catalog",
+      "customerTitle": "Product Price",
+      "image": "Image",
+      "product": "Product",
+      "size": "Size",
+      "color": "Color",
+      "price": "Unit Price",
+      "actions": "Actions",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "upload": "Select image",
+      "editTitle": "Edit catalog image",
+      "noImage": "No image",
+      "invalidImage": "Select one PNG, JPEG or WebP image up to 5 MB.",
+      "saved": "Catalog image saved.",
+      "saveError": "Image could not be saved.",
+      "selectImage": "Select an image before saving.",
+      "open": "Open",
+      "search": "Search",
+      "selectProduct": "Select product",
+      "selectSize": "Select size",
+      "selectColor": "Select color",
+      "loadFiltersError": "Filter options could not be loaded.",
+      "customer": "Customer",
+      "selectCustomer": "Select customer",
+      "selectCustomerToView": "Select a customer to view product prices.",
+      "loadCustomersError": "Customers could not be loaded."
     }
   },
   "forms": {

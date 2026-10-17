@@ -960,3 +960,11 @@ export const NotificationRulesAPI = {
   remove: (id) => api.del(`/notifications/${id}`),
   listRecipientUsers: () => api.get("/notifications/recipient-users"),
 };
+
+export const ProductCatalogAPI = {
+  list: (payload) => api.post("/product-catalog/list", payload),
+  saveImage: (payload) => api.putMultipart("/product-catalog/image", payload),
+  customerPrices: (payload) => api.post("/product-prices/catalog", payload),
+  partnerPrices: (payload) => api.post("/product-prices/partner-catalog", payload),
+  partnerCustomerPrices: (payload, customerId) => api.post("/product-prices/partner-customer-catalog", { ...payload, customer_id: customerId }),
+};
