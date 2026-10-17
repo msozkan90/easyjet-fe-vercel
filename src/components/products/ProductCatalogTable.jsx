@@ -28,7 +28,6 @@ export default function ProductCatalogTable({ customer = false, partner = false,
   const [customersLoading, setCustomersLoading] = useState(false);
   const [filterOptions, setFilterOptions] = useState({ product: [], size: [], color: [] });
   useEffect(() => {
-    if (!showPrices) return;
     let alive = true;
     const fields = ["product", "size", "color"];
     Promise.allSettled([
@@ -48,7 +47,7 @@ export default function ProductCatalogTable({ customer = false, partner = false,
       if (results.some(result => result.status === "rejected")) message.error(t("loadFiltersError"));
     });
     return () => { alive = false; };
-  }, [showPrices, message, t]);
+  }, [message, t]);
   useEffect(() => {
     if (!partner || !selectCustomer) return;
     let alive = true;
@@ -77,13 +76,13 @@ export default function ProductCatalogTable({ customer = false, partner = false,
       : customer ? ProductCatalogAPI.customerPrices : ProductCatalogAPI.list;
     return makeListRequest(list, {
       defaultSort: [],
-      filterTransform: showPrices ? filters => ({
+      filterTransform: filters => ({
         ...filters,
         ...(filters.size_name ? { size_name: { eq: filters.size_name } } : {}),
         ...(filters.color_name ? { color_name: { eq: filters.color_name } } : {}),
-      }) : undefined,
+      }),
     }, normalizeListAndMeta);
-  }, [customer, partner, selectCustomer, selectedCustomerId, showPrices]);
+  }, [customer, partner, selectCustomer, selectedCustomerId]);
   const close = () => { setEditing(null); setFile(null); };
   const columns = [
     { title: t("image"), dataIndex: "image_url", width: 120, render: (url, row) => url ? (
@@ -91,11 +90,9 @@ export default function ProductCatalogTable({ customer = false, partner = false,
         openLabel={t("open")} emptyText={t("noImage")} style={{ objectFit: "contain", borderRadius: 8 }} />
     ) : <Typography.Text type="secondary">{t("noImage")}</Typography.Text> },
     ...["product", "size", "color"].map(field => ({
-      title: t(field), dataIndex: showPrices && field === "product" ? "product_id" : `${field}_name`,
+      title: t(field), dataIndex: field === "product" ? "product_id" : `${field}_name`,
       render: (_, row) => row[`${field}_name`],
-      filter: showPrices
-        ? { type: "select", options: filterOptions[field], placeholder: t(`select${field[0].toUpperCase()}${field.slice(1)}`) }
-        : { type: "text", placeholder: t("search") },
+      filter: { type: "select", options: filterOptions[field], placeholder: t(`select${field[0].toUpperCase()}${field.slice(1)}`) },
     })),
     ...(showPrices ? [{ title: t("price"), dataIndex: "price", sorter: true, render: value => formatPrice(value) }] : [{
       title: t("actions"), key: "actions", width: 100,
