@@ -710,6 +710,11 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
                       ),
                     },
                     {
+                      key: "product-variation-catalog",
+                      icon: <AppstoreOutlined />,
+                      label: <Link href="/dashboard/product-variation/catalog">{tSidebar("productVariation.catalog")}</Link>,
+                    },
+                    {
                       key: "product-variation-positions",
                       icon: <GatewayOutlined />,
                       label: (
@@ -822,6 +827,11 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
       ? [
           ...(showCustomerProductMapperMenu
             ? [
+                {
+                  key: "product-price",
+                  icon: <DollarOutlined />,
+                  label: <Link href="/dashboard/product-price">{tSidebar("productPrice")}</Link>,
+                },
                 {
                   key: "product-mapper",
                   icon: <AppstoreOutlined />,
