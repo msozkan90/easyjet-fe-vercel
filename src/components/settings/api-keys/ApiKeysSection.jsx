@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { App as AntdApp, Button, Skeleton } from "antd";
-import { KeyOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { KeyOutlined, PlusOutlined, ReadOutlined, ReloadOutlined } from "@ant-design/icons";
+import Link from "next/link";
 import StatusTag from "@/components/ui/StatusTag";
 import { EmptyState, ErrorState } from "@/components/ui/StateView";
 import { useTranslations } from "@/i18n/use-translations";
@@ -125,7 +126,10 @@ export default function ApiKeysSection() {
           <h2 className="m-0 text-base font-semibold text-text">{t("title")}</h2>
           <p className="m-0 max-w-[640px] text-[13px] text-text-secondary">{t("subtitle")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/dashboard/api-docs">
+            <Button icon={<ReadOutlined />}>{t("actions.docs")}</Button>
+          </Link>
           <Button icon={<ReloadOutlined />} onClick={load} loading={loading} aria-label={t("actions.refresh")} />
           <Button
             type="primary"

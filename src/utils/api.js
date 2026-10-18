@@ -983,3 +983,12 @@ export const ApiKeysAPI = {
   adminRevoke: (id, reason) =>
     api.post(`/api-keys/admin/keys/${id}/revoke`, reason ? { reason } : {}),
 };
+
+export const PublicApiDocsAPI = {
+  openapi: () => api.get("/public-api/openapi.json"),
+  info: () => api.get("/public-api/info"),
+  postman: () =>
+    fetchBlobFile("/public-api/postman.json", {
+      fallbackFilename: "EasyJet-API-v1.postman_collection.json",
+    }),
+};

@@ -3965,7 +3965,8 @@
       },
       "settings": "Settings",
       "productPrice": "Product Price",
-      "apiAccess": "API Access"
+      "apiAccess": "API Access",
+      "apiDocs": "API Docs"
     },
     "settings": {
       "header": {
@@ -4143,7 +4144,8 @@
           "create": "Create API key",
           "rotate": "Rotate",
           "revoke": "Revoke",
-          "refresh": "Refresh"
+          "refresh": "Refresh",
+          "docs": "Read the API docs"
         },
         "confirm": {
           "rotateTitle": "Rotate this key?",

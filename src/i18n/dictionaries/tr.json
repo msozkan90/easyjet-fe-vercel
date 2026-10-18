@@ -3745,7 +3745,8 @@
       },
       "settings": "Ayarlar",
       "productPrice": "Product Price",
-      "apiAccess": "API Erişimi"
+      "apiAccess": "API Erişimi",
+      "apiDocs": "API Dokümanı"
     },
     "settings": {
       "header": {
@@ -3923,7 +3924,8 @@
           "create": "API anahtarı oluştur",
           "rotate": "Yenile",
           "revoke": "İptal et",
-          "refresh": "Yenile"
+          "refresh": "Yenile",
+          "docs": "API dokümanını oku"
         },
         "confirm": {
           "rotateTitle": "Bu anahtar yenilensin mi?",

@@ -23,6 +23,7 @@ import {
   BarChartOutlined,
   UserOutlined,
   ApiOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 
 import Link from "next/link";
@@ -1316,6 +1317,15 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
             key: "api-access",
             icon: <ApiOutlined />,
             label: <Link href="/dashboard/api-access">{tSidebar("apiAccess")}</Link>,
+          },
+        ]
+      : []),
+    ...(isSystemAdmin || isCustomerAdmin
+      ? [
+          {
+            key: "api-docs",
+            icon: <ReadOutlined />,
+            label: <Link href="/dashboard/api-docs">{tSidebar("apiDocs")}</Link>,
           },
         ]
       : []),
