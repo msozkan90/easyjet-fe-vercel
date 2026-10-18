@@ -3744,7 +3744,8 @@
         "userMetrics": "Kullanıcı Metrikleri"
       },
       "settings": "Ayarlar",
-      "productPrice": "Product Price"
+      "productPrice": "Product Price",
+      "apiAccess": "API Erişimi"
     },
     "settings": {
       "header": {
@@ -3756,6 +3757,7 @@
         "subtitle": "Yönetmek istediğiniz bölümü seçin.",
         "items": {
           "apiConf": "Api Conf",
+          "apiKeys": "API Anahtarları",
           "notification": "Bildirim"
         }
       },
@@ -3870,6 +3872,99 @@
       "integrations": {
         "restrictedTitle": "ShipStation hesabınız yöneticiniz tarafından yönetiliyor",
         "restrictedDescription": "Erişim talebi için EasyJet yöneticinizle iletişime geçin."
+      },
+      "apiKeys": {
+        "title": "API anahtarları",
+        "subtitle": "Kendi sisteminizi EasyJet'e bağlayın. Anahtarlar hesabınız adına, seçtiğiniz yetkilerle sınırlı olarak çalışır. Test anahtarları sandbox'ta çalışır; canlı anahtarlar gerçek sipariş oluşturur ve bakiyenizden düşer.",
+        "empty": "Henüz API anahtarı yok.",
+        "never": "Hiç",
+        "noExpiry": "Süresiz",
+        "limitReached": "En fazla {max} aktif anahtarınız olabilir.",
+        "fields": {
+          "name": "Ad",
+          "environment": "Ortam",
+          "scopes": "Yetkiler",
+          "status": "Durum",
+          "lastUsedAt": "Son kullanım",
+          "expiresAt": "Bitiş",
+          "createdAt": "Oluşturulma",
+          "ipAllowlist": "İzin verilen IP'ler",
+          "actions": "İşlemler"
+        },
+        "environment": {
+          "test": "Test (sandbox)",
+          "live": "Canlı"
+        },
+        "status": {
+          "active": "Aktif",
+          "expired": "Süresi doldu",
+          "revoked": "İptal edildi"
+        },
+        "scopes": {
+          "catalog:read": "Ürün, varyant, fiyat ve baskı pozisyonlarını okuma",
+          "orders:read": "Sipariş ve sipariş kalemlerini okuma",
+          "orders:write": "Sipariş oluşturma, güncelleme ve iptal",
+          "designs:write": "Tasarım yükleme ve silme",
+          "shipping:read": "Kargo ücretlerini ve sipariş toplamını alma",
+          "shipping:purchase": "Etiket satın alma ve siparişi üretime gönderme (bakiyeden düşer)",
+          "wallet:read": "Bakiye ve hareketleri okuma",
+          "webhooks:manage": "Webhook adreslerini yönetme"
+        },
+        "summary": {
+          "liveAccess": "Erişim",
+          "liveEnabled": "Canlı ve test",
+          "testOnly": "Yalnızca test",
+          "activeKeys": "Aktif anahtar",
+          "readLimit": "Okuma limiti",
+          "writeLimit": "Yazma limiti",
+          "perMinute": "{count} / dk"
+        },
+        "actions": {
+          "create": "API anahtarı oluştur",
+          "rotate": "Yenile",
+          "revoke": "İptal et",
+          "refresh": "Yenile"
+        },
+        "confirm": {
+          "rotateTitle": "Bu anahtar yenilensin mi?",
+          "rotateDescription": "Yeni bir anahtar oluşturulur. Mevcut anahtar 24 saat daha çalışır.",
+          "revokeTitle": "Bu anahtar iptal edilsin mi?",
+          "revokeDescription": "Bu anahtarla yapılan istekler hemen reddedilir. Geri alınamaz."
+        },
+        "create": {
+          "title": "API anahtarı oluştur",
+          "submit": "Anahtarı oluştur",
+          "nameHelp": "Anahtarı tanımanıza yardımcı olur, örn. kullanan sistemin adı.",
+          "namePlaceholder": "örn. ERP canlı",
+          "liveLocked": "Canlı anahtarlar, EasyJet canlı erişimi onayladıktan sonra açılır. Önce test anahtarıyla geliştirip test edin.",
+          "scopesRequired": "En az bir yetki seçin.",
+          "noExpiry": "Süresiz",
+          "expiresInDays": "{days} gün sonra",
+          "ipHelp": "İsteğe bağlı. Anahtarı yalnızca bu IP adresleri veya CIDR aralıkları kullanabilir. Her birinden sonra Enter'a basın.",
+          "ipInvalid": "Geçerli IP adresleri veya CIDR aralıkları girin."
+        },
+        "secret": {
+          "title": "Yeni API anahtarınız",
+          "rotatedTitle": "Yenilenen API anahtarınız",
+          "warning": "Bu anahtarı şimdi kopyalayıp güvenli bir yerde saklayın. Güvenliğiniz için tekrar gösterilmeyecek.",
+          "copy": "Kopyala",
+          "copied": "API anahtarı kopyalandı.",
+          "copyFailed": "Kopyalanamadı. Anahtarı seçip elle kopyalayın.",
+          "previousKeyGrace": "Önceki anahtar {date} tarihine kadar çalışmaya devam eder.",
+          "confirmStored": "Bu anahtarı güvenli bir yerde sakladım.",
+          "done": "Tamam"
+        },
+        "disabled": {
+          "title": "API erişimi açık değil",
+          "description": "EasyJet API'si ile kendi sisteminizden sipariş oluşturabilir, tasarım yükleyebilir ve etiket satın alabilirsiniz. Hesabınızda açılması için EasyJet ile iletişime geçin."
+        },
+        "messages": {
+          "loadError": "API anahtarları yüklenemedi.",
+          "createError": "API anahtarı oluşturulamadı.",
+          "rotateError": "API anahtarı yenilenemedi.",
+          "revokeSuccess": "API anahtarı iptal edildi.",
+          "revokeError": "API anahtarı iptal edilemedi."
+        }
       }
     },
     "profile": {
@@ -4271,6 +4366,60 @@
       "selectCustomer": "Müşteri seçin",
       "selectCustomerToView": "Ürün fiyatlarını görmek için bir müşteri seçin.",
       "loadCustomersError": "Müşteriler yüklenemedi."
+    },
+    "apiAccess": {
+      "columns": {
+        "customer": "Müşteri",
+        "access": "API erişimi",
+        "tier": "Rate limit",
+        "keys": "Aktif anahtar",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "searchCustomer": "Müşteri ara",
+        "onlyGranted": "Yalnızca API erişimi olanlar"
+      },
+      "access": {
+        "disabled": "Kapalı",
+        "test": "Yalnızca test",
+        "live": "Canlı"
+      },
+      "tiers": {
+        "standard": "Standart",
+        "high": "Yüksek"
+      },
+      "actions": {
+        "edit": "Erişimi düzenle",
+        "viewKeys": "Anahtarları gör",
+        "save": "Kaydet"
+      },
+      "fields": {
+        "enabled": "API erişimi",
+        "liveEnabled": "Canlı erişim",
+        "tier": "Rate limit seviyesi",
+        "maxKeys": "En fazla aktif anahtar",
+        "notes": "İç notlar"
+      },
+      "modal": {
+        "title": "API erişimi: {name}",
+        "enabledHelp": "Kapatıldığında bu müşterinin tüm anahtarları hemen çalışmayı durdurur.",
+        "liveHelp": "Gerçek sipariş oluşturan ve bakiyeden düşen canlı anahtarlara izin verir. Erişim açıkken test anahtarları her zaman çalışır.",
+        "disableWarning": "Bu müşterinin tüm API anahtarları çalışmayı durduracak."
+      },
+      "drawer": {
+        "title": "API anahtarları: {name}",
+        "empty": "Bu müşterinin API anahtarı yok."
+      },
+      "table": {
+        "noData": "Müşteri bulunamadı."
+      },
+      "messages": {
+        "saveSuccess": "API erişimi güncellendi.",
+        "saveError": "API erişimi güncellenemedi.",
+        "keysLoadError": "API anahtarları yüklenemedi.",
+        "revokeSuccess": "API anahtarı iptal edildi.",
+        "revokeError": "API anahtarı iptal edilemedi."
+      }
     }
   },
   "forms": {

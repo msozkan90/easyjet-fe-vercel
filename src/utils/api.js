@@ -968,3 +968,18 @@ export const ProductCatalogAPI = {
   partnerPrices: (payload) => api.post("/product-prices/partner-catalog", payload),
   partnerCustomerPrices: (payload, customerId) => api.post("/product-prices/partner-customer-catalog", { ...payload, customer_id: customerId }),
 };
+
+export const ApiKeysAPI = {
+  access: () => api.get("/api-keys/access"),
+  list: () => api.get("/api-keys"),
+  create: (payload) => api.post("/api-keys", payload),
+  rotate: (id) => api.post(`/api-keys/${id}/rotate`),
+  revoke: (id, reason) => api.post(`/api-keys/${id}/revoke`, reason ? { reason } : {}),
+  requestLogs: (payload) => api.post("/api-keys/request-logs/list", payload),
+  adminListGrants: (payload) => api.post("/api-keys/admin/grants/list", payload),
+  adminUpsertGrant: (customerId, payload) =>
+    api.put(`/api-keys/admin/grants/${customerId}`, payload),
+  adminCustomerKeys: (customerId) => api.get(`/api-keys/admin/customers/${customerId}/keys`),
+  adminRevoke: (id, reason) =>
+    api.post(`/api-keys/admin/keys/${id}/revoke`, reason ? { reason } : {}),
+};

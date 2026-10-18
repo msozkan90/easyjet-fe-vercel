@@ -3964,7 +3964,8 @@
         "userMetrics": "User Metrics"
       },
       "settings": "Settings",
-      "productPrice": "Product Price"
+      "productPrice": "Product Price",
+      "apiAccess": "API Access"
     },
     "settings": {
       "header": {
@@ -3976,6 +3977,7 @@
         "subtitle": "Choose a section to manage.",
         "items": {
           "apiConf": "Api Conf",
+          "apiKeys": "API Keys",
           "notification": "Notification"
         }
       },
@@ -4090,6 +4092,99 @@
       "integrations": {
         "restrictedTitle": "ShipStation is managed by your company",
         "restrictedDescription": "Contact your EasyJet administrator to request access."
+      },
+      "apiKeys": {
+        "title": "API keys",
+        "subtitle": "Connect your own system to EasyJet. Keys act on behalf of your account, limited to the scopes you choose. Test keys run in the sandbox; live keys create real orders and charge your wallet.",
+        "empty": "No API keys yet.",
+        "never": "Never",
+        "noExpiry": "No expiry",
+        "limitReached": "You can have at most {max} active keys.",
+        "fields": {
+          "name": "Name",
+          "environment": "Environment",
+          "scopes": "Permissions",
+          "status": "Status",
+          "lastUsedAt": "Last used",
+          "expiresAt": "Expires",
+          "createdAt": "Created",
+          "ipAllowlist": "Allowed IPs",
+          "actions": "Actions"
+        },
+        "environment": {
+          "test": "Test (sandbox)",
+          "live": "Live"
+        },
+        "status": {
+          "active": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked"
+        },
+        "scopes": {
+          "catalog:read": "Read products, variants, prices and print positions",
+          "orders:read": "Read orders and order items",
+          "orders:write": "Create, update and cancel orders",
+          "designs:write": "Upload and delete designs",
+          "shipping:read": "Get shipping rates and order totals",
+          "shipping:purchase": "Buy labels and send orders to production (charges your wallet)",
+          "wallet:read": "Read wallet balance and transactions",
+          "webhooks:manage": "Manage webhook endpoints"
+        },
+        "summary": {
+          "liveAccess": "Access",
+          "liveEnabled": "Live and test",
+          "testOnly": "Test only",
+          "activeKeys": "Active keys",
+          "readLimit": "Read limit",
+          "writeLimit": "Write limit",
+          "perMinute": "{count} / min"
+        },
+        "actions": {
+          "create": "Create API key",
+          "rotate": "Rotate",
+          "revoke": "Revoke",
+          "refresh": "Refresh"
+        },
+        "confirm": {
+          "rotateTitle": "Rotate this key?",
+          "rotateDescription": "A new key is created. The current key keeps working for 24 hours.",
+          "revokeTitle": "Revoke this key?",
+          "revokeDescription": "Requests with this key fail immediately. This cannot be undone."
+        },
+        "create": {
+          "title": "Create API key",
+          "submit": "Create key",
+          "nameHelp": "Helps you recognize the key, e.g. the system that uses it.",
+          "namePlaceholder": "e.g. ERP production",
+          "liveLocked": "Live keys become available after EasyJet approves live access. Build and test with a test key first.",
+          "scopesRequired": "Select at least one permission.",
+          "noExpiry": "Never expires",
+          "expiresInDays": "In {days} days",
+          "ipHelp": "Optional. Only these IP addresses or CIDR ranges may use the key. Press Enter after each one.",
+          "ipInvalid": "Enter valid IP addresses or CIDR ranges."
+        },
+        "secret": {
+          "title": "Your new API key",
+          "rotatedTitle": "Your rotated API key",
+          "warning": "Copy this key now and store it somewhere safe. For your security it will not be shown again.",
+          "copy": "Copy",
+          "copied": "API key copied.",
+          "copyFailed": "Could not copy. Select the key and copy it manually.",
+          "previousKeyGrace": "The previous key keeps working until {date}.",
+          "confirmStored": "I have stored this key securely.",
+          "done": "Done"
+        },
+        "disabled": {
+          "title": "API access is not enabled",
+          "description": "The EasyJet API lets you create orders, upload designs and buy labels from your own system. Contact EasyJet to enable it for your account."
+        },
+        "messages": {
+          "loadError": "API keys could not be loaded.",
+          "createError": "API key could not be created.",
+          "rotateError": "API key could not be rotated.",
+          "revokeSuccess": "API key revoked.",
+          "revokeError": "API key could not be revoked."
+        }
       }
     },
     "profile": {
@@ -4271,6 +4366,60 @@
       "selectCustomer": "Select customer",
       "selectCustomerToView": "Select a customer to view product prices.",
       "loadCustomersError": "Customers could not be loaded."
+    },
+    "apiAccess": {
+      "columns": {
+        "customer": "Customer",
+        "access": "API access",
+        "tier": "Rate limit",
+        "keys": "Active keys",
+        "actions": "Actions"
+      },
+      "filters": {
+        "searchCustomer": "Search customer",
+        "onlyGranted": "Only customers with API access"
+      },
+      "access": {
+        "disabled": "Disabled",
+        "test": "Test only",
+        "live": "Live"
+      },
+      "tiers": {
+        "standard": "Standard",
+        "high": "High"
+      },
+      "actions": {
+        "edit": "Edit access",
+        "viewKeys": "View keys",
+        "save": "Save"
+      },
+      "fields": {
+        "enabled": "API access",
+        "liveEnabled": "Live access",
+        "tier": "Rate limit tier",
+        "maxKeys": "Max active keys",
+        "notes": "Internal notes"
+      },
+      "modal": {
+        "title": "API access: {name}",
+        "enabledHelp": "When off, every key of this customer stops working immediately.",
+        "liveHelp": "Allows live keys that create real orders and charge the wallet. Test keys always work while access is on.",
+        "disableWarning": "All API keys of this customer will stop working."
+      },
+      "drawer": {
+        "title": "API keys: {name}",
+        "empty": "This customer has no API keys."
+      },
+      "table": {
+        "noData": "No customers found."
+      },
+      "messages": {
+        "saveSuccess": "API access updated.",
+        "saveError": "API access could not be updated.",
+        "keysLoadError": "API keys could not be loaded.",
+        "revokeSuccess": "API key revoked.",
+        "revokeError": "API key could not be revoked."
+      }
     }
   },
   "forms": {

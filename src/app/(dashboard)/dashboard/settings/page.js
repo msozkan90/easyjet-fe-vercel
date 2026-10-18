@@ -13,6 +13,7 @@ import SettingsHero from "@/components/settings/SettingsHero";
 import SettingsSideMenu from "@/components/settings/SettingsSideMenu";
 import NotificationSettingsTable from "@/components/settings/NotificationSettingsTable";
 import IntegrationsPlaceholder from "@/components/settings/IntegrationsPlaceholder";
+import ApiKeysSection from "@/components/settings/api-keys/ApiKeysSection";
 import { SETTINGS_SECTIONS } from "@/components/settings/settings.constants";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
 import { filterSourcesByAccess } from "@/utils/apiSourceRules";
@@ -734,6 +735,7 @@ export default function SettingsPage() {
             activeKey={activeSection}
             onChange={setActiveSection}
             tSettings={tSettings}
+            showApiKeys={isCustomerAdmin}
           />
         </div>
 
@@ -776,6 +778,10 @@ export default function SettingsPage() {
               ) : (
                 <IntegrationsPlaceholder tSettings={tSettings} />
               )}
+            </RequireRole>
+          ) : activeSection === SETTINGS_SECTIONS.API_KEYS ? (
+            <RequireRole anyOfRoles={["customerAdmin"]}>
+              <ApiKeysSection />
             </RequireRole>
           ) : (
             <RequireRole
