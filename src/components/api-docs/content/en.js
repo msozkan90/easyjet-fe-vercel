@@ -60,36 +60,58 @@ const en = {
       id: "quickstart",
       title: "Quickstart",
       blocks: [
-        { p: "1. Create a **test** key in Settings → API Keys. Test keys never produce anything or charge money." },
+        {
+          p: "1. Create a **test** key in Settings → API Keys. Test keys never produce anything or charge money.",
+        },
         { p: "2. Check the key:" },
-        { code: 'curl {{baseUrl}}/me -H "Authorization: Bearer $EASYJET_API_KEY"', lang: "bash" },
+        {
+          code: 'curl {{baseUrl}}/me -H "Authorization: Bearer $EASYJET_API_KEY"',
+          lang: "bash",
+        },
         { p: "3. Pick a product variant and a print position:" },
-        { code: 'curl "{{baseUrl}}/products?expand=variants,positions&page_size=5" -H "Authorization: Bearer $EASYJET_API_KEY"', lang: "bash" },
+        {
+          code: 'curl "{{baseUrl}}/products?expand=variants,positions&page_size=5" -H "Authorization: Bearer $EASYJET_API_KEY"',
+          lang: "bash",
+        },
         { p: "4. Create an order:" },
         {
           code: 'curl -X POST {{baseUrl}}/orders \\\n  -H "Authorization: Bearer $EASYJET_API_KEY" \\\n  -H "Idempotency-Key: $(uuidgen)" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"reference":"ERP-1001","ship_to":{"name":"Jane Doe","street1":"1 Market St","city":"San Francisco","state":"CA","postal_code":"94105","country":"US"},"items":[{"product_id":"…","size_id":"…","color_id":"…","quantity":1}]}\'',
           lang: "bash",
         },
-        { p: "5. Send the design by URL, then get rates, quote and fulfill. Each step is described in the guides below and in the API reference." },
-        { p: "The Postman collection runs this whole flow request by request." },
+        {
+          p: "5. Send the design by URL, then get rates, quote and fulfill. Each step is described in the guides below and in the API reference.",
+        },
+        {
+          p: "The Postman collection runs this whole flow request by request.",
+        },
       ],
     },
     {
       id: "authentication",
       title: "Authentication",
       blocks: [
-        { p: "Send your API key in the `Authorization` header: `Authorization: Bearer ej_test_…`. Keys are shown once when created; EasyJet stores only a hash." },
+        {
+          p: "Send your API key in the `Authorization` header: `Authorization: Bearer ej_test_…`. Keys are shown once when created; EasyJet stores only a hash.",
+        },
         {
           table: {
             head: ["Key", "Environment"],
             rows: [
-              ["`ej_test_…`", "Sandbox: same rules and responses, nothing is produced, stored in S3 or charged."],
-              ["`ej_live_…`", "Live: real orders, designs, labels and wallet charges. Available after EasyJet approves live access."],
+              [
+                "`ej_test_…`",
+                "Sandbox: same rules and responses, nothing is produced, stored in S3 or charged.",
+              ],
+              [
+                "`ej_live_…`",
+                "Live: real orders, designs, labels and wallet charges. Available after EasyJet approves live access.",
+              ],
             ],
           },
         },
         { h: "Scopes" },
-        { p: "Each key has the scopes you selected. A request without the needed scope returns `403 INSUFFICIENT_SCOPE`." },
+        {
+          p: "Each key has the scopes you selected. A request without the needed scope returns `403 INSUFFICIENT_SCOPE`.",
+        },
         {
           table: {
             head: ["Scope", "Allows"],
@@ -119,7 +141,9 @@ const en = {
       id: "sandbox",
       title: "Sandbox (test keys)",
       blocks: [
-        { p: "Test keys use the same endpoints, validation, prices and statuses as live keys, but their data is kept apart from real orders." },
+        {
+          p: "Test keys use the same endpoints, validation, prices and statuses as live keys, but their data is kept apart from real orders.",
+        },
         {
           list: [
             "Sandbox orders expire 30 days after their last change; up to 500 per account. `POST /sandbox/reset` deletes them.",
@@ -135,12 +159,17 @@ const en = {
       id: "conventions",
       title: "Requests and responses",
       blocks: [
-        { p: "Requests and responses are JSON (designs and own labels may be multipart). Every response has the same envelope:" },
-        { code: '{\n  "success": true,\n  "data": { … },\n  "pagination": { "page": 1, "page_size": 25, "total": 120, "total_pages": 5 },\n  "meta": { "request_id": "6e3f9a4c-…" }\n}', lang: "json" },
+        {
+          p: "Requests and responses are JSON (designs and own labels may be multipart). Every response has the same envelope:",
+        },
+        {
+          code: '{\n  "success": true,\n  "data": { … },\n  "pagination": { "page": 1, "page_size": 25, "total": 120, "total_pages": 5 },\n  "meta": { "request_id": "6e3f9a4c-…" }\n}',
+          lang: "json",
+        },
         {
           list: [
             "Lists accept `page` and `page_size` (max 100).",
-            "Money is a string with 4 decimals in USD, e.g. `\"12.5000\"`.",
+            'Money is a string with 4 decimals in USD, e.g. `"12.5000"`.',
             "Dates are ISO 8601 in UTC.",
             "Keep `meta.request_id` (also the `X-Request-Id` header) when contacting support.",
           ],
@@ -150,7 +179,10 @@ const en = {
           table: {
             head: ["Status", "Meaning"],
             rows: [
-              ["`newOrder`", "Created; designs can be changed; ready for fulfillment once designs are complete."],
+              [
+                "`newOrder`",
+                "Created; designs can be changed; ready for fulfillment once designs are complete.",
+              ],
               ["`waitingForDesign`", "Marked by you as waiting for designs."],
               ["`readyForProduction`", "Waiting in EasyJet production."],
               ["`processing`", "Label bought; in production."],
@@ -164,15 +196,22 @@ const en = {
             ],
           },
         },
-        { p: "Shipments use `preparing`, `processing`, `completed`, `shipped`, `label_required` and `canceled`." },
+        {
+          p: "Shipments use `preparing`, `processing`, `completed`, `shipped`, `label_required` and `canceled`.",
+        },
       ],
     },
     {
       id: "errors",
       title: "Errors",
       blocks: [
-        { p: "Errors return `success: false` with a stable `error.code` you can branch on, a readable `message` and, when useful, `details` (for example every invalid field)." },
-        { code: '{\n  "success": false,\n  "error": {\n    "code": "VALIDATION_ERROR",\n    "message": "Validation error",\n    "details": [{ "path": "items.0.quantity", "message": "Too small" }]\n  },\n  "meta": { "request_id": "…" }\n}', lang: "json" },
+        {
+          p: "Errors return `success: false` with a stable `error.code` you can branch on, a readable `message` and, when useful, `details` (for example every invalid field).",
+        },
+        {
+          code: '{\n  "success": false,\n  "error": {\n    "code": "VALIDATION_ERROR",\n    "message": "Validation error",\n    "details": [{ "path": "items.0.quantity", "message": "Too small" }]\n  },\n  "meta": { "request_id": "…" }\n}',
+          lang: "json",
+        },
         { errorCodes: true },
       ],
     },
@@ -180,7 +219,9 @@ const en = {
       id: "rate-limits",
       title: "Rate limits",
       blocks: [
-        { p: "Limits are per API key and minute; `GET /me` shows yours. Responses carry `RateLimit` and `RateLimit-Policy` headers; a `429 RATE_LIMITED` response has `Retry-After`." },
+        {
+          p: "Limits are per API key and minute; `GET /me` shows yours. Responses carry `RateLimit` and `RateLimit-Policy` headers; a `429 RATE_LIMITED` response has `Retry-After`.",
+        },
         {
           table: {
             head: ["Class", "Standard", "High"],
@@ -192,14 +233,18 @@ const en = {
             ],
           },
         },
-        { p: "Repeated requests with invalid keys from one IP are blocked for 15 minutes." },
+        {
+          p: "Repeated requests with invalid keys from one IP are blocked for 15 minutes.",
+        },
       ],
     },
     {
       id: "idempotency",
       title: "Idempotency",
       blocks: [
-        { p: "Send an `Idempotency-Key` header (for example a UUID) with POST requests. If the network fails, retry with the same key: you get the first response back (`Idempotent-Replayed: true`) and nothing is created or charged twice. Keys are kept for 24 hours per API key." },
+        {
+          p: "Send an `Idempotency-Key` header (for example a UUID) with POST requests. If the network fails, retry with the same key: you get the first response back (`Idempotent-Replayed: true`) and nothing is created or charged twice. Keys are kept for 24 hours per API key.",
+        },
         {
           list: [
             "Required for `POST /orders/{id}/fulfill`.",
@@ -213,10 +258,17 @@ const en = {
       id: "designs",
       title: "Designs",
       blocks: [
-        { p: "Each item needs at least one design before fulfillment. A design belongs to a print position of the product (`front`, `back`, …)." },
+        {
+          p: "Each item needs at least one design before fulfillment. A design belongs to a print position of the product (`front`, `back`, …).",
+        },
         { h: "From URLs (recommended)" },
-        { p: "Send public https URLs as JSON. EasyJet downloads each file in the background, checks it and keeps its own copy, so your URL only has to work until the import completes. The response is `202` with a design import; follow it with `GET /design-imports/{id}` or `design_imports` on the item." },
-        { code: '{\n  "designs": [\n    { "url": "https://cdn.example.com/front.png", "position": "front" },\n    { "url": "https://cdn.example.com/back.png", "position": "back" }\n  ]\n}', lang: "json" },
+        {
+          p: "Send public https URLs as JSON. EasyJet downloads each file in the background, checks it and keeps its own copy, so your URL only has to work until the import completes. The response is `202` with a design import; follow it with `GET /design-imports/{id}` or `design_imports` on the item.",
+        },
+        {
+          code: '{\n  "designs": [\n    { "url": "https://cdn.example.com/front.png", "position": "front" },\n    { "url": "https://cdn.example.com/back.png", "position": "back" }\n  ]\n}',
+          lang: "json",
+        },
         {
           list: [
             "https on port 443 only; private or internal addresses are refused.",
@@ -225,7 +277,9 @@ const en = {
           ],
         },
         { h: "As files" },
-        { p: "Or upload files as multipart/form-data, one field per position: `-F front=@front.png`. Up to 20 files of 200 MB." },
+        {
+          p: "Or upload files as multipart/form-data, one field per position: `-F front=@front.png`. Up to 20 files of 200 MB.",
+        },
         { h: "Rules" },
         {
           list: [
@@ -241,21 +295,100 @@ const en = {
       id: "shipping",
       title: "Shipping and production",
       blocks: [
-        { steps: [
-          "`POST /orders/{id}/shipping/rates` with the package weight and dimensions returns EasyJet label rates. Each `rate_id` is valid for 15 minutes.",
-          "`POST /orders/{id}/shipping/quote` shows the order price, shipping price, total and whether your wallet covers it.",
-          "`POST /orders/{id}/fulfill` with `{ \"rate_id\" }` buys the label, or send your own label as multipart `label_file` (no shipping charge). The wallet is charged and items move to `processing`.",
-        ] },
-        { p: "Only items in `newOrder` with complete designs go to production. Top up the wallet in the EasyJet panel if the quote says it is not sufficient." },
+        {
+          steps: [
+            "`POST /orders/{id}/shipping/rates` with the package weight and dimensions returns EasyJet label rates. Each `rate_id` is valid for 15 minutes.",
+            "`POST /orders/{id}/shipping/quote` shows the order price, shipping price, total and whether your wallet covers it.",
+            '`POST /orders/{id}/fulfill` with `{ "rate_id" }` buys the label, or send your own label as multipart `label_file` (no shipping charge). The wallet is charged and items move to `processing`.',
+          ],
+        },
+        {
+          p: "Only items in `newOrder` with complete designs go to production. Top up the wallet in the EasyJet panel if the quote says it is not sufficient.",
+        },
         { h: "Cancellation" },
-        { p: "Before fulfillment, cancelling costs nothing. After fulfillment the label is voided and the shipping price is refunded, but the production price is not. Shipped orders cannot be cancelled." },
+        {
+          p: "Before fulfillment, cancelling costs nothing. After fulfillment the label is voided and the shipping price is refunded, but the production price is not. Shipped orders cannot be cancelled.",
+        },
+      ],
+    },
+    {
+      id: "webhooks",
+      title: "Webhooks",
+      blocks: [
+        {
+          p: "Instead of polling, let EasyJet call your https endpoint when something happens. Create endpoints with `POST /webhooks` (scope `webhooks:manage`) or in Settings → API Keys. An endpoint belongs to the environment of the key that created it: test keys receive sandbox events, live keys live events.",
+        },
+        {
+          table: {
+            head: ["Event", "When"],
+            rows: [
+              [
+                "`order.status_changed`",
+                "The order status changed (data: `previous_status`, `status`, `order`). Includes `designFlaw`, `completed`, `cancel`…",
+              ],
+              [
+                "`shipment.label_created`",
+                "A label was bought or uploaded at fulfillment (data: `order`, `shipment`).",
+              ],
+              [
+                "`order.shipped`",
+                "A shipment was handed to the carrier, with its tracking number (data: `order`, `shipment`).",
+              ],
+              [
+                "`design_import.completed`",
+                "Designs from URLs were stored (data: `design_import`, `order`).",
+              ],
+              [
+                "`design_import.failed`",
+                "A design import failed after retries (data: `design_import` with `error`).",
+              ],
+              ["`webhook.test`", "Sent by `POST /webhooks/{id}/test`."],
+            ],
+          },
+        },
+        { h: "Payload" },
+        {
+          p: "Every event is a JSON POST. `data.order` is the order as it is when the event is sent, in the same shape as `GET /orders/{id}`. The event `id` stays the same across retries: use it to ignore duplicates.",
+        },
+        {
+          code: '{\n  "id": "9b1c…",\n  "type": "order.status_changed",\n  "created_at": "2026-10-19T12:00:00.000Z",\n  "environment": "live",\n  "data": {\n    "previous_status": "processing",\n    "status": "completed",\n    "order": { "id": "…", "order_number": "API-ERP-1001", "status": "completed", "items": [ … ], "shipments": [ … ] }\n  }\n}',
+          lang: "json",
+        },
+        { h: "Verifying the signature" },
+        {
+          p: "Each request has an `EasyJet-Signature: t=<unix time>,v1=<hex>` header: an HMAC-SHA256 of `<t>.<raw body>` with your endpoint secret (`whsec_…`, shown once when created or rotated). Reject requests with a wrong signature or a timestamp older than 5 minutes. `EasyJet-Event-Id`, `EasyJet-Event-Type` and `EasyJet-Delivery-Id` headers are also sent.",
+        },
+        {
+          code: 'import crypto from "node:crypto";\n\n// Use the raw request body, before JSON parsing.\nfunction verifyEasyJetSignature(rawBody, header, secret, toleranceSeconds = 300) {\n  const parts = Object.fromEntries(header.split(",").map((part) => part.split("=")));\n  const expected = crypto.createHmac("sha256", secret).update(`${parts.t}.${rawBody}`).digest("hex");\n  const fresh = Math.abs(Date.now() / 1000 - Number(parts.t)) <= toleranceSeconds;\n  return fresh && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(parts.v1 ?? ""));\n}',
+          lang: "javascript",
+        },
+        {
+          code: "function verifyEasyJetSignature(string $rawBody, string $header, string $secret): bool {\n    parse_str(str_replace(',', '&', $header), $parts);\n    $expected = hash_hmac('sha256', $parts['t'] . '.' . $rawBody, $secret);\n    return abs(time() - (int) $parts['t']) <= 300 && hash_equals($expected, $parts['v1'] ?? '');\n}",
+          lang: "php",
+        },
+        {
+          code: 'import hashlib, hmac, time\n\ndef verify_easyjet_signature(raw_body: bytes, header: str, secret: str) -> bool:\n    parts = dict(part.split("=", 1) for part in header.split(","))\n    expected = hmac.new(secret.encode(), f"{parts[\'t\']}.".encode() + raw_body, hashlib.sha256).hexdigest()\n    return abs(time.time() - int(parts["t"])) <= 300 and hmac.compare_digest(expected, parts.get("v1", ""))',
+          lang: "python",
+        },
+        { h: "Delivery" },
+        {
+          list: [
+            "Answer with any 2xx status within 10 seconds; do the work afterwards.",
+            'Failed deliveries are retried for about 2 hours (30s, 1m, 2m … 64m). After 20 failed deliveries in a row the endpoint is disabled; enable it again with `PATCH /webhooks/{id}` `{"enabled": true}`.',
+            "Events can arrive out of order or more than once. Use `created_at` and the order's current `status`.",
+            "Every attempt is listed in `GET /webhooks/{id}/deliveries` for 30 days; resend one with `POST …/deliveries/{deliveryId}/retry`.",
+            "Endpoints must be public https URLs (port 443).",
+          ],
+        },
       ],
     },
     {
       id: "postman",
       title: "Postman",
       blocks: [
-        { p: "Download the collection, import it into Postman, set the `apiKey` collection variable to a test key and run the folders in order. Ids found in responses (product, order, item, rate…) are stored automatically, and POST requests get an `Idempotency-Key`." },
+        {
+          p: "Download the collection, import it into Postman, set the `apiKey` collection variable to a test key and run the folders in order. Ids found in responses (product, order, item, rate…) are stored automatically, and POST requests get an `Idempotency-Key`.",
+        },
         { postman: true },
       ],
     },

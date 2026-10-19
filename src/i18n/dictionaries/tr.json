@@ -3954,7 +3954,10 @@
           "copyFailed": "Kopyalanamadı. Anahtarı seçip elle kopyalayın.",
           "previousKeyGrace": "Önceki anahtar {date} tarihine kadar çalışmaya devam eder.",
           "confirmStored": "Bu anahtarı güvenli bir yerde sakladım.",
-          "done": "Tamam"
+          "done": "Tamam",
+          "webhookTitle": "Webhook imza anahtarınız",
+          "webhookRotatedTitle": "Yeni webhook imza anahtarınız",
+          "webhookWarning": "Bu anahtarı sunucunuzda saklayın ve EasyJet-Signature başlığını doğrulamak için kullanın. Tekrar gösterilmeyecek."
         },
         "disabled": {
           "title": "API erişimi açık değil",
@@ -3966,6 +3969,83 @@
           "rotateError": "API anahtarı yenilenemedi.",
           "revokeSuccess": "API anahtarı iptal edildi.",
           "revokeError": "API anahtarı iptal edilemedi."
+        },
+        "webhooks": {
+          "title": "Webhook'lar",
+          "subtitle": "Siparişler değiştiğinde, etiket oluşturulduğunda, sipariş kargoya verildiğinde veya tasarım importu bittiğinde EasyJet https adresinizi çağırır. Her istek adresin gizli anahtarıyla imzalanır.",
+          "testNote": "Test adresleri sandbox olaylarını (test anahtarlarından) alır.",
+          "empty": "Henüz webhook adresi yok.",
+          "environment": {
+            "test": "Test",
+            "live": "Canlı"
+          },
+          "fields": {
+            "url": "URL",
+            "description": "Açıklama",
+            "events": "Olaylar",
+            "status": "Durum",
+            "lastDelivery": "Son gönderim",
+            "actions": "İşlemler"
+          },
+          "status": {
+            "enabled": "Açık",
+            "disabled": "Kapalı"
+          },
+          "events": {
+            "order_status_changed": "Sipariş durumu değişti",
+            "order_shipped": "Sevkiyat kargoya verildi",
+            "shipment_label_created": "Kargo etiketi oluşturuldu",
+            "design_import_completed": "URL'lerden tasarımlar kaydedildi",
+            "design_import_failed": "Tasarım importu başarısız oldu"
+          },
+          "actions": {
+            "create": "Adres ekle",
+            "test": "Test olayı gönder",
+            "deliveries": "Gönderimler",
+            "enable": "Aç",
+            "disable": "Kapat",
+            "rotate": "Anahtarı yenile",
+            "delete": "Sil",
+            "retry": "Tekrar gönder",
+            "refresh": "Yenile"
+          },
+          "create": {
+            "title": "Webhook adresi ekle",
+            "submit": "Adresi ekle",
+            "urlHelp": "443 portunda, 10 saniye içinde 2xx dönen herkese açık bir https adresi.",
+            "httpsOnly": "https adresi kullanın.",
+            "descriptionPlaceholder": "örn. ERP canlı",
+            "eventsRequired": "En az bir olay seçin."
+          },
+          "confirm": {
+            "rotateTitle": "İmza anahtarı yenilensin mi?",
+            "rotateDescription": "Mevcut anahtar hemen geçersiz olur.",
+            "deleteTitle": "Bu adres silinsin mi?",
+            "deleteDescription": "Bu adrese artık olay gönderilmez."
+          },
+          "deliveries": {
+            "title": "Gönderimler",
+            "empty": "Henüz gönderim yok.",
+            "event": "Olay",
+            "attempts": "Deneme",
+            "response": "Yanıt",
+            "error": "Hata",
+            "createdAt": "Oluşturulma",
+            "status": {
+              "succeeded": "İletildi",
+              "pending": "Tekrar deneniyor",
+              "failed": "Başarısız"
+            }
+          },
+          "messages": {
+            "loadError": "Webhook'lar yüklenemedi.",
+            "createError": "Adres eklenemedi.",
+            "actionError": "İşlem başarısız oldu.",
+            "testQueued": "Test olayı sıraya alındı.",
+            "retryQueued": "Gönderim tekrar sıraya alındı.",
+            "updated": "Adres güncellendi.",
+            "deleted": "Adres silindi."
+          }
         }
       }
     },

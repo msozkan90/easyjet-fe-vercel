@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { App as AntdApp, Button, Skeleton } from "antd";
-import { KeyOutlined, PlusOutlined, ReadOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  KeyOutlined,
+  PlusOutlined,
+  ReadOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import Link from "next/link";
 import StatusTag from "@/components/ui/StatusTag";
 import { EmptyState, ErrorState } from "@/components/ui/StateView";
@@ -11,6 +16,7 @@ import { ApiKeysAPI } from "@/utils/api";
 import ApiKeySecretModal from "./ApiKeySecretModal";
 import ApiKeyTable from "./ApiKeyTable";
 import CreateApiKeyModal from "./CreateApiKeyModal";
+import WebhooksCard from "./WebhooksCard";
 
 const errorMessage = (error, fallback) =>
   error?.response?.data?.error?.message || fallback;
@@ -120,57 +126,87 @@ export default function ApiKeysSection() {
   const limits = access.rate_limits_per_minute ?? {};
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h2 className="m-0 text-base font-semibold text-text">{t("title")}</h2>
-          <p className="m-0 max-w-[640px] text-[13px] text-text-secondary">{t("subtitle")}</p>
+    <div className="flex flex-col gap-4">
+      <section className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="m-0 text-base font-semibold text-text">
+              {t("title")}
+            </h2>
+            <p className="m-0 max-w-[640px] text-[13px] text-text-secondary">
+              {t("subtitle")}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/dashboard/api-docs">
+              <Button icon={<ReadOutlined />}>{t("actions.docs")}</Button>
+            </Link>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={load}
+              loading={loading}
+              aria-label={t("actions.refresh")}
+            />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              disabled={limitReached}
+              title={
+                limitReached
+                  ? t("limitReached", { max: access.max_keys })
+                  : undefined
+              }
+              onClick={() => setCreateOpen(true)}
+            >
+              {t("actions.create")}
+            </Button>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-2 gap-4 rounded-lg border border-line bg-subtle px-4 py-3 md:grid-cols-4">
+          <Stat label={t("summary.liveAccess")}>
+            <StatusTag
+              tone={access.live_enabled ? "success" : "waiting"}
+              size="small"
+            >
+              {access.live_enabled
+                ? t("summary.liveEnabled")
+                : t("summary.testOnly")}
+            </StatusTag>
+          </Stat>
+          <Stat label={t("summary.activeKeys")}>
+            <span className="tabular-nums">
+              {access.active_keys} / {access.max_keys}
+            </span>
+          </Stat>
+          <Stat label={t("summary.readLimit")}>
+            <span className="tabular-nums">
+              {t("summary.perMinute", { count: limits.read ?? 0 })}
+            </span>
+          </Stat>
+          <Stat label={t("summary.writeLimit")}>
+            <span className="tabular-nums">
+              {t("summary.perMinute", { count: limits.write ?? 0 })}
+            </span>
+          </Stat>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/dashboard/api-docs">
-            <Button icon={<ReadOutlined />}>{t("actions.docs")}</Button>
-          </Link>
-          <Button icon={<ReloadOutlined />} onClick={load} loading={loading} aria-label={t("actions.refresh")} />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            disabled={limitReached}
-            title={limitReached ? t("limitReached", { max: access.max_keys }) : undefined}
-            onClick={() => setCreateOpen(true)}
-          >
-            {t("actions.create")}
-          </Button>
-        </div>
-      </header>
 
-      <div className="grid grid-cols-2 gap-4 rounded-lg border border-line bg-subtle px-4 py-3 md:grid-cols-4">
-        <Stat label={t("summary.liveAccess")}>
-          <StatusTag tone={access.live_enabled ? "success" : "waiting"} size="small">
-            {access.live_enabled ? t("summary.liveEnabled") : t("summary.testOnly")}
-          </StatusTag>
-        </Stat>
-        <Stat label={t("summary.activeKeys")}>
-          <span className="tabular-nums">
-            {access.active_keys} / {access.max_keys}
-          </span>
-        </Stat>
-        <Stat label={t("summary.readLimit")}>
-          <span className="tabular-nums">{t("summary.perMinute", { count: limits.read ?? 0 })}</span>
-        </Stat>
-        <Stat label={t("summary.writeLimit")}>
-          <span className="tabular-nums">{t("summary.perMinute", { count: limits.write ?? 0 })}</span>
-        </Stat>
-      </div>
+        <ApiKeyTable
+          keys={keys}
+          loading={loading}
+          onRotate={handleRotate}
+          onRevoke={handleRevoke}
+        />
 
-      <ApiKeyTable keys={keys} loading={loading} onRotate={handleRotate} onRevoke={handleRevoke} />
-
-      <CreateApiKeyModal
-        open={createOpen}
-        access={access}
-        onClose={() => setCreateOpen(false)}
-        onCreated={handleCreated}
-      />
-      <ApiKeySecretModal secret={secret} onClose={() => setSecret(null)} />
-    </section>
+        <CreateApiKeyModal
+          open={createOpen}
+          access={access}
+          onClose={() => setCreateOpen(false)}
+          onCreated={handleCreated}
+        />
+        <ApiKeySecretModal secret={secret} onClose={() => setSecret(null)} />
+      </section>
+      <WebhooksCard access={access} />
+    </div>
   );
 }

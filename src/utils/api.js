@@ -16,6 +16,8 @@ export const api = {
     http.post(url, data, config).then((r) => r.data),
   put: (url, data = {}, config = {}) =>
     http.put(url, data, config).then((r) => r.data),
+  patch: (url, data = {}, config = {}) =>
+    http.patch(url, data, config).then((r) => r.data),
   postMultipart: (url, data = {}, config = {}) =>
     http
       .post(url, data, buildMultipartRequestConfig(config))
@@ -982,6 +984,26 @@ export const ApiKeysAPI = {
   adminCustomerKeys: (customerId) => api.get(`/api-keys/admin/customers/${customerId}/keys`),
   adminRevoke: (id, reason) =>
     api.post(`/api-keys/admin/keys/${id}/revoke`, reason ? { reason } : {}),
+  webhooks: {
+    list: (environment) => api.get("/api-keys/webhooks", { environment }),
+    create: (environment, payload) =>
+      api.post("/api-keys/webhooks", payload, { params: { environment } }),
+    update: (environment, id, payload) =>
+      api.patch(`/api-keys/webhooks/${id}`, payload, { params: { environment } }),
+    remove: (environment, id) => api.del(`/api-keys/webhooks/${id}`, { environment }),
+    rotate: (environment, id) =>
+      api.post(`/api-keys/webhooks/${id}/rotate-secret`, {}, { params: { environment } }),
+    test: (environment, id) =>
+      api.post(`/api-keys/webhooks/${id}/test`, {}, { params: { environment } }),
+    deliveries: (environment, id, page = 1) =>
+      api.get(`/api-keys/webhooks/${id}/deliveries`, { environment, page }),
+    retry: (environment, id, deliveryId) =>
+      api.post(
+        `/api-keys/webhooks/${id}/deliveries/${deliveryId}/retry`,
+        {},
+        { params: { environment } },
+      ),
+  },
 };
 
 export const PublicApiDocsAPI = {

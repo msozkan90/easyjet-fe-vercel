@@ -4174,7 +4174,10 @@
           "copyFailed": "Could not copy. Select the key and copy it manually.",
           "previousKeyGrace": "The previous key keeps working until {date}.",
           "confirmStored": "I have stored this key securely.",
-          "done": "Done"
+          "done": "Done",
+          "webhookTitle": "Your webhook signing secret",
+          "webhookRotatedTitle": "Your new webhook signing secret",
+          "webhookWarning": "Store this secret on your server and use it to verify the EasyJet-Signature header. It will not be shown again."
         },
         "disabled": {
           "title": "API access is not enabled",
@@ -4186,6 +4189,83 @@
           "rotateError": "API key could not be rotated.",
           "revokeSuccess": "API key revoked.",
           "revokeError": "API key could not be revoked."
+        },
+        "webhooks": {
+          "title": "Webhooks",
+          "subtitle": "EasyJet calls your https endpoint when orders change, labels are created, orders ship or design imports finish. Each request is signed with the endpoint secret.",
+          "testNote": "Test endpoints receive sandbox events (from test keys).",
+          "empty": "No webhook endpoints yet.",
+          "environment": {
+            "test": "Test",
+            "live": "Live"
+          },
+          "fields": {
+            "url": "URL",
+            "description": "Description",
+            "events": "Events",
+            "status": "Status",
+            "lastDelivery": "Last delivery",
+            "actions": "Actions"
+          },
+          "status": {
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+          },
+          "events": {
+            "order_status_changed": "The order status changed",
+            "order_shipped": "A shipment was handed to the carrier",
+            "shipment_label_created": "A shipping label was created",
+            "design_import_completed": "Designs from URLs were stored",
+            "design_import_failed": "A design import failed"
+          },
+          "actions": {
+            "create": "Add endpoint",
+            "test": "Send test event",
+            "deliveries": "Deliveries",
+            "enable": "Enable",
+            "disable": "Disable",
+            "rotate": "Rotate secret",
+            "delete": "Delete",
+            "retry": "Send again",
+            "refresh": "Refresh"
+          },
+          "create": {
+            "title": "Add webhook endpoint",
+            "submit": "Add endpoint",
+            "urlHelp": "A public https URL on port 443 that answers with 2xx within 10 seconds.",
+            "httpsOnly": "Use an https URL.",
+            "descriptionPlaceholder": "e.g. ERP production",
+            "eventsRequired": "Select at least one event."
+          },
+          "confirm": {
+            "rotateTitle": "Rotate the signing secret?",
+            "rotateDescription": "The current secret stops working immediately.",
+            "deleteTitle": "Delete this endpoint?",
+            "deleteDescription": "No more events will be sent to it."
+          },
+          "deliveries": {
+            "title": "Deliveries",
+            "empty": "No deliveries yet.",
+            "event": "Event",
+            "attempts": "Attempts",
+            "response": "Response",
+            "error": "Error",
+            "createdAt": "Created",
+            "status": {
+              "succeeded": "Delivered",
+              "pending": "Retrying",
+              "failed": "Failed"
+            }
+          },
+          "messages": {
+            "loadError": "Webhooks could not be loaded.",
+            "createError": "The endpoint could not be added.",
+            "actionError": "The action failed.",
+            "testQueued": "Test event queued.",
+            "retryQueued": "Delivery queued again.",
+            "updated": "Endpoint updated.",
+            "deleted": "Endpoint deleted."
+          }
         }
       }
     },

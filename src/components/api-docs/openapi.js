@@ -1,6 +1,6 @@
 // Helpers that turn the public API OpenAPI document into what the docs page renders.
 
-export const TAG_ORDER = ["Account", "Catalog", "Wallet", "Orders", "Designs", "Shipping", "Sandbox"];
+export const TAG_ORDER = ["Account", "Catalog", "Wallet", "Orders", "Designs", "Shipping", "Webhooks", "Sandbox"];
 
 export const operationKey = (method, path) => `${method.toUpperCase()} ${path}`;
 

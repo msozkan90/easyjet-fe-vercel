@@ -33,7 +33,11 @@ export default function ApiKeySecretModal({ secret, onClose }) {
   return (
     <Modal
       open={Boolean(secret)}
-      title={secret?.rotated ? t("rotatedTitle") : t("title")}
+      title={
+        secret?.kind === "webhook"
+          ? t(secret.rotated ? "webhookRotatedTitle" : "webhookTitle")
+          : t(secret?.rotated ? "rotatedTitle" : "title")
+      }
       closable={false}
       maskClosable={false}
       keyboard={false}
@@ -46,7 +50,13 @@ export default function ApiKeySecretModal({ secret, onClose }) {
     >
       {secret ? (
         <div className="flex flex-col gap-4">
-          <Alert type="warning" showIcon message={t("warning")} />
+          <Alert
+            type="warning"
+            showIcon
+            message={t(
+              secret.kind === "webhook" ? "webhookWarning" : "warning",
+            )}
+          />
           <div className="flex items-stretch gap-2">
             <code className="ej-mono min-w-0 flex-1 break-all rounded-md border border-line bg-subtle px-3 py-2 text-[13px] text-text">
               {secret.apiKey}
@@ -67,7 +77,10 @@ export default function ApiKeySecretModal({ secret, onClose }) {
               })}
             </p>
           ) : null}
-          <Checkbox checked={stored} onChange={(e) => setStored(e.target.checked)}>
+          <Checkbox
+            checked={stored}
+            onChange={(e) => setStored(e.target.checked)}
+          >
             {t("confirmStored")}
           </Checkbox>
         </div>
