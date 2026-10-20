@@ -137,9 +137,9 @@ export default function TransferProductsPage() {
         },
         render: (value) =>
           value ? (
-            <CheckOutlined style={{ color: "#1E7A4C", fontSize: 16 }} />
+            <CheckOutlined style={{ color: "var(--ej-success)", fontSize: 16 }} />
           ) : (
-            <CloseOutlined style={{ color: "#B42318", fontSize: 16 }} />
+            <CloseOutlined style={{ color: "var(--ej-danger)", fontSize: 16 }} />
           ),
       },
       {

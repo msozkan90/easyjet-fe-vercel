@@ -167,7 +167,7 @@ export default function DesignAreaSelector({
           </Button>
         </Space>
       </div>
-      <div className="mt-4 min-h-[240px] rounded-xl border border-dashed border-line-strong bg-white/70 p-3">
+      <div className="mt-4 min-h-[240px] rounded-xl border border-dashed border-line-strong bg-surface/70 p-3">
         {hasImage ? (
           <div className="relative rounded-lg">
             <img

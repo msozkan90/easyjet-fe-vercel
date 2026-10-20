@@ -19,7 +19,6 @@ import {
 import Link from "next/link";
 import StatusTag from "@/components/ui/StatusTag";
 import RowActions from "@/components/ui/RowActions";
-import { palette } from "@/theme/tokens";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
@@ -395,13 +394,13 @@ export default function PendingOrdersPage() {
             <CheckCircleFilled
               role="img"
               aria-label={t("columns.hasDesign")}
-              style={{ color: palette.success, fontSize: 20 }}
+              style={{ color: "var(--ej-success)", fontSize: 20 }}
             />
           ) : (
             <CloseCircleOutlined
               role="img"
               aria-label={t("columns.hasDesign")}
-              style={{ color: palette.danger, fontSize: 20 }}
+              style={{ color: "var(--ej-danger)", fontSize: 20 }}
             />
           ),
       },

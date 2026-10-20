@@ -201,6 +201,10 @@ const darkToken = {
   colorPrimaryTextHover: dp.linkHover,
   colorPrimaryBg: "rgba(245, 122, 31, 0.14)",
   colorPrimaryBgHover: "rgba(245, 122, 31, 0.22)",
+  // The light seed red turns too dark on navy; lift it so danger text stays readable.
+  colorError: "#E5534B",
+  colorErrorText: "#F28B82",
+  colorErrorTextHover: "#F7A8A1",
   boxShadow: "0 16px 40px rgba(0, 0, 0, 0.45)",
   boxShadowSecondary: "0 12px 32px rgba(0, 0, 0, 0.4)",
 };
@@ -224,6 +228,19 @@ const darkComponents = {
     itemActiveColor: "#FFFFFF",
   },
   Tag: { defaultBg: dp.muted, defaultColor: dp.text },
+  // Outlined/default buttons take their hover color from colorPrimaryHover,
+  // which is the dark light-mode orange; use the readable link oranges instead.
+  Button: {
+    defaultHoverColor: dp.link,
+    defaultHoverBorderColor: dp.link,
+    defaultActiveColor: dp.linkHover,
+    defaultActiveBorderColor: dp.linkHover,
+  },
+  Pagination: {
+    itemActiveBg: "rgba(245, 122, 31, 0.14)",
+    itemActiveColor: dp.link,
+    itemActiveColorHover: dp.linkHover,
+  },
 };
 
 export const THEME_MODES = Object.freeze({ LIGHT: "light", DARK: "dark" });

@@ -1,10 +1,15 @@
 "use client";
 
-import { ApiOutlined, BellOutlined } from "@ant-design/icons";
+import { ApiOutlined, BellOutlined, KeyOutlined } from "@ant-design/icons";
 import { SETTINGS_SECTIONS } from "@/components/settings/settings.constants";
 import { translateOrFallback } from "@/components/settings/settings.helpers";
 
-export default function SettingsSideMenu({ activeKey, onChange, tSettings }) {
+export default function SettingsSideMenu({
+  activeKey,
+  onChange,
+  tSettings,
+  showApiKeys = false,
+}) {
   const title = translateOrFallback(tSettings, "sidebar.title", "Settings Menu");
 
   const items = [
@@ -12,6 +17,11 @@ export default function SettingsSideMenu({ activeKey, onChange, tSettings }) {
       key: SETTINGS_SECTIONS.API_CONF,
       icon: <ApiOutlined />,
       label: translateOrFallback(tSettings, "sidebar.items.apiConf", "Api Conf"),
+    },
+    showApiKeys && {
+      key: SETTINGS_SECTIONS.API_KEYS,
+      icon: <KeyOutlined />,
+      label: translateOrFallback(tSettings, "sidebar.items.apiKeys", "API Keys"),
     },
     {
       key: SETTINGS_SECTIONS.NOTIFICATION,
@@ -22,7 +32,7 @@ export default function SettingsSideMenu({ activeKey, onChange, tSettings }) {
         "Notification"
       ),
     },
-  ];
+  ].filter(Boolean);
 
   return (
     <nav
