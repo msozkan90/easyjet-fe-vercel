@@ -18,7 +18,6 @@ import {
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import dayjs from "dayjs";
-import { palette } from "@/theme/tokens";
 import { EmptyState, ErrorState } from "@/components/ui/StateView";
 import { useProductVariantFilterOptions } from "@/hooks/useProductVariantFilterOptions";
 import { getProductVariantFilterConfig, normalizeProductIds, resetProductVariantFilters } from "@/utils/productVariantFilters.mjs";
@@ -463,7 +462,7 @@ const CrudTable = forwardRef(function CrudTable(
         filterDropdown,
         filterIcon: (filtered) => (
           <FilterFilled
-            style={{ color: filtered ? palette.orange600 : undefined }}
+            style={{ color: filtered ? "var(--ej-accent)" : undefined }}
           />
         ),
         filteredValue,

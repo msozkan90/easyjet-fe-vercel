@@ -1058,7 +1058,7 @@ const ShippingRatesModal = ({
             </div>
             {fulfillmentAction === FULFILLMENT_ACTIONS.REPLACE &&
             targetShipmentId ? (
-              <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 space-y-2">
+              <div className="rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm text-brand-800 space-y-2">
                 <div>{tShipping("fulfillment.replaceWarning")}</div>
                 <div className="grid gap-2 sm:grid-cols-4">
                   <span>
@@ -1080,7 +1080,7 @@ const ShippingRatesModal = ({
               </div>
             ) : null}
             {isReuseMode ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              <div className="rounded-xl border border-danger/30 bg-danger-bg p-3 text-sm text-danger">
                 <Checkbox
                   checked={reuseAcknowledged}
                   onChange={(event) =>

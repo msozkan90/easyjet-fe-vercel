@@ -4,7 +4,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Form, App as AntdApp } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { AuthAPI, ShipStationAPI } from "@/utils/api";
+import { useSearchParams } from "next/navigation";
+import { ApiKeysAPI, AuthAPI, ShipStationAPI } from "@/utils/api";
 import { setUser } from "@/redux/features/authSlice";
 import { useTranslations } from "@/i18n/use-translations";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -39,7 +40,10 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(INITIAL_LOADING_STATE);
   const [isUserLoading, setIsUserLoading] = useState(!user);
+  const searchParams = useSearchParams();
+  const requestedSection = searchParams.get("section");
   const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS.API_CONF);
+  const [apiAccessEnabled, setApiAccessEnabled] = useState(false);
   const [apiSources, setApiSources] = useState([]);
   const [activeSourceId, setActiveSourceId] = useState(null);
   const [credentialsBySource, setCredentialsBySource] = useState({});
@@ -118,6 +122,31 @@ export default function SettingsPage() {
 
   const canSeeShipStation =
     isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
+
+  // The API Keys tab is only shown once SystemAdmin has enabled API access.
+  useEffect(() => {
+    if (!isCustomerAdmin) {
+      setApiAccessEnabled(false);
+      return;
+    }
+    let canceled = false;
+    ApiKeysAPI.access()
+      .then((resp) => {
+        if (!canceled) setApiAccessEnabled(Boolean(resp?.data?.enabled));
+      })
+      .catch(() => {
+        if (!canceled) setApiAccessEnabled(false);
+      });
+    return () => {
+      canceled = true;
+    };
+  }, [isCustomerAdmin]);
+
+  useEffect(() => {
+    if (requestedSection === SETTINGS_SECTIONS.API_KEYS && apiAccessEnabled) {
+      setActiveSection(SETTINGS_SECTIONS.API_KEYS);
+    }
+  }, [apiAccessEnabled, requestedSection]);
 
   const userEntityType = useMemo(
     () => `${user?.entity?.entity_type || ""}`.toLowerCase(),
@@ -735,7 +764,7 @@ export default function SettingsPage() {
             activeKey={activeSection}
             onChange={setActiveSection}
             tSettings={tSettings}
-            showApiKeys={isCustomerAdmin}
+            showApiKeys={isCustomerAdmin && apiAccessEnabled}
           />
         </div>
 
@@ -779,7 +808,7 @@ export default function SettingsPage() {
                 <IntegrationsPlaceholder tSettings={tSettings} />
               )}
             </RequireRole>
-          ) : activeSection === SETTINGS_SECTIONS.API_KEYS ? (
+          ) : activeSection === SETTINGS_SECTIONS.API_KEYS && apiAccessEnabled ? (
             <RequireRole anyOfRoles={["customerAdmin"]}>
               <ApiKeysSection />
             </RequireRole>

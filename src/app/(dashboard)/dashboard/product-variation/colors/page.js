@@ -133,7 +133,7 @@ export default function ProductColorsPage() {
                   width: 16,
                   height: 16,
                   borderRadius: 4,
-                  border: "1px solid #C9D2D9",
+                  border: "1px solid var(--ej-border-strong)",
                   backgroundColor: normalizedHex,
                 }}
               />

@@ -3745,8 +3745,7 @@
       },
       "settings": "Ayarlar",
       "productPrice": "Product Price",
-      "apiAccess": "API Erişimi",
-      "apiDocs": "API Dokümanı"
+      "apiAccess": "API Erişimi"
     },
     "settings": {
       "header": {
@@ -4473,6 +4472,7 @@
       "actions": {
         "edit": "Erişimi düzenle",
         "viewKeys": "Anahtarları gör",
+        "docs": "API dokümanı",
         "save": "Kaydet"
       },
       "fields": {

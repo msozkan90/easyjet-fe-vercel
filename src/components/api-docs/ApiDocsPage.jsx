@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
 import { App as AntdApp, Button, Input, Select, Skeleton } from "antd";
 import { DownloadOutlined, KeyOutlined, SearchOutlined } from "@ant-design/icons";
 import PageHeader from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateView";
 import { useLocaleInfo } from "@/i18n/use-translations";
 import { PublicApiDocsAPI } from "@/utils/api";
+import { hasAnyRole } from "@/utils/rbac";
 import { saveBlobAsFile } from "@/utils/apiHelpers";
 import en from "./content/en";
 import tr from "./content/tr";
@@ -89,6 +91,11 @@ export default function ApiDocsPage() {
   const content = CONTENT[locale] ?? en;
   const ui = content.ui;
   const { message } = AntdApp.useApp();
+  const user = useSelector((state) => state.auth.user);
+  // SystemAdmin manages access grants; customers manage their own keys in Settings.
+  const keysHref = hasAnyRole(user, ["systemadmin"])
+    ? "/dashboard/api-access"
+    : "/dashboard/settings?section=api_keys";
   const [doc, setDoc] = useState(null);
   const [info, setInfo] = useState(null);
   const [error, setError] = useState(false);
@@ -163,7 +170,7 @@ export default function ApiDocsPage() {
         description={content.subtitle}
         extra={
           <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard/settings">
+            <Link href={keysHref}>
               <Button icon={<KeyOutlined />}>{ui.manageKeys}</Button>
             </Link>
             <Button type="primary" icon={<DownloadOutlined />} onClick={downloadPostman} loading={downloading}>

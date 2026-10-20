@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { App as AntdApp, Drawer, Switch } from "antd";
-import { EditOutlined, KeyOutlined } from "@ant-design/icons";
+import Link from "next/link";
+import { App as AntdApp, Button, Drawer, Switch } from "antd";
+import { EditOutlined, KeyOutlined, ReadOutlined } from "@ant-design/icons";
 import CrudTable from "@/components/common/table/CrudTable";
 import ApiKeyTable from "@/components/settings/api-keys/ApiKeyTable";
 import RowActions from "@/components/ui/RowActions";
@@ -179,6 +180,11 @@ export default function ApiAccessAdminPage() {
             />
             {t("filters.onlyGranted")}
           </label>
+        }
+        toolbarRight={
+          <Link href="/dashboard/api-docs">
+            <Button icon={<ReadOutlined />}>{t("actions.docs")}</Button>
+          </Link>
         }
         tableProps={{ locale: { emptyText: t("table.noData") } }}
       />

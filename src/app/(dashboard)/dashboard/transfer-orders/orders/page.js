@@ -484,7 +484,7 @@ export default function TransferOrdersPage() {
             return (
               <span
                 style={{
-                  color: allPrepared ? "#1E7A4C" : "#4E6373",
+                  color: allPrepared ? "var(--ej-success)" : "var(--ej-text-secondary)",
                   fontWeight: 600,
                 }}
               >
@@ -951,7 +951,7 @@ export default function TransferOrdersPage() {
               <div
                 key={entry.id}
                 style={{
-                  border: "1px solid #E3E8EC",
+                  border: "1px solid var(--ej-border)",
                   borderRadius: 8,
                   padding: 12,
                 }}

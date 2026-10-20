@@ -3965,8 +3965,7 @@
       },
       "settings": "Settings",
       "productPrice": "Product Price",
-      "apiAccess": "API Access",
-      "apiDocs": "API Docs"
+      "apiAccess": "API Access"
     },
     "settings": {
       "header": {
@@ -4473,6 +4472,7 @@
       "actions": {
         "edit": "Edit access",
         "viewKeys": "View keys",
+        "docs": "API docs",
         "save": "Save"
       },
       "fields": {
