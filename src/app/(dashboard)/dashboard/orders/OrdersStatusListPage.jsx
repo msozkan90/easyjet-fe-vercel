@@ -294,17 +294,26 @@ export default function OrdersStatusListPage({
   const annotateRows = useCallback(function markRows(
     items = [],
     parent = null,
+    pdfAnchorId = null,
   ) {
     return (items || []).map((item) => {
       const hasChildren =
         Array.isArray(item?.children) && item.children.length > 0;
+      // First pdf-status row of an order group: the one that offers the
+      // group's packing slip.
+      const anchorId = parent
+        ? pdfAnchorId
+        : ([item, ...(hasChildren ? item.children : [])].find(
+            (row) => row?.status === "pdf",
+          )?.id ?? null);
       const next = {
         ...item,
         __hasChildren: hasChildren,
         __isChild: Boolean(parent),
+        __pdfGroupAnchorId: anchorId,
       };
       if (hasChildren) {
-        next.children = markRows(item.children, next);
+        next.children = markRows(item.children, next, anchorId);
       }
       return next;
     });

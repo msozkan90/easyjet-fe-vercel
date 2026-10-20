@@ -32,10 +32,10 @@ import PageHeader from "@/components/ui/PageHeader";
 
 const { Text } = Typography;
 const BUCKETS = [
-  { key: "overdue_72_plus", color: "#B42318", background: "#FDECEA", icon: <ExclamationCircleOutlined /> },
-  { key: "critical_48_72", color: "#C4560B", background: "#FFF4EB", icon: <ClockCircleOutlined /> },
-  { key: "warning_24_48", color: "#8A5300", background: "#FFF4DB", icon: <ClockCircleOutlined /> },
-  { key: "action_0_24", color: "#1F5F99", background: "#E8F1FA", icon: <ShoppingOutlined /> },
+  { key: "overdue_72_plus", color: "var(--ej-danger)", background: "var(--ej-danger-bg)", icon: <ExclamationCircleOutlined /> },
+  { key: "critical_48_72", color: "var(--ej-accent)", background: "var(--ej-orange-50)", icon: <ClockCircleOutlined /> },
+  { key: "warning_24_48", color: "var(--ej-warning)", background: "var(--ej-warning-bg)", icon: <ClockCircleOutlined /> },
+  { key: "action_0_24", color: "var(--ej-info)", background: "var(--ej-info-bg)", icon: <ShoppingOutlined /> },
 ];
 
 const unwrap = (response) => response?.data || response;

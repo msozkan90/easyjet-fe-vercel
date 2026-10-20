@@ -16,6 +16,8 @@ export const api = {
     http.post(url, data, config).then((r) => r.data),
   put: (url, data = {}, config = {}) =>
     http.put(url, data, config).then((r) => r.data),
+  patch: (url, data = {}, config = {}) =>
+    http.patch(url, data, config).then((r) => r.data),
   postMultipart: (url, data = {}, config = {}) =>
     http
       .post(url, data, buildMultipartRequestConfig(config))
@@ -967,4 +969,48 @@ export const ProductCatalogAPI = {
   customerPrices: (payload) => api.post("/product-prices/catalog", payload),
   partnerPrices: (payload) => api.post("/product-prices/partner-catalog", payload),
   partnerCustomerPrices: (payload, customerId) => api.post("/product-prices/partner-customer-catalog", { ...payload, customer_id: customerId }),
+};
+
+export const ApiKeysAPI = {
+  access: () => api.get("/api-keys/access"),
+  list: () => api.get("/api-keys"),
+  create: (payload) => api.post("/api-keys", payload),
+  rotate: (id) => api.post(`/api-keys/${id}/rotate`),
+  revoke: (id, reason) => api.post(`/api-keys/${id}/revoke`, reason ? { reason } : {}),
+  requestLogs: (payload) => api.post("/api-keys/request-logs/list", payload),
+  adminListGrants: (payload) => api.post("/api-keys/admin/grants/list", payload),
+  adminUpsertGrant: (customerId, payload) =>
+    api.put(`/api-keys/admin/grants/${customerId}`, payload),
+  adminCustomerKeys: (customerId) => api.get(`/api-keys/admin/customers/${customerId}/keys`),
+  adminRevoke: (id, reason) =>
+    api.post(`/api-keys/admin/keys/${id}/revoke`, reason ? { reason } : {}),
+  webhooks: {
+    list: (environment) => api.get("/api-keys/webhooks", { environment }),
+    create: (environment, payload) =>
+      api.post("/api-keys/webhooks", payload, { params: { environment } }),
+    update: (environment, id, payload) =>
+      api.patch(`/api-keys/webhooks/${id}`, payload, { params: { environment } }),
+    remove: (environment, id) => api.del(`/api-keys/webhooks/${id}`, { environment }),
+    rotate: (environment, id) =>
+      api.post(`/api-keys/webhooks/${id}/rotate-secret`, {}, { params: { environment } }),
+    test: (environment, id) =>
+      api.post(`/api-keys/webhooks/${id}/test`, {}, { params: { environment } }),
+    deliveries: (environment, id, page = 1) =>
+      api.get(`/api-keys/webhooks/${id}/deliveries`, { environment, page }),
+    retry: (environment, id, deliveryId) =>
+      api.post(
+        `/api-keys/webhooks/${id}/deliveries/${deliveryId}/retry`,
+        {},
+        { params: { environment } },
+      ),
+  },
+};
+
+export const PublicApiDocsAPI = {
+  openapi: () => api.get("/public-api/openapi.json"),
+  info: () => api.get("/public-api/info"),
+  postman: () =>
+    fetchBlobFile("/public-api/postman.json", {
+      fallbackFilename: "EasyJet-API-v1.postman_collection.json",
+    }),
 };

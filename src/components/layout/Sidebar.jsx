@@ -22,6 +22,7 @@ import {
   TagsOutlined,
   BarChartOutlined,
   UserOutlined,
+  ApiOutlined,
 } from "@ant-design/icons";
 
 import Link from "next/link";
@@ -1310,6 +1311,11 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
                 ),
               },
             ],
+          },
+          {
+            key: "api-access",
+            icon: <ApiOutlined />,
+            label: <Link href="/dashboard/api-access">{tSidebar("apiAccess")}</Link>,
           },
         ]
       : []),

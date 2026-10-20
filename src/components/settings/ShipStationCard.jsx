@@ -15,7 +15,7 @@ import {
 } from "antd";
 import {
   SafetyCertificateOutlined,
-  CheckCircleTwoTone,
+  CheckCircleOutlined,
   SaveOutlined,
   CloseOutlined,
   EditOutlined,
@@ -230,7 +230,7 @@ export default function ShipStationCard({
                 <Button
                   onClick={() => onVerify?.(activeSourceId)}
                   loading={isVerifying}
-                  icon={<CheckCircleTwoTone twoToneColor="#1E7A4C" />}
+                  icon={<CheckCircleOutlined style={{ color: "var(--ej-success)" }} />}
                 >
                   {tProfile("shipStation.buttons.verify")}
                 </Button>

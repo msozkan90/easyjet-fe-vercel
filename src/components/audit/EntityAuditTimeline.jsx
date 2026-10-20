@@ -420,7 +420,7 @@ export default function EntityAuditTimeline({
 
             {selectedEntry?.external_api_request != null ||
             selectedEntry?.external_api_response != null ? (
-              <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+              <div className="space-y-3 rounded-xl border border-warning/30 bg-warning-bg/50 p-4">
                 <Typography.Text strong>
                   {t("detailModal.sections.externalApi")}
                 </Typography.Text>

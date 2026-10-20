@@ -53,6 +53,8 @@ body,
   --ej-shadow-overlay: 0 12px 32px rgba(15, 36, 51, 0.16);
 
   --ej-avatar-bg: #0f2433;
+  /* Brand orange for icons and figures; lighter on dark surfaces. */
+  --ej-accent: #c4560b;
 
   --background: var(--ej-canvas);
   --foreground: var(--ej-text);
@@ -85,6 +87,7 @@ body,
 
   --ej-shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.4);
   --ej-avatar-bg: #2e4a5d;
+  --ej-accent: #f7934a;
 }
 
 /* Dark variants of the status pills */
@@ -1072,6 +1075,34 @@ a:focus-visible,
   width: min(320px, 70vw);
 }
 
+:root[data-theme="dark"] .order-options-trigger,
+:root[data-theme="dark"] .order-option-row {
+  border-color: var(--ej-border);
+  background: var(--ej-subtle);
+  box-shadow: none;
+}
+:root[data-theme="dark"] .order-options-trigger {
+  color: var(--ej-text);
+}
+:root[data-theme="dark"] .order-options-trigger:hover {
+  border-color: var(--ej-border-strong);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+:root[data-theme="dark"] .order-options-count {
+  background: var(--ej-info-bg);
+  color: var(--ej-info);
+}
+:root[data-theme="dark"] .order-option-label {
+  color: var(--ej-text-secondary);
+}
+:root[data-theme="dark"] .order-option-value {
+  color: var(--ej-text);
+}
+:root[data-theme="dark"] .order-option-link,
+:root[data-theme="dark"] .order-option-link:hover {
+  color: var(--ej-info);
+}
+
 /* Google Places dropdown styling */
 .pac-container {
   z-index: 2000 !important;
@@ -1117,4 +1148,21 @@ a:focus-visible,
 .pac-container:after {
   display: none !important;
   height: 0;
+}
+
+:root[data-theme="dark"] .pac-container {
+  border-color: var(--ej-border);
+  background: var(--ej-surface);
+  box-shadow: var(--ej-shadow-overlay);
+}
+:root[data-theme="dark"] .pac-item {
+  border-bottom-color: var(--ej-border);
+  color: var(--ej-text-secondary);
+}
+:root[data-theme="dark"] .pac-item:hover,
+:root[data-theme="dark"] .pac-item.pac-item-selected {
+  background: var(--ej-muted);
+}
+:root[data-theme="dark"] .pac-item .pac-item-query {
+  color: var(--ej-text);
 }

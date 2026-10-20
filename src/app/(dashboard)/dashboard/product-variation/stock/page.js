@@ -595,7 +595,7 @@ export default function ProductStockPage() {
         destroyOnHidden
       >
         <Space direction="vertical" size={16} style={{ width: "100%" }}>
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="rounded-xl border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning">
             {t("decreaseModal.description", {
               max: Number(decreaseTarget?.quantity || 0),
             })}

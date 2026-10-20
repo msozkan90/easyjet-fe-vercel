@@ -422,7 +422,7 @@ export default function OrderReportPage() {
         />
       ),
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#C4560B" : undefined }} />
+        <SearchOutlined style={{ color: filtered ? "var(--ej-accent)" : undefined }} />
       ),
       onFilter: (value, record) =>
         getTextValue(accessor(record)).includes(getTextValue(value)),

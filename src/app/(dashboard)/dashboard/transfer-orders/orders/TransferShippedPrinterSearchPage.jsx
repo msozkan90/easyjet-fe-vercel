@@ -756,7 +756,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Designs
                 </Typography.Title>
                 {shippingChecklist.designs.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
+                  <div className="divide-y divide-line rounded-lg border border-line">
                     {shippingChecklist.designs.map((design) => {
                       const designKey = `design:${design?.id}`;
                       return (
@@ -816,7 +816,7 @@ export default function TransferShippedPrinterSearchPage() {
                   Without-design items
                 </Typography.Title>
                 {shippingChecklist.without_design_items.length ? (
-                  <div className="divide-y divide-slate-100 rounded-lg border border-line">
+                  <div className="divide-y divide-line rounded-lg border border-line">
                     {shippingChecklist.without_design_items.map((item) => {
                       const itemKey = `without-design-item:${item?.id}`;
                       const optionText = getChecklistOptionText(item);

@@ -320,7 +320,7 @@ const LabelVoidCard = ({ labelVoid, tDesign, tOrders }) => {
               key={safeRow.refundId || safeRow.id || index}
               className={
                 detailRows.length > 1
-                  ? "rounded-xl border border-slate-100 bg-slate-50 p-4"
+                  ? "rounded-xl border border-line bg-subtle p-4"
                   : ""
               }
             >
@@ -431,7 +431,7 @@ const ProductionRecoveryCard = ({
 
   return (
     <Card
-      className="rounded-xl border border-amber-200 bg-amber-50/40"
+      className="rounded-xl border border-warning/30 bg-warning-bg/50"
       styles={{ body: { padding: 16 } }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
