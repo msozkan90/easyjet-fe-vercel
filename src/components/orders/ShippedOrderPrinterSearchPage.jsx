@@ -1,5 +1,7 @@
 "use client";
 
+import OrderNotesCard from "./OrderNotesCard";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -144,7 +146,7 @@ const OrderItemCard = ({
 
           <div>
             <Typography.Text type="secondary">
-              {tOrders("columns.notes")}
+              {tOrders("columns.designerNotes")}
             </Typography.Text>
             <div className="mt-1 text-sm">
               {item?.notes || tOrders("common.none")}
@@ -423,6 +425,8 @@ export default function ShippedOrderPrinterSearchPage() {
             })}
           </div>
         ) : null}
+
+        <OrderNotesCard order={order} />
 
         {searched && !searching && !items.length ? (
           <Empty description={tDetail("messages.noItems")} />
