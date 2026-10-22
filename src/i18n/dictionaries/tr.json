@@ -2103,7 +2103,7 @@
         "designChecklist": "Tasarım Kontrolü",
         "actions": "İşlemler",
         "notes": "Notlar",
-        "designerNotes": "Tasarımcı Notları"
+        "designerNotes": "Tasarımcı Notu"
       },
       "designChecklist": {
         "ready": "Hazır",
@@ -2671,6 +2671,8 @@
           "confirmation": "Onay",
           "customerNotes": "Müşteri Notu",
           "internalNotes": "Dahili Not",
+          "giftMessage": "Hediye Mesajı",
+          "productionNotes": "Üretim Notları",
           "labelSource": "Kaynak",
           "labelCarrier": "Taşıyıcı",
           "labelService": "Servis",
@@ -2697,6 +2699,8 @@
         },
         "messages": {
           "missingParams": "Sipariş numarası bulunamadı. Lütfen bu sayfayı sipariş listesinden tekrar açın.",
+          "productionNotesSaved": "Üretim notları kaydedildi",
+          "productionNotesSaveError": "Üretim notları kaydedilemedi",
           "loadOrderError": "Sipariş detayı yüklenemedi.",
           "loadPositionsError": "Ürün pozisyonları yüklenemedi.",
           "noOrderFound": "İstenen sipariş bulunamadı.",

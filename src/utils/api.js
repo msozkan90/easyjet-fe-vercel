@@ -178,6 +178,7 @@ export const OrdersAPI = {
   update: (data) => api.put(`/orders/items`, data),
   rematchItem: (id, data) =>
     api.put(`/orders/items/${encodeURIComponent(id)}/rematch`, data),
+  updateProductionNotes: (id, data) => api.put(`/orders/${encodeURIComponent(id)}/production-notes`, data),
   updateOrder: (id, data) => api.put(`/orders/update/${id}`, data),
   remove: (id) => api.del(`/orders/${id}`),
 

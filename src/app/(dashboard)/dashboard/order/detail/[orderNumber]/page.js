@@ -21,6 +21,7 @@ import {
   Typography,
   Steps,
 } from "antd";
+import OrderNotesCard from "@/components/orders/OrderNotesCard";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
@@ -701,7 +702,7 @@ const OrderItemCard = ({
           </div>
           <div className="grid gap-2">
             <Typography.Text type="secondary">
-              {tOrders("columns.notes")}
+              {tOrders("columns.designerNotes")}
             </Typography.Text>
 
             <div className="flex flex-wrap gap-2 text-sm">
@@ -1194,20 +1195,8 @@ export default function OrderDetailPage() {
             ) : (
               <Empty description={tDesign("messages.noItems")} />
             )}
-            <SideCard title={tDesign("sections.notes")}>
-              <KeyValueList
-                rows={[
-                  {
-                    label: tDesign("fields.customerNotes"),
-                    value: orderDetail?.customer_notes || tOrders("common.none"),
-                  },
-                  {
-                    label: tDesign("fields.internalNotes"),
-                    value: orderDetail?.internal_notes || tOrders("common.none"),
-                  },
-                ]}
-              />
-            </SideCard>
+            <OrderNotesCard order={orderDetail} editable
+              onSaved={(production_notes) => setOrderDetail((current) => ({ ...current, production_notes }))} />
           </div>
           <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
             <SideCard title={tDesign("sections.totals")}>
