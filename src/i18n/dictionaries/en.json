@@ -2323,7 +2323,7 @@
         "designChecklist": "Design Check",
         "actions": "Actions",
         "notes": "Notes",
-        "designerNotes": "Designer Notes"
+        "designerNotes": "Designer Note"
       },
       "designChecklist": {
         "ready": "Ready",
@@ -2891,6 +2891,8 @@
           "confirmation": "Confirmation",
           "customerNotes": "Customer Notes",
           "internalNotes": "Internal Notes",
+          "giftMessage": "Gift Message",
+          "productionNotes": "Production Notes",
           "labelSource": "Source",
           "labelCarrier": "Carrier",
           "labelService": "Service",
@@ -2917,6 +2919,8 @@
         },
         "messages": {
           "missingParams": "Order number is missing. Please reopen this page from the Orders list.",
+          "productionNotesSaved": "Production notes saved",
+          "productionNotesSaveError": "Failed to save production notes",
           "loadOrderError": "Unable to load order detail.",
           "loadPositionsError": "Unable to load product positions.",
           "noOrderFound": "The requested order could not be found.",
