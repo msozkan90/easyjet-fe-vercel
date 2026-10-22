@@ -669,7 +669,7 @@ export default function RefundRemakeCreateModal({
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #E3E8EC;
+          border: 1px solid var(--ej-border);
           border-radius: 6px;
           color: #6F8494;
           font-size: 11px;

@@ -46,6 +46,9 @@ import ReportExportButton from "@/components/reports/ReportExportButton";
 import PageHeader from "@/components/ui/PageHeader";
 import StatCard from "@/components/ui/StatCard";
 import { formatMoney as formatMoneyShared } from "@/utils/formatMoney";
+import { SelectFilterDropdown } from "@/components/common/table/CrudTable";
+import { useProductVariantFilterOptions } from "@/hooks/useProductVariantFilterOptions";
+import { resetProductVariantFilters } from "@/utils/productVariantFilters.mjs";
 import TextColumnFilter from "@/components/reports/TextColumnFilter";
 import {
   ALL_ENTITIES_VALUE,
@@ -57,6 +60,11 @@ import {
   normalizeCategoryList,
 } from "@/components/reports/reportHelpers";
 
+const DETAIL_VARIANT_FIELDS = [
+  { key: "size", table: "product_size", valueField: "id", multiple: true },
+  { key: "color", table: "product_color", valueField: "id", multiple: true },
+];
+const DETAIL_VARIANT_CONFIG = { parent: "product", children: DETAIL_VARIANT_FIELDS };
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 
@@ -414,7 +422,7 @@ export default function OrderReportPage() {
         />
       ),
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#C4560B" : undefined }} />
+        <SearchOutlined style={{ color: filtered ? "var(--ej-accent)" : undefined }} />
       ),
       onFilter: (value, record) =>
         getTextValue(accessor(record)).includes(getTextValue(value)),
@@ -434,6 +442,10 @@ export default function OrderReportPage() {
     [detailData?.products],
   );
 
+  const selectedDetailProductIds = detailRows
+    .filter(row => detailFilters.product.map(String).includes(String(row.product_id || row.product_name)))
+    .map(row => row.product_id).filter(Boolean);
+  const detailVariantOptions = useProductVariantFilterOptions(selectedDetailProductIds, DETAIL_VARIANT_FIELDS);
   const detailDropdownOptions = useMemo(() => {
     const createOptions = (rows) =>
       Array.from(
@@ -448,7 +460,10 @@ export default function OrderReportPage() {
         }),
       );
 
-    const children = detailRows.flatMap((product) => product.children || []);
+    const selectedProducts = new Set(detailFilters.product.map(String));
+    const children = detailRows
+      .filter(product => !selectedProducts.size || selectedProducts.has(String(product.product_id || product.product_name)))
+      .flatMap(product => product.children || []);
 
     return {
       products: createOptions(
@@ -457,14 +472,14 @@ export default function OrderReportPage() {
           text: product.product_name,
         })),
       ),
-      sizes: createOptions(
-        children.map((child) => ({ value: child.size_id, text: child.size_name })),
-      ),
-      colors: createOptions(
-        children.map((child) => ({ value: child.color_id, text: child.color_name })),
-      ),
+      sizes: detailVariantOptions.active
+        ? detailVariantOptions.fields.size.options.map(option => ({ value: option.value, text: option.label }))
+        : createOptions(children.map(child => ({ value: child.size_id, text: child.size_name }))),
+      colors: detailVariantOptions.active
+        ? detailVariantOptions.fields.color.options.map(option => ({ value: option.value, text: option.label }))
+        : createOptions(children.map(child => ({ value: child.color_id, text: child.color_name }))),
     };
-  }, [detailRows]);
+  }, [detailRows, detailFilters.product, detailVariantOptions]);
 
   const filteredDetailRows = useMemo(() => {
     const selectedProducts = new Set(detailFilters.product.map(String));
@@ -505,11 +520,11 @@ export default function OrderReportPage() {
   }, [detailFilters, detailRows]);
 
   const handleDetailTableChange = useCallback((_, nextFilters) => {
-    setDetailFilters({
+    setDetailFilters(previous => resetProductVariantFilters(previous, {
       product: nextFilters.product_name || [],
       size: nextFilters.size_name || [],
       color: nextFilters.color_name || [],
-    });
+    }, DETAIL_VARIANT_CONFIG));
   }, []);
 
   const dailyColumns = useMemo(
@@ -595,6 +610,13 @@ export default function OrderReportPage() {
           ),
         render: (value, record) => (record?.children ? "-" : value || "-"),
         filters: detailDropdownOptions.sizes,
+        filterDropdown: props => (
+          <SelectFilterDropdown {...props} key={detailVariantOptions.key} multiple
+            options={detailDropdownOptions.sizes.map(option => ({ value: option.value, label: option.text }))}
+            loading={detailVariantOptions.fields.size.loading}
+            error={detailVariantOptions.fields.size.error} onRetry={detailVariantOptions.reload}
+            labels={{ apply: tActions("apply"), reset: tActions("reset"), close: tActions("close") }} />
+        ),
         filteredValue: detailFilters.size,
         filterSearch: true,
         onFilter: () => true,
@@ -609,6 +631,13 @@ export default function OrderReportPage() {
           ),
         render: (value, record) => (record?.children ? "-" : value || "-"),
         filters: detailDropdownOptions.colors,
+        filterDropdown: props => (
+          <SelectFilterDropdown {...props} key={detailVariantOptions.key} multiple
+            options={detailDropdownOptions.colors.map(option => ({ value: option.value, label: option.text }))}
+            loading={detailVariantOptions.fields.color.loading}
+            error={detailVariantOptions.fields.color.error} onRetry={detailVariantOptions.reload}
+            labels={{ apply: tActions("apply"), reset: tActions("reset"), close: tActions("close") }} />
+        ),
         filteredValue: detailFilters.color,
         filterSearch: true,
         onFilter: () => true,
@@ -633,7 +662,7 @@ export default function OrderReportPage() {
         ...getTextColumnSearchProps(t("detailTable.revenue"), (record) => record.revenue),
       },
     ],
-    [detailDropdownOptions, detailFilters, getTextColumnSearchProps, t],
+    [detailDropdownOptions, detailFilters, detailVariantOptions, getTextColumnSearchProps, t, tActions],
   );
 
   const summaryCards = useMemo(

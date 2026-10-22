@@ -314,7 +314,7 @@ export default function TransferPrinterOrderSearchPage({
                                           maxHeight: 220,
                                           objectFit: "cover",
                                           borderRadius: 8,
-                                          border: "1px solid #EEF1F3",
+                                          border: "1px solid var(--ej-muted)",
                                         }}
                                         preview
                                       />

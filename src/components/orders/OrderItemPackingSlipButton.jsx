@@ -17,6 +17,14 @@ export default function OrderItemPackingSlipButton({
   const tMessages = useTranslations("dashboard.orders.ordersPdf.messages");
 
   if (orderItem?.status !== "pdf" || !orderItem?.id || !categoryId) return null;
+  // One button per order group: the backend returns all of the group's
+  // pdf-status items in this category scope as one PDF.
+  if (
+    orderItem.__pdfGroupAnchorId &&
+    orderItem.__pdfGroupAnchorId !== orderItem.id
+  ) {
+    return null;
+  }
 
   const downloadKey = `orders-pdf:packing-slip:${orderItem.id}`;
   const title = tActions("downloadPackingSlips");

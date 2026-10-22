@@ -2,6 +2,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -17,8 +18,9 @@ import {
 } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import dayjs from "dayjs";
-import { palette } from "@/theme/tokens";
 import { EmptyState, ErrorState } from "@/components/ui/StateView";
+import { useProductVariantFilterOptions } from "@/hooks/useProductVariantFilterOptions";
+import { getProductVariantFilterConfig, normalizeProductIds, resetProductVariantFilters } from "@/utils/productVariantFilters.mjs";
 import MobileCardList from "./MobileCardList";
 
 const { RangePicker } = DatePicker;
@@ -32,7 +34,7 @@ const isActionsColumn = (column) => {
   return key === "actions";
 };
 
-function FilterDropdownFrame({ width, labels, onApply, onReset, onClose, applyIcon, applyLabel, children }) {
+function FilterDropdownFrame({ width, labels, onApply, onReset, onClose, applyIcon, applyLabel, applyDisabled, children }) {
   return (
     <div
       className="flex flex-col"
@@ -48,7 +50,7 @@ function FilterDropdownFrame({ width, labels, onApply, onReset, onClose, applyIc
           <Button size="small" onClick={onReset}>
             {labels.reset}
           </Button>
-          <Button type="primary" size="small" icon={applyIcon} onClick={onApply}>
+          <Button type="primary" size="small" icon={applyIcon} onClick={onApply} disabled={applyDisabled}>
             {applyLabel}
           </Button>
         </Space>
@@ -94,7 +96,10 @@ function TextFilterDropdown({
   );
 }
 
-function SelectFilterDropdown({
+export function SelectFilterDropdown({
+  loading,
+  error,
+  onRetry,
   multiple,
   placeholder,
   options,
@@ -121,8 +126,12 @@ function SelectFilterDropdown({
       }}
       onClose={() => close()}
       applyLabel={labels.apply}
+      applyDisabled={loading || Boolean(error)}
     >
+      {error ? <ErrorState compact onRetry={onRetry} /> : null}
       <Select
+        loading={loading}
+        disabled={loading || Boolean(error)}
         allowClear
         showSearch
         autoFocus
@@ -245,6 +254,25 @@ const CrudTable = forwardRef(function CrudTable(
   });
   const [sortState, setSortState] = useState(initialSort);
   const [filters, setFilters] = useState(initialFilters);
+  const variantConfigKey = JSON.stringify(getProductVariantFilterConfig(columns));
+  const variantConfig = useMemo(() => JSON.parse(variantConfigKey), [variantConfigKey]);
+  const variantOptions = useProductVariantFilterOptions(
+    variantConfig ? filters[variantConfig.parent] : null,
+    variantConfig?.children || [],
+  );
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+  const updateFilters = useCallback(update => {
+    const previous = filtersRef.current;
+    const next = resetProductVariantFilters(previous,
+      typeof update === "function" ? update(previous) : update, variantConfig);
+    filtersRef.current = next;
+    setFilters(next);
+    if (variantConfig && JSON.stringify(normalizeProductIds(previous[variantConfig.parent])) !==
+      JSON.stringify(normalizeProductIds(next[variantConfig.parent]))) {
+      setPageState(page => page.page === 1 ? page : { ...page, page: 1 });
+    }
+  }, [variantConfig]);
   const onFiltersChangeRef = useRef(onFiltersChange);
 
   useEffect(() => {
@@ -286,17 +314,18 @@ const CrudTable = forwardRef(function CrudTable(
   useImperativeHandle(ref, () => ({
     reload: () => fetchData(),
     setPage: (page) => setPageState((s) => ({ ...s, page })),
-    setFilters: (f) => setFilters((prev) => ({ ...prev, ...f })),
+    setFilters: (f) => updateFilters((prev) => ({ ...prev, ...f })),
     setSort: (s) => setSortState(s),
   }));
 
+  const filtersSignature = JSON.stringify(filters);
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pageState.page,
     pageState.pageSize,
-    JSON.stringify(filters),
+    filtersSignature,
     sortState.orderBy,
     sortState.orderDir,
   ]);
@@ -308,7 +337,8 @@ const CrudTable = forwardRef(function CrudTable(
   // Column filterDropdown/filteredValue wiring
   const effectiveColumns = useMemo(() => {
     return (columns || []).map((col) => {
-      const meta = col.filter;
+      const scopedOptions = variantOptions.active ? variantOptions.fields[col.dataIndex || col.key] : null;
+      const meta = scopedOptions ? { ...col.filter, options: scopedOptions.options } : col.filter;
       const fallbackLabel =
         typeof col.title === "string" || typeof col.title === "number"
           ? String(col.title)
@@ -369,6 +399,10 @@ const CrudTable = forwardRef(function CrudTable(
           tTable("selectPlaceholder", { label: fallbackLabel });
         filterDropdown = (args) => (
           <SelectFilterDropdown
+            key={`${dataIndex}:${variantOptions.key}`}
+            loading={scopedOptions?.loading}
+            error={scopedOptions?.error}
+            onRetry={variantOptions.reload}
             multiple={false}
             placeholder={placeholder}
             options={meta.options || []}
@@ -387,6 +421,10 @@ const CrudTable = forwardRef(function CrudTable(
           tTable("selectPlaceholder", { label: fallbackLabel });
         filterDropdown = (args) => (
           <SelectFilterDropdown
+            key={`${dataIndex}:${variantOptions.key}`}
+            loading={scopedOptions?.loading}
+            error={scopedOptions?.error}
+            onRetry={variantOptions.reload}
             multiple
             placeholder={placeholder}
             options={meta.options || []}
@@ -424,7 +462,7 @@ const CrudTable = forwardRef(function CrudTable(
         filterDropdown,
         filterIcon: (filtered) => (
           <FilterFilled
-            style={{ color: filtered ? palette.orange600 : undefined }}
+            style={{ color: filtered ? "var(--ej-accent)" : undefined }}
           />
         ),
         filteredValue,
@@ -434,7 +472,7 @@ const CrudTable = forwardRef(function CrudTable(
             : null,
       };
     });
-  }, [columns, filters, sortState]);
+  }, [columns, filters, sortState, variantOptions, tActions, tTable]);
 
   const onTableChange = (pagination, tableFilters, sorter) => {
     const { current, pageSize } = pagination || {};
@@ -476,7 +514,7 @@ const CrudTable = forwardRef(function CrudTable(
         }
       }
     });
-    setFilters(next);
+    updateFilters(next);
   };
 
   const { locale: tableLocale, ...restTableProps } = tableProps || {};
