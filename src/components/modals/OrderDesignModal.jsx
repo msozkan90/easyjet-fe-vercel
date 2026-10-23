@@ -1538,6 +1538,7 @@ export default function OrderDesignModal({
                       <Input.TextArea
                         rows={4}
                         value={note}
+                        maxLength={200}
                         onChange={(event) => setNote(event.target.value)}
                         className="rounded-xl border-none bg-surface"
                       />

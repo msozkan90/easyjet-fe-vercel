@@ -2103,7 +2103,8 @@
         "designChecklist": "Tasarım Kontrolü",
         "actions": "İşlemler",
         "notes": "Notlar",
-        "designerNotes": "Tasarımcı Notu"
+        "designerNotes": "Tasarımcı Notu",
+        "productionNote": "Üretim Notu"
       },
       "designChecklist": {
         "ready": "Hazır",
@@ -2169,7 +2170,8 @@
         "confirmNewOrderOk": "Güncelle",
         "download": "İndir",
         "printLabel": "Etiket Yazdır",
-        "manualOrder": "Manuel Sipariş"
+        "manualOrder": "Manuel Sipariş",
+        "addProductionNote": "Üretim Notu Ekle"
       },
       "rematch": {
         "title": "Ürün Varyasyonunu Yeniden Eşleştir",

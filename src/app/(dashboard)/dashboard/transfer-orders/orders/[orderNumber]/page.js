@@ -573,6 +573,7 @@ export default function TransferOrderDetailPage() {
                   id="transfer-designer-notes"
                   autoSize={{ minRows: 3, maxRows: 8 }}
                   value={designerNotesDraft}
+                  maxLength={200}
                   onChange={(event) =>
                     setDesignerNotesDraft(event?.target?.value || "")
                   }

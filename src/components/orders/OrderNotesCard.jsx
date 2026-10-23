@@ -75,7 +75,7 @@ export default function OrderNotesCard({ order, editable = false, onSaved }) {
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 autoSize={{ minRows: 3, maxRows: 12 }}
-                maxLength={10000}
+                maxLength={200}
                 disabled={saving}
               />
               <Button

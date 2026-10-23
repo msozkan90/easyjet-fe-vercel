@@ -17,6 +17,7 @@ import {
   CloseCircleOutlined,
   EyeOutlined,
   FileSearchOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import CrudTable from "@/components/common/table/CrudTable";
@@ -29,6 +30,7 @@ import { useSelector } from "react-redux";
 import { fetchGenericList } from "@/utils/fetchGenericList";
 import StatusTag from "@/components/ui/StatusTag";
 import { formatAmount } from "@/utils/formatMoney";
+import ProductionNoteModal from "@/components/orders/ProductionNoteModal";
 
 const { RangePicker } = DatePicker;
 
@@ -59,6 +61,7 @@ export default function OrdersStatusListPage({
   affilated,
   showCustomerColumn = false,
   showProductionAt = false,
+  enableProductionNotes = true,
   toolbarRight,
   defaultSort = [{ field: "order_date", direction: "asc" }],
 }) {
@@ -71,6 +74,7 @@ export default function OrdersStatusListPage({
   const tableRef = tableRefExternal || internalTableRef;
   const [productVariations, setProductVariations] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [productionNoteOrder, setProductionNoteOrder] = useState(null);
   const isCompanyUser = (currentUser?.roles || []).some((role) =>
     [
       "companyadmin",
@@ -79,6 +83,7 @@ export default function OrdersStatusListPage({
     ].includes(String(role).toLowerCase()),
   );
   const shouldShowCustomerColumn = showCustomerColumn || isCompanyUser;
+  const canEditProductionNotes = enableProductionNotes && isCompanyUser;
   const [quickFilters, setQuickFilters] = useState(() => {
     if (!initialFiltersProp) {
       return createDefaultToolbarFilters();
@@ -706,6 +711,76 @@ export default function OrdersStatusListPage({
         : []),
     ];
 
+    const builtColumns =
+      typeof columnsBuilder === "function"
+        ? columnsBuilder(baseColumns)
+        : baseColumns;
+    const productionNoteColumn = {
+      title: t("columns.productionNote"),
+      key: "production_notes",
+      width: 220,
+      fixed: "right",
+      render: (_, record) => {
+        const note = record?.order?.production_notes;
+        if (!note) return t("common.none");
+        return (
+          <Tooltip
+            title={
+              <div
+                style={{
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "anywhere",
+                  maxHeight: 320,
+                  overflowY: "auto",
+                }}
+              >
+                {note}
+              </div>
+            }
+          >
+            <span
+              style={{
+                display: "block",
+                width: 196,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {note}
+            </span>
+          </Tooltip>
+        );
+      },
+    };
+    const finalColumns = canEditProductionNotes
+      ? builtColumns.flatMap((column) =>
+          column.key !== "actions"
+            ? [column]
+            : [
+                productionNoteColumn,
+                {
+                  ...column,
+                  width: (column.width || 100) + 40,
+                  render: (value, record, index) => (
+                    <Space size="small">
+                      {column.render?.(value, record, index)}
+                      {record?.order?.id ? (
+                        <Tooltip title={t("actions.addProductionNote")}>
+                          <Button
+                            icon={<FormOutlined />}
+                            aria-label={t("actions.addProductionNote")}
+                            onClick={() => setProductionNoteOrder(record.order)}
+                          />
+                        </Tooltip>
+                      ) : null}
+                    </Space>
+                  ),
+                },
+              ],
+        )
+      : builtColumns;
+
     return [
       {
         title: "",
@@ -715,15 +790,14 @@ export default function OrdersStatusListPage({
         className: "orders-expand-column",
         render: () => null,
       },
-      ...(typeof columnsBuilder === "function"
-        ? columnsBuilder(baseColumns)
-        : baseColumns),
+      ...finalColumns,
     ];
   }, [
     colorOptions,
     customerOptions,
     formatDateTime,
     columnsBuilder,
+    canEditProductionNotes,
     productOptions,
     sizeOptions,
     statusLabels,
@@ -843,6 +917,16 @@ export default function OrdersStatusListPage({
         onFiltersChange={handleFiltersSync}
         tableProps={tableProps}
       />
+      {canEditProductionNotes && productionNoteOrder ? (
+        <ProductionNoteModal
+          order={productionNoteOrder}
+          onCancel={() => setProductionNoteOrder(null)}
+          onSaved={() => {
+            setProductionNoteOrder(null);
+            tableRef.current?.reload?.();
+          }}
+        />
+      ) : null}
     </RequireRole>
   );
 }

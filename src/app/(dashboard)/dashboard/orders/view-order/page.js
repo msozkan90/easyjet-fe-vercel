@@ -17,6 +17,7 @@ export default function OrdersViewOrderPage() {
       ]}
       requireRoles={["companyShipmentWorker"]}
       productListFetcher={fetchProducts}
+      enableProductionNotes
     />
   );
 }
