@@ -2323,7 +2323,8 @@
         "designChecklist": "Design Check",
         "actions": "Actions",
         "notes": "Notes",
-        "designerNotes": "Designer Note"
+        "designerNotes": "Designer Note",
+        "productionNote": "Production Note"
       },
       "designChecklist": {
         "ready": "Ready",
@@ -2389,7 +2390,8 @@
         "confirmNewOrderOk": "Update",
         "download": "Download",
         "printLabel": "Print Label",
-        "manualOrder": "Manual Order"
+        "manualOrder": "Manual Order",
+        "addProductionNote": "Add Production Note"
       },
       "rematch": {
         "title": "Rematch Product Variation",

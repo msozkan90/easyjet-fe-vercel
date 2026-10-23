@@ -137,6 +137,7 @@ export default function SubCategoryViewOrderPage({ params }) {
         requireRoles={["companyCompletedWorker"]}
         productListFetcher={fetchProducts}
         affilated
+        enableProductionNotes
         toolbarRight={toolbarRight}
         columnsBuilder={columnsBuilder}
       />
