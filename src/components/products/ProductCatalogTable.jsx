@@ -14,8 +14,8 @@ import { formatPrice } from "@/utils/priceHelpers";
 import { useTranslations } from "@/i18n/use-translations";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
 
-export default function ProductCatalogTable({ customer = false, partner = false, selectCustomer = false }) {
-  const showPrices = customer || partner;
+export default function ProductCatalogTable({ partner = false, selectCustomer = false }) {
+  const showPrices = partner;
   const t = useTranslations("dashboard.productCatalog");
   const { message } = App.useApp();
   const tableRef = useRef(null);
@@ -73,7 +73,7 @@ export default function ProductCatalogTable({ customer = false, partner = false,
       ? selectCustomer
         ? payload => ProductCatalogAPI.partnerCustomerPrices(payload, selectedCustomerId)
         : ProductCatalogAPI.partnerPrices
-      : customer ? ProductCatalogAPI.customerPrices : ProductCatalogAPI.list;
+      : ProductCatalogAPI.list;
     return makeListRequest(list, {
       defaultSort: [],
       filterTransform: filters => ({
@@ -82,7 +82,7 @@ export default function ProductCatalogTable({ customer = false, partner = false,
         ...(filters.color_name ? { color_name: { eq: filters.color_name } } : {}),
       }),
     }, normalizeListAndMeta);
-  }, [customer, partner, selectCustomer, selectedCustomerId]);
+  }, [partner, selectCustomer, selectedCustomerId]);
   const close = () => { setEditing(null); setFile(null); };
   const columns = [
     { title: t("image"), dataIndex: "image_url", width: 120, render: (url, row) => url ? (
@@ -116,7 +116,7 @@ export default function ProductCatalogTable({ customer = false, partner = false,
     finally { setSaving(false); }
   };
   return (
-    <RequireRole anyOfRoles={[partner ? "partnerAdmin" : customer ? "customerAdmin" : "companyAdmin"]}>
+    <RequireRole anyOfRoles={[partner ? "partnerAdmin" : "companyAdmin"]}>
       <CrudTable key={selectedCustomerId || "unselected"} ref={tableRef} columns={columns} request={request}
         toolbarLeft={partner && selectCustomer ? (
           <Space wrap>

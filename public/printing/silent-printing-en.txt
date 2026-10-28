@@ -1,0 +1,74 @@
+EASYJETCONNECT — SCANNER SILENT PRINTING SETUP
+
+Complete once on each label-printing workstation. No desktop application or
+browser extension is required. Requires Chrome 144 or newer.
+
+1. CONFIGURE THE PRINTER
+
+Install the printer driver. Select the label printer as the default in the
+operating system's printer settings. Configure the default label size,
+orientation, scaling and number of copies there. A 4 x 6 inch label is
+101.6 x 152.4 mm, not 100 x 150 mm. Use the size of your actual stock.
+
+2. ENABLE CHROME SILENT PRINTING
+
+Download the configuration for your operating system from Scanner > Printer
+settings. Administrator access may be required. For centrally managed Chrome,
+deploy SilentPrintingEnabled=true using your existing management tool instead.
+Avoid conflicting configurations for the same policy.
+
+Windows:
+  Open and import chrome-silent-printing-enable.reg.
+  This only sets the SilentPrintingEnabled DWORD value to 1 under
+  HKLM\SOFTWARE\Policies\Google\Chrome.
+
+macOS:
+  Open chrome-silent-printing.mobileconfig, then review and install the downloaded
+  profile in System Settings. Managed devices can receive the profile via MDM.
+  The profile contains only Chrome's silent-printing policy.
+
+Linux (Google Chrome):
+  From the folder containing the downloaded chrome-silent-printing.json:
+    sudo install -d -m 755 /etc/opt/chrome/policies/managed
+    sudo install -o root -g root -m 644 chrome-silent-printing.json /etc/opt/chrome/policies/managed/easyjet-silent-printing.json
+  Chromium policy locations vary by distribution.
+
+3. VERIFY THE SETUP
+
+Open chrome://policy in Chrome and reload policies. Verify that
+SilentPrintingEnabled is true and its status is OK. If necessary, fully quit and
+restart Chrome. Check the browser version at chrome://version. A missing or
+invalid policy means setup is not complete.
+
+Enable Print automatically after scanning in Scanner > Printer settings.
+Scan an order. Verify one label is printed by the correct printer with the
+correct dimensions and a readable barcode. Print Label reprints the current
+label; it does not purchase an additional shipping label.
+
+If Save as PDF is the default destination, a PDF may be saved to Downloads
+instead of producing paper output. Select a real printer for physical output.
+The website cannot verify the policy, selected printer or physical output.
+
+4. CHANGE SETTINGS / ROLLBACK
+
+Change the default printer and label settings in the computer's printer settings,
+then check with a label. The policy affects browser printing beyond Scanner;
+it is not limited to EasyJetConnect or a particular website.
+
+Disabling automatic printing in Scanner stops printing after scans. The
+preference is stored for the account in this browser; clearing browser data
+restores the default enabled setting. You can still use Print Label manually.
+Manual printing also skips confirmation while Chrome's policy is enabled.
+
+To restore the browser's confirmation dialog, remove the workstation policy:
+  Windows: Download /printing/chrome-silent-printing-disable.reg from your
+    application host and import it. This only removes the named policy value.
+  macOS: Remove the EasyJetConnect - Chrome Silent Printing configuration profile.
+  Linux: Remove /etc/opt/chrome/policies/managed/easyjet-silent-printing.json.
+  Central management: Remove the policy or set it to false in your management tool.
+Reload policies at chrome://policy and verify the result.
+
+Sources:
+https://chromeenterprise.google/policies/silent-printing-enabled/
+https://www.chromium.org/administrators/policy-templates/
+https://www.chromium.org/administrators/linux-quick-start/
