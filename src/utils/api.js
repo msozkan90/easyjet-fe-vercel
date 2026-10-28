@@ -967,7 +967,9 @@ export const NotificationRulesAPI = {
 export const ProductCatalogAPI = {
   list: (payload) => api.post("/product-catalog/list", payload),
   saveImage: (payload) => api.putMultipart("/product-catalog/image", payload),
-  customerPrices: (payload) => api.post("/product-prices/catalog", payload),
+  customerProducts: (payload) => api.post("/product-prices/catalog/products", payload),
+  customerCategories: () => api.get("/product-prices/catalog/categories"),
+  customerProduct: (id) => api.get(`/product-prices/catalog/products/${id}`),
   partnerPrices: (payload) => api.post("/product-prices/partner-catalog", payload),
   partnerCustomerPrices: (payload, customerId) => api.post("/product-prices/partner-customer-catalog", { ...payload, customer_id: customerId }),
 };

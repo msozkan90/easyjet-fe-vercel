@@ -3991,7 +3991,7 @@
         "userMetrics": "User Metrics"
       },
       "settings": "Settings",
-      "productPrice": "Product Price",
+      "productCatalog": "Product Catalog",
       "apiAccess": "API Access"
     },
     "settings": {
@@ -4447,7 +4447,6 @@
     },
     "productCatalog": {
       "title": "Catalog",
-      "customerTitle": "Product Price",
       "image": "Image",
       "product": "Product",
       "size": "Size",
@@ -4474,6 +4473,45 @@
       "selectCustomer": "Select customer",
       "selectCustomerToView": "Select a customer to view product prices.",
       "loadCustomersError": "Customers could not be loaded."
+    },
+    "customerCatalog": {
+      "title": "Product Catalog",
+      "description": "Browse the products assigned to you, their size and color options and your current unit prices.",
+      "searchPlaceholder": "Search by product name",
+      "allCategories": "All",
+      "categoryFilter": "Category filter",
+      "productCount": "{count} products",
+      "sizeCount": "{count} sizes",
+      "colorCount": "{count} colors",
+      "unitPrice": "Unit price",
+      "from": "from",
+      "noImage": "No image",
+      "emptyTitle": "No products found",
+      "emptyFiltered": "Try changing the search or category filter.",
+      "emptyCatalog": "No active product has a price assigned to you yet.",
+      "clearFilters": "Clear filters",
+      "loadError": "Catalog could not be loaded",
+      "back": "Back to catalog",
+      "color": "Color",
+      "size": "Size",
+      "sku": "SKU",
+      "noSku": "Not set",
+      "priceRange": "Prices for this product range from {min} to {max}.",
+      "additionalPosition": "Additional print position",
+      "additionalPositionHint": "Added per unit for every position after the first one.",
+      "positions": "Print positions",
+      "variantCount": "{count} variants",
+      "selectedVariant": "Selected variant",
+      "priceTable": "Price table",
+      "priceTableHint": "Click a cell to select that size and color.",
+      "unavailable": "{size} / {color} is not available",
+      "imageFallback": "No image for this combination; showing another variant of the product.",
+      "gallery": "Product images",
+      "showImage": "Show {size} / {color} image",
+      "notFoundTitle": "Product not found",
+      "notFoundDescription": "This product is not in your catalog or is no longer active.",
+      "details": "Product details",
+      "category": "Category"
     },
     "apiAccess": {
       "columns": {

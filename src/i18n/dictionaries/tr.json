@@ -3771,7 +3771,7 @@
         "userMetrics": "Kullanıcı Metrikleri"
       },
       "settings": "Ayarlar",
-      "productPrice": "Product Price",
+      "productCatalog": "Ürün Kataloğu",
       "apiAccess": "API Erişimi"
     },
     "settings": {
@@ -4447,7 +4447,6 @@
     },
     "productCatalog": {
       "title": "Catalog",
-      "customerTitle": "Product Price",
       "image": "Görsel",
       "product": "Ürün",
       "size": "Beden",
@@ -4474,6 +4473,45 @@
       "selectCustomer": "Müşteri seçin",
       "selectCustomerToView": "Ürün fiyatlarını görmek için bir müşteri seçin.",
       "loadCustomersError": "Müşteriler yüklenemedi."
+    },
+    "customerCatalog": {
+      "title": "Ürün Kataloğu",
+      "description": "Size tanımlı ürünleri, beden ve renk seçeneklerini ve güncel birim fiyatlarınızı inceleyin.",
+      "searchPlaceholder": "Ürün adıyla ara",
+      "allCategories": "Tümü",
+      "categoryFilter": "Kategori filtresi",
+      "productCount": "{count} ürün",
+      "sizeCount": "{count} beden",
+      "colorCount": "{count} renk",
+      "unitPrice": "Birim fiyat",
+      "from": "itibaren",
+      "noImage": "Görsel yok",
+      "emptyTitle": "Ürün bulunamadı",
+      "emptyFiltered": "Arama veya kategori filtresini değiştirerek tekrar deneyin.",
+      "emptyCatalog": "Henüz size fiyat tanımlanmış aktif bir ürün yok.",
+      "clearFilters": "Filtreleri temizle",
+      "loadError": "Katalog yüklenemedi",
+      "back": "Kataloğa dön",
+      "color": "Renk",
+      "size": "Beden",
+      "sku": "SKU",
+      "noSku": "Tanımlı değil",
+      "priceRange": "Bu üründe fiyatlar {min} – {max} arasında değişir.",
+      "additionalPosition": "Ek baskı pozisyonu",
+      "additionalPositionHint": "İlk pozisyondan sonraki her pozisyon için adet başına eklenir.",
+      "positions": "Baskı pozisyonları",
+      "variantCount": "{count} varyasyon",
+      "selectedVariant": "Seçili varyasyon",
+      "priceTable": "Fiyat tablosu",
+      "priceTableHint": "Bir hücreye tıklayarak o beden ve rengi seçin.",
+      "unavailable": "{size} / {color} kombinasyonu mevcut değil",
+      "imageFallback": "Bu kombinasyonun görseli yok; aynı ürünün başka bir varyasyonu gösteriliyor.",
+      "gallery": "Ürün görselleri",
+      "showImage": "{size} / {color} görselini göster",
+      "notFoundTitle": "Ürün bulunamadı",
+      "notFoundDescription": "Bu ürün kataloğunuzda değil veya artık aktif değil.",
+      "details": "Ürün bilgileri",
+      "category": "Kategori"
     },
     "apiAccess": {
       "columns": {
