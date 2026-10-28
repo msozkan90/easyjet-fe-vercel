@@ -2987,6 +2987,27 @@
         "actions": {
           "complete": "Tamamla"
         },
+        "printing": {
+          "settings": "Yazıcı ayarları",
+          "done": "Tamam",
+          "autoPrint": "Okutma sonrası otomatik yazdır",
+          "autoPrintDescription": "Sipariş bulunduğunda veya yeni etiket oluşturulduğunda kargo etiketini yazdırır. Bu tercih hesabınız için bu tarayıcıda saklanır.",
+          "printerTitle": "Varsayılan etiket yazıcısı",
+          "printerDescription": "Etiketler bu bilgisayarda seçili yazıcı ve varsayılan ayarlarla yazdırılır. Web sitesi yazıcıları listeleyemez veya seçili yazıcıyı değiştiremez.",
+          "printerStep": "Bilgisayarınızın yazıcı ayarlarından etiket yazıcısını varsayılan olarak seçin.",
+          "paperStep": "Yazıcının varsayılan ayarlarından etiket boyutunu, yönünü, ölçeğini ve kopya sayısını düzenleyin. Kağıt boyutunu kullandığınız etiketle eşleştirin.",
+          "updateStep": "Daha sonra yazıcı veya ayar değiştirmek için bilgisayarınızdaki bu ayarları güncelleyin ve bir etiket yazdırarak sonucu kontrol edin.",
+          "silentTitle": "Onay beklemeden yazdırma",
+          "silentDescription": "Her bilgisayarda Chrome 144 veya üzeri için bir kerelik kurulum gerekir. Yöneticinizden kurulum rehberini uygulamasını isteyin. Kurulum tamamlanana kadar tarayıcının normal yazdırma penceresi açılır.",
+          "scopeDescription": "Sessiz yazdırma, bu Scanner sayfası dışındaki tarayıcı yazdırmalarını da etkiler. Burada otomatik yazdırmayı kapatmak yalnızca okutma sonrası yazdırmayı durdurur; tarayıcının onay penceresini geri açmaz.",
+          "downloadGuide": "Kurulum rehberini indir",
+          "verificationDescription": "Kurulumu kontrol etmek için bir sipariş okutun ve etiketini yazdırın. Yazdırma isteği fiziksel çıktıyı doğrulamaz. Varsayılan hedef PDF olarak kaydet ise yazıcı çıktısı yerine PDF kaydedilir.",
+          "preferenceSaveError": "Tercih bu tarayıcıya kaydedilemedi. Sayfadan ayrılana kadar geçerli olacak.",
+          "printRequested": "Etiket için yazdırma isteği tarayıcıya iletildi.",
+          "defaultPrinter": "Bu bilgisayarın varsayılan yazıcısını ve yazdırma ayarlarını kullanır.",
+          "automatic": "Otomatik yazdırma",
+          "manual": "Elle yazdırma"
+        },
         "messages": {
           "loadBeforeScrap": "Fire kaydı girmeden önce siparişi yükleyin.",
           "invalidScrapItem": "Seçilen ürün geçerli bir varyanta sahip değil.",

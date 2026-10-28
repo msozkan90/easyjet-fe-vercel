@@ -3207,6 +3207,27 @@
         "actions": {
           "complete": "Complete"
         },
+        "printing": {
+          "settings": "Printer settings",
+          "done": "Done",
+          "autoPrint": "Print automatically after scanning",
+          "autoPrintDescription": "Print the shipping label when an order is found or a new label is created. This preference is saved for your account in this browser.",
+          "printerTitle": "Default label printer",
+          "printerDescription": "Labels use the printer and defaults configured on this computer. The website cannot list printers or change the selected printer.",
+          "printerStep": "Choose your label printer as the default in your computer’s printer settings.",
+          "paperStep": "Set the label size, orientation, scale and number of copies in the printer’s default settings. Match the paper size to your labels.",
+          "updateStep": "To change printers or defaults later, update these computer settings, then print a label to check the result.",
+          "silentTitle": "Print without confirmation",
+          "silentDescription": "A one-time setup of Chrome 144 or newer is required on each workstation. Ask your administrator to follow the setup guide. Until setup is complete, the browser will show its usual print dialog.",
+          "scopeDescription": "Silent printing affects browser printing beyond this Scanner page. Turning off automatic printing here only stops printing after scans; it does not restore the browser’s confirmation dialog.",
+          "downloadGuide": "Download setup guide",
+          "verificationDescription": "Scan an order and print its label to check the setup. A print request does not confirm physical output. If Save as PDF is the default destination, a PDF will be saved instead.",
+          "preferenceSaveError": "The preference could not be saved in this browser. It will apply until you leave this page.",
+          "printRequested": "Label print request sent to the browser.",
+          "defaultPrinter": "Uses this computer’s default printer and print settings.",
+          "automatic": "Automatic printing",
+          "manual": "Manual printing"
+        },
         "messages": {
           "loadBeforeScrap": "Load an order before recording scrap.",
           "invalidScrapItem": "Selected item does not have a valid variant.",

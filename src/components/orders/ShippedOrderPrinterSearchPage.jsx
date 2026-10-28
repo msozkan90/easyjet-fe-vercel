@@ -3,6 +3,8 @@
 import OrderNotesCard from "./OrderNotesCard";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { PrinterOutlined, SettingOutlined } from "@ant-design/icons";
 import {
   Alert,
   App as AntdApp,
@@ -25,6 +27,12 @@ import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesMod
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount } from "@/utils/formatMoney";
+import LabelPrinterSettings from "./LabelPrinterSettings";
+import {
+  labelPrintPreferenceKey,
+  readAutoPrintPreference,
+  saveAutoPrintPreference,
+} from "@/utils/labelPrintPreferences.mjs";
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -179,8 +187,12 @@ export default function ShippedOrderPrinterSearchPage() {
   const tDetail = useTranslations("dashboard.orders.detail");
   const tCommonActions = useTranslations("common.actions");
   const fallbackText = tDetail("designs.designAreaPlaceholder");
+  const userId = useSelector((state) => state.auth.user?.id);
+  const preferenceKey = labelPrintPreferenceKey(userId);
 
   const orderNumberInputRef = useRef(null);
+  const searchInFlightRef = useRef(false);
+  const printInFlightRef = useRef(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [printingLabel, setPrintingLabel] = useState(false);
@@ -189,6 +201,59 @@ export default function ShippedOrderPrinterSearchPage() {
   const [positionsByProductId, setPositionsByProductId] = useState({});
   const [positionsLoading, setPositionsLoading] = useState(false);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [printerSettingsOpen, setPrinterSettingsOpen] = useState(false);
+  const [labelUrl, setLabelUrl] = useState(null);
+  const [printPreference, setPrintPreference] = useState(null);
+  const preferencesReady = Boolean(
+    preferenceKey && printPreference?.key === preferenceKey,
+  );
+  const autoPrint = preferencesReady ? printPreference.autoPrint : true;
+  const busy = searching || printingLabel;
+
+  useEffect(() => {
+    if (!preferenceKey) return;
+    let enabled = true;
+    try {
+      enabled = readAutoPrintPreference(window.localStorage, preferenceKey);
+    } catch {
+      // Browsers may deny access to localStorage altogether.
+    }
+    setPrintPreference({ key: preferenceKey, autoPrint: enabled });
+  }, [preferenceKey]);
+
+  const handleAutoPrintChange = (enabled) => {
+    setPrintPreference({ key: preferenceKey, autoPrint: enabled });
+    let saved = false;
+    try {
+      saved = saveAutoPrintPreference(window.localStorage, preferenceKey, enabled);
+    } catch {
+      // Keep the selected mode for this page even if persistence is unavailable.
+    }
+    if (!saved) message.warning(tOrders("scanner.printing.preferenceSaveError"));
+  };
+
+  const requestLabelPrint = useCallback(
+    async (url) => {
+      if (!url || printInFlightRef.current) return;
+      printInFlightRef.current = true;
+      setPrintingLabel(true);
+      try {
+        const result = await printOrderLabel({ labelUrl: url });
+        if (result?.printed) {
+          // The browser cannot confirm the policy, destination or paper output.
+          message.info(tOrders("scanner.printing.printRequested"));
+        }
+      } catch (error) {
+        message.error(
+          error?.message || tOrders("scanner.messages.labelPrintError"),
+        );
+      } finally {
+        printInFlightRef.current = false;
+        setPrintingLabel(false);
+      }
+    },
+    [message, tOrders],
+  );
 
   const items = useMemo(() => {
     if (!Array.isArray(order?.items)) return [];
@@ -256,14 +321,23 @@ export default function ShippedOrderPrinterSearchPage() {
 
   const handleSearch = useCallback(
     async (rawOrderNumber) => {
+      if (
+        !preferencesReady ||
+        searchInFlightRef.current ||
+        printInFlightRef.current ||
+        shippingModalOpen ||
+        printerSettingsOpen
+      ) return;
       const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
       if (!nextOrderNumber) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
 
+      searchInFlightRef.current = true;
       setSearching(true);
       setSearched(true);
+      setLabelUrl(null);
 
       try {
         const response = await OrdersAPI.shippedItems({
@@ -271,7 +345,7 @@ export default function ShippedOrderPrinterSearchPage() {
         });
 
         const responseOrder = response?.data?.order || null;
-        const labelUrl = response?.data?.label_download?.label_url;
+        const nextLabelUrl = response?.data?.label_download?.label_url;
 
         setOrder(responseOrder);
 
@@ -281,24 +355,8 @@ export default function ShippedOrderPrinterSearchPage() {
           return;
         }
 
-        if (labelUrl) {
-          setPrintingLabel(true);
-          try {
-            const printResult = await printOrderLabel({
-              labelUrl,
-            });
-            if (printResult?.printed) {
-              message.success(tOrders("scanner.messages.labelPrintOpened"));
-            }
-          } catch (printError) {
-            message.error(
-              printError?.message ||
-                tOrders("scanner.messages.labelPrintError"),
-            );
-          } finally {
-            setPrintingLabel(false);
-          }
-        }
+        setLabelUrl(nextLabelUrl || null);
+        if (nextLabelUrl && autoPrint) await requestLabelPrint(nextLabelUrl);
 
         setOrderNumber("");
         window.requestAnimationFrame(() => {
@@ -311,10 +369,21 @@ export default function ShippedOrderPrinterSearchPage() {
             tDetail("messages.loadOrderError"),
         );
       } finally {
+        searchInFlightRef.current = false;
         setSearching(false);
       }
     },
-    [message, orderNumber, tDetail, tOrders],
+    [
+      message,
+      orderNumber,
+      tDetail,
+      tOrders,
+      preferencesReady,
+      shippingModalOpen,
+      printerSettingsOpen,
+      autoPrint,
+      requestLabelPrint,
+    ],
   );
 
   const handlePaste = useCallback(
@@ -332,37 +401,55 @@ export default function ShippedOrderPrinterSearchPage() {
   const handleLabelCreated = useCallback(
     async (payload) => {
       const responseOrder = payload?.order || null;
-      const labelUrl = payload?.label_download?.label_url;
+      const nextLabelUrl = payload?.label_download?.label_url;
       setOrder(responseOrder);
+      setLabelUrl(nextLabelUrl || null);
       setShippingModalOpen(false);
-      if (labelUrl) {
-        setPrintingLabel(true);
-        try {
-          const printResult = await printOrderLabel({ labelUrl });
-          if (printResult?.printed) {
-            message.success(tOrders("scanner.messages.labelPrintOpened"));
-          }
-        } catch (error) {
-          message.error(error?.message || tOrders("scanner.messages.labelPrintError"));
-        } finally {
-          setPrintingLabel(false);
-        }
-      }
+      if (nextLabelUrl && autoPrint) await requestLabelPrint(nextLabelUrl);
       setOrderNumber("");
       window.requestAnimationFrame(() => orderNumberInputRef.current?.focus());
     },
-    [message, tOrders],
+    [autoPrint, requestLabelPrint],
   );
 
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker", "companyadmin"]}>
       <div className="space-y-4">
-        <PageHeader className="" title={tOrders("scanner.title")} />
+        <PageHeader
+          className=""
+          title={tOrders("scanner.title")}
+          description={tOrders("scanner.printing.defaultPrinter")}
+          meta={
+            <Tag>
+              {tOrders(`scanner.printing.${autoPrint ? "automatic" : "manual"}`)}
+            </Tag>
+          }
+          extra={
+            <>
+              <Button
+                icon={<PrinterOutlined />}
+                disabled={!labelUrl || searching || !preferencesReady}
+                loading={printingLabel}
+                onClick={() => requestLabelPrint(labelUrl)}
+              >
+                {tOrders("actions.printLabel")}
+              </Button>
+              <Button
+                icon={<SettingOutlined />}
+                disabled={busy || !preferencesReady}
+                onClick={() => setPrinterSettingsOpen(true)}
+              >
+                {tOrders("scanner.printing.settings")}
+              </Button>
+            </>
+          }
+        />
 
         <Card className="rounded-xl">
           <Space.Compact style={{ width: "100%" }}>
             <Input
               ref={orderNumberInputRef}
+              disabled={busy || !preferencesReady}
               allowClear
               placeholder={tOrders("filters.searchOrderNumber")}
               value={orderNumber}
@@ -373,6 +460,7 @@ export default function ShippedOrderPrinterSearchPage() {
             <Button
               type="primary"
               loading={searching}
+              disabled={printingLabel || !preferencesReady}
               onClick={() => handleSearch(orderNumber)}
             >
               {tCommonActions("search")}
@@ -436,6 +524,12 @@ export default function ShippedOrderPrinterSearchPage() {
           order={order}
           onClose={() => setShippingModalOpen(false)}
           onCreated={handleLabelCreated}
+        />
+        <LabelPrinterSettings
+          open={printerSettingsOpen}
+          onClose={() => setPrinterSettingsOpen(false)}
+          autoPrint={autoPrint}
+          onAutoPrintChange={handleAutoPrintChange}
         />
       </div>
     </RequireRole>
