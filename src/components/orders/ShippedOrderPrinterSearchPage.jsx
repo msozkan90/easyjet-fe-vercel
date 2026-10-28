@@ -194,6 +194,7 @@ export default function ShippedOrderPrinterSearchPage() {
   const searchInFlightRef = useRef(false);
   const printInFlightRef = useRef(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [loadedOrderNumber, setLoadedOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [printingLabel, setPrintingLabel] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -348,6 +349,7 @@ export default function ShippedOrderPrinterSearchPage() {
         const nextLabelUrl = response?.data?.label_download?.label_url;
 
         setOrder(responseOrder);
+        setLoadedOrderNumber(responseOrder ? nextOrderNumber : "");
 
         if (response?.data?.requires_label_creation === true) {
           setShippingModalOpen(true);
@@ -364,6 +366,7 @@ export default function ShippedOrderPrinterSearchPage() {
         });
       } catch (error) {
         setOrder(null);
+        setLoadedOrderNumber("");
         message.error(
           error?.response?.data?.error?.message ||
             tDetail("messages.loadOrderError"),
@@ -466,6 +469,19 @@ export default function ShippedOrderPrinterSearchPage() {
               {tCommonActions("search")}
             </Button>
           </Space.Compact>
+          {order && loadedOrderNumber ? (
+            <div
+              className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-4"
+              aria-live="polite"
+            >
+              <Typography.Text type="secondary">
+                {tOrders("columns.orderNumber")}
+              </Typography.Text>
+              <Typography.Text strong copyable className="break-all text-lg!">
+                {loadedOrderNumber}
+              </Typography.Text>
+            </div>
+          ) : null}
         </Card>
 
         {printingLabel ? (
