@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadType</key><string>Configuration</string>
+  <key>PayloadVersion</key><integer>1</integer>
+  <key>PayloadIdentifier</key><string>com.easyjetconnect.chrome.silentprinting</string>
+  <key>PayloadUUID</key><string>AA858024-14C7-4BDC-9130-BCFB39C2CBB8</string>
+  <key>PayloadDisplayName</key><string>EasyJetConnect - Chrome Silent Printing</string>
+  <key>PayloadDescription</key><string>Prints from Chrome without confirmation using the default printer and settings. Applies beyond the Scanner page. Remove this profile to restore normal printing.</string>
+  <key>PayloadScope</key><string>System</string>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key><string>com.google.Chrome</string>
+      <key>PayloadVersion</key><integer>1</integer>
+      <key>PayloadIdentifier</key><string>com.easyjetconnect.chrome.silentprinting.policy</string>
+      <key>PayloadUUID</key><string>F264DF4C-702D-4F85-91DF-F0212E2E5DDB</string>
+      <key>PayloadDisplayName</key><string>Chrome Silent Printing Policy</string>
+      <key>SilentPrintingEnabled</key><true/>
+    </dict>
+  </array>
+</dict>
+</plist>

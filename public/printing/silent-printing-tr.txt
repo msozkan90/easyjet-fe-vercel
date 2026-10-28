@@ -1,0 +1,74 @@
+EASYJETCONNECT — SCANNER SESSİZ YAZDIRMA KURULUMU
+
+Her etiket yazdırma bilgisayarında bir kere uygulanır. Masaüstü uygulaması veya
+tarayıcı eklentisi kurulmaz. Chrome 144 veya üzeri gerekir.
+
+1. YAZICIYI HAZIRLAYIN
+
+Yazıcı sürücüsünü kurun. İşletim sisteminin yazıcı ayarlarından etiket yazıcısını
+varsayılan seçin. Etiket ölçüsünü, yönünü, ölçeğini ve kopya sayısını yazıcının
+varsayılan ayarlarında düzenleyin. Örneğin 4 x 6 inç etiket 101,6 x 152,4 mm'dir;
+100 x 150 mm ile aynı değildir. Gerçekte kullandığınız etiketi esas alın.
+
+2. CHROME SESSİZ YAZDIRMAYI ETKİNLEŞTİRİN
+
+Scanner > Yazıcı ayarları altındaki işletim sistemi düğmesiyle yapılandırmayı
+indirin. Kurulum yönetici yetkisi gerektirebilir. Kurumda mevcut bir Chrome
+yönetimi varsa SilentPrintingEnabled=true politikasını oradan dağıtın;
+aynı politikayı birden fazla çelişen kaynaktan ayarlamayın.
+
+Windows:
+  chrome-silent-printing-enable.reg dosyasını açıp içe aktarın.
+  HKLM\SOFTWARE\Policies\Google\Chrome altında yalnızca
+  SilentPrintingEnabled DWORD değeri 1 yapılır.
+
+macOS:
+  chrome-silent-printing.mobileconfig dosyasını açın, Sistem Ayarları'nda
+  indirilen profili inceleyip yükleyin. Yönetilen cihazlarda profili MDM ile
+  dağıtabilirsiniz. Profil yalnızca Chrome'un sessiz yazdırma ayarını içerir.
+
+Linux (Google Chrome):
+  İndirilen chrome-silent-printing.json dosyasının bulunduğu klasörde:
+    sudo install -d -m 755 /etc/opt/chrome/policies/managed
+    sudo install -o root -g root -m 644 chrome-silent-printing.json /etc/opt/chrome/policies/managed/easyjet-silent-printing.json
+  Chromium kullanılıyorsa politika klasörü dağıtıma göre farklıdır.
+
+3. ETKİN OLDUĞUNU DOĞRULAYIN
+
+Chrome'da chrome://policy adresini açın, politikaları yeniden yükleyin.
+SilentPrintingEnabled değerinin true, durumunun OK/Tamam olduğunu doğrulayın.
+Gerekirse Chrome'u tamamen kapatıp yeniden açın. chrome://version sürümü gösterir.
+Politika görünmüyor veya hata veriyorsa kurulum tamamlanmış sayılmaz.
+
+Scanner > Yazıcı ayarları > Okutma sonrası otomatik yazdır açık olmalıdır.
+Bir sipariş okutun. Tek etiketin doğru yazıcıdan, doğru ölçüde ve barkodu okunur
+şekilde çıktığını kontrol edin. Etiketi yazdır düğmesi mevcut etiketi yeniden
+yazdırır; ayrıca bir kargo etiketi satın almaz.
+
+Varsayılan hedef PDF olarak kaydet ise fiziksel çıktı yerine İndirilenler
+klasörüne PDF kaydedilebilir. Gerçek yazıcı seçmeden fiziksel çıktı beklemeyin.
+Web sayfası politikayı, seçili yazıcıyı veya fiziksel çıktıyı doğrulayamaz.
+
+4. AYARLARI DEĞİŞTİRME / GERİ ALMA
+
+Yazıcıyı, etiket boyutunu ve diğer varsayılanları bilgisayarın yazıcı ayarlarından
+değiştirin, ardından bir etiketle kontrol edin. Sessiz yazdırma politikası tarayıcı
+genelinde etkilidir; yalnızca EasyJetConnect veya Scanner sayfasıyla sınırlı değildir.
+
+Scanner'da otomatik yazdırmayı kapatmak okutma sonrası yazdırmayı durdurur.
+Bu tercih aynı hesap için bu tarayıcıda saklanır; tarayıcı verileri silinirse
+varsayılan açık duruma döner. Elle Etiketi yazdır düğmesi kullanılabilir; Chrome
+politikası etkinse bu düğme de onay penceresi göstermeden yazdırır.
+
+Onay penceresini geri getirmek için cihazdaki politikayı kaldırın:
+  Windows: Uygulama adresinizin /printing/chrome-silent-printing-disable.reg
+    dosyasını indirip içe aktarın. Yalnızca ilgili değer kaldırılır.
+  macOS: EasyJetConnect - Chrome Silent Printing yapılandırma profilini kaldırın.
+  Linux: /etc/opt/chrome/policies/managed/easyjet-silent-printing.json dosyasını kaldırın.
+  Merkezi yönetim: Politikayı yönetim aracınızdan kaldırın veya false yapın.
+Sonra chrome://policy sayfasından politikaları yeniden yükleyip kontrol edin.
+
+Kaynaklar:
+https://chromeenterprise.google/policies/silent-printing-enabled/
+https://www.chromium.org/administrators/policy-templates/
+https://www.chromium.org/administrators/linux-quick-start/

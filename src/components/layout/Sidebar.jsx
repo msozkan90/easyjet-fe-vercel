@@ -12,6 +12,7 @@ import {
   LineChartOutlined,
   BankOutlined,
   DollarOutlined,
+  ShopOutlined,
   AntDesignOutlined,
   PartitionOutlined,
   AppstoreOutlined,
@@ -829,9 +830,9 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
           ...(showCustomerProductMapperMenu
             ? [
                 {
-                  key: "product-price",
-                  icon: <DollarOutlined />,
-                  label: <Link href="/dashboard/product-price">{tSidebar("productPrice")}</Link>,
+                  key: "product-catalog",
+                  icon: <ShopOutlined />,
+                  label: <Link href="/dashboard/product-catalog">{tSidebar("productCatalog")}</Link>,
                 },
                 {
                   key: "product-mapper",
