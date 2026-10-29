@@ -4,9 +4,9 @@ updates:
   - package-ecosystem: npm
     directory: /
     target-branch: dev
+    # Monthly keeps Actions minutes and dev rebases low; security PRs still arrive immediately.
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: '07:00'
       timezone: Europe/Istanbul
     open-pull-requests-limit: 1
