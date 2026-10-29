@@ -1,11 +1,13 @@
 # Scanner silent printing
 
-Normal orders at `/dashboard/orders/printer` use the existing browser PDF print
-path. Chrome 144+ `SilentPrintingEnabled=true` supplies silent printing on each
+Normal orders at `/dashboard/orders/printer` and transfer shipments at
+`/dashboard/transfer-orders/printer` use the same printer settings and browser PDF
+print path. Chrome 144+ `SilentPrintingEnabled=true` supplies silent printing on each
 workstation. No JavaScript parameter can activate or detect this policy.
 
 The Scanner settings persist only `autoPrint` under an account-specific local
-storage key. They do not store or claim to control OS printer settings. Automatic
+storage key shared by both shipment scanners, with changes synchronized across
+browser tabs. They do not store or claim to control OS printer settings. Automatic
 printing defaults to the existing enabled behavior. Both order lookup and remake
 label creation respect the preference. The manual Print Label button retains the
 current label for retries without purchasing a new label. Starting another lookup
@@ -40,5 +42,14 @@ Acceptance on each target OS/browser and printer driver:
    label download failure and retry using the current label.
 8. Remove the policy and verify the normal print dialog returns. Cancel the dialog:
    no physical-print success should be reported.
+9. In the transfer shipment Scanner, complete the required checklist with auto-print
+   off and then on. Verify only completed shipments print automatically in the on
+   mode, and that the input is ready for the next barcode after each operation.
 
-This does not change transfer-order scanners or production scanners.
+Transfer shipments retain the existing shipping checklist and label-creation flow.
+Automatic printing runs only when the shipment response reports `shipped=true`
+and includes a label URL. Disabling automatic printing also applies to the
+checklist-confirmation response. Re-scanning a shipped order starts a fresh print
+attempt; repeated payloads within the same shipment flow do not print twice.
+
+This does not change production scanners.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
   Alert,
@@ -16,9 +16,10 @@ import {
   Popconfirm,
   Space,
   Spin,
+  Tag,
   Typography,
 } from "antd";
-import { PrinterOutlined } from "@ant-design/icons";
+import { PrinterOutlined, SettingOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import {
   GuardedPreviewImage,
@@ -27,7 +28,8 @@ import DesignThumbnailImage from "@/components/common/media/DesignThumbnailImage
 import TransferShippingRatesModal from "@/components/modals/TransferShippingRatesModal";
 import { TransferOrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
+import LabelPrinterSettings from "@/components/orders/LabelPrinterSettings";
+import useLabelPrinter from "@/hooks/useLabelPrinter";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount, formatCurrency } from "@/utils/formatMoney";
@@ -167,8 +169,8 @@ const TransferOrderItemCard = ({
                     />
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                       {tDetail("designCard.size")}:{" "}
-                      {formatAmount(design?.width)}" x{" "}
-                      {formatAmount(design?.height)}"
+                      {formatAmount(design?.width)}&quot; x{" "}
+                      {formatAmount(design?.height)}&quot;
                     </Typography.Text>
                     <Typography.Text strong>
                       {tDetail("designCard.price")}:{" "}
@@ -200,6 +202,17 @@ export default function TransferShippedPrinterSearchPage() {
   const tDetail = useTranslations("dashboard.orders.transferDetail");
   const tCommonActions = useTranslations("common.actions");
   const autoPrintedLabelRef = useRef("");
+  const orderNumberInputRef = useRef(null);
+  const searchInFlightRef = useRef(false);
+  const checklistInFlightRef = useRef(false);
+  const {
+    autoPrint,
+    preferencesReady,
+    handleAutoPrintChange,
+    printingLabel,
+    printInFlightRef,
+    requestLabelPrint,
+  } = useLabelPrinter();
 
   const [orderNumber, setOrderNumber] = useState("");
   const [transferOrderId, setTransferOrderId] = useState("");
@@ -216,30 +229,30 @@ export default function TransferShippedPrinterSearchPage() {
     designs: [],
     without_design_items: [],
   });
-  const [printingLabel, setPrintingLabel] = useState(false);
+  const [printerSettingsOpen, setPrinterSettingsOpen] = useState(false);
   const [checkedChecklistKeys, setCheckedChecklistKeys] = useState([]);
   const [pendingChecklistOrderId, setPendingChecklistOrderId] = useState("");
   const [confirmingChecklist, setConfirmingChecklist] = useState(false);
 
-  const triggerLabelPrint = useCallback(
-    async (labelUrl) => {
-      if (!labelUrl) return;
-      setPrintingLabel(true);
-      try {
-        const printResult = await printOrderLabel({ labelUrl });
-        if (printResult?.printed) {
-          message.success(tOrders("scanner.messages.labelPrintOpened"));
-        }
-      } catch (error) {
-        message.error(
-          error?.message || tOrders("scanner.messages.labelPrintError"),
-        );
-      } finally {
-        setPrintingLabel(false);
-      }
-    },
-    [message, tOrders],
-  );
+  const busy =
+    searching || printingLabel || confirmingChecklist || Boolean(voidingLabelId);
+  const manualPrintDisabled =
+    searching || confirmingChecklist || Boolean(voidingLabelId) || !preferencesReady;
+
+  useEffect(() => {
+    if (
+      busy ||
+      !preferencesReady ||
+      shippingModalOpen ||
+      checklistModalOpen ||
+      printerSettingsOpen
+    ) return;
+    const frame = window.requestAnimationFrame(() => {
+      orderNumberInputRef.current?.focus();
+      orderNumberInputRef.current?.select();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [busy, preferencesReady, shippingModalOpen, checklistModalOpen, printerSettingsOpen]);
 
   const checklistRequiredKeys = useMemo(() => {
     const designs = shippingChecklist.designs.map(
@@ -301,11 +314,16 @@ export default function TransferShippedPrinterSearchPage() {
         setCheckedChecklistKeys([]);
       }
 
-      if (payload?.shipped === true && latestLabel?.label_url) {
+      if (
+        autoPrint &&
+        preferencesReady &&
+        payload?.shipped === true &&
+        latestLabel?.label_url
+      ) {
         const labelIdentity = `${latestLabel?.id || ""}:${latestLabel.label_url}`;
         if (autoPrintedLabelRef.current !== labelIdentity) {
           autoPrintedLabelRef.current = labelIdentity;
-          void triggerLabelPrint(latestLabel.label_url);
+          void requestLabelPrint(latestLabel.label_url);
         }
       }
 
@@ -340,11 +358,23 @@ export default function TransferShippedPrinterSearchPage() {
         }
       }
     },
-    [message, tOrders, triggerLabelPrint],
+    [message, tOrders, autoPrint, preferencesReady, requestLabelPrint],
   );
 
   const handleSearch = useCallback(
     async (rawTransferOrderId) => {
+      if (
+        !preferencesReady ||
+        searchInFlightRef.current ||
+        printInFlightRef.current ||
+        checklistInFlightRef.current ||
+        shippingModalOpen ||
+        checklistModalOpen ||
+        printerSettingsOpen ||
+        voidingLabelId
+      ) {
+        return;
+      }
       const nextTransferOrderId = String(
         rawTransferOrderId || transferOrderId || orderNumber,
       ).trim();
@@ -353,6 +383,9 @@ export default function TransferShippedPrinterSearchPage() {
         return;
       }
 
+      searchInFlightRef.current = true;
+      autoPrintedLabelRef.current = "";
+      setTransferLabel(null);
       setSearching(true);
       setSearched(true);
 
@@ -382,10 +415,23 @@ export default function TransferShippedPrinterSearchPage() {
             tOrders("messages.loadListError"),
         );
       } finally {
+        searchInFlightRef.current = false;
         setSearching(false);
       }
     },
-    [applyShipmentPayload, message, orderNumber, tOrders, transferOrderId],
+    [
+      applyShipmentPayload,
+      message,
+      orderNumber,
+      tOrders,
+      transferOrderId,
+      preferencesReady,
+      printInFlightRef,
+      shippingModalOpen,
+      checklistModalOpen,
+      printerSettingsOpen,
+      voidingLabelId,
+    ],
   );
 
   const confirmShipSearch = useCallback(
@@ -418,6 +464,14 @@ export default function TransferShippedPrinterSearchPage() {
   );
 
   const handleChecklistConfirm = useCallback(async () => {
+    if (
+      !preferencesReady ||
+      checklistInFlightRef.current ||
+      searchInFlightRef.current ||
+      printInFlightRef.current
+    ) {
+      return;
+    }
     const nextTransferOrderId = String(
       pendingChecklistOrderId || transferOrderId || orderNumber,
     ).trim();
@@ -437,6 +491,7 @@ export default function TransferShippedPrinterSearchPage() {
       .filter((key) => key.startsWith("without-design-item:"))
       .map((key) => key.replace("without-design-item:", ""));
 
+    checklistInFlightRef.current = true;
     setConfirmingChecklist(true);
     try {
       const response = await TransferOrdersAPI.shipWorkerItems({
@@ -458,6 +513,7 @@ export default function TransferShippedPrinterSearchPage() {
           tOrders("messages.loadListError"),
       );
     } finally {
+      checklistInFlightRef.current = false;
       setConfirmingChecklist(false);
     }
   }, [
@@ -468,7 +524,10 @@ export default function TransferShippedPrinterSearchPage() {
     orderNumber,
     pendingChecklistOrderId,
     tOrders,
+    tDetail,
     transferOrderId,
+    preferencesReady,
+    printInFlightRef,
   ]);
 
   const handleVoidLabel = useCallback(async () => {
@@ -514,13 +573,47 @@ export default function TransferShippedPrinterSearchPage() {
   return (
     <RequireRole anyOfRoles={["companyShipmentWorker"]}>
       <div className="space-y-4">
-        <PageHeader className="" title={tOrders("workerShipmentPrinter.title")} />
+        <PageHeader
+          className=""
+          title={tOrders("workerShipmentPrinter.title")}
+          description={tOrders("scanner.printing.defaultPrinter")}
+          meta={
+            <Tag>
+              {tOrders(`scanner.printing.${autoPrint ? "automatic" : "manual"}`)}
+            </Tag>
+          }
+          extra={
+            <>
+              <Button
+                icon={<PrinterOutlined />}
+                disabled={!transferLabel?.label_url || manualPrintDisabled}
+                loading={printingLabel}
+                onClick={() => requestLabelPrint(transferLabel.label_url)}
+              >
+                {tOrders("actions.printLabel")}
+              </Button>
+              <Button
+                icon={<SettingOutlined />}
+                disabled={busy || !preferencesReady}
+                onClick={() => setPrinterSettingsOpen(true)}
+              >
+                {tOrders("scanner.printing.settings")}
+              </Button>
+            </>
+          }
+        />
 
         <Card className="rounded-xl">
           <Input.Search
+            ref={orderNumberInputRef}
+            disabled={busy || !preferencesReady}
             allowClear
             enterButton={
-              <Button type="primary" loading={searching}>
+              <Button
+                type="primary"
+                loading={searching}
+                disabled={busy || !preferencesReady}
+              >
                 {tCommonActions("search")}
               </Button>
             }
@@ -562,7 +655,7 @@ export default function TransferShippedPrinterSearchPage() {
           <Card className="rounded-xl border border-line">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
-                <Typography.Title level={5} style={{ margin: 0 }}>
+                <Typography.Title level={5} copyable style={{ margin: 0 }}>
                   {orderSummary?.order_number || tOrders("common.none")}
                 </Typography.Title>
                 <Typography.Text type="secondary">
@@ -660,9 +753,10 @@ export default function TransferShippedPrinterSearchPage() {
                   {transferLabel?.label_url ? (
                     <Button
                       icon={<PrinterOutlined />}
+                      disabled={manualPrintDisabled}
                       loading={printingLabel}
                       onClick={() =>
-                        void triggerLabelPrint(transferLabel.label_url)
+                        void requestLabelPrint(transferLabel.label_url)
                       }
                     >
                       {tOrders("actions.printLabel")}
@@ -688,6 +782,7 @@ export default function TransferShippedPrinterSearchPage() {
                     >
                       <Button
                         danger
+                        disabled={searching || printingLabel || confirmingChecklist}
                         loading={
                           voidingLabelId ===
                           String(
@@ -730,7 +825,8 @@ export default function TransferShippedPrinterSearchPage() {
         okText="Confirm shipment"
         cancelText={tCommonActions("cancel")}
         okButtonProps={{
-          disabled: !allChecklistItemsChecked,
+          disabled:
+            !allChecklistItemsChecked || !preferencesReady || searching || printingLabel,
           loading: confirmingChecklist,
         }}
         onOk={handleChecklistConfirm}
@@ -790,8 +886,8 @@ export default function TransferShippedPrinterSearchPage() {
                               Qty: {design?.quantity ?? "-"}
                             </MetaChip>
                             <MetaChip>
-                              {formatAmount(design?.width)}" x{" "}
-                              {formatAmount(design?.height)}"
+                              {formatAmount(design?.width)}&quot; x{" "}
+                              {formatAmount(design?.height)}&quot;
                             </MetaChip>
                             <StatusTag status={design?.status}>
                               {design?.status || "-"}
@@ -872,6 +968,12 @@ export default function TransferShippedPrinterSearchPage() {
         orderTotal={Number(shippingModalRecord?.order_total || 0)}
         onClose={() => setShippingModalOpen(false)}
         onLabelCreated={handleCreateLabelSuccess}
+      />
+      <LabelPrinterSettings
+        open={printerSettingsOpen}
+        onClose={() => setPrinterSettingsOpen(false)}
+        autoPrint={autoPrint}
+        onAutoPrintChange={handleAutoPrintChange}
       />
     </RequireRole>
   );

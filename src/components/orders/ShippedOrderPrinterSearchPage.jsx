@@ -3,7 +3,6 @@
 import OrderNotesCard from "./OrderNotesCard";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import { PrinterOutlined, SettingOutlined } from "@ant-design/icons";
 import {
   Alert,
@@ -21,18 +20,13 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-import { printOrderLabel } from "@/utils/orderItemDesignDownloads";
 import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
 import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount } from "@/utils/formatMoney";
 import LabelPrinterSettings from "./LabelPrinterSettings";
-import {
-  labelPrintPreferenceKey,
-  readAutoPrintPreference,
-  saveAutoPrintPreference,
-} from "@/utils/labelPrintPreferences.mjs";
+import useLabelPrinter from "@/hooks/useLabelPrinter";
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -187,16 +181,20 @@ export default function ShippedOrderPrinterSearchPage() {
   const tDetail = useTranslations("dashboard.orders.detail");
   const tCommonActions = useTranslations("common.actions");
   const fallbackText = tDetail("designs.designAreaPlaceholder");
-  const userId = useSelector((state) => state.auth.user?.id);
-  const preferenceKey = labelPrintPreferenceKey(userId);
+  const {
+    autoPrint,
+    preferencesReady,
+    handleAutoPrintChange,
+    printingLabel,
+    printInFlightRef,
+    requestLabelPrint,
+  } = useLabelPrinter();
 
   const orderNumberInputRef = useRef(null);
   const searchInFlightRef = useRef(false);
-  const printInFlightRef = useRef(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [loadedOrderNumber, setLoadedOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
-  const [printingLabel, setPrintingLabel] = useState(false);
   const [searched, setSearched] = useState(false);
   const [order, setOrder] = useState(null);
   const [positionsByProductId, setPositionsByProductId] = useState({});
@@ -204,57 +202,7 @@ export default function ShippedOrderPrinterSearchPage() {
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
   const [printerSettingsOpen, setPrinterSettingsOpen] = useState(false);
   const [labelUrl, setLabelUrl] = useState(null);
-  const [printPreference, setPrintPreference] = useState(null);
-  const preferencesReady = Boolean(
-    preferenceKey && printPreference?.key === preferenceKey,
-  );
-  const autoPrint = preferencesReady ? printPreference.autoPrint : true;
   const busy = searching || printingLabel;
-
-  useEffect(() => {
-    if (!preferenceKey) return;
-    let enabled = true;
-    try {
-      enabled = readAutoPrintPreference(window.localStorage, preferenceKey);
-    } catch {
-      // Browsers may deny access to localStorage altogether.
-    }
-    setPrintPreference({ key: preferenceKey, autoPrint: enabled });
-  }, [preferenceKey]);
-
-  const handleAutoPrintChange = (enabled) => {
-    setPrintPreference({ key: preferenceKey, autoPrint: enabled });
-    let saved = false;
-    try {
-      saved = saveAutoPrintPreference(window.localStorage, preferenceKey, enabled);
-    } catch {
-      // Keep the selected mode for this page even if persistence is unavailable.
-    }
-    if (!saved) message.warning(tOrders("scanner.printing.preferenceSaveError"));
-  };
-
-  const requestLabelPrint = useCallback(
-    async (url) => {
-      if (!url || printInFlightRef.current) return;
-      printInFlightRef.current = true;
-      setPrintingLabel(true);
-      try {
-        const result = await printOrderLabel({ labelUrl: url });
-        if (result?.printed) {
-          // The browser cannot confirm the policy, destination or paper output.
-          message.info(tOrders("scanner.printing.printRequested"));
-        }
-      } catch (error) {
-        message.error(
-          error?.message || tOrders("scanner.messages.labelPrintError"),
-        );
-      } finally {
-        printInFlightRef.current = false;
-        setPrintingLabel(false);
-      }
-    },
-    [message, tOrders],
-  );
 
   const items = useMemo(() => {
     if (!Array.isArray(order?.items)) return [];
@@ -386,6 +334,7 @@ export default function ShippedOrderPrinterSearchPage() {
       printerSettingsOpen,
       autoPrint,
       requestLabelPrint,
+      printInFlightRef,
     ],
   );
 

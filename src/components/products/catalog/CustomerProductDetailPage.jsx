@@ -13,6 +13,7 @@ import { formatMoney } from "@/utils/formatMoney";
 import { useTranslations } from "@/i18n/use-translations";
 import { CATALOG_PATH, catalogHref } from "./CustomerProductCatalogPage";
 import { ColorDot, resolveVariantImage, sortSizes, variantKey } from "./catalogHelpers";
+import PrintPositions, { POSITIONS_TRANSITION_MS } from "./PrintPositions";
 
 function Section({ title, extra, children, className = "" }) {
   return (
@@ -58,6 +59,7 @@ export default function CustomerProductDetailPage() {
   const [reloadKey, setReloadKey] = useState(0);
   const [selection, setSelection] = useState({ sizeId: null, colorId: null });
   const [backHref, setBackHref] = useState(CATALOG_PATH);
+  const [positionsOpen, setPositionsOpen] = useState(false);
 
   useEffect(() => setBackHref(catalogHref()), []);
 
@@ -125,6 +127,19 @@ export default function CustomerProductDetailPage() {
       ? selection.sizeId
       : sizes.find((size) => has(size.id, colorId))?.id || selection.sizeId;
     select({ sizeId, colorId });
+  };
+
+  // Position chips open the collapsed positions list, then scroll to the card
+  // once the opening animation has finished and its position is final.
+  const showPosition = (positionId) => {
+    const scroll = () =>
+      document.getElementById(`position-${positionId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (positionsOpen) {
+      scroll();
+      return;
+    }
+    setPositionsOpen(true);
+    window.setTimeout(scroll, POSITIONS_TRANSITION_MS);
   };
 
   const selectedSize = sizes.find((size) => size.id === selection.sizeId);
@@ -347,12 +362,14 @@ export default function CustomerProductDetailPage() {
                     <dt className="text-xs text-text-secondary">{t("positions")}</dt>
                     <dd className="m-0 mt-1.5 flex flex-wrap gap-1.5">
                       {product.positions.map((position) => (
-                        <span
+                        <button
                           key={position.id}
-                          className="rounded-md border border-line bg-subtle px-2 py-0.5 text-xs font-medium text-text"
+                          type="button"
+                          onClick={() => showPosition(position.id)}
+                          className="cursor-pointer rounded-md border border-line bg-subtle px-2 py-0.5 text-xs font-medium text-text transition-colors hover:border-brand-600 hover:text-brand-700"
                         >
                           {position.name}
-                        </span>
+                        </button>
                       ))}
                     </dd>
                   </div>
@@ -361,6 +378,14 @@ export default function CustomerProductDetailPage() {
             </div>
           </Section>
         </div>
+
+        <PrintPositions
+          positions={product.positions}
+          colorHex={selectedColor?.hex_code}
+          open={positionsOpen}
+          onOpenChange={setPositionsOpen}
+          t={t}
+        />
 
         {/* Price matrix */}
         {sizes.length && colors.length && variants.length > 1 ? (
