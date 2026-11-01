@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { App, Button, Modal, Select, Space, Typography, Upload } from "antd";
-import { EditOutlined, UploadOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
@@ -13,6 +13,7 @@ import { fetchGenericList } from "@/utils/fetchGenericList";
 import { formatPrice } from "@/utils/priceHelpers";
 import { useTranslations } from "@/i18n/use-translations";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
+import VariationImagesDrawer from "./VariationImagesDrawer";
 
 export default function ProductCatalogTable({ partner = false, selectCustomer = false }) {
   const showPrices = partner;
@@ -27,6 +28,8 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customersLoading, setCustomersLoading] = useState(false);
   const [filterOptions, setFilterOptions] = useState({ product: [], size: [], color: [] });
+  // undefined = closed; null = open without a product; id = open on that product.
+  const [bulkProductId, setBulkProductId] = useState(undefined);
   useEffect(() => {
     let alive = true;
     const fields = ["product", "size", "color"];
@@ -95,9 +98,15 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
       filter: { type: "select", options: filterOptions[field], placeholder: t(`select${field[0].toUpperCase()}${field.slice(1)}`) },
     })),
     ...(showPrices ? [{ title: t("price"), dataIndex: "price", sorter: true, render: value => formatPrice(value) }] : [{
-      title: t("actions"), key: "actions", width: 100,
-      render: (_, row) => <Button aria-label={t("edit")} title={t("edit")} icon={<EditOutlined />}
-        onClick={() => { setFile(null); setEditing(row); }} />,
+      title: t("actions"), key: "actions", width: 110,
+      render: (_, row) => (
+        <Space size={4}>
+          <Button aria-label={t("edit")} title={t("edit")} icon={<EditOutlined />}
+            onClick={() => { setFile(null); setEditing(row); }} />
+          <Button aria-label={t("bulk.openForProduct")} title={t("bulk.openForProduct")} icon={<AppstoreOutlined />}
+            onClick={() => setBulkProductId(row.product_id)} />
+        </Space>
+      ),
     }]),
   ];
   const save = async () => {
@@ -127,6 +136,11 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
               style={{ width: 260, maxWidth: "100%" }} />
           </Space>
         ) : undefined}
+        toolbarRight={!showPrices ? (
+          <Button type="primary" icon={<AppstoreOutlined />} onClick={() => setBulkProductId(null)}>
+            {t("bulk.open")}
+          </Button>
+        ) : undefined}
         tableProps={{ scroll: { x: true }, ...(partner && selectCustomer && !selectedCustomerId
           ? { locale: { emptyText: t("selectCustomerToView") } } : {}) }} />
       {!showPrices && <Modal title={t("editTitle")} open={Boolean(editing)} onCancel={guardClose(close)}
@@ -148,6 +162,9 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
           </Upload>
         </Space>
       </Modal>}
+      {!showPrices && <VariationImagesDrawer open={bulkProductId !== undefined}
+        productId={bulkProductId ?? undefined} products={filterOptions.product}
+        onClose={() => setBulkProductId(undefined)} onSaved={() => tableRef.current?.reload()} />}
     </RequireRole>
   );
 }
