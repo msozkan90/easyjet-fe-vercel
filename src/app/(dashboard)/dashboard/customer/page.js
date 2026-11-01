@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, GoldOutlined, DollarOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { CustomersAPI, CategoriesAPI } from "@/utils/api";
+import { PricePackagesAPI, CustomersAPI, CategoriesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import CustomerForm from "@/components/common/forms/CustomerForm";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
@@ -20,7 +20,9 @@ import {
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
 import StatusTag from "@/components/ui/StatusTag";
+import Link from "next/link";
 import RowActions from "@/components/ui/RowActions";
+import AssignPricePackageModal from "@/components/price-package/AssignPricePackageModal";
 
 export default function CustomersPage() {
   const { message } = AntdApp.useApp();
@@ -40,6 +42,32 @@ export default function CustomersPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
   const [formDirty, setFormDirty] = useState(false);
+  const tPackage = useTranslations("dashboard.pricePackage");
+  const tPrices = useTranslations("dashboard.priceManager");
+  const isCompanyAdmin = (user?.roles || []).includes("companyadmin");
+  const [hasPricePackages, setHasPricePackages] = useState(false);
+  const [packageTarget, setPackageTarget] = useState(null);
+  const [packageModalOpen, setPackageModalOpen] = useState(false);
+  const [packageIntro, setPackageIntro] = useState(null);
+
+  useEffect(() => {
+    if (!isCompanyAdmin) return undefined;
+    let alive = true;
+    PricePackagesAPI.list()
+      .then((resp) => {
+        if (alive) setHasPricePackages(Boolean((resp?.data ?? resp)?.items?.length));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [isCompanyAdmin]);
+
+  const openPackageModal = useCallback((target, intro = null) => {
+    setPackageTarget(target);
+    setPackageIntro(intro);
+    setPackageModalOpen(true);
+  }, []);
   const { confirmIfDirty, unsavedChangesModalContextHolder } =
     useUnsavedChangesPrompt();
 
@@ -221,6 +249,26 @@ export default function CustomersPage() {
               },
             ]}
             menuItems={[
+              isCompanyAdmin && !record.partner_id && {
+                key: "edit-prices",
+                icon: <DollarOutlined />,
+                label: (
+                  <Link href={`/dashboard/product-variation/prices?customer=${record.id}`}>
+                    {tPrices("editPrices")}
+                  </Link>
+                ),
+              },
+              isCompanyAdmin && !record.partner_id && {
+                key: "price-package",
+                icon: <GoldOutlined />,
+                label: tPackage("actions.assign"),
+                onClick: () =>
+                  openPackageModal({
+                    type: "customer",
+                    id: record.id,
+                    name: record.name,
+                  }),
+              },
               {
                 key: "delete",
                 icon: <DeleteOutlined />,
@@ -242,8 +290,12 @@ export default function CustomersPage() {
       isMineControlEnabled,
       isPartnerEntity,
       isShippingOwner,
+      isCompanyAdmin,
       onDelete,
+      openPackageModal,
       t,
+      tPackage,
+      tPrices,
     ],
   );
 
@@ -298,8 +350,15 @@ export default function CustomersPage() {
         setEditingRow(null);
         tableRef.current?.reload();
       } else {
-        await CustomersAPI.create(payload);
+        const createdResp = await CustomersAPI.create(payload);
+        const created = createdResp?.data ?? createdResp;
         message.success(t("messages.createSuccess"));
+        if (isCompanyAdmin && hasPricePackages && created?.id && !created?.partner_id) {
+          openPackageModal(
+            { type: "customer", id: created.id, name: created.name },
+            tPackage("assign.afterCreate", { name: created.name }),
+          );
+        }
         setFormDirty(false);
         setOpen(false);
         tableRef.current?.setPage(1);
@@ -427,6 +486,12 @@ export default function CustomersPage() {
           />
         </div>
       </Modal>
+      <AssignPricePackageModal
+        open={packageModalOpen}
+        target={packageTarget}
+        intro={packageIntro}
+        onClose={() => setPackageModalOpen(false)}
+      />
     </RequireRole>
   );
 }
