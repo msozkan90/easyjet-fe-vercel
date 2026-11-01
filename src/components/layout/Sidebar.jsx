@@ -12,6 +12,7 @@ import {
   LineChartOutlined,
   BankOutlined,
   DollarOutlined,
+  GoldOutlined,
   ShopOutlined,
   AntDesignOutlined,
   PartitionOutlined,
@@ -749,6 +750,15 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
                       label: (
                         <Link href="/dashboard/product-variation/prices">
                           {tSidebar("productVariation.prices")}
+                        </Link>
+                      ),
+                    },
+                    {
+                      key: "product-variation-price-packages",
+                      icon: <GoldOutlined />,
+                      label: (
+                        <Link href="/dashboard/product-variation/price-packages">
+                          {tSidebar("productVariation.pricePackages")}
                         </Link>
                       ),
                     },

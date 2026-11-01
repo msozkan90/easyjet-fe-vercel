@@ -770,6 +770,18 @@ export const ProductPricesAPI = {
   },
 };
 
+export const PricePackagesAPI = {
+  list: () => api.get("/price-packages"),
+  variations: () => api.get("/price-packages/variations"),
+  targets: () => api.get("/price-packages/targets"),
+  get: (id) => api.get(`/price-packages/${id}`),
+  create: (data) => api.post("/price-packages", data),
+  update: (id, data) => api.put(`/price-packages/${id}`, data),
+  remove: (id) => api.del(`/price-packages/${id}`),
+  preview: (id, target) => api.post(`/price-packages/${id}/preview`, target),
+  apply: (id, data) => api.post(`/price-packages/${id}/apply`, data),
+};
+
 export const ProductMappersAPI = {
   list: (query) => api.post("/product-mappers/list", query),
   create: (data) => api.post("/product-mappers", data),

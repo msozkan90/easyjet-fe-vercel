@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, GoldOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { PartnersAPI, CategoriesAPI } from "@/utils/api";
+import { PricePackagesAPI, PartnersAPI, CategoriesAPI } from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import PartnerForm from "@/components/common/forms/PartnerForm";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
@@ -20,6 +20,7 @@ import {
 } from "@/utils/multiplier";
 import StatusTag from "@/components/ui/StatusTag";
 import RowActions from "@/components/ui/RowActions";
+import AssignPricePackageModal from "@/components/price-package/AssignPricePackageModal";
 
 export default function PartnersPage() {
   const { message } = AntdApp.useApp();
@@ -32,6 +33,31 @@ export default function PartnersPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
   const [formDirty, setFormDirty] = useState(false);
+  const tPackage = useTranslations("dashboard.pricePackage");
+  const isCompanyAdmin = (user?.roles || []).includes("companyadmin");
+  const [hasPricePackages, setHasPricePackages] = useState(false);
+  const [packageTarget, setPackageTarget] = useState(null);
+  const [packageModalOpen, setPackageModalOpen] = useState(false);
+  const [packageIntro, setPackageIntro] = useState(null);
+
+  useEffect(() => {
+    if (!isCompanyAdmin) return undefined;
+    let alive = true;
+    PricePackagesAPI.list()
+      .then((resp) => {
+        if (alive) setHasPricePackages(Boolean((resp?.data ?? resp)?.items?.length));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [isCompanyAdmin]);
+
+  const openPackageModal = useCallback((target, intro = null) => {
+    setPackageTarget(target);
+    setPackageIntro(intro);
+    setPackageModalOpen(true);
+  }, []);
   const { confirmIfDirty, unsavedChangesModalContextHolder } =
     useUnsavedChangesPrompt();
 
@@ -196,6 +222,17 @@ export default function PartnersPage() {
               },
             ]}
             menuItems={[
+              isCompanyAdmin && {
+                key: "price-package",
+                icon: <GoldOutlined />,
+                label: tPackage("actions.assign"),
+                onClick: () =>
+                  openPackageModal({
+                    type: "partner",
+                    id: record.id,
+                    name: record.name,
+                  }),
+              },
               {
                 key: "delete",
                 icon: <DeleteOutlined />,
@@ -212,7 +249,16 @@ export default function PartnersPage() {
         ),
       },
     ],
-    [categories, isShippingOwner, onDelete, t, tStatus],
+    [
+      categories,
+      isCompanyAdmin,
+      isShippingOwner,
+      onDelete,
+      openPackageModal,
+      t,
+      tPackage,
+      tStatus,
+    ],
   );
 
   const buildPayload = (values) => {
@@ -248,8 +294,15 @@ export default function PartnersPage() {
         setEditingRow(null);
         tableRef.current?.reload();
       } else {
-        await PartnersAPI.create(payload);
+        const createdResp = await PartnersAPI.create(payload);
+        const created = createdResp?.data ?? createdResp;
         message.success(t("messages.createSuccess"));
+        if (isCompanyAdmin && hasPricePackages && created?.id) {
+          openPackageModal(
+            { type: "partner", id: created.id, name: created.name },
+            tPackage("assign.afterCreate", { name: created.name }),
+          );
+        }
         setFormDirty(false);
         setOpen(false);
         tableRef.current?.setPage(1);
@@ -360,6 +413,12 @@ export default function PartnersPage() {
           />
         </div>
       </Modal>
+      <AssignPricePackageModal
+        open={packageModalOpen}
+        target={packageTarget}
+        intro={packageIntro}
+        onClose={() => setPackageModalOpen(false)}
+      />
     </RequireRole>
   );
 }
