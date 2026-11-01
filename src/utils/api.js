@@ -735,6 +735,10 @@ export const ProductStockAPI = {
 
 export const ProductPricesAPI = {
   list: (query) => api.post("/product-prices/list", query),
+  // Per-target editor: { customer_id } or { partner_id }.
+  targets: () => api.get("/product-prices/targets"),
+  targetPrices: (target) => api.get("/product-prices/target", target),
+  saveTargetPrices: (data) => api.put("/product-prices/target", data),
   assigned: (query) => api.post("/product-prices/assigned", query),
   create: (data) => api.post("/product-prices", data),
   update: (id, data) => api.put(`/product-prices/${id}`, data),

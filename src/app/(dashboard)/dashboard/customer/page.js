@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, GoldOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, GoldOutlined, DollarOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import { PricePackagesAPI, CustomersAPI, CategoriesAPI } from "@/utils/api";
@@ -20,6 +20,7 @@ import {
   getPrimaryShipmentMultiplier,
 } from "@/utils/multiplier";
 import StatusTag from "@/components/ui/StatusTag";
+import Link from "next/link";
 import RowActions from "@/components/ui/RowActions";
 import AssignPricePackageModal from "@/components/price-package/AssignPricePackageModal";
 
@@ -42,6 +43,7 @@ export default function CustomersPage() {
   const [categories, setCategories] = useState([]);
   const [formDirty, setFormDirty] = useState(false);
   const tPackage = useTranslations("dashboard.pricePackage");
+  const tPrices = useTranslations("dashboard.priceManager");
   const isCompanyAdmin = (user?.roles || []).includes("companyadmin");
   const [hasPricePackages, setHasPricePackages] = useState(false);
   const [packageTarget, setPackageTarget] = useState(null);
@@ -248,6 +250,15 @@ export default function CustomersPage() {
             ]}
             menuItems={[
               isCompanyAdmin && !record.partner_id && {
+                key: "edit-prices",
+                icon: <DollarOutlined />,
+                label: (
+                  <Link href={`/dashboard/product-variation/prices?customer=${record.id}`}>
+                    {tPrices("editPrices")}
+                  </Link>
+                ),
+              },
+              isCompanyAdmin && !record.partner_id && {
                 key: "price-package",
                 icon: <GoldOutlined />,
                 label: tPackage("actions.assign"),
@@ -284,6 +295,7 @@ export default function CustomersPage() {
       openPackageModal,
       t,
       tPackage,
+      tPrices,
     ],
   );
 
