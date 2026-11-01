@@ -735,6 +735,10 @@ export const ProductStockAPI = {
 
 export const ProductPricesAPI = {
   list: (query) => api.post("/product-prices/list", query),
+  // Per-target editor: { customer_id } or { partner_id }.
+  targets: () => api.get("/product-prices/targets"),
+  targetPrices: (target) => api.get("/product-prices/target", target),
+  saveTargetPrices: (data) => api.put("/product-prices/target", data),
   assigned: (query) => api.post("/product-prices/assigned", query),
   create: (data) => api.post("/product-prices", data),
   update: (id, data) => api.put(`/product-prices/${id}`, data),
@@ -768,6 +772,18 @@ export const ProductPricesAPI = {
       options.config || options.multipartConfig,
     );
   },
+};
+
+export const PricePackagesAPI = {
+  list: () => api.get("/price-packages"),
+  variations: () => api.get("/price-packages/variations"),
+  targets: () => api.get("/price-packages/targets"),
+  get: (id) => api.get(`/price-packages/${id}`),
+  create: (data) => api.post("/price-packages", data),
+  update: (id, data) => api.put(`/price-packages/${id}`, data),
+  remove: (id) => api.del(`/price-packages/${id}`),
+  preview: (id, target) => api.post(`/price-packages/${id}/preview`, target),
+  apply: (id, data) => api.post(`/price-packages/${id}/apply`, data),
 };
 
 export const ProductMappersAPI = {
@@ -967,6 +983,9 @@ export const NotificationRulesAPI = {
 export const ProductCatalogAPI = {
   list: (payload) => api.post("/product-catalog/list", payload),
   saveImage: (payload) => api.putMultipart("/product-catalog/image", payload),
+  productImages: (productId) => api.get(`/product-catalog/products/${productId}/images`),
+  // FormData: product_id, variations (JSON [{ size_id, color_id }]), image.
+  saveImages: (payload) => api.putMultipart("/product-catalog/images", payload),
   customerProducts: (payload) => api.post("/product-prices/catalog/products", payload),
   customerCategories: () => api.get("/product-prices/catalog/categories"),
   customerProduct: (id) => api.get(`/product-prices/catalog/products/${id}`),
