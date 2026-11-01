@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   App as AntdApp,
@@ -37,6 +37,7 @@ const productKeys = (product) =>
 function FillPopover({ title, applyText, onApply, children }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const inputRef = useRef(null);
   const apply = () => {
     if (!isPrice(value)) return;
     onApply(value);
@@ -46,12 +47,16 @@ function FillPopover({ title, applyText, onApply, children }) {
     <Popover
       open={open}
       onOpenChange={setOpen}
+      // autoFocus does not fire for popover content; focus once it is shown.
+      afterOpenChange={(visible) => {
+        if (visible) inputRef.current?.focus();
+      }}
       trigger="click"
       title={title}
       content={
         <Space.Compact>
           <InputNumber
-            autoFocus
+            ref={inputRef}
             min={0}
             step={0.01}
             value={value}
@@ -395,7 +400,8 @@ export default function PricePackageEditorPage() {
         </Card>
       ) : (
         <Space direction="vertical" size={16} className="w-full">
-          <Card loading={!variations}>
+          {/* The form stays mounted while loading so setFieldsValue reaches it. */}
+          <Card>
             <Form
               form={form}
               layout="vertical"

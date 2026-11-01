@@ -244,6 +244,7 @@ export default function AssignPricePackageModal({
                 options={targetOptions}
                 value={targetId}
                 onChange={setTargetId}
+                className="w-full"
                 aria-label={t("assign.selectTarget")}
               />
               <div className="text-[12px] text-text-secondary">

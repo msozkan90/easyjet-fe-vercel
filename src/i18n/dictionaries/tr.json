@@ -1756,7 +1756,7 @@
         "afterCreate": "{name} oluşturuldu. Fiyatlarını bir paketten atamak ister misiniz?",
         "modeQuestion": "{name} için paketteki {overlapping} varyasyonda zaten fiyat tanımlı. Nasıl devam edelim?",
         "overwrite": "Tüm fiyatlarını paketle eşitle",
-        "overwriteHint": "Paketteki {total} varyasyonun fiyatı paket fiyatı olur (mevcut {overlapping} fiyat değişir). Pakette olmayan varyasyonlardaki fiyatlara dokunulmaz.",
+        "overwriteHint": "Paketteki {total} varyasyonun fiyatı paket fiyatı olur (mevcut {overlapping} fiyatın üzerine yazılır). Pakette olmayan varyasyonlardaki fiyatlara dokunulmaz.",
         "fillMissing": "Sadece atanmamış varyasyonlara ata",
         "fillMissingHint": "Mevcut {overlapping} fiyat korunur; fiyatı olmayan {missing} varyasyona paket fiyatı atanır.",
         "emptyPackage": "Bu pakette atanabilir fiyat yok. Önce paketi doldurun.",

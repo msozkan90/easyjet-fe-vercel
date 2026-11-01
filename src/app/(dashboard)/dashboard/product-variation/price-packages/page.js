@@ -147,11 +147,11 @@ export default function PricePackagesPage() {
                   <span className="text-[12px] text-text-secondary">
                     {t("coverage", { priced: pkg.priced_variations, total })}
                   </span>
-                </div>
-                <div className="mt-auto flex items-center justify-between gap-2 border-0 border-t border-solid border-line pt-3">
                   <span className="text-[12px] text-text-secondary">
                     {t("updatedAt", { date: dayjs(pkg.updated_at).format("DD.MM.YYYY HH:mm") })}
                   </span>
+                </div>
+                <div className="mt-auto flex items-center justify-end gap-2 border-0 border-t border-solid border-line pt-3">
                   <div className="flex items-center gap-1.5">
                     <Tooltip title={t("actions.edit")}>
                       <Link href={`/dashboard/product-variation/price-packages/${pkg.id}`}>
@@ -165,6 +165,8 @@ export default function PricePackagesPage() {
                       }
                       okText={t("actions.confirmDeleteOk")}
                       okButtonProps={{ danger: true }}
+                      // Opens below so the button's tooltip (above) never covers it.
+                      placement="bottomRight"
                       onConfirm={() => onDelete(pkg.id)}
                     >
                       <Tooltip title={t("actions.delete")}>
@@ -193,7 +195,7 @@ export default function PricePackagesPage() {
             <Link
               key={`slot-${index}`}
               href={NEW_PACKAGE_HREF}
-              className="flex min-h-[204px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong text-text-secondary! no-underline transition-colors hover:border-brand-500 hover:text-brand-600!"
+              className="flex min-h-[120px] flex-col md:min-h-[204px] items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong text-text-secondary! no-underline transition-colors hover:border-brand-500 hover:text-brand-600!"
             >
               <PlusOutlined className="text-xl" />
               <span className="text-[13px] font-medium">{t("actions.new")}</span>

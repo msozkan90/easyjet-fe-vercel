@@ -1976,7 +1976,7 @@
         "afterCreate": "{name} was created. Do you want to set its prices from a package?",
         "modeQuestion": "{name} already has prices for {overlapping} variations in this package. How should we continue?",
         "overwrite": "Make all prices match the package",
-        "overwriteHint": "All {total} package variations get the package price ({overlapping} existing prices change). Prices of variations outside the package are left as they are.",
+        "overwriteHint": "All {total} package variations get the package price ({overlapping} existing prices are overwritten). Prices of variations outside the package are left as they are.",
         "fillMissing": "Only assign unpriced variations",
         "fillMissingHint": "The existing {overlapping} prices are kept; the {missing} variations without a price get the package price.",
         "emptyPackage": "This package has no assignable prices. Fill the package first.",
