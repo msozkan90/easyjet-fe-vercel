@@ -29,6 +29,7 @@ import GroupedOrderItemDesignPreview, {
 } from "@/components/orders/OrderItemDesignPreview";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
+import { reclaimScanFocus, useScanQueue } from "@/hooks/useScanQueue";
 import { formatAmount } from "@/utils/formatMoney";
 
 const SCRAP_REASON_OPTIONS = [
@@ -513,12 +514,8 @@ export default function PrinterOrderSearchPage({
             : tOrders("scanner.messages.completeSuccess"),
         );
 
-        if (!isReportScrapeMode) {
-          setOrderNumber("");
-          window.requestAnimationFrame(() => {
-            orderNumberInputRef.current?.focus();
-          });
-        }
+        // The input was cleared when the scan was submitted. Clearing it here would wipe
+        // the next barcode typed while this request was running.
       } catch (error) {
         message.error(
           error?.response?.data?.error?.message ||
@@ -549,21 +546,34 @@ export default function PrinterOrderSearchPage({
     });
   }, [finalizeCompletion]);
 
-  const handleSearchSubmit = useCallback(
-    async (rawOrderNumber) => {
-      if (isReportScrapeMode) {
-        await loadPreview(rawOrderNumber);
+  // Scans are queued and completed one by one (see useScanQueue). The input is cleared
+  // and keeps focus at submit time, so the next barcode can be typed right away.
+  const enqueueCompletion = useScanQueue((code) =>
+    finalizeCompletion({
+      rawOrderNumber: code,
+      scrapPayload: {
+        has_scrap: false,
+        entries: [],
+      },
+    }),
+  );
+
+  const submitScan = useCallback(
+    (rawValue) => {
+      const code = String(rawValue ?? "").trim();
+      if (!code) {
+        message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
-      await finalizeCompletion({
-        rawOrderNumber,
-        scrapPayload: {
-          has_scrap: false,
-          entries: [],
-        },
-      });
+      if (isReportScrapeMode) {
+        loadPreview(code);
+        return;
+      }
+      setOrderNumber("");
+      orderNumberInputRef.current?.focus();
+      enqueueCompletion(code);
     },
-    [finalizeCompletion, isReportScrapeMode, loadPreview],
+    [enqueueCompletion, isReportScrapeMode, loadPreview, message, tOrders],
   );
 
   const handlePaste = useCallback(
@@ -572,20 +582,9 @@ export default function PrinterOrderSearchPage({
       const normalizedOrderNumber = String(pastedValue).trim();
       if (!normalizedOrderNumber) return;
       event.preventDefault();
-      setOrderNumber(normalizedOrderNumber);
-      if (isReportScrapeMode) {
-        loadPreview(normalizedOrderNumber);
-        return;
-      }
-      finalizeCompletion({
-        rawOrderNumber: normalizedOrderNumber,
-        scrapPayload: {
-          has_scrap: false,
-          entries: [],
-        },
-      });
+      submitScan(normalizedOrderNumber);
     },
-    [finalizeCompletion, isReportScrapeMode, loadPreview],
+    [submitScan],
   );
 
   const openScrapModal = useCallback(() => {
@@ -682,13 +681,14 @@ export default function PrinterOrderSearchPage({
                 placeholder={tOrders("filters.searchOrderNumber")}
                 value={orderNumber}
                 onChange={(event) => setOrderNumber(event.target.value)}
-                onPressEnter={() => handleSearchSubmit(orderNumber)}
+                onPressEnter={() => submitScan(orderNumber)}
                 onPaste={handlePaste}
+                onBlur={() => reclaimScanFocus(orderNumberInputRef)}
               />
               <Button
                 type="primary"
                 loading={isReportScrapeMode ? searching : completing}
-                onClick={() => handleSearchSubmit(orderNumber)}
+                onClick={() => submitScan(orderNumber)}
               >
                 {tCommonActions("search")}
               </Button>
