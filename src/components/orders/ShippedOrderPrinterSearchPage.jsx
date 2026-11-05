@@ -27,6 +27,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount } from "@/utils/formatMoney";
 import LabelPrinterSettings from "./LabelPrinterSettings";
 import useLabelPrinter from "@/hooks/useLabelPrinter";
+import { reclaimScanFocus, useScanQueue } from "@/hooks/useScanQueue";
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -186,12 +187,10 @@ export default function ShippedOrderPrinterSearchPage() {
     preferencesReady,
     handleAutoPrintChange,
     printingLabel,
-    printInFlightRef,
     requestLabelPrint,
   } = useLabelPrinter();
 
   const orderNumberInputRef = useRef(null);
-  const searchInFlightRef = useRef(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [loadedOrderNumber, setLoadedOrderNumber] = useState("");
   const [searching, setSearching] = useState(false);
@@ -270,20 +269,13 @@ export default function ShippedOrderPrinterSearchPage() {
 
   const handleSearch = useCallback(
     async (rawOrderNumber) => {
-      if (
-        !preferencesReady ||
-        searchInFlightRef.current ||
-        printInFlightRef.current ||
-        shippingModalOpen ||
-        printerSettingsOpen
-      ) return;
+      if (!preferencesReady || shippingModalOpen || printerSettingsOpen) return;
       const nextOrderNumber = String(rawOrderNumber || orderNumber).trim();
       if (!nextOrderNumber) {
         message.warning(tOrders("filters.searchOrderNumber"));
         return;
       }
 
-      searchInFlightRef.current = true;
       setSearching(true);
       setSearched(true);
       setLabelUrl(null);
@@ -308,10 +300,6 @@ export default function ShippedOrderPrinterSearchPage() {
         setLabelUrl(nextLabelUrl || null);
         if (nextLabelUrl && autoPrint) await requestLabelPrint(nextLabelUrl);
 
-        setOrderNumber("");
-        window.requestAnimationFrame(() => {
-          orderNumberInputRef.current?.focus();
-        });
       } catch (error) {
         setOrder(null);
         setLoadedOrderNumber("");
@@ -320,7 +308,6 @@ export default function ShippedOrderPrinterSearchPage() {
             tDetail("messages.loadOrderError"),
         );
       } finally {
-        searchInFlightRef.current = false;
         setSearching(false);
       }
     },
@@ -334,8 +321,27 @@ export default function ShippedOrderPrinterSearchPage() {
       printerSettingsOpen,
       autoPrint,
       requestLabelPrint,
-      printInFlightRef,
     ],
+  );
+
+  // Scans are queued and looked up one by one (see useScanQueue). The input is cleared
+  // and keeps focus at submit time, so the next barcode can be typed while this one loads.
+  const enqueueScan = useScanQueue((code) => handleSearch(code));
+
+  const submitScan = useCallback(
+    (rawValue) => {
+      const code = String(rawValue ?? "").trim();
+      if (!code) {
+        message.warning(tOrders("filters.searchOrderNumber"));
+        return;
+      }
+      // While the shipping modal or printer settings are open, scans stay in the input.
+      if (!preferencesReady || shippingModalOpen || printerSettingsOpen) return;
+      setOrderNumber("");
+      orderNumberInputRef.current?.focus();
+      enqueueScan(code);
+    },
+    [enqueueScan, message, preferencesReady, printerSettingsOpen, shippingModalOpen, tOrders],
   );
 
   const handlePaste = useCallback(
@@ -344,10 +350,9 @@ export default function ShippedOrderPrinterSearchPage() {
       const normalizedOrderNumber = String(pastedValue).trim();
       if (!normalizedOrderNumber) return;
       event.preventDefault();
-      setOrderNumber(normalizedOrderNumber);
-      handleSearch(normalizedOrderNumber);
+      submitScan(normalizedOrderNumber);
     },
-    [handleSearch],
+    [submitScan],
   );
 
   const handleLabelCreated = useCallback(
@@ -401,19 +406,20 @@ export default function ShippedOrderPrinterSearchPage() {
           <Space.Compact style={{ width: "100%" }}>
             <Input
               ref={orderNumberInputRef}
-              disabled={busy || !preferencesReady}
+              disabled={!preferencesReady}
               allowClear
               placeholder={tOrders("filters.searchOrderNumber")}
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
-              onPressEnter={() => handleSearch(orderNumber)}
+              onPressEnter={() => submitScan(orderNumber)}
               onPaste={handlePaste}
+              onBlur={() => reclaimScanFocus(orderNumberInputRef)}
             />
             <Button
               type="primary"
               loading={searching}
               disabled={printingLabel || !preferencesReady}
-              onClick={() => handleSearch(orderNumber)}
+              onClick={() => submitScan(orderNumber)}
             >
               {tCommonActions("search")}
             </Button>

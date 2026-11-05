@@ -34,6 +34,7 @@ import {
   normalizeRefundRemakeItems,
 } from "@/utils/refundRemakeRequests";
 import StatusTag from "@/components/ui/StatusTag";
+import ShippingRatesModal from "@/components/modals/ShippingRatesModal";
 
 export default function RefundRemakeRequestDetailPage({
   requireRoles = ["customerAdmin"],
@@ -56,6 +57,7 @@ export default function RefundRemakeRequestDetailPage({
   const [detail, setDetail] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
 
   const loadDetail = useCallback(async () => {
     if (!requestId) return;
@@ -128,6 +130,44 @@ export default function RefundRemakeRequestDetailPage({
   const isPending = detail?.status === "pending";
   const isCanceled = detail?.status === "canceled";
   const linkedOrder = detail?.[orderResponseKey] || detail?.order || detail?.transfer_order || null;
+
+  // Company remake of a shipped order: approval buys the replacement label first and the
+  // remake order is created from that purchase (see approveWithLabel on the backend).
+  const labelApprovalEnabled =
+    allowStatusActions &&
+    canManageStatus &&
+    detailApi === RefundRemakeRequestsAPI &&
+    isPending &&
+    detail?.request_type === "remake" &&
+    detail?.responsible_entity_id === detail?.company_id &&
+    linkedOrder?.order_status === "shipped";
+
+  // Shape the request for ShippingRatesModal: the source order is the record, and the
+  // request's order items (with snapshot prices) are the items being remade.
+  const labelRecord = useMemo(
+    () => (linkedOrder ? { order: linkedOrder } : null),
+    [linkedOrder],
+  );
+  const approvalItems = useMemo(() => {
+    const rawItems = detail?.order_items;
+    if (!rawItems || typeof rawItems !== "object" || Array.isArray(rawItems)) return [];
+    return Object.entries(rawItems).map(([id, item]) => ({
+      ...item,
+      id,
+      price: Number(item?.line_total ?? item?.price ?? 0),
+      order: linkedOrder,
+    }));
+  }, [detail?.order_items, linkedOrder]);
+  const approval = useMemo(
+    () => ({
+      items: approvalItems,
+      onApprove: (payload) =>
+        payload instanceof FormData
+          ? detailApi.approveWithLabelWithFile(requestId, payload)
+          : detailApi.approveWithLabel(requestId, payload),
+    }),
+    [approvalItems, detailApi, requestId],
+  );
 
   const itemColumns = useMemo(
     () => [
@@ -270,20 +310,31 @@ export default function RefundRemakeRequestDetailPage({
           </Link>
           {canManageStatus ? (
             <>
-              <Popconfirm
-                title={t("actions.approveConfirm")}
-                onConfirm={() => updateStatus({ status: "approved" })}
-                okButtonProps={{ loading: statusUpdating }}
-                disabled={!isPending || statusUpdating}
-              >
+              {labelApprovalEnabled ? (
                 <Button
                   type="primary"
                   disabled={!isPending || statusUpdating}
                   loading={statusUpdating}
+                  onClick={() => setLabelModalOpen(true)}
                 >
                   {t("actions.approve")}
                 </Button>
-              </Popconfirm>
+              ) : (
+                <Popconfirm
+                  title={t("actions.approveConfirm")}
+                  onConfirm={() => updateStatus({ status: "approved" })}
+                  okButtonProps={{ loading: statusUpdating }}
+                  disabled={!isPending || statusUpdating}
+                >
+                  <Button
+                    type="primary"
+                    disabled={!isPending || statusUpdating}
+                    loading={statusUpdating}
+                  >
+                    {t("actions.approve")}
+                  </Button>
+                </Popconfirm>
+              )}
               <Button
                 danger
                 disabled={!isPending || statusUpdating}
@@ -386,6 +437,19 @@ export default function RefundRemakeRequestDetailPage({
           )}
         </Card>
       </Space>
+
+      {labelApprovalEnabled ? (
+        <ShippingRatesModal
+          open={labelModalOpen}
+          record={labelRecord}
+          onClose={() => setLabelModalOpen(false)}
+          approval={approval}
+          onSendSuccess={async () => {
+            setLabelModalOpen(false);
+            await loadDetail();
+          }}
+        />
+      ) : null}
 
       <Modal
         open={cancelModalOpen}

@@ -3086,6 +3086,11 @@
           "confirmUploadTitle": "Yüklenen label ile üretime gönderilsin mi?",
           "confirmUploadDescription": "Yüklenen dosya self label olarak kaydedilecek ve sipariş üretime gönderilecek. Devam edilsin mi?",
           "confirmSendOk": "Evet, gönder",
+          "approvalTitle": "Remake'i onayla ve label satın al",
+          "approveWithLabel": "Onayla ve Label Satın Al",
+          "confirmApproveTitle": "Remake onaylansın ve label satın alınsın mı?",
+          "confirmApproveDescription": "Seçili kargo etiketi satın alınacak, bedeli company cüzdanından düşülecek ve remake siparişi üretimde oluşturulacak. Devam edilsin mi?",
+          "confirmApproveOk": "Evet, onayla",
           "createShipmentLabel": "Label Oluştur ve Sevk Et",
           "labelCreateSuccess": "Kargo labelı oluşturuldu ve sipariş sevk edildi.",
           "labelCreateError": "Kargo labelı oluşturulamadı."

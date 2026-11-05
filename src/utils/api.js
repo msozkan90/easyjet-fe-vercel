@@ -456,6 +456,14 @@ export const RefundRemakeRequestsAPI = {
   create: (payload) => api.post("/refund-remake-requests", payload),
   updateStatus: (id, payload) =>
     api.post(`/refund-remake-requests/${id}/status`, payload),
+  approveWithLabel: (id, payload) =>
+    api.post(`/refund-remake-requests/${id}/approve-with-label`, payload),
+  approveWithLabelWithFile: (id, formData, config = {}) =>
+    api.postMultipart(
+      `/refund-remake-requests/${id}/approve-with-label`,
+      formData,
+      config,
+    ),
 };
 
 export const TransferRefundRemakeRequestsAPI = {
