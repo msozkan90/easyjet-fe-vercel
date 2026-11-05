@@ -265,6 +265,11 @@ const ShippingRatesModal = ({
   formatAmount,
   onEditAddress,
   onSendSuccess,
+  // Company approval of a shipped-order remake: same modal, but the purchase is handed to
+  // approval.onApprove(payload) instead of sending the order to production. Items are the
+  // remake request's order items; production options, fulfillment and self-label upload
+  // do not apply because the remake order is created from the purchase.
+  approval,
 }) => {
   const { message } = AntdApp.useApp();
   const dispatch = useDispatch();
@@ -298,6 +303,7 @@ const ShippingRatesModal = ({
   );
 
   const orderId = record?.order?.id ?? record?.order_id;
+  const isApproval = Boolean(approval);
   const quoteDefaults = useMemo(() => createQuoteDefaults(record), [record]);
   const requestedShippingService = useMemo(
     () => getRequestedShippingService(record),
@@ -404,14 +410,17 @@ const ShippingRatesModal = ({
     [formatAmount],
   );
 
-  const orderItems = useMemo(() => flattenOrderItems(record), [record]);
+  const orderItems = useMemo(
+    () => (approval ? approval.items || [] : flattenOrderItems(record)),
+    [approval, record],
+  );
   const orderItemIds = useMemo(
     () => orderItems.map((item) => item?.id).filter(Boolean),
     [orderItems],
   );
 
   useEffect(() => {
-    if (!open || !orderId || !orderItemIds.length) return;
+    if (!open || isApproval || !orderId || !orderItemIds.length) return;
     let active = true;
     setOptionsLoading(true);
     OrdersAPI.productionOptions({ order_id: orderId, item_ids: orderItemIds })
@@ -436,7 +445,7 @@ const ShippingRatesModal = ({
     return () => {
       active = false;
     };
-  }, [open, orderId, orderItemIds, message, tShipping]);
+  }, [open, isApproval, orderId, orderItemIds, message, tShipping]);
 
   const orderItemsTotal = useMemo(() => {
     const total = orderItems.reduce((sum, item) => {
@@ -669,7 +678,38 @@ const ShippingRatesModal = ({
 
     setSendingProduction(true);
     try {
-      if (isReuseMode) {
+      if (isApproval && isUploadMode) {
+        const payload = new FormData();
+        payload.append("idempotency_key", productionRequestKey);
+        payload.append("source", "self_label");
+        payload.append("label_file", selectedLabelFile);
+        await approval.onApprove(payload);
+      } else if (isApproval) {
+        await approval.onApprove({
+          carrier_service: toProductionCarrierService(selectedRate),
+          idempotency_key: productionRequestKey,
+          shipping_price: selectedRateAmount,
+          weight: {
+            units: "ounces",
+            value: weightValue,
+            WeightUnits: 1,
+          },
+          dimensions: {
+            units: "inches",
+            width: normalizeNumber(quoteValues.widthIn) ?? 0,
+            height: normalizeNumber(quoteValues.heightIn) ?? 0,
+            length: normalizeNumber(quoteValues.lengthIn) ?? 0,
+          },
+          source: (() => {
+            if (activeServiceTab === SERVICE_TABS.EASYJET) return "easyjet";
+            if (activeServiceTab === SERVICE_TABS.COMPANY)
+              return "shipStationCompany";
+            if (activeServiceTab === SERVICE_TABS.PARTNER)
+              return "shipStationPartner";
+            return "shipStationCustomer";
+          })(),
+        });
+      } else if (isReuseMode) {
         await OrdersAPI.sendToProduction({
           order_id: orderId,
           idempotency_key: productionRequestKey,
@@ -800,21 +840,27 @@ const ShippingRatesModal = ({
       open={open}
       onCancel={onClose}
       width={1280}
-      title={tShipping("title")}
+      title={isApproval ? tShipping("actions.approvalTitle") : tShipping("title")}
       footer={[
         <Popconfirm
           key="send"
           title={tShipping(
-            isUploadMode
-              ? "actions.confirmUploadTitle"
-              : "actions.confirmSendTitle",
+            isApproval
+              ? "actions.confirmApproveTitle"
+              : isUploadMode
+                ? "actions.confirmUploadTitle"
+                : "actions.confirmSendTitle",
           )}
           description={tShipping(
-            isUploadMode
-              ? "actions.confirmUploadDescription"
-              : "actions.confirmSendDescription",
+            isApproval
+              ? "actions.confirmApproveDescription"
+              : isUploadMode
+                ? "actions.confirmUploadDescription"
+                : "actions.confirmSendDescription",
           )}
-          okText={tShipping("actions.confirmSendOk")}
+          okText={tShipping(
+            isApproval ? "actions.confirmApproveOk" : "actions.confirmSendOk",
+          )}
           cancelText={tCommonActions("cancel")}
           onConfirm={handleSendToProduction}
           disabled={!canSendToProduction || sendingProduction}
@@ -824,7 +870,9 @@ const ShippingRatesModal = ({
             disabled={!canSendToProduction || sendingProduction}
             loading={sendingProduction}
           >
-            {tShipping("actions.sendToProduction")}
+            {tShipping(
+              isApproval ? "actions.approveWithLabel" : "actions.sendToProduction",
+            )}
           </Button>
         </Popconfirm>,
         <Button key="close" onClick={onClose} type="primary">
@@ -991,6 +1039,7 @@ const ShippingRatesModal = ({
             </div>
           </div>
 
+          {isApproval ? null : (
           <div className="rounded-xl border border-line bg-info-bg p-5 space-y-4">
             <div>
               <Typography.Title level={4} style={{ margin: 0 }}>
@@ -1092,6 +1141,7 @@ const ShippingRatesModal = ({
               </div>
             ) : null}
           </div>
+          )}
 
           <Tabs
             style={{ display: isReuseMode ? "none" : undefined }}

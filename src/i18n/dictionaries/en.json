@@ -3306,6 +3306,11 @@
           "confirmUploadTitle": "Send to production with uploaded label?",
           "confirmUploadDescription": "The uploaded label will be saved as a self label and this order will be sent to production. Continue?",
           "confirmSendOk": "Yes, send",
+          "approvalTitle": "Approve remake and buy label",
+          "approveWithLabel": "Approve & Buy Label",
+          "confirmApproveTitle": "Approve remake and buy label?",
+          "confirmApproveDescription": "The selected shipping label will be purchased, charged to the company wallet, and the remake order will be created in production. Continue?",
+          "confirmApproveOk": "Yes, approve",
           "createShipmentLabel": "Create Label & Ship",
           "labelCreateSuccess": "Shipping label created and order shipped.",
           "labelCreateError": "Shipping label could not be created."
