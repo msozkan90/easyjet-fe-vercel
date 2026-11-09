@@ -27,7 +27,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import { formatAmount } from "@/utils/formatMoney";
 import LabelPrinterSettings from "./LabelPrinterSettings";
 import useLabelPrinter from "@/hooks/useLabelPrinter";
-import { reclaimScanFocus, useScanQueue } from "@/hooks/useScanQueue";
+import { useScanInputFocus, useScanQueue } from "@/hooks/useScanQueue";
 
 const extractPositionList = (response) => {
   if (!response) return [];
@@ -202,6 +202,12 @@ export default function ShippedOrderPrinterSearchPage() {
   const [printerSettingsOpen, setPrinterSettingsOpen] = useState(false);
   const [labelUrl, setLabelUrl] = useState(null);
   const busy = searching || printingLabel;
+
+  // Keeps the scan input focused between scans (label printing moves focus into a
+  // hidden print iframe). Modals take over focus while they are open.
+  useScanInputFocus(orderNumberInputRef, {
+    enabled: preferencesReady && !shippingModalOpen && !printerSettingsOpen,
+  });
 
   const items = useMemo(() => {
     if (!Array.isArray(order?.items)) return [];
@@ -413,7 +419,6 @@ export default function ShippedOrderPrinterSearchPage() {
               onChange={(event) => setOrderNumber(event.target.value)}
               onPressEnter={() => submitScan(orderNumber)}
               onPaste={handlePaste}
-              onBlur={() => reclaimScanFocus(orderNumberInputRef)}
             />
             <Button
               type="primary"

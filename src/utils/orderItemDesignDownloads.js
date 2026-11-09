@@ -179,6 +179,23 @@ export const downloadOrderLabel = async ({ orderNumber, labelUrl }) => {
   };
 };
 
+const restoreFocus = (element, printFrame) => {
+  if (
+    !element ||
+    element === document.body ||
+    element === printFrame ||
+    !element.isConnected ||
+    typeof element.focus !== "function"
+  ) {
+    return;
+  }
+  try {
+    element.focus({ preventScroll: true });
+  } catch {
+    // Focus restoration is best effort.
+  }
+};
+
 const createHiddenPrintFrame = () => {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
@@ -202,6 +219,10 @@ export const printOrderLabel = async ({ labelUrl }) => {
   if (typeof window === "undefined" || typeof document === "undefined") {
     throw new Error("Label can only be printed in the browser.");
   }
+
+  // Printing focuses the hidden frame. Remember where focus was (usually a scanner
+  // input) so the next barcode is not typed into the frame after printing.
+  const focusedBeforePrint = document.activeElement;
 
   const blob = await fetchLabelFile(labelUrl);
   const objectUrl = URL.createObjectURL(blob);
@@ -250,8 +271,15 @@ export const printOrderLabel = async ({ labelUrl }) => {
           };
 
           frameWindow.addEventListener?.("afterprint", cleanupAfterPrint);
+          const focusedNow = document.activeElement;
+          const returnFocusTo =
+            focusedNow && focusedNow !== document.body && focusedNow !== iframe
+              ? focusedNow
+              : focusedBeforePrint;
+
           frameWindow.focus();
           frameWindow.print();
+          restoreFocus(returnFocusTo, iframe);
           resolveOnce();
           window.setTimeout(cleanup, 60000);
         } catch (error) {

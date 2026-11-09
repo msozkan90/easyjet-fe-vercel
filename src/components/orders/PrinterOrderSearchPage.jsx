@@ -29,7 +29,7 @@ import GroupedOrderItemDesignPreview, {
 } from "@/components/orders/OrderItemDesignPreview";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
-import { reclaimScanFocus, useScanQueue } from "@/hooks/useScanQueue";
+import { useScanInputFocus, useScanQueue } from "@/hooks/useScanQueue";
 import { formatAmount } from "@/utils/formatMoney";
 
 const SCRAP_REASON_OPTIONS = [
@@ -297,6 +297,9 @@ export default function PrinterOrderSearchPage({
   const [positionsByProductId, setPositionsByProductId] = useState({});
   const [positionsLoading, setPositionsLoading] = useState(false);
   const [scrapModalOpen, setScrapModalOpen] = useState(false);
+
+  // Keeps the scan input focused between scans; the scrap modal takes over while open.
+  useScanInputFocus(orderNumberInputRef, { enabled: !scrapModalOpen });
 
   useEffect(() => {
     if (!items.length) {
@@ -683,7 +686,6 @@ export default function PrinterOrderSearchPage({
                 onChange={(event) => setOrderNumber(event.target.value)}
                 onPressEnter={() => submitScan(orderNumber)}
                 onPaste={handlePaste}
-                onBlur={() => reclaimScanFocus(orderNumberInputRef)}
               />
               <Button
                 type="primary"
