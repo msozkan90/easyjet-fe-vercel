@@ -18,7 +18,12 @@ import SelectionFloatActions from "@/components/common/actions/SelectionFloatAct
 import CrudTable from "@/components/common/table/CrudTable";
 import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
-import { OrdersAPI, ProductVariationAPI, ShipStationAPI } from "@/utils/api";
+import {
+  OrdersAPI,
+  PrintTypeMappersAPI,
+  ProductVariationAPI,
+  ShipStationAPI,
+} from "@/utils/api";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { makeListRequest } from "@/utils/listPayload";
 import { getFirstInvalidOrderNumber } from "@/utils/orderNumberValidation";
@@ -48,6 +53,11 @@ const getRecordFieldValue = (record, field) => {
 const getNormalizedRecordValue = (record, field) =>
   normalizeId(getRecordFieldValue(record, field));
 const hasOwn = Object.prototype.hasOwnProperty;
+const REXVEN_SOURCE = "rexven_api";
+const isRexvenRecord = (record) =>
+  String(record?.source || "").toLowerCase() === REXVEN_SOURCE;
+const isRoutingBlocked = (record) =>
+  Boolean(record?.requires_routing_sub_category) && !record?.routing_sub_category;
 
 export default function OrdersPage({ mode = "pending" }) {
   const { message } = AntdApp.useApp();
@@ -64,11 +74,45 @@ export default function OrdersPage({ mode = "pending" }) {
   const [bulkApproving, setBulkApproving] = useState(false);
   const [bulkCancelling, setBulkCancelling] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
+  const [isRexvenCustomer, setIsRexvenCustomer] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const isCancelledView = mode === "cancelled";
 
   const t = useTranslations("dashboard.preOrders");
   const tCommonActions = useTranslations("common.actions");
+
+  useEffect(() => {
+    let active = true;
+    PrintTypeMappersAPI.context()
+      .then((response) => {
+        if (active) setIsRexvenCustomer(Boolean(response?.data?.is_rexven_customer));
+      })
+      .catch(() => {
+        if (active) setIsRexvenCustomer(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const describeSkippedOrders = useCallback(
+    (skipped) =>
+      (Array.isArray(skipped) ? skipped : [])
+        .map((entry) => {
+          const reasonKey = [
+            "incomplete_selection",
+            "items_unavailable",
+            "print_type_unmatched",
+          ].includes(entry?.reason)
+            ? entry.reason
+            : "unknown";
+          return `${entry?.order_number ?? "-"}: ${t(`messages.skipReasons.${reasonKey}`, {
+            count: entry?.pending_item_count ?? 0,
+          })}`;
+        })
+        .join(" • "),
+    [t],
+  );
   const storeId = user?.entity?.store_id;
   const customerName =
     user?.entity?.entity_name || user?.displayName || user?.email || "";
@@ -542,6 +586,19 @@ export default function OrdersPage({ mode = "pending" }) {
     ],
   );
 
+  // Rexven: baskı tipi (routing sub category) elle seçimi; temizlenirse otomatik eşleşmeye döner.
+  const handlePrintTypeSelect = useCallback(
+    (record, nextValue) => {
+      if (!record?.id) return;
+      const nextId = nextValue ?? null;
+      if ((record?.routing_sub_category?.id ?? null) === nextId && record?.routing_sub_category_manual) {
+        return;
+      }
+      handlePreOrderUpdate(record, { routing_sub_category_id: nextId }, "print_type");
+    },
+    [handlePreOrderUpdate],
+  );
+
   const handleColorSelect = useCallback(
     (record, nextValue) => {
       if (!record?.id) return;
@@ -605,8 +662,16 @@ export default function OrdersPage({ mode = "pending" }) {
           order_number: item?.order_number,
           order_pool_item_id: item?.id,
         }));
-        await OrdersAPI.create(payload);
-        message.success(t("messages.approveSuccess"));
+        const response = await OrdersAPI.create(payload);
+        const skipped = Array.isArray(response?.skipped) ? response.skipped : [];
+        if (skipped.length) {
+          message.warning({
+            content: `${t("messages.approvePartial", { count: skipped.length })} ${describeSkippedOrders(skipped)}`,
+            duration: 8,
+          });
+        } else {
+          message.success(t("messages.approveSuccess"));
+        }
         if (isBulk) {
           resetSelections();
         } else {
@@ -614,9 +679,17 @@ export default function OrdersPage({ mode = "pending" }) {
         }
         tableRef.current?.reload?.();
       } catch (error) {
-        message.error(
-          error?.response?.data?.error?.message || t("messages.approveError"),
-        );
+        const skipped = error?.response?.data?.error?.details?.skipped;
+        if (Array.isArray(skipped) && skipped.length) {
+          message.error({
+            content: `${t("messages.approveNoneRexven")} ${describeSkippedOrders(skipped)}`,
+            duration: 8,
+          });
+        } else {
+          message.error(
+            error?.response?.data?.error?.message || t("messages.approveError"),
+          );
+        }
       } finally {
         ids.forEach((id) => setRowActionLoadingState(id, "approve", false));
         if (isBulk) {
@@ -626,6 +699,7 @@ export default function OrdersPage({ mode = "pending" }) {
     },
     [
       clearSelectionForIds,
+      describeSkippedOrders,
       message,
       resetSelections,
       setRowActionLoadingState,
@@ -649,6 +723,9 @@ export default function OrdersPage({ mode = "pending" }) {
   const cancelOrders = useCallback(
     async (records, options = {}) => {
       if (!Array.isArray(records) || !records.length) return;
+      // Rexven pool kalemleri iptal edilemez.
+      records = records.filter((record) => !isRexvenRecord(record));
+      if (!records.length) return;
       const ids = records.map((item) => item?.id).filter(Boolean);
       const isBulk = Boolean(options?.bulk);
       if (isBulk) {
@@ -773,6 +850,12 @@ export default function OrdersPage({ mode = "pending" }) {
           type: "text",
           placeholder: t("filters.searchOrderNumber"),
         },
+        render: (value, record) => (
+          <Space size={[4, 4]} wrap>
+            <span>{value || t("common.none")}</span>
+            {record?.is_remake ? <Tag color="magenta">{t("badges.remake")}</Tag> : null}
+          </Space>
+        ),
       },
       {
         title: t("items.columns.sku"),
@@ -946,6 +1029,45 @@ export default function OrdersPage({ mode = "pending" }) {
         },
       },
       {
+        title: t("columns.printType"),
+        key: "print_type",
+        width: 180,
+        render: (_, record) => {
+          if (!isRexvenRecord(record)) return t("common.none");
+          const printType = record?.print_type || t("common.none");
+          if (!record?.requires_routing_sub_category) {
+            return <Tag>{printType}</Tag>;
+          }
+          if (isCancelledView) {
+            return record?.routing_sub_category?.name || t("common.none");
+          }
+          const options = (
+            Array.isArray(record?.routing_sub_category_options)
+              ? record.routing_sub_category_options
+              : []
+          ).map((option) => ({ value: option.id, label: option.name }));
+          const printTypeLoading = Boolean(cellLoading?.[`${record.id}-print_type`]);
+          const unmatched = !record?.routing_sub_category;
+          return (
+            <Tooltip title={unmatched ? t("messages.printTypeUnmatchedHint") : undefined}>
+              <Select
+                showSearch
+                allowClear={Boolean(record?.routing_sub_category_manual)}
+                optionFilterProp="label"
+                placeholder={t("filters.selectPrintType")}
+                options={options}
+                value={record?.routing_sub_category?.id ?? undefined}
+                status={unmatched ? "error" : undefined}
+                loading={printTypeLoading}
+                disabled={printTypeLoading || isVariantUpdateLoading(record.id)}
+                onChange={(value) => handlePrintTypeSelect(record, value)}
+                style={{ minWidth: 160 }}
+              />
+            </Tooltip>
+          );
+        },
+      },
+      {
         title: t("columns.price"),
         dataIndex: "price",
         sorter: true,
@@ -1069,14 +1191,20 @@ export default function OrdersPage({ mode = "pending" }) {
           const cancelLoading = isRowActionLoading(record.id, "cancel");
           const disableActions =
             bulkApproving || bulkCancelling || approveLoading || cancelLoading;
+          const isRexven = isRexvenRecord(record);
+          const routingBlocked = isRoutingBlocked(record);
           return (
             <Space>
-              <Tooltip title={t("actions.approve")}>
+              <Tooltip
+                title={
+                  routingBlocked ? t("messages.printTypeUnmatchedHint") : t("actions.approve")
+                }
+              >
                 <Popconfirm
                   title={t("actions.confirmApproveTitle")}
                   okText={t("actions.confirmApproveOk")}
                   okButtonProps={{ loading: approveLoading, type: "primary" }}
-                  disabled={disableActions}
+                  disabled={disableActions || routingBlocked}
                   onConfirm={() => handleSingleApprove(record)}
                 >
                   <Button
@@ -1084,10 +1212,11 @@ export default function OrdersPage({ mode = "pending" }) {
                     icon={<CheckOutlined />}
                     type="primary"
                     loading={approveLoading}
-                    disabled={disableActions}
+                    disabled={disableActions || routingBlocked}
                   />
                 </Popconfirm>
               </Tooltip>
+              {isRexven ? null : (
               <Tooltip title={t("actions.cancel")}>
                 <Popconfirm
                   title={t("actions.confirmCancelTitle")}
@@ -1106,18 +1235,23 @@ export default function OrdersPage({ mode = "pending" }) {
                   />
                 </Popconfirm>
               </Tooltip>
+              )}
             </Space>
           );
         },
       },
     ].filter((column) => {
       const columnKey = column.key || column.dataIndex;
+      if (columnKey === "print_type" && !isRexvenCustomer) return false;
       if (isCancelledView) {
         return !["pool_status", "linked_orders"].includes(columnKey);
       }
       return !["deactivated_at", "deactivated_by"].includes(columnKey);
     });
   }, [
+    isRexvenCustomer,
+    cellLoading,
+    handlePrintTypeSelect,
     bulkApproving,
     bulkCancelling,
     getColorOptions,
@@ -1254,6 +1388,7 @@ export default function OrdersPage({ mode = "pending" }) {
           confirmCancelDismiss={t("actions.confirmCancelDismiss")}
           approving={bulkApproving}
           cancelling={bulkCancelling}
+          hideCancel={selectedRows.some(isRexvenRecord)}
           onApprove={handleBulkApprove}
           onCancel={handleBulkCancel}
           onClearSelection={() => setSelectedRowMap({})}

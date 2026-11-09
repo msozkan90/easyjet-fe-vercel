@@ -115,6 +115,13 @@
     "boolean": {
       "yes": "Yes",
       "no": "No"
+    },
+    "rexvenDesign": {
+      "empty": "No Rexven designs",
+      "untitled": "Design",
+      "piece": "Piece {number}",
+      "noPreview": "No mockup",
+      "designOnly": "No mockup, design only"
     }
   },
   "home": {
@@ -2306,7 +2313,8 @@
         "linkedTransferOrders": "Linked Transfer Orders",
         "cancelledAt": "Cancelled At",
         "cancelledBy": "Cancelled By",
-        "actions": "Actions"
+        "actions": "Actions",
+        "printType": "Print Type"
       },
       "filters": {
         "searchOrderNumber": "Search order number",
@@ -2321,7 +2329,8 @@
         "dateRange": "Date range",
         "clearDate": "Clear date filter",
         "searchSku": "Search SKU",
-        "searchItem": "Search item"
+        "searchItem": "Search item",
+        "selectPrintType": "Select print type"
       },
       "actions": {
         "fetch": "Fetch ShipStation",
@@ -2359,12 +2368,22 @@
         "cancelSuccess": "Order cancelled successfully.",
         "cancelError": "Failed to cancel order.",
         "restoreSuccess": "Item restored to the pool.",
-        "restoreError": "Failed to restore item to the pool."
+        "restoreError": "Failed to restore item to the pool.",
+        "approvePartial": "Approval finished; {count} Rexven order(s) were skipped.",
+        "approveNoneRexven": "No orders were approved.",
+        "printTypeUnmatchedHint": "The print type is not matched to a sub category. Pick one from the list or add a mapping under Product Mapper > Print Types.",
+        "skipReasons": {
+          "incomplete_selection": "all pending items of the order ({count}) must be selected together",
+          "items_unavailable": "items are no longer in the pool",
+          "print_type_unmatched": "print type is not matched to a sub category",
+          "unknown": "skipped"
+        }
       },
       "badges": {
         "pendingItems": "{count} pending items",
         "complete": "Pool complete",
-        "progressBlocked": "Progress blocked"
+        "progressBlocked": "Progress blocked",
+        "remake": "Remake"
       },
       "shipStationStatus": {
         "lastUpdated": "Last updated {date}",
@@ -2551,7 +2570,7 @@
       },
       "values": {
         "noOptions": "No options",
-        "reordered": "Re-ordered"
+        "reordered": "Remake"
       },
       "common": {
         "none": "-"
@@ -3860,6 +3879,61 @@
         "tooltip": "Copy transfer order id",
         "success": "Transfer order id copied.",
         "error": "Transfer order id could not be copied."
+      },
+      "rexvenLabels": {
+        "description": "PDFs and designs of Rexven orders are produced by Rexven. \"Download PDF\" sends a label request for Rexven orders; the resulting batches are listed here. The batch PDF button stays disabled until the file is ready.",
+        "tabs": {
+          "pdfs": "PDFs",
+          "rexven": "Rexven Labels"
+        },
+        "columns": {
+          "id": "Batch #",
+          "status": "Status",
+          "progress": "Progress",
+          "orders": "Orders",
+          "processedAt": "Last Processed",
+          "actions": "Actions"
+        },
+        "statuses": {
+          "processing": "Processing",
+          "completed": "Completed",
+          "partially_failed": "Partially Failed",
+          "failed": "Failed",
+          "unknown": "Unknown"
+        },
+        "counts": {
+          "completed": "{count} done",
+          "failed": "{count} failed",
+          "pending": "{count} pending",
+          "total": "Total {count}"
+        },
+        "process": {
+          "orderNumber": "Order #",
+          "productName": "Product",
+          "page": "Page",
+          "status": "Status",
+          "error": "Error",
+          "label": "Label"
+        },
+        "actions": {
+          "openPdf": "Open batch PDF",
+          "pdfNotReady": "PDF is not ready yet",
+          "retry": "Retry",
+          "confirmRetry": "Resend the label request for the failed orders of this batch?",
+          "refresh": "Refresh"
+        },
+        "messages": {
+          "requested": "Label request sent for {count} Rexven order(s); they were moved to PDF status. Track the PDFs in the \"Rexven Labels\" tab.",
+          "requestFailed": "The Rexven label request could not be sent.",
+          "loadFailed": "Rexven label batches could not be loaded.",
+          "retryRequested": "Retry requested for batch #{id}.",
+          "retryFailed": "The retry request could not be sent.",
+          "retryNoOrders": "No orders to retry.",
+          "rejectedTitle": "Rexven rejected the label request",
+          "rolledBack": "No order statuses were changed and the PDF download was cancelled. Fix the issue and try again.",
+          "retryRejected": "Rexven rejected the retry request: {reason}"
+        },
+        "empty": "No Rexven label batches yet"
       }
     },
     "refundRemake": {
@@ -4072,7 +4146,8 @@
         "products": "Products",
         "sizes": "Sizes",
         "colors": "Colors",
-        "customizations": "Customization Mapper"
+        "customizations": "Customization Mapper",
+        "printTypes": "Print Types"
       },
       "customer": {
         "title": "Customer",
@@ -4720,6 +4795,49 @@
         "revokeSuccess": "API key revoked.",
         "revokeError": "API key could not be revoked."
       }
+    },
+    "productPrintTypeMapper": {
+      "description": "Map the \"Baskı Tipi\" (print type) value of Rexven orders (e.g. DTF) to your sub categories. Orders of products with several sub categories cannot be approved from the pool without this match. Without a mapping, an exact sub category name match is tried.",
+      "columns": {
+        "subCategory": "Sub Category",
+        "mapper": "Print Type Values",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "filters": {
+        "selectSubCategory": "Select sub category",
+        "searchMapper": "Search print type",
+        "selectStatus": "Select status"
+      },
+      "actions": {
+        "new": "New Mapping",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteTitle": "Delete this mapping?",
+        "confirmDeleteOk": "Delete"
+      },
+      "messages": {
+        "createSuccess": "Mapping created.",
+        "updateSuccess": "Mapping updated.",
+        "deleteSuccess": "Mapping deleted.",
+        "deleteError": "Mapping could not be deleted.",
+        "operationFailed": "Operation failed.",
+        "loadContextError": "Sub categories could not be loaded.",
+        "notRexvenCustomer": "These mappings are only used for customers with a Rexven integration."
+      },
+      "modal": {
+        "createTitle": "Add Print Type Mapping",
+        "editTitle": "Edit Mapping: {name}",
+        "submitCreate": "Create",
+        "submitUpdate": "Update"
+      },
+      "table": {
+        "noData": "No print type mappings yet"
+      },
+      "common": {
+        "none": "—"
+      }
     }
   },
   "forms": {
@@ -5169,6 +5287,21 @@
         "partner": "Partner",
         "status": "Status",
         "role": "Role"
+      }
+    },
+    "productPrintTypeMapper": {
+      "labels": {
+        "subCategory": "Sub Category",
+        "mapper": "Print Type Values",
+        "status": "Status"
+      },
+      "placeholders": {
+        "subCategory": "Select a sub category",
+        "mapper": "Type a value and press Enter (e.g. DTF)"
+      },
+      "hints": {
+        "subCategory": "Rexven order items are routed to this sub category.",
+        "mapper": "Print type values coming from Rexven; matched exactly, case-insensitive."
       }
     }
   },

@@ -218,6 +218,12 @@ export const OrdersAPI = {
       config,
       fallbackFilename: "orders.pdf",
     }),
+  // Rexven: download pdf kapsamındaki Rexven order'ları için etiket isteği + batch listesi
+  requestRexvenLabels: (payload) => api.post("/orders/rexven/labels", payload),
+  rexvenLabelContext: () => api.get("/orders/rexven/label-context"),
+  rexvenLabelBatches: (params) => api.get("/orders/rexven/label-batches", params),
+  retryRexvenLabelBatch: (batchId, data) =>
+    api.post(`/orders/rexven/label-batches/${batchId}/retry`, data),
 
   designFlawOptions: (id) =>
     api.get(`/orders/items/${encodeURIComponent(id)}/design-flaw-options`),
@@ -873,6 +879,14 @@ export const ProductSizeMappersAPI = {
       options.config || options.multipartConfig,
     );
   },
+};
+
+export const PrintTypeMappersAPI = {
+  context: () => api.get("/print-type-mappers/context"),
+  list: (query) => api.post("/print-type-mappers/list", query),
+  create: (data) => api.post("/print-type-mappers", data),
+  update: (id, data) => api.put(`/print-type-mappers/${id}`, data),
+  remove: (id) => api.del(`/print-type-mappers/${id}`),
 };
 
 export const ProductColorMappersAPI = {

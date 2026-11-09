@@ -249,3 +249,63 @@ export default function OrderItemDesignPreview({
     </div>
   );
 }
+
+/**
+ * Rexven item'ları: purchasedMockups pozisyon görseli yerinde gösterilir,
+ * altındaki "orijinali indir" butonu eşleşen purchasedDesign dosyasını indirir.
+ */
+export const hasRexvenDesigns = (item) =>
+  Array.isArray(item?.rexven_designs) && item.rexven_designs.length > 0;
+
+export function RexvenDesignPreview({ item }) {
+  const t = useTranslations("common.rexvenDesign");
+  const rows = Array.isArray(item?.rexven_designs) ? item.rexven_designs : [];
+  if (!rows.length) {
+    return <Empty description={t("empty")} />;
+  }
+  const hasMultiplePieces = rows.some((row) => Number(row?.piece_number || 1) > 1);
+
+  return (
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
+      {rows.map((row) => {
+        const previewUrl = row?.mockup_url || row?.design_url;
+        const title = row?.side || t("untitled");
+        return (
+          <Card
+            key={row?.id || row?.pair_key}
+            title={title}
+            extra={
+              hasMultiplePieces ? (
+                <Tag color="blue">{t("piece", { number: row?.piece_number || 1 })}</Tag>
+              ) : null
+            }
+            className="rounded-xl border border-line"
+            styles={{
+              body: { display: "flex", flexDirection: "column", gap: 12, flex: 1, padding: 16 },
+            }}
+          >
+            <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-subtle">
+              {previewUrl ? (
+                <Image
+                  src={previewUrl}
+                  alt={title}
+                  width="100%"
+                  preview={{ src: previewUrl }}
+                  style={{ objectFit: "contain", borderRadius: 12 }}
+                />
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center p-6">
+                  <Empty description={t("noPreview")} />
+                </div>
+              )}
+            </div>
+            {!row?.mockup_url && row?.design_url ? (
+              <Tag className="self-start">{t("designOnly")}</Tag>
+            ) : null}
+            <OriginalDesignButton url={row?.design_url} block />
+          </Card>
+        );
+      })}
+    </div>
+  );
+}

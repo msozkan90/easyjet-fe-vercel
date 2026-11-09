@@ -25,6 +25,7 @@ import {
   BarChartOutlined,
   UserOutlined,
   ApiOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 
 import Link from "next/link";
@@ -36,6 +37,7 @@ import Image from "next/image";
 import { useTranslations } from "@/i18n/use-translations";
 import { palette } from "@/theme/tokens";
 import { findActiveNavItem } from "./navMatching";
+import { PrintTypeMappersAPI } from "@/utils/api";
 
 const { Sider } = Layout;
 
@@ -82,6 +84,25 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
     isPartnerAdmin && hasTransferOrderCategory;
   const showCustomerProductMapperMenu =
     isCustomerAdmin && !hasTransferOrderCategory;
+  // Print Type Mapper sekmesi yalnızca Rexven entegrasyonlu müşterilerde görünür.
+  const [isRexvenCustomer, setIsRexvenCustomer] = useState(false);
+  useEffect(() => {
+    if (!showCustomerProductMapperMenu) {
+      setIsRexvenCustomer(false);
+      return undefined;
+    }
+    let active = true;
+    PrintTypeMappersAPI.context()
+      .then((response) => {
+        if (active) setIsRexvenCustomer(Boolean(response?.data?.is_rexven_customer));
+      })
+      .catch(() => {
+        if (active) setIsRexvenCustomer(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [showCustomerProductMapperMenu]);
   const isFinancialUser = isSystemAdmin || isCompanyAdmin || isPartnerAdmin || isCustomerAdmin;
   const categoriesData = useSelector((s) => {
     s?.categories?.listWithSubCategories;
@@ -885,6 +906,19 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
                         </Link>
                       ),
                     },
+                    ...(isRexvenCustomer
+                      ? [
+                          {
+                            key: "product-mapper-print-types",
+                            icon: <PrinterOutlined />,
+                            label: (
+                              <Link href="/dashboard/product-mapper/print-types">
+                                {tSidebar("productMapper.printTypes")}
+                              </Link>
+                            ),
+                          },
+                        ]
+                      : []),
                   ],
                 },
               ]

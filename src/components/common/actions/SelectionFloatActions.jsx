@@ -21,6 +21,7 @@ export default function SelectionFloatActions({
   confirmCancelDismiss,
   approving = false,
   cancelling = false,
+  hideCancel = false,
   onApprove,
   onCancel,
   onClearSelection,
@@ -56,6 +57,7 @@ export default function SelectionFloatActions({
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        {hideCancel ? null : (
         <Popconfirm
           title={confirmCancelTitle}
           okText={confirmCancelOk}
@@ -78,6 +80,7 @@ export default function SelectionFloatActions({
             {cancelTooltip}
           </Button>
         </Popconfirm>
+        )}
         <Popconfirm
           title={confirmApproveTitle}
           okText={confirmApproveOk}

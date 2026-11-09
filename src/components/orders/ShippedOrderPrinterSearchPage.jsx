@@ -20,7 +20,10 @@ import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate"
 import RequireRole from "@/components/common/Access/RequireRole";
 import { OrdersAPI, ProductPositionsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
-import OrderItemDesignPreview from "@/components/orders/OrderItemDesignPreview";
+import OrderItemDesignPreview, {
+  RexvenDesignPreview,
+  hasRexvenDesigns,
+} from "@/components/orders/OrderItemDesignPreview";
 import RemakeShippingRatesModal from "@/components/modals/RemakeShippingRatesModal";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
@@ -161,13 +164,17 @@ const OrderItemCard = ({
               {tDetail("designs.title")}
             </Typography.Text>
             <div className="mt-2">
-              <OrderItemDesignPreview
-                item={item}
-                positionMap={positionMap}
-                tDetail={tDetail}
-                tOrders={tOrders}
-                fallbackText={fallbackText}
-              />
+              {hasRexvenDesigns(item) ? (
+                <RexvenDesignPreview item={item} />
+              ) : (
+                <OrderItemDesignPreview
+                  item={item}
+                  positionMap={positionMap}
+                  tDetail={tDetail}
+                  tOrders={tOrders}
+                  fallbackText={fallbackText}
+                />
+              )}
             </div>
           </div>
         </div>

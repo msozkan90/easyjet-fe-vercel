@@ -115,6 +115,13 @@
     "boolean": {
       "yes": "Evet",
       "no": "Hayır"
+    },
+    "rexvenDesign": {
+      "empty": "Rexven tasarımı yok",
+      "untitled": "Tasarım",
+      "piece": "Parça {number}",
+      "noPreview": "Mockup yok",
+      "designOnly": "Mockup yok, sadece tasarım"
     }
   },
   "home": {
@@ -2086,7 +2093,8 @@
         "linkedTransferOrders": "Bağlı Transfer Siparişleri",
         "cancelledAt": "İptal Tarihi",
         "cancelledBy": "İptal Eden",
-        "actions": "İşlemler"
+        "actions": "İşlemler",
+        "printType": "Baskı Tipi"
       },
       "filters": {
         "searchOrderNumber": "Sipariş numarası ara",
@@ -2101,7 +2109,8 @@
         "dateRange": "Tarih aralığı",
         "clearDate": "Tarih filtresini temizle",
         "searchSku": "SKU ara",
-        "searchItem": "Ürün ara"
+        "searchItem": "Ürün ara",
+        "selectPrintType": "Baskı tipi seç"
       },
       "actions": {
         "fetch": "ShipStation verisini çek",
@@ -2139,12 +2148,22 @@
         "cancelSuccess": "Sipariş başarıyla iptal edildi.",
         "cancelError": "Sipariş iptal edilemedi.",
         "restoreSuccess": "Kalem havuza geri alındı.",
-        "restoreError": "Kalem havuza geri alınamadı."
+        "restoreError": "Kalem havuza geri alınamadı.",
+        "approvePartial": "Onay tamamlandı; {count} Rexven siparişi atlandı.",
+        "approveNoneRexven": "Hiçbir sipariş onaylanmadı.",
+        "printTypeUnmatchedHint": "Baskı tipi bir alt kategoriyle eşleşmedi. Listeden elle seçin ya da Ürün Eşleştirme > Baskı Tipi sekmesinden eşleştirme ekleyin.",
+        "skipReasons": {
+          "incomplete_selection": "siparişin tüm bekleyen kalemleri ({count}) birlikte seçilmeli",
+          "items_unavailable": "kalemler artık havuzda değil",
+          "print_type_unmatched": "baskı tipi alt kategoriyle eşleşmedi",
+          "unknown": "atlandı"
+        }
       },
       "badges": {
         "pendingItems": "{count} bekleyen kalem",
         "complete": "Pool tamam",
-        "progressBlocked": "İlerleme bloklu"
+        "progressBlocked": "İlerleme bloklu",
+        "remake": "Remake"
       },
       "shipStationStatus": {
         "lastUpdated": "Son güncelleme {date}",
@@ -2331,7 +2350,7 @@
       },
       "values": {
         "noOptions": "Seçenek yok",
-        "reordered": "Yeniden sipariş"
+        "reordered": "Remake"
       },
       "common": {
         "none": "-"
@@ -3640,6 +3659,61 @@
         "tooltip": "Transfer sipariş ID kopyala",
         "success": "Transfer sipariş ID kopyalandı.",
         "error": "Transfer sipariş ID kopyalanamadı."
+      },
+      "rexvenLabels": {
+        "description": "Rexven siparişlerinin PDF'leri ve tasarımları Rexven tarafında üretilir. \"PDF İndir\" butonu Rexven siparişleri için etiket isteği gönderir; oluşan batch'ler burada listelenir. Batch PDF'i hazır olana kadar buton pasif kalır.",
+        "tabs": {
+          "pdfs": "PDF'ler",
+          "rexven": "Rexven Etiketleri"
+        },
+        "columns": {
+          "id": "Batch #",
+          "status": "Durum",
+          "progress": "İlerleme",
+          "orders": "Siparişler",
+          "processedAt": "Son İşlem",
+          "actions": "İşlemler"
+        },
+        "statuses": {
+          "processing": "İşleniyor",
+          "completed": "Tamamlandı",
+          "partially_failed": "Kısmen Başarısız",
+          "failed": "Başarısız",
+          "unknown": "Bilinmiyor"
+        },
+        "counts": {
+          "completed": "{count} tamam",
+          "failed": "{count} hatalı",
+          "pending": "{count} bekliyor",
+          "total": "Toplam {count}"
+        },
+        "process": {
+          "orderNumber": "Sipariş #",
+          "productName": "Ürün",
+          "page": "Sayfa",
+          "status": "Durum",
+          "error": "Hata",
+          "label": "Etiket"
+        },
+        "actions": {
+          "openPdf": "Batch PDF'ini aç",
+          "pdfNotReady": "PDF henüz hazır değil",
+          "retry": "Yeniden Dene",
+          "confirmRetry": "Bu batch'in hatalı siparişleri için etiket isteği yeniden gönderilsin mi?",
+          "refresh": "Yenile"
+        },
+        "messages": {
+          "requested": "{count} Rexven siparişi için etiket isteği gönderildi; siparişler PDF durumuna alındı. PDF'leri \"Rexven Etiketleri\" sekmesinden takip edin.",
+          "requestFailed": "Rexven etiket isteği gönderilemedi.",
+          "loadFailed": "Rexven etiket batch'leri yüklenemedi.",
+          "retryRequested": "Batch #{id} için yeniden deneme isteği gönderildi.",
+          "retryFailed": "Yeniden deneme isteği gönderilemedi.",
+          "retryNoOrders": "Yeniden denenecek sipariş bulunamadı.",
+          "rejectedTitle": "Rexven etiket isteği reddedildi",
+          "rolledBack": "Hiçbir siparişin durumu değiştirilmedi ve PDF indirme iptal edildi. Sorunu giderip tekrar deneyin.",
+          "retryRejected": "Rexven yeniden deneme isteğini reddetti: {reason}"
+        },
+        "empty": "Henüz Rexven etiket batch'i yok"
       }
     },
     "refundRemake": {
@@ -3852,7 +3926,8 @@
         "products": "Ürünler",
         "sizes": "Bedenler",
         "colors": "Renkler",
-        "customizations": "Özelleştirme Eşleştirici"
+        "customizations": "Özelleştirme Eşleştirici",
+        "printTypes": "Baskı Tipi"
       },
       "customer": {
         "title": "Müşteri",
@@ -4720,6 +4795,49 @@
         "revokeSuccess": "API anahtarı iptal edildi.",
         "revokeError": "API anahtarı iptal edilemedi."
       }
+    },
+    "productPrintTypeMapper": {
+      "description": "Rexven siparişlerindeki \"Baskı Tipi\" değerini (ör. DTF) alt kategorilerinizle eşleştirin. Birden fazla alt kategorisi olan ürünlerde bu eşleşme olmadan sipariş havuzdan onaylanamaz. Eşleşme yoksa alt kategori adıyla birebir eşleşme denenir.",
+      "columns": {
+        "subCategory": "Alt Kategori",
+        "mapper": "Baskı Tipi Değerleri",
+        "status": "Durum",
+        "createdAt": "Oluşturulma",
+        "actions": "İşlemler"
+      },
+      "filters": {
+        "selectSubCategory": "Alt kategori seç",
+        "searchMapper": "Baskı tipi ara",
+        "selectStatus": "Durum seç"
+      },
+      "actions": {
+        "new": "Yeni Eşleştirme",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "confirmDeleteTitle": "Bu eşleştirmeyi silmek istiyor musunuz?",
+        "confirmDeleteOk": "Sil"
+      },
+      "messages": {
+        "createSuccess": "Eşleştirme oluşturuldu.",
+        "updateSuccess": "Eşleştirme güncellendi.",
+        "deleteSuccess": "Eşleştirme silindi.",
+        "deleteError": "Eşleştirme silinemedi.",
+        "operationFailed": "İşlem başarısız.",
+        "loadContextError": "Alt kategoriler yüklenemedi.",
+        "notRexvenCustomer": "Bu eşleştirmeler yalnızca Rexven entegrasyonu olan müşterilerde kullanılır."
+      },
+      "modal": {
+        "createTitle": "Baskı Tipi Eşleştirmesi Ekle",
+        "editTitle": "Eşleştirmeyi Düzenle: {name}",
+        "submitCreate": "Oluştur",
+        "submitUpdate": "Güncelle"
+      },
+      "table": {
+        "noData": "Henüz baskı tipi eşleştirmesi yok"
+      },
+      "common": {
+        "none": "—"
+      }
     }
   },
   "forms": {
@@ -5169,6 +5287,21 @@
         "product": "Ürün seçin",
         "color": "Renk seçin",
         "mapper": "Örn. Okyanus Mavisi"
+      }
+    },
+    "productPrintTypeMapper": {
+      "labels": {
+        "subCategory": "Alt Kategori",
+        "mapper": "Baskı Tipi Değerleri",
+        "status": "Durum"
+      },
+      "placeholders": {
+        "subCategory": "Alt kategori seçin",
+        "mapper": "Değer yazıp Enter'a basın (ör. DTF)"
+      },
+      "hints": {
+        "subCategory": "Rexven siparişi bu alt kategoriye yönlendirilir.",
+        "mapper": "Rexven'den gelen Baskı Tipi değerleri; büyük/küçük harf duyarsız birebir eşleşir."
       }
     }
   },

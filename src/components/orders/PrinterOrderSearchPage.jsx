@@ -26,6 +26,8 @@ import { useTranslations } from "@/i18n/use-translations";
 import { downloadOrderItemDesigns } from "@/utils/orderItemDesignDownloads";
 import GroupedOrderItemDesignPreview, {
   PositionDesignCard,
+  RexvenDesignPreview,
+  hasRexvenDesigns,
 } from "@/components/orders/OrderItemDesignPreview";
 import StatusTag from "@/components/ui/StatusTag";
 import PageHeader from "@/components/ui/PageHeader";
@@ -246,7 +248,9 @@ const OrderItemCard = ({
               {tDetail("designs.title")}
             </Typography.Text>
             <div className="mt-2">
-              {usesPersonalizedDesignGroups ? (
+              {hasRexvenDesigns(item) ? (
+                <RexvenDesignPreview item={item} />
+              ) : usesPersonalizedDesignGroups ? (
                 <GroupedOrderItemDesignPreview
                   item={item}
                   positionMap={positionMap}

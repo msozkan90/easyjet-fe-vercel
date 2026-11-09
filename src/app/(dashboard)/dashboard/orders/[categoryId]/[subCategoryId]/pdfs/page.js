@@ -1,8 +1,8 @@
 "use client";
 
-import OrdersPdfPage from "@/components/orders-pdf/OrdersPdfPage";
+import OrdersPdfWithRexvenTabs from "@/components/orders/rexven/OrdersPdfWithRexvenTabs";
 
 export default function SubCategoryOrdersPdfPage({ params }) {
   const { categoryId, subCategoryId } = params || {};
-  return <OrdersPdfPage categoryId={categoryId} subCategoryId={subCategoryId} />;
+  return <OrdersPdfWithRexvenTabs categoryId={categoryId} subCategoryId={subCategoryId} />;
 }

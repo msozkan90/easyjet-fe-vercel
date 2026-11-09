@@ -33,6 +33,8 @@ import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/utils/rbac";
 import GroupedOrderItemDesignPreview, {
   PositionDesignCard,
+  RexvenDesignPreview,
+  hasRexvenDesigns,
 } from "@/components/orders/OrderItemDesignPreview";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
@@ -716,7 +718,9 @@ const OrderItemCard = ({
       <div className="mt-6">
         <SectionHeader title={tDesign("designs.title")} />
         <div className="mt-4">
-          {usesPersonalizedDesignGroups ? (
+          {hasRexvenDesigns(item) ? (
+            <RexvenDesignPreview item={item} />
+          ) : usesPersonalizedDesignGroups ? (
             <GroupedOrderItemDesignPreview
               item={item}
               positionMap={positionMap}

@@ -8,6 +8,20 @@ const ALLOWED_HOSTS = new Set([
   'easypost-files.s3.us-west-2.amazonaws.com',
 ]);
 
+// Shared hosts are only allowed for specific buckets (path prefixes), e.g. Rexven designs/mockups.
+const ALLOWED_HOST_PATH_PREFIXES = new Map([
+  [
+    'storage.googleapis.com',
+    ['/rexven-storage-public/', '/rexven-cloudinary-backup/', '/rexven-pdfs/'],
+  ],
+]);
+
+const isAllowedTarget = (url) => {
+  if (ALLOWED_HOSTS.has(url.hostname)) return true;
+  const prefixes = ALLOWED_HOST_PATH_PREFIXES.get(url.hostname);
+  return Boolean(prefixes?.some((prefix) => url.pathname.startsWith(prefix)));
+};
+
 const getErrorResponse = (message, status = 400) =>
   Response.json({ success: false, message }, { status });
 
@@ -31,7 +45,7 @@ export async function GET(request) {
     return getErrorResponse('Only https URLs are allowed.');
   }
 
-  if (!ALLOWED_HOSTS.has(parsedUrl.hostname)) {
+  if (!isAllowedTarget(parsedUrl)) {
     return getErrorResponse('Host is not allowed.');
   }
 
