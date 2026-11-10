@@ -3881,6 +3881,52 @@
         "error": "Transfer order id could not be copied."
       },
       "rexvenLabels": {
+        "settings": {
+          "invalidWidth": "Machine width must be at least 1 inch.",
+          "title": "Label Download Settings",
+          "description": "Choose your label download settings. Track your files in the Rexven Labels tab.",
+          "submit": "Download Labels",
+          "cancel": "Cancel",
+          "required": "This field is required.",
+          "invalidSpacing": "Enter a nonnegative number, e.g. 0.25.",
+          "invalidDimension": "Enter a size greater than zero.",
+          "fields": {
+            "dtfMachineWidth": "DTF machine width (inches)",
+            "arrangementOption": "Arrangement",
+            "designSpacing": "Design spacing (inches)",
+            "labelOrder": "Label order",
+            "outputType": "Output type",
+            "mockupSize": "Mockup size",
+            "printType": "Print type",
+            "pageWidth": "Jig Size Width (in)",
+            "pageHeight": "Jig Size Height (in)"
+          },
+          "choices": {
+            "arrangementOption": {
+              "optimal": "Optimal",
+              "sequential-optimal": "Sequential optimal"
+            },
+            "labelOrder": {
+              "product-name": "Product name",
+              "order-number": "Order number",
+              "date": "Date",
+              "variant-color": "Variant color"
+            },
+            "outputType": {
+              "label_only": "Label only",
+              "order_info_only": "Order info only",
+              "label_and_order_info": "Label and order info"
+            },
+            "mockupSize": {
+              "normal": "Normal",
+              "large": "Large"
+            },
+            "printType": {
+              "normal": "Normal",
+              "ornament": "Ornament"
+            }
+          }
+        },
         "description": "PDFs and designs of Rexven orders are produced by Rexven. \"Download PDF\" sends a label request for Rexven orders; the resulting batches are listed here. The batch PDF button stays disabled until the file is ready.",
         "tabs": {
           "pdfs": "PDFs",
@@ -3917,6 +3963,7 @@
         },
         "actions": {
           "openPdf": "Open batch PDF",
+          "downloadZip": "Download ZIP",
           "pdfNotReady": "PDF is not ready yet",
           "retry": "Retry",
           "confirmRetry": "Resend the label request for the failed orders of this batch?",

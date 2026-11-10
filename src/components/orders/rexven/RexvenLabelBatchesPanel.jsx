@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import { FilePdfOutlined, ReloadOutlined, RedoOutlined } from "@ant-design/icons";
+import { DownloadOutlined, FilePdfOutlined, ReloadOutlined, RedoOutlined } from "@ant-design/icons";
 import { OrdersAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import { getRexvenLabelErrorReason } from "./useRexvenAwarePdfDownload";
@@ -58,6 +58,7 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [retryingId, setRetryingId] = useState(null);
+  const hasRetryableRows = rows.some((row) => RETRYABLE_STATUSES.has(row?.status));
 
   useEffect(() => {
     if (!customerId && customers[0]?.id) setCustomerId(customers[0].id);
@@ -187,7 +188,8 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
         title: t("columns.actions"),
         key: "actions",
         fixed: "right",
-        width: 200,
+        width: hasRetryableRows ? 240 : 112,
+        align: "right",
         render: (_, row) => (
           <Space>
             <Tooltip title={isReadyUrl(row?.batchPdfUrl) ? t("actions.openPdf") : t("actions.pdfNotReady")}>
@@ -199,6 +201,18 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
                 disabled={!isReadyUrl(row?.batchPdfUrl)}
               />
             </Tooltip>
+            {isReadyUrl(row?.batchImageUrl) ? (
+              <Tooltip title={t("actions.downloadZip")}>
+                <Button
+                  icon={<DownloadOutlined />}
+                  aria-label={t("actions.downloadZip")}
+                  href={row.batchImageUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              </Tooltip>
+            ) : null}
             {RETRYABLE_STATUSES.has(row?.status) ? (
               <Popconfirm
                 title={t("actions.confirmRetry")}
@@ -214,7 +228,7 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
         ),
       },
     ],
-    [handleRetry, retryingId, t],
+    [handleRetry, hasRetryableRows, retryingId, t],
   );
 
   const expandedRowRender = useCallback(
@@ -267,7 +281,7 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
   );
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+    <Space direction="vertical" size="middle" style={{ width: "100%", minWidth: 0, alignItems: "stretch" }}>
       <Alert type="info" showIcon message={t("description")} />
       <Space wrap>
         {customers.length > 1 ? (
@@ -290,8 +304,10 @@ export default function RexvenLabelBatchesPanel({ customers = [] }) {
         loading={loading}
         columns={columns}
         dataSource={rows}
+        style={{ width: "100%" }}
+        tableLayout="fixed"
         expandable={{ expandedRowRender }}
-        scroll={{ x: true }}
+        scroll={{ x: hasRetryableRows ? 1120 : 1000 }}
         locale={{ emptyText: t("empty") }}
         pagination={{
           current: page,

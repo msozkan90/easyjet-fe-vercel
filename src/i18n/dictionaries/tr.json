@@ -3661,6 +3661,52 @@
         "error": "Transfer sipariş ID kopyalanamadı."
       },
       "rexvenLabels": {
+        "settings": {
+          "invalidWidth": "Makine genişliği en az 1 inç olmalıdır.",
+          "title": "Etiket İndirme Ayarları",
+          "description": "Etiket indirme ayarlarınızı belirleyin. Dosyalarınızı Rexven Etiketleri sekmesinden takip edebilirsiniz.",
+          "submit": "Etiket İndir",
+          "cancel": "İptal",
+          "required": "Bu alan zorunludur.",
+          "invalidSpacing": "Sıfır veya pozitif bir sayı girin, ör. 0.25.",
+          "invalidDimension": "Sıfırdan büyük bir ölçü girin.",
+          "fields": {
+            "dtfMachineWidth": "DTF Makine Genişliği (inç)",
+            "arrangementOption": "Yerleşim Seçenekleri",
+            "designSpacing": "Tasarım Aralıkları / Boşluklar (inç)",
+            "labelOrder": "Etiketlerin Sırası",
+            "outputType": "Çıktı Türü",
+            "mockupSize": "Mockup Boyutu",
+            "printType": "Baskı tipi",
+            "pageWidth": "Jig Size Width (in)",
+            "pageHeight": "Jig Size Height (in)"
+          },
+          "choices": {
+            "arrangementOption": {
+              "optimal": "Optimal Dizim",
+              "sequential-optimal": "Sıralı Optimal Dizim"
+            },
+            "labelOrder": {
+              "product-name": "Ürün adı",
+              "order-number": "Sipariş numarası",
+              "date": "Tarih",
+              "variant-color": "Varyant rengi"
+            },
+            "outputType": {
+              "label_only": "Sadece Etiket",
+              "order_info_only": "Sadece Sipariş Bilgileri",
+              "label_and_order_info": "Etiket ve Sipariş Bilgileri"
+            },
+            "mockupSize": {
+              "normal": "Normal",
+              "large": "Büyük"
+            },
+            "printType": {
+              "normal": "Normal",
+              "ornament": "Ornament"
+            }
+          }
+        },
         "description": "Rexven siparişlerinin PDF'leri ve tasarımları Rexven tarafında üretilir. \"PDF İndir\" butonu Rexven siparişleri için etiket isteği gönderir; oluşan batch'ler burada listelenir. Batch PDF'i hazır olana kadar buton pasif kalır.",
         "tabs": {
           "pdfs": "PDF'ler",
@@ -3697,6 +3743,7 @@
         },
         "actions": {
           "openPdf": "Batch PDF'ini aç",
+          "downloadZip": "ZIP İndir",
           "pdfNotReady": "PDF henüz hazır değil",
           "retry": "Yeniden Dene",
           "confirmRetry": "Bu batch'in hatalı siparişleri için etiket isteği yeniden gönderilsin mi?",

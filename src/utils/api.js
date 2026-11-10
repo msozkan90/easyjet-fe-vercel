@@ -219,6 +219,7 @@ export const OrdersAPI = {
       fallbackFilename: "orders.pdf",
     }),
   // Rexven: download pdf kapsamındaki Rexven order'ları için etiket isteği + batch listesi
+  previewRexvenLabels: (payload) => api.post("/orders/rexven/labels/preview", payload),
   requestRexvenLabels: (payload) => api.post("/orders/rexven/labels", payload),
   rexvenLabelContext: () => api.get("/orders/rexven/label-context"),
   rexvenLabelBatches: (params) => api.get("/orders/rexven/label-batches", params),
