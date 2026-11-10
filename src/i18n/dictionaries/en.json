@@ -3382,7 +3382,8 @@
           "labelPrintPreparing": "Shipping label is being prepared for printing.",
           "labelPrintOpened": "Shipping label print dialog opened.",
           "labelPrintError": "Shipping label could not be printed.",
-          "remakeLabelRequired": "This company remake has no active shipping label. Purchase or upload a label to complete shipment."
+          "remakeLabelRequired": "This company remake has no active shipping label. Purchase or upload a label to complete shipment.",
+          "rexvenPickupFailed": "Rexven did not update the shipping status: {reason} The order status was not changed; scan again."
         },
         "scrap": {
           "title": "Record Fire / Scrap",

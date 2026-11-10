@@ -3162,7 +3162,8 @@
           "labelPrintPreparing": "Kargo etiketi yazdırma için hazırlanıyor.",
           "labelPrintOpened": "Kargo etiketi yazdırma penceresi açıldı.",
           "labelPrintError": "Kargo etiketi yazdırılamadı.",
-          "remakeLabelRequired": "Bu company remake siparişinde aktif label yok. Sevkiyatı tamamlamak için label satın alın veya yükleyin."
+          "remakeLabelRequired": "Bu company remake siparişinde aktif label yok. Sevkiyatı tamamlamak için label satın alın veya yükleyin.",
+          "rexvenPickupFailed": "Rexven kargo durumunu güncellemedi: {reason} Sipariş durumu değiştirilmedi, tekrar okutun."
         },
         "scrap": {
           "title": "Fire Kaydı Oluştur",

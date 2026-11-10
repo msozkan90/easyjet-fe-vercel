@@ -310,10 +310,18 @@ export default function ShippedOrderPrinterSearchPage() {
       } catch (error) {
         setOrder(null);
         setLoadedOrderNumber("");
-        message.error(
-          error?.response?.data?.error?.message ||
-            tDetail("messages.loadOrderError"),
-        );
+        const apiError = error?.response?.data?.error;
+        if (apiError?.code === "REXVEN_PICKUP_FAILED") {
+          // Rexven pickedUp isteği reddetti: sipariş durumu değiştirilmedi (rollback).
+          message.error(
+            tOrders("scanner.messages.rexvenPickupFailed", {
+              reason: apiError?.details?.rexven_message || apiError?.message || "",
+            }),
+            8,
+          );
+        } else {
+          message.error(apiError?.message || tDetail("messages.loadOrderError"));
+        }
       } finally {
         setSearching(false);
       }
