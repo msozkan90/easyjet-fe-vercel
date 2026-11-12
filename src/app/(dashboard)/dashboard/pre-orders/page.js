@@ -17,6 +17,8 @@ import RequireRole from "@/components/common/Access/RequireRole";
 import SelectionFloatActions from "@/components/common/actions/SelectionFloatActions";
 import CrudTable from "@/components/common/table/CrudTable";
 import ShipStationStoreStatusCard from "@/components/common/shipstation/ShipStationStoreStatusCard";
+import PageHeader from "@/components/ui/PageHeader";
+import CountTabs from "@/components/ui/CountTabs";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import {
   OrdersAPI,
@@ -58,6 +60,12 @@ const isRexvenRecord = (record) =>
   String(record?.source || "").toLowerCase() === REXVEN_SOURCE;
 const isRoutingBlocked = (record) =>
   Boolean(record?.requires_routing_sub_category) && !record?.routing_sub_category;
+// Rexven: pool kalemleri ürünün alt kategorisine (çoklu ise baskı tipine) göre tab'lanır.
+const ALL_SUB_CATEGORIES_TAB = "__all__";
+const SPECIAL_SUB_CATEGORY_TAB_LABELS = {
+  __unmatched__: "subCategoryTabs.unmatched",
+  __none__: "subCategoryTabs.none",
+};
 
 export default function OrdersPage({ mode = "pending" }) {
   const { message } = AntdApp.useApp();
@@ -75,7 +83,11 @@ export default function OrdersPage({ mode = "pending" }) {
   const [bulkCancelling, setBulkCancelling] = useState(false);
   const [rowActionLoading, setRowActionLoading] = useState({});
   const [isRexvenCustomer, setIsRexvenCustomer] = useState(false);
+  // Seçili tab { key, name }; kalemi kalmasa da adıyla görünmeye devam eder.
+  const [subCategoryTab, setSubCategoryTab] = useState({ key: ALL_SUB_CATEGORIES_TAB });
+  const [subCategoryTabs, setSubCategoryTabs] = useState(null);
   const user = useSelector((state) => state.auth.user);
+  const activeNav = useSelector((state) => state.ui.activeNav);
   const isCancelledView = mode === "cancelled";
 
   const t = useTranslations("dashboard.preOrders");
@@ -238,6 +250,11 @@ export default function OrdersPage({ mode = "pending" }) {
             } else {
               delete next.item_state;
             }
+            if (isRexvenCustomer) {
+              next.with_sub_category_tabs = true;
+            } else {
+              delete next.sub_category_tab;
+            }
             const orderDate = next.order_date;
             if (orderDate?.gte || orderDate?.lte) {
               next.date_from = orderDate?.gte;
@@ -249,9 +266,12 @@ export default function OrdersPage({ mode = "pending" }) {
             return next;
           },
         },
-        normalizeListAndMeta,
+        (response) => ({
+          ...normalizeListAndMeta(response),
+          subCategoryTabs: response?.meta?.sub_category_tabs,
+        }),
       ),
-    [isCancelledView],
+    [isCancelledView, isRexvenCustomer],
   );
 
   const reconcileSelectionOverrides = useCallback((records = []) => {
@@ -326,6 +346,9 @@ export default function OrdersPage({ mode = "pending" }) {
     async (params) => {
       const result = await baseRequest(params);
       reconcileSelectionOverrides(result?.list);
+      setSubCategoryTabs(
+        Array.isArray(result?.subCategoryTabs) ? result.subCategoryTabs : null,
+      );
       return result;
     },
     [baseRequest, reconcileSelectionOverrides],
@@ -1273,6 +1296,57 @@ export default function OrdersPage({ mode = "pending" }) {
     isCancelledView,
   ]);
 
+  // Bağlam (Rexven mi) ilk listeden sonra gelirse tab sayıları için listeyi yenile.
+  useEffect(() => {
+    if (isRexvenCustomer) tableRef.current?.reload?.();
+  }, [isRexvenCustomer]);
+
+  const handleSubCategoryTabChange = useCallback((key) => {
+    setSubCategoryTab({
+      key,
+      name: (subCategoryTabs || []).find((tab) => tab.key === key)?.name,
+    });
+    tableRef.current?.setFilters?.({
+      sub_category_tab: key === ALL_SUB_CATEGORIES_TAB ? undefined : key,
+    });
+    tableRef.current?.setPage?.(1);
+  }, [subCategoryTabs]);
+
+  const subCategoryTabItems = useMemo(() => {
+    if (!isRexvenCustomer || !subCategoryTabs) return [];
+    const labelOf = (tab) =>
+      SPECIAL_SUB_CATEGORY_TAB_LABELS[tab.key]
+        ? t(SPECIAL_SUB_CATEGORY_TAB_LABELS[tab.key])
+        : tab.name || t("common.none");
+    const tabs = subCategoryTabs.map((tab) => ({
+      key: tab.key,
+      title: labelOf(tab),
+      count: Number(tab.count) || 0,
+    }));
+    if (
+      subCategoryTab.key !== ALL_SUB_CATEGORIES_TAB &&
+      !tabs.some((tab) => tab.key === subCategoryTab.key)
+    ) {
+      tabs.push({ key: subCategoryTab.key, title: labelOf(subCategoryTab), count: 0 });
+    }
+    // Sunucu sayıları seçili tab'dan bağımsız hesaplar; toplam = "Tümü".
+    const total = subCategoryTabs.reduce(
+      (sum, tab) => sum + (Number(tab.count) || 0),
+      0,
+    );
+    return [
+      { key: ALL_SUB_CATEGORIES_TAB, title: t("subCategoryTabs.all"), count: total },
+      ...tabs,
+    ];
+  }, [isRexvenCustomer, subCategoryTab, subCategoryTabs, t]);
+
+  const pageTrail = (activeNav?.trail || []).filter(
+    (title) => title !== activeNav?.title,
+  );
+  const pageBreadcrumb = pageTrail.length
+    ? [...pageTrail.map((title) => ({ title })), { title: activeNav.title }]
+    : undefined;
+
   const fetchButtonLabel = pulling
     ? t("actions.fetching")
     : remainingSec > 0
@@ -1337,6 +1411,17 @@ export default function OrdersPage({ mode = "pending" }) {
 
   return (
     <RequireRole anyOfRoles={["companyAdmin", "customerAdmin"]}>
+      {isRexvenCustomer && activeNav?.title ? (
+        <>
+          <PageHeader title={activeNav.title} breadcrumb={pageBreadcrumb} />
+          <CountTabs
+            items={subCategoryTabItems}
+            activeKey={subCategoryTab.key}
+            onChange={handleSubCategoryTabChange}
+            ariaLabel={t("subCategoryTabs.ariaLabel")}
+          />
+        </>
+      ) : null}
       <CrudTable
         ref={tableRef}
         columns={columns}

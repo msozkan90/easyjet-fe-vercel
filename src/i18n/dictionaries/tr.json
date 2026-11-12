@@ -2062,6 +2062,12 @@
       }
     },
     "preOrders": {
+      "subCategoryTabs": {
+        "ariaLabel": "Alt kategoriler",
+        "all": "Tümü",
+        "unmatched": "Baskı tipi eşleşmedi",
+        "none": "Alt kategori yok"
+      },
       "columns": {
         "id": "Kimlik",
         "orderNumber": "Sipariş #",

@@ -2282,6 +2282,12 @@
       }
     },
     "preOrders": {
+      "subCategoryTabs": {
+        "ariaLabel": "Sub categories",
+        "all": "All",
+        "unmatched": "Print type unmatched",
+        "none": "No sub category"
+      },
       "columns": {
         "id": "ID",
         "orderNumber": "Order #",
