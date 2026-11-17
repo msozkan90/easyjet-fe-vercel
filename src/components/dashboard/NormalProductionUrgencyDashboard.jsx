@@ -101,7 +101,10 @@ export default function NormalProductionUrgencyDashboard() {
   const columnsBuilder = useCallback((columns) => {
     const asOf = dayjs(data?.meta?.generated_at);
     const deadlineHours = 72;
-    const productionIndex = columns.findIndex((column) => column.dataIndex === "production_at");
+    const pdfIndex = columns.findIndex((column) => column.dataIndex === "pdf_at");
+    const timingIndex = pdfIndex >= 0
+      ? pdfIndex
+      : columns.findIndex((column) => column.dataIndex === "production_at");
     const timingColumns = [
       {
         title: t("table.elapsed"),
@@ -127,10 +130,10 @@ export default function NormalProductionUrgencyDashboard() {
         },
       },
     ];
-    const withTimings = productionIndex < 0 ? [...columns, ...timingColumns] : [
-      ...columns.slice(0, productionIndex + 1),
+    const withTimings = timingIndex < 0 ? [...columns, ...timingColumns] : [
+      ...columns.slice(0, timingIndex + 1),
       ...timingColumns,
-      ...columns.slice(productionIndex + 1),
+      ...columns.slice(timingIndex + 1),
     ];
     return [
       ...withTimings,
@@ -245,6 +248,7 @@ export default function NormalProductionUrgencyDashboard() {
             listApiFn={listApiFn}
             allowedStatuses={allowedStatuses}
             showProductionAt
+            showPdfAt
             columnsBuilder={columnsBuilder}
             requireRoles={["companyAdmin", "companyCompletedWorker", "companyShipmentWorker"]}
             productListFetcher={fetchProducts}

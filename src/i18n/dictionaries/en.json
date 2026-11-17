@@ -2437,6 +2437,7 @@
         "localPickup": "Local Pickup",
         "orderDate": "Order Date",
         "productionAt": "Production Date",
+        "pdfAt": "PDF Date",
         "hasDesign": "Design",
         "poolStatus": "Pre-order Status",
         "designChecklist": "Design Check",
@@ -2463,6 +2464,7 @@
         "selectColor": "Select color",
         "orderDate": "Order date",
         "orderDateRange": "Order date range",
+        "pdfDateRange": "PDF date range",
         "singleDate": "Single date",
         "dateRange": "Date range",
         "clearDate": "Clear date filter"

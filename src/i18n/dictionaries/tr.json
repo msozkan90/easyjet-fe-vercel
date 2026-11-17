@@ -2217,6 +2217,7 @@
         "localPickup": "Local Pickup",
         "orderDate": "Sipariş Tarihi",
         "productionAt": "Üretim Tarihi",
+        "pdfAt": "PDF Tarihi",
         "hasDesign": "Tasarım",
         "poolStatus": "Pre-order Durumu",
         "designChecklist": "Tasarım Kontrolü",
@@ -2243,6 +2244,7 @@
         "selectColor": "Renk seçin",
         "orderDate": "Sipariş tarihi",
         "orderDateRange": "Sipariş tarihi aralığı",
+        "pdfDateRange": "PDF tarihi aralığı",
         "singleDate": "Tek tarih",
         "dateRange": "Tarih aralığı",
         "clearDate": "Tarih filtresini temizle"
