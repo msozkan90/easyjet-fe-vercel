@@ -61,6 +61,7 @@ export default function OrdersStatusListPage({
   affilated,
   showCustomerColumn = false,
   showProductionAt = false,
+  showPdfAt = false,
   enableProductionNotes = true,
   toolbarRight,
   defaultSort = [{ field: "order_date", direction: "asc" }],
@@ -685,6 +686,20 @@ export default function OrdersStatusListPage({
             },
           ]
         : []),
+      ...(showPdfAt
+        ? [
+            {
+              title: t("columns.pdfAt"),
+              dataIndex: "pdf_at",
+              sorter: true,
+              filter: {
+                type: "dateRange",
+                placeholder: t("filters.pdfDateRange"),
+              },
+              render: (value) => formatDateTime(value),
+            },
+          ]
+        : []),
       ...(showDetailAction
         ? [
             {
@@ -805,6 +820,7 @@ export default function OrdersStatusListPage({
     skuFilterKey,
     shouldShowCustomerColumn,
     showProductionAt,
+    showPdfAt,
     t,
     tCommonActions,
   ]);

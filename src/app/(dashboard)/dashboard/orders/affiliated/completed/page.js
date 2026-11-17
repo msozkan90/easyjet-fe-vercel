@@ -10,6 +10,7 @@ export default function AffiliatedCompletedOrdersPage() {
       allowedStatuses={["completed"]}
       enableItemCancel
       showProductionAt
+      showPdfAt
       defaultSort={[
         { field: "production_at", direction: "asc" },
         { field: "id", direction: "asc" },
