@@ -2875,20 +2875,43 @@
             "manual_review": "Manuel inceleme gerekli",
             "sync_pending": "Gönderi senkronizasyonu bekleniyor",
             "sync_retry": "Gönderi senkronizasyonu yeniden denenecek",
-            "sync_manual_review": "Gönderi senkronizasyonu inceleme bekliyor"
+            "sync_manual_review": "Gönderi senkronizasyonu inceleme bekliyor",
+            "purchase_ready": "Etiket kurtarma için hazır",
+            "purchase_review": "Destek incelemesi gerekli"
           },
           "fields": {
             "createdAt": "Başlangıç Tarihi",
             "retryCount": "Deneme Sayısı",
             "nextRetryAt": "Sonraki Deneme",
-            "lastError": "Son Hata"
+            "lastError": "Son Hata",
+            "outcome": "Sağlayıcının doğruladığı sonuç",
+            "providerReference": "Sağlayıcı doğrulama referansı",
+            "idempotency_key": "Alım deneme anahtarı",
+            "provider_label_id": "Sağlayıcı etiket kimliği",
+            "provider_shipment_id": "Sağlayıcı gönderi kimliği",
+            "provider_rate_id": "Sağlayıcı fiyat kimliği"
           },
           "actions": {
-            "retry": "Etiket iptalini yeniden dene"
+            "retry": "Etiket iptalini yeniden dene",
+            "resume": "Devam et",
+            "resolve": "Sağlayıcı onayıyla kapat"
           },
           "messages": {
             "retrySuccess": "Etiket iptali yeniden başlatıldı.",
-            "retryError": "Etiket iptali yeniden başlatılamadı."
+            "retryError": "Etiket iptali yeniden başlatılamadı.",
+            "resumeSuccess": "Etiket kurtarma tamamlandı.",
+            "resumeError": "Etiket alımına devam edilemedi.",
+            "resolveSuccess": "Etiket kurtarma kapatıldı.",
+            "resolveError": "Etiket kurtarma kapatılamadı."
+          },
+          "purchase": {
+            "checking": "Etiket alımı doğrulanıyor",
+            "support": "Etiket alımı destek incelemesinde",
+            "retry": "Etiket alınmadı. Tekrar deneyebilirsiniz.",
+            "resume": "Önceki etiket alımına devam edebilirsiniz.",
+            "resumeDescription": "İlk alım başarısız olduysa devam etmek etiketi satın alabilir.",
+            "notPurchased": "Etiket satın alınmadı",
+            "voided": "Etiket iptal edildi"
           }
         },
         "scrap": {
@@ -3080,6 +3103,7 @@
           "grandTotal": "Genel toplam"
         },
         "actions": {
+          "retryPurchase": "Tekrar dene",
           "sendToProduction": "Üretime Gönder",
           "sendSuccess": "Sipariş üretime gönderildi.",
           "sendError": "Sipariş üretime gönderilemedi.",

@@ -3095,20 +3095,43 @@
             "manual_review": "Manual review required",
             "sync_pending": "Shipment sync pending",
             "sync_retry": "Shipment sync will be retried",
-            "sync_manual_review": "Shipment sync requires review"
+            "sync_manual_review": "Shipment sync requires review",
+            "purchase_ready": "Label ready for recovery",
+            "purchase_review": "Support review required"
           },
           "fields": {
             "createdAt": "Started At",
             "retryCount": "Retry Count",
             "nextRetryAt": "Next Retry",
-            "lastError": "Last Error"
+            "lastError": "Last Error",
+            "outcome": "Provider-confirmed outcome",
+            "providerReference": "Provider confirmation reference",
+            "idempotency_key": "Idempotency key",
+            "provider_label_id": "Provider label ID",
+            "provider_shipment_id": "Provider shipment ID",
+            "provider_rate_id": "Provider rate ID"
           },
           "actions": {
-            "retry": "Retry label void"
+            "retry": "Retry label void",
+            "resume": "Continue",
+            "resolve": "Resolve with provider confirmation"
           },
           "messages": {
             "retrySuccess": "Label void retry started.",
-            "retryError": "Unable to retry label void."
+            "retryError": "Unable to retry label void.",
+            "resumeSuccess": "Label recovery completed.",
+            "resumeError": "Unable to continue the label purchase.",
+            "resolveSuccess": "Label recovery resolved.",
+            "resolveError": "Unable to resolve label recovery."
+          },
+          "purchase": {
+            "checking": "Verifying the label purchase",
+            "support": "Label purchase needs support review",
+            "retry": "No label was purchased. You can try again.",
+            "resume": "You can continue the previous label attempt.",
+            "resumeDescription": "If the first purchase failed, continuing can purchase the label.",
+            "notPurchased": "No label was purchased",
+            "voided": "The label was voided"
           }
         },
         "scrap": {
@@ -3300,6 +3323,7 @@
           "grandTotal": "Grand total"
         },
         "actions": {
+          "retryPurchase": "Try again",
           "sendToProduction": "Send to Production",
           "sendSuccess": "Order sent to production.",
           "sendError": "Order could not be sent to production.",

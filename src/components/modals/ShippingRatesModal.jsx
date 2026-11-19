@@ -23,6 +23,11 @@ import {
   ReloadOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
+import {
+  labelRecoveryFromError,
+  PurchaseRecoveryNotice,
+  useOrderPurchaseRecovery,
+} from "@/components/orders/PurchaseRecovery";
 import { GuardedPreviewImage } from "@/components/common/media/ImagePreviewGate";
 import {
   NestShipperAPI,
@@ -304,6 +309,15 @@ const ShippingRatesModal = ({
 
   const orderId = record?.order?.id ?? record?.order_id;
   const isApproval = Boolean(approval);
+  const [recovery, setRecovery] = useOrderPurchaseRecovery(
+    open && !isApproval,
+    record?.order?.order_number ?? record?.order_number,
+  );
+  const recoveryAction = recovery?.recovery_action;
+  const recoveryActive = Boolean(recoveryAction && recoveryAction !== "retry");
+  useEffect(() => {
+    if (recoveryAction === "retry") setProductionRequestKey(createIdempotencyKey());
+  }, [recovery, recoveryAction]);
   const quoteDefaults = useMemo(() => createQuoteDefaults(record), [record]);
   const requestedShippingService = useMemo(
     () => getRequestedShippingService(record),
@@ -660,8 +674,41 @@ const ShippingRatesModal = ({
     [message, tShipping],
   );
 
+  const finishProduction = useCallback(async () => {
+    message.success(tShipping("actions.sendSuccess"));
+    try {
+      const response = await WalletAPI.getBalance();
+      const balance = extractBalanceValue(response);
+      if (balance !== null) dispatch(setBalance(balance));
+    } catch {}
+    onSendSuccess();
+  }, [dispatch, message, onSendSuccess, tShipping]);
+
+  const handleProductionError = useCallback((error) => {
+    const details = !isApproval && labelRecoveryFromError(error);
+    if (details) {
+      setRecovery(details.recovery_action === "retry"
+        ? { ...details, message: error?.response?.data?.error?.message }
+        : details);
+    } else {
+      message.error(error?.response?.data?.error?.message || tShipping("actions.sendError"));
+    }
+  }, [isApproval, message, setRecovery, tShipping]);
+
+  const resumeProduction = async () => {
+    setSendingProduction(true);
+    try {
+      await OrdersAPI.resumeProductionLabelRecovery(recovery.attempt_id);
+      await finishProduction();
+    } catch (error) {
+      handleProductionError(error);
+    } finally {
+      setSendingProduction(false);
+    }
+  };
+
   const handleSendToProduction = useCallback(async () => {
-    if (!orderId) return;
+    if (!orderId || recoveryActive) return;
     if (!isReuseMode && isUploadMode && !selectedLabelFile) {
       message.warning(tShipping("upload.required"));
       return;
@@ -765,21 +812,9 @@ const ShippingRatesModal = ({
         };
         await OrdersAPI.sendToProduction(payload);
       }
-      message.success(tShipping("actions.sendSuccess"));
-      try {
-        const walletResp = await WalletAPI.getBalance();
-        const balance = extractBalanceValue(walletResp);
-        if (balance !== null) {
-          dispatch(setBalance(balance));
-        }
-      } catch {
-        // Bakiye çekilemezse sessizce devam et
-      }
-      onSendSuccess();
+      await finishProduction();
     } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message || tShipping("actions.sendError"),
-      );
+      handleProductionError(error);
     } finally {
       setSendingProduction(false);
     }
@@ -803,6 +838,9 @@ const ShippingRatesModal = ({
     orderItemIds,
     targetShipmentId,
     productionRequestKey,
+    recoveryActive,
+    finishProduction,
+    handleProductionError,
     dispatch,
     onClose,
     onSendSuccess,
@@ -863,15 +901,15 @@ const ShippingRatesModal = ({
           )}
           cancelText={tCommonActions("cancel")}
           onConfirm={handleSendToProduction}
-          disabled={!canSendToProduction || sendingProduction}
+          disabled={recoveryActive || !canSendToProduction || sendingProduction}
         >
           <Button
             type="primary"
-            disabled={!canSendToProduction || sendingProduction}
+            disabled={recoveryActive || !canSendToProduction || sendingProduction}
             loading={sendingProduction}
           >
             {tShipping(
-              isApproval ? "actions.approveWithLabel" : "actions.sendToProduction",
+              recoveryAction === "retry" ? "actions.retryPurchase" : isApproval ? "actions.approveWithLabel" : "actions.sendToProduction",
             )}
           </Button>
         </Popconfirm>,
@@ -884,6 +922,7 @@ const ShippingRatesModal = ({
         <Empty description={tShipping("empty")} />
       ) : (
         <div className="space-y-6">
+          <PurchaseRecoveryNotice recovery={recovery} loading={sendingProduction} onResume={resumeProduction} />
           <div className="rounded-xl border border-line bg-surface p-6">
             {requestedShippingService ? (
               <div className="mb-4">
