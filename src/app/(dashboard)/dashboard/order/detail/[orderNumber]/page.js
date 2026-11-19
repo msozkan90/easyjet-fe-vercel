@@ -21,6 +21,7 @@ import {
   Typography,
   Steps,
 } from "antd";
+import { PurchaseRecoveryNotice } from "@/components/orders/PurchaseRecovery";
 import OrderNotesCard from "@/components/orders/OrderNotesCard";
 import EntityAuditTimeline from "@/components/audit/EntityAuditTimeline";
 import RequireRole from "@/components/common/Access/RequireRole";
@@ -411,6 +412,8 @@ const ProductionRecoveryCard = ({
   canRetry,
   retrying,
   onRetry,
+  onResume,
+  onResolve,
 }) => {
   const isSyncRecovery =
     recovery?.status === "committed" &&
@@ -429,6 +432,13 @@ const ProductionRecoveryCard = ({
     : recovery?.next_retry_at;
   const canRetryVoid =
     canRetry && recovery?.status === "manual_review" && !isSyncRecovery;
+  const showPurchaseAction = recovery?.blocks_order && [
+    "purchase_unknown", "purchase_ready", "purchase_review",
+  ].includes(recovery.status);
+  const canResolve = canRetry && recovery?.blocks_order &&
+    (recovery.recovery_action === "support" || recovery.status === "purchase_unknown");
+  const providerIdentifiers = Object.entries(recovery?.provider_identifiers ?? {})
+    .filter(([, value]) => value);
 
   return (
     <Card
@@ -472,6 +482,29 @@ const ProductionRecoveryCard = ({
           />
         ) : null}
       </div>
+      {showPurchaseAction ? (
+        <div className="mt-4">
+          <PurchaseRecoveryNotice
+            recovery={recovery}
+            loading={retrying}
+            onResume={onResume ? () => onResume(recovery) : undefined}
+          />
+        </div>
+      ) : null}
+      {canResolve ? (
+        <div className="mt-4 flex flex-col gap-2">
+          {providerIdentifiers.map(([field, value]) => (
+            <InfoField
+              key={field}
+              label={tDesign(`labelRecovery.fields.${field}`)}
+              value={<Typography.Text copyable>{value}</Typography.Text>}
+            />
+          ))}
+          <Button className="self-start" onClick={() => onResolve(recovery)}>
+            {tDesign("labelRecovery.actions.resolve")}
+          </Button>
+        </div>
+      ) : null}
       {canRetryVoid ? (
         <div className="mt-4">
           <Button danger loading={retrying} onClick={() => onRetry?.(recovery)}>
@@ -765,6 +798,9 @@ export default function OrderDetailPage() {
   const [positionsLoading, setPositionsLoading] = useState(false);
   const [voidingLabelId, setVoidingLabelId] = useState(null);
   const [retryingRecoveryId, setRetryingRecoveryId] = useState(null);
+  const [resolvingRecovery, setResolvingRecovery] = useState(null);
+  const [resolving, setResolving] = useState(false);
+  const [resolutionForm] = Form.useForm();
   const [scrapModalOpen, setScrapModalOpen] = useState(false);
   const [recordingScrap, setRecordingScrap] = useState(false);
 
@@ -842,21 +878,59 @@ export default function OrderDetailPage() {
     [orderDetail],
   );
 
-  const loadOrderDetail = useCallback(async () => {
+  const loadOrderDetail = useCallback(async (silent = false) => {
     if (!orderNumber) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const response = await OrdersAPI.orderDetail(orderNumber);
       setOrderDetail(response?.data || null);
     } catch (error) {
-      message.error(
-        error?.response?.data?.error?.message ||
-          tDesign("messages.loadOrderError"),
+      if (!silent) message.error(
+        error?.response?.data?.error?.message || tDesign("messages.loadOrderError"),
       );
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [message, orderNumber, tDesign]);
+
+  const hasPendingPurchase = labelRecoveries.some(
+    (attempt) => attempt.blocks_order && attempt.recovery_action === "checking",
+  );
+  useEffect(() => {
+    if (!hasPendingPurchase) return;
+    const interval = setInterval(() => void loadOrderDetail(true), 10_000);
+    return () => clearInterval(interval);
+  }, [hasPendingPurchase, loadOrderDetail]);
+
+  const resumeRecovery = async (recovery) => {
+    setRetryingRecoveryId(recovery.id);
+    try {
+      await OrdersAPI.resumeProductionLabelRecovery(recovery.id);
+      message.success(tDesign("labelRecovery.messages.resumeSuccess"));
+    } catch (error) {
+      if (error?.response?.data?.error?.code !== "LABEL_RECOVERY_PENDING") {
+        message.error(error?.response?.data?.error?.message || tDesign("labelRecovery.messages.resumeError"));
+      }
+    } finally {
+      await loadOrderDetail(true);
+      setRetryingRecoveryId(null);
+    }
+  };
+
+  const resolveRecovery = async (values) => {
+    if (!resolvingRecovery) return;
+    setResolving(true);
+    try {
+      await OrdersAPI.resolveProductionLabelRecovery(resolvingRecovery.id, values);
+      message.success(tDesign("labelRecovery.messages.resolveSuccess"));
+      setResolvingRecovery(null);
+      await loadOrderDetail(true);
+    } catch (error) {
+      message.error(error?.response?.data?.error?.message || tDesign("labelRecovery.messages.resolveError"));
+    } finally {
+      setResolving(false);
+    }
+  };
 
   const handleVoidLabel = useCallback(
     async (label) => {
@@ -1427,6 +1501,14 @@ export default function OrderDetailPage() {
                     canRetry={canRetryLabelRecovery}
                     retrying={retryingRecoveryId === String(recovery?.id || "")}
                     onRetry={handleRetryLabelRecovery}
+                    onResume={hasAnyRole(user, recovery.purchase_flow === "remake"
+                      ? ["companyadmin", "companyshipmentworker"]
+                      : ["systemadmin", "companyadmin", "partneradmin", "customeradmin"])
+                      ? resumeRecovery : undefined}
+                    onResolve={(attempt) => {
+                      resolutionForm.resetFields();
+                      setResolvingRecovery(attempt);
+                    }}
                   />
                 ))}
               </div>
@@ -1510,6 +1592,28 @@ export default function OrderDetailPage() {
         "partnerAdmin",
       ]}
     >
+      <Modal
+        open={Boolean(resolvingRecovery)}
+        title={tDesign("labelRecovery.actions.resolve")}
+        okText={tDesign("labelRecovery.actions.resolve")}
+        confirmLoading={resolving}
+        onOk={() => resolutionForm.submit()}
+        onCancel={() => setResolvingRecovery(null)}
+      >
+        <Form form={resolutionForm} layout="vertical" onFinish={resolveRecovery}>
+          <Form.Item name="outcome" label={tDesign("labelRecovery.fields.outcome")} rules={[{ required: true }]}>
+            <Select options={[
+              ...(resolvingRecovery?.provider_identifiers?.provider_label_id ? [] : [
+                { value: "not_purchased", label: tDesign("labelRecovery.purchase.notPurchased") },
+              ]),
+              { value: "voided", label: tDesign("labelRecovery.purchase.voided") },
+            ]} />
+          </Form.Item>
+          <Form.Item name="reference" label={tDesign("labelRecovery.fields.providerReference")} rules={[{ required: true, whitespace: true }]}>
+            <Input maxLength={500} />
+          </Form.Item>
+        </Form>
+      </Modal>
       <div>
         {!orderNumber ? (
           <Alert

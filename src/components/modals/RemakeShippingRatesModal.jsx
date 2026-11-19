@@ -19,6 +19,11 @@ import {
   Upload,
 } from "antd";
 import { InboxOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  labelRecoveryFromError,
+  PurchaseRecoveryNotice,
+  useOrderPurchaseRecovery,
+} from "@/components/orders/PurchaseRecovery";
 import { NestShipperAPI, OrdersAPI, ShipStationAPI, WalletAPI } from "@/utils/api";
 import { setBalance } from "@/redux/features/balanceSlice";
 import { useTranslations } from "@/i18n/use-translations";
@@ -64,6 +69,12 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
   const [loadingRates, setLoadingRates] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requestKey, setRequestKey] = useState(idempotencyKey);
+  const [recovery, setRecovery] = useOrderPurchaseRecovery(open, order?.order_number);
+  const recoveryAction = recovery?.recovery_action;
+  const recoveryActive = Boolean(recoveryAction && recoveryAction !== "retry");
+  useEffect(() => {
+    if (recoveryAction === "retry") setRequestKey(idempotencyKey());
+  }, [recovery, recoveryAction]);
 
   const parent = user?.parent_entity || {};
   const company = parent?.company || user?.entity || {};
@@ -169,12 +180,14 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
     }
   }, [activeTab, getMeasurements, message, order, t]);
 
-  const submit = useCallback(async () => {
-    if (!order?.id) return;
+  const submit = async (resume = false) => {
+    if (!order?.id || (recoveryActive && !resume)) return;
     setSubmitting(true);
     try {
       let response;
-      if (mode === "upload") {
+      if (resume) {
+        response = await OrdersAPI.resumeProductionLabelRecovery(recovery.attempt_id);
+      } else if (mode === "upload") {
         const file = labelFiles[0]?.originFileObj || labelFiles[0];
         if (!file) {
           message.warning(t("upload.required"));
@@ -217,11 +230,18 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
       message.success(t("actions.labelCreateSuccess"));
       onCreated?.(response?.data || {});
     } catch (error) {
-      message.error(error?.response?.data?.error?.message || t("actions.labelCreateError"));
+      const details = labelRecoveryFromError(error);
+      if (details) {
+        setRecovery(details.recovery_action === "retry"
+          ? { ...details, message: error?.response?.data?.error?.message }
+          : details);
+      } else {
+        message.error(error?.response?.data?.error?.message || t("actions.labelCreateError"));
+      }
     } finally {
       setSubmitting(false);
     }
-  }, [activeTab, dispatch, getMeasurements, labelFiles, message, mode, onCreated, order, requestKey, selectedRate, t]);
+  };
 
   return (
     <Modal
@@ -235,14 +255,15 @@ export default function RemakeShippingRatesModal({ open, order, onClose, onCreat
           key="submit"
           type="primary"
           loading={submitting}
-          disabled={mode === "upload" ? !labelFiles.length : !selectedRate}
+          disabled={recoveryActive || (mode === "upload" ? !labelFiles.length : !selectedRate)}
           onClick={() => void submit()}
         >
-          {t("actions.createShipmentLabel")}
+          {t(recoveryAction === "retry" ? "actions.retryPurchase" : "actions.createShipmentLabel")}
         </Button>,
       ]}
     >
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
+        <PurchaseRecoveryNotice recovery={recovery} loading={submitting} onResume={() => void submit(true)} />
         <Card size="small" title={`${t("items.orderNumber")}: ${order?.order_number || "-"}`}>
           <Typography.Text>{address.join(" · ") || "-"}</Typography.Text>
         </Card>

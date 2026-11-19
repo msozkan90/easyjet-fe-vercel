@@ -186,7 +186,7 @@ export const OrdersAPI = {
 
   //order Details
   details: (id) => api.get(`/orders/items/${id}`),
-  orderDetail: (orderNumber) => api.get(`/orders/${orderNumber}`),
+  orderDetail: (orderNumber) => api.get(`/orders/${encodeURIComponent(orderNumber)}`),
   report: (payload) => api.post("/orders/report", payload),
   reportDayDetail: (payload) => api.post("/orders/report/day-detail", payload),
   reportExport: (payload) => fetchBlobFilePost('/orders/report/export', {
@@ -234,6 +234,10 @@ export const OrdersAPI = {
 
   // Label
   voidLabel: (data) => api.post("/orders/labels/void", data),
+  resumeProductionLabelRecovery: (id) =>
+    api.post(`/orders/production-label-recoveries/${encodeURIComponent(id)}/resume`),
+  resolveProductionLabelRecovery: (id, data) =>
+    api.post(`/orders/production-label-recoveries/${encodeURIComponent(id)}/resolve`, data),
   retryProductionLabelRecovery: (id) =>
     api.post(`/orders/production-label-recoveries/${id}/retry`),
 };
