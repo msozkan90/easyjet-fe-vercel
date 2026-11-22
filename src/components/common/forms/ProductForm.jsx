@@ -18,6 +18,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useTranslations } from "@/i18n/use-translations";
 import { SubCategoriesAPI } from "@/utils/api";
 import { fetchGenericList } from "@/utils/fetchGenericList";
+import { categoryRequiresSubCategory } from "@/utils/categorySubCategory";
 import FormActions from "@/components/ui/FormActions";
 import { useSubmitHandler } from "@/hooks/useSubmitHandler";
 
@@ -77,6 +78,7 @@ export default function ProductForm({
     const match = categories.find((item) => item.id === categoryId);
     return match?.name ?? "";
   }, [categories, categoryId]);
+  const requiresSubCategory = categoryRequiresSubCategory(categoryLabel);
 
   const normalizeItemResponse = useCallback((resp) => {
     const payload = resp?.data ?? resp;
@@ -182,7 +184,7 @@ export default function ProductForm({
         const resp = await SubCategoriesAPI.create({
           name: trimmed,
           category_id: categoryId,
-          optional: optional ?? false,
+          optional: !requiresSubCategory && Boolean(optional),
         });
         const item = normalizeItemResponse(resp);
         if (!item?.id) {
@@ -212,6 +214,7 @@ export default function ProductForm({
       form,
       messageApi,
       normalizeItemResponse,
+      requiresSubCategory,
       selectSubCategory,
       subCategories,
       tForm,
@@ -365,7 +368,7 @@ export default function ProductForm({
       if (!editingSubCategory) {
         const created = await handleCreateSubCategory(trimmed, {
           resetSearch: false,
-          optional: values?.optional ?? false,
+          optional: !requiresSubCategory && Boolean(values?.optional),
         });
         if (!created) return;
         manageForm.resetFields();
@@ -404,12 +407,12 @@ export default function ProductForm({
         const resp = await SubCategoriesAPI.update(editingSubCategory.id, {
           name: trimmed,
           category_id: categoryId,
-          optional: values?.optional ?? false,
+          optional: !requiresSubCategory && Boolean(values?.optional),
         });
         const updated = normalizeItemResponse(resp) ?? {
           ...editingSubCategory,
           name: trimmed,
-          optional: values?.optional ?? false,
+          optional: !requiresSubCategory && Boolean(values?.optional),
         };
         setSubCategories((prev) => {
           const list = Array.isArray(prev) ? [...prev] : [];
@@ -443,6 +446,7 @@ export default function ProductForm({
     manageForm,
     messageApi,
     normalizeItemResponse,
+    requiresSubCategory,
     editingSubCategory,
     selectSubCategory,
     subCategories,
@@ -502,6 +506,14 @@ export default function ProductForm({
         <Form.Item
           name={subCategoryFieldName}
           label={tForm("labels.subCategory")}
+          rules={[
+            {
+              required: requiresSubCategory,
+              message: tCommon("validation.required", {
+                field: tForm("labels.subCategory"),
+              }),
+            },
+          ]}
         >
           <Select
             mode={multipleSubCategories ? "multiple" : undefined}
@@ -547,22 +559,26 @@ export default function ProductForm({
                       ? tForm("helpers.subCategoryHint")
                       : tForm("helpers.subCategoryHintNoCategory")}
                   </Typography.Text>
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <Typography.Text style={{ fontSize: 12 }}>
-                      {tForm("labels.subCategoryOptional")}
-                    </Typography.Text>
-                    <Switch
-                      size="small"
-                      checked={createOptional}
-                      onChange={setCreateOptional}
-                    />
-                  </div>
-                  <Typography.Text
-                    type="secondary"
-                    style={{ fontSize: 12, display: "block", marginTop: 4 }}
-                  >
-                    {tForm("helpers.subCategoryOptionalHint")}
-                  </Typography.Text>
+                  {!requiresSubCategory && (
+                    <>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <Typography.Text style={{ fontSize: 12 }}>
+                          {tForm("labels.subCategoryOptional")}
+                        </Typography.Text>
+                        <Switch
+                          size="small"
+                          checked={createOptional}
+                          onChange={setCreateOptional}
+                        />
+                      </div>
+                      <Typography.Text
+                        type="secondary"
+                        style={{ fontSize: 12, display: "block", marginTop: 4 }}
+                      >
+                        {tForm("helpers.subCategoryOptionalHint")}
+                      </Typography.Text>
+                    </>
+                  )}
                 </div>
                 <div className="px-2 pb-2 space-y-2">
                   <Button
@@ -665,13 +681,15 @@ export default function ProductForm({
           >
             <Input placeholder={tForm("placeholders.subCategory")} />
           </Form.Item>
-          <Form.Item
-            name="optional"
-            valuePropName="checked"
-            label={tForm("labels.subCategoryOptional")}
-          >
-            <Switch />
-          </Form.Item>
+          {!requiresSubCategory && (
+            <Form.Item
+              name="optional"
+              valuePropName="checked"
+              label={tForm("labels.subCategoryOptional")}
+            >
+              <Switch />
+            </Form.Item>
+          )}
           <Space className="w-full justify-end">
             <Button onClick={handleCloseManageModal}>
               {tCommon("buttons.cancel")}
@@ -695,7 +713,7 @@ export default function ProductForm({
               >
                 <Space size="small">
                   <Typography.Text>{item.name}</Typography.Text>
-                  {item.optional ? (
+                  {item.optional && !requiresSubCategory ? (
                     <Tag color="blue">{tForm("labels.optional")}</Tag>
                   ) : null}
                 </Space>

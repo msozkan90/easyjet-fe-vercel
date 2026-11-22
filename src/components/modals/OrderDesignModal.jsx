@@ -30,6 +30,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useUnsavedChangesPrompt } from "@/hooks/useUnsavedChangesPrompt";
 import { extractUploadFileList } from "@/utils/formDataHelpers";
 import { extractDesignAreaFromRecord } from "@/utils/designArea";
+import { categoryRequiresSubCategory } from "@/utils/categorySubCategory";
 import {
   GuardedPreviewImage,
   isFilePreviewAllowed,
@@ -470,19 +471,23 @@ export default function OrderDesignModal({
         label: item.name || `#${item.id}`,
       }));
   }, [orderDetail]);
+  const productCategory = orderDetail?.product?.category?.name;
+  const categoryRequiresRoute = categoryRequiresSubCategory(productCategory);
   const requiresProductSubCategoryRouting =
-    productSubCategoryOptions.length > 1;
+    categoryRequiresRoute || productSubCategoryOptions.length > 1;
+  const selectedRouteId =
+    categoryRequiresRoute && productSubCategoryOptions.length === 1
+      ? productSubCategoryOptions[0].value
+      : routingSubCategoryId;
   const hasValidProductSubCategoryRouting =
     !requiresProductSubCategoryRouting ||
     productSubCategoryOptions.some(
-      (option) => option.value === String(routingSubCategoryId || ""),
+      (option) => option.value === String(selectedRouteId || ""),
     );
   const canRouteToPrint =
     (user?.roles || []).includes("customeradmin") &&
     !requiresProductSubCategoryRouting &&
-    String(orderDetail?.product?.category?.name || "")
-      .trim()
-      .toLowerCase() === "engraving";
+    productCategory?.trim().toLowerCase() === "engraving";
   const printSubCategoryOptions = useMemo(() => {
     const categories = Array.isArray(categoriesData)
       ? categoriesData
@@ -822,7 +827,7 @@ export default function OrderDesignModal({
           isSubCategory,
           includeRoutingSubCategory:
             canRouteToPrint || requiresProductSubCategoryRouting,
-          routingSubCategoryId,
+          routingSubCategoryId: selectedRouteId,
           positions: Array.from(new Set(files.map((file) => file.positionId))),
           files,
         });
@@ -873,7 +878,7 @@ export default function OrderDesignModal({
           isSubCategory,
           includeRoutingSubCategory:
             canRouteToPrint || requiresProductSubCategoryRouting,
-          routingSubCategoryId,
+          routingSubCategoryId: selectedRouteId,
           positions: positionsToSubmit,
           files,
         });
@@ -897,7 +902,7 @@ export default function OrderDesignModal({
     if (canRouteToPrint || requiresProductSubCategoryRouting) {
       formData.append(
         "routing_sub_category_id",
-        routingSubCategoryId ? String(routingSubCategoryId) : "",
+        selectedRouteId ? String(selectedRouteId) : "",
       );
     }
 
@@ -927,7 +932,7 @@ export default function OrderDesignModal({
     personalizedDesignEntries,
     personalizedQuantityIncomplete,
     positionMap,
-    routingSubCategoryId,
+    selectedRouteId,
     requiresProductSubCategoryRouting,
     selectedPositionIds,
     t,
@@ -1386,7 +1391,8 @@ export default function OrderDesignModal({
   };
 
   const subCategory = orderDetail?.product?.sub_category;
-  const showSubCategorySwitch = Boolean(subCategory?.optional);
+  const showSubCategorySwitch =
+    !requiresProductSubCategoryRouting && Boolean(subCategory?.optional);
 
   return (
     <>
@@ -1558,7 +1564,7 @@ export default function OrderDesignModal({
                     className="mt-2 w-full"
                     value={
                       hasValidProductSubCategoryRouting
-                        ? routingSubCategoryId || undefined
+                        ? selectedRouteId || undefined
                         : undefined
                     }
                     onChange={(value) => setRoutingSubCategoryId(value || null)}
@@ -1573,7 +1579,9 @@ export default function OrderDesignModal({
                     }
                   />
                   <Typography.Text type="secondary" className="mt-2 block">
-                    {t("fields.productSubCategoryRoutingHelp")}
+                    {productSubCategoryOptions.length
+                      ? t("fields.productSubCategoryRoutingHelp")
+                      : t("fields.productSubCategoryRoutingEmpty")}
                   </Typography.Text>
                 </div>
               ) : null}

@@ -35,6 +35,7 @@ import { setActiveNav } from "@/redux/features/uiSlice";
 import Image from "next/image";
 import { useTranslations } from "@/i18n/use-translations";
 import { palette } from "@/theme/tokens";
+import { categoryRequiresSubCategory } from "@/utils/categorySubCategory";
 import { findActiveNavItem } from "./navMatching";
 
 const { Sider } = Layout;
@@ -328,7 +329,9 @@ export default function Sidebar({ collapsed, variant = "sider", onNavigate }) {
         className: "sidebar-category-item",
         icon: <AppstoreOutlined />,
         label: category.name || tSidebar("common.category"),
-        children: [...categoryItems, ...subCategoryItems],
+        children: categoryRequiresSubCategory(category.name)
+          ? subCategoryItems
+          : [...categoryItems, ...subCategoryItems],
       };
     });
 
