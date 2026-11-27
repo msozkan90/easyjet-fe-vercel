@@ -1,5 +1,7 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { App as AntdApp, Button, Select, Space, Tag, Tooltip } from "antd";
@@ -8,7 +10,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
-import { CustomersAPI, PartnersAPI, TransferOrdersAPI } from "@/utils/api";
+import { PartnersAPI, TransferOrdersAPI } from "@/utils/api";
 import { makeListRequest } from "@/utils/listPayload";
 import { normalizeListAndMeta } from "@/utils/normalizeListAndMeta";
 import { useTranslations } from "@/i18n/use-translations";
@@ -33,8 +35,9 @@ export default function TransferPaymentProcessingPage() {
   const t = useTranslations("dashboard.financial.transferPayments");
   const roles = useSelector((state) => state.auth.user?.roles || []);
   const isPartnerAdmin = roles.includes("partneradmin");
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customerOptions } = useCustomerFilterOptions();
   const tableRef = useRef(null);
-  const [customerOptions, setCustomerOptions] = useState([]);
   const [partnerOptions, setPartnerOptions] = useState([]);
   const [entityFilter, setEntityFilter] = useState(null);
 
@@ -42,17 +45,8 @@ export default function TransferPaymentProcessingPage() {
     let alive = true;
     (async () => {
       try {
-        const [customers, partners] = await Promise.all([
-          listAll(CustomersAPI.list),
-          isPartnerAdmin ? Promise.resolve([]) : listAll(PartnersAPI.list),
-        ]);
+        const partners = isPartnerAdmin ? [] : await listAll(PartnersAPI.list);
         if (!alive) return;
-        setCustomerOptions(
-          customers.map((row) => ({
-            value: row.id,
-            label: row.name || row.id,
-          })),
-        );
         setPartnerOptions(
           partners.map((row) => ({ value: row.id, label: row.name || row.id })),
         );
@@ -89,7 +83,7 @@ export default function TransferPaymentProcessingPage() {
 
   const request = useCallback(
     async (ctx) => {
-      if (!ctx?.filters?.customer_id && !ctx?.filters?.partner_id) {
+      if (!ctx?.filters?.customer_id && !ctx?.filters?.customer_group_id && !ctx?.filters?.partner_id) {
         return { list: [], total: 0 };
       }
       const result = await listRequest(ctx);
@@ -124,10 +118,7 @@ export default function TransferPaymentProcessingPage() {
 
   const entityOptions = useMemo(
     () => [
-      ...customerOptions.map((option) => ({
-        value: `customer:${option.value}`,
-        label: `Customer: ${option.label}`,
-      })),
+      ...customerOptions,
       ...partnerOptions.map((option) => ({
         value: `partner:${option.value}`,
         label: `Partner: ${option.label}`,
@@ -139,35 +130,21 @@ export default function TransferPaymentProcessingPage() {
   const handleEntityFilterChange = useCallback((value) => {
     setEntityFilter(value || null);
 
-    if (!value) {
-      tableRef.current?.setFilters?.({
-        customer_id: undefined,
-        partner_id: undefined,
-      });
-      tableRef.current?.setPage?.(1);
-      return;
-    }
-
-    const [type, id] = String(value).split(":");
+    const [type, id] = String(value || "").split(":");
     tableRef.current?.setFilters?.({
-      customer_id: type === "customer" ? id : undefined,
+      customer_id: undefined,
+      customer_group_id: undefined,
       partner_id: type === "partner" ? id : undefined,
+      ...customerSelection(value),
     });
     tableRef.current?.setPage?.(1);
   }, []);
 
   useEffect(() => {
-    if (!isPartnerAdmin || entityFilter || customerOptions.length !== 1) return;
-    const onlyCustomer = customerOptions[0];
-    if (!onlyCustomer?.value) return;
-    const value = `customer:${onlyCustomer.value}`;
-    setEntityFilter(value);
-    tableRef.current?.setFilters?.({
-      customer_id: onlyCustomer.value,
-      partner_id: undefined,
-    });
-    tableRef.current?.setPage?.(1);
-  }, [customerOptions, entityFilter, isPartnerAdmin]);
+    if (!isPartnerAdmin || entityFilter) return;
+    const customers = customerOptions.filter((option) => option.type === "customer");
+    if (customers.length === 1) handleEntityFilterChange(customers[0].value);
+  }, [customerOptions, entityFilter, handleEntityFilterChange, isPartnerAdmin]);
 
   const columns = useMemo(() => {
     const priceColumns = isPartnerAdmin
@@ -331,11 +308,7 @@ export default function TransferPaymentProcessingPage() {
               allowClear
               showSearch
               value={entityFilter}
-              placeholder={
-                isPartnerAdmin
-                  ? "Select customer"
-                  : "Select customer or partner"
-              }
+              placeholder={tGroups(isPartnerAdmin ? "customerFilter" : "customerOrPartnerFilter")}
               options={entityOptions}
               optionFilterProp="label"
               onChange={handleEntityFilterChange}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import {
   startTransition,
   useCallback,
@@ -35,7 +36,6 @@ import RequireRole from "@/components/common/Access/RequireRole";
 import { useSelector } from "react-redux";
 import {
   CategoriesAPI,
-  CustomersAPI,
   OrdersAPI,
   PartnersAPI,
 } from "@/utils/api";
@@ -102,12 +102,14 @@ const buildReportPayload = (filters, entityOptionsMap) => {
   const customer_ids = selectedEntities
     .filter((entity) => entity.type === "customer")
     .map((entity) => entity.id);
+  const customer_group_ids = selectedEntities.filter((entity) => entity.type === "customer_group").map((entity) => entity.id);
   const partner_ids = selectedEntities
     .filter((entity) => entity.type === "partner")
     .map((entity) => entity.id);
 
   return {
     customer_ids: customer_ids.length ? customer_ids : undefined,
+    customer_group_ids: customer_group_ids.length ? customer_group_ids : undefined,
     partner_ids: partner_ids.length ? partner_ids : undefined,
     category_id: filters?.category_id || undefined,
     sub_category_id: filters?.sub_category_id || undefined,
@@ -146,7 +148,6 @@ export default function OrderReportPage() {
   const reportRequest = useRef(0);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [partners, setPartners] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -158,17 +159,19 @@ export default function OrderReportPage() {
   });
   const deferredDailyRows = useDeferredValue(reportData.daily_rows);
 
+  const { options: customerOptions, loading: customerOptionsLoading } = useCustomerFilterOptions({
+    enabled: !isCustomerAdmin,
+  });
+
   const loadFilterOptions = useCallback(async () => {
     setFilterOptionsLoading(true);
     try {
-      const [partnersResp, customersResp, categoriesResp] = await Promise.all([
+      const [partnersResp, categoriesResp] = await Promise.all([
         isCustomerAdmin ? null : PartnersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
-        isCustomerAdmin ? null : CustomersAPI.list({ pagination: { page: 1, pageSize: 500 } }),
         CategoriesAPI.listWithSubCategories(),
       ]);
 
       setPartners(normalizeListAndMeta(partnersResp).list);
-      setCustomers(normalizeListAndMeta(customersResp).list);
       setCategories(
         normalizeCategoryList(categoriesResp).filter(
           (category) => !isTransferCategory(category),
@@ -192,18 +195,15 @@ export default function OrderReportPage() {
       searchText: `${partner.name || ""} partner`,
     }));
 
-    const customerRows = customers.map((customer) => ({
-      value: `customer:${customer.id}`,
-      id: customer.id,
-      type: "customer",
-      label: customer.name || customer.id,
-      searchText: `${customer.name || ""} customer`,
+    const customerRows = customerOptions.map((option) => ({
+      ...option,
+      searchText: option.label,
     }));
 
     return [...partnerRows, ...customerRows].sort((left, right) =>
       left.label.localeCompare(right.label, undefined, { sensitivity: "base" }),
     );
-  }, [customers, partners]);
+  }, [customerOptions, partners]);
 
   const entityOptionsMap = useMemo(
     () => new Map(entityOptions.map((option) => [option.value, option])),
@@ -754,7 +754,7 @@ export default function OrderReportPage() {
                 value={filters.entity_ids}
                 onChange={handleEntityChange}
                 options={entitySelectOptions}
-                loading={filterOptionsLoading}
+                loading={filterOptionsLoading || customerOptionsLoading}
                 placeholder={t("filters.entitiesPlaceholder")}
                 style={{ width: "100%", marginTop: 8 }}
                 optionFilterProp="searchText"

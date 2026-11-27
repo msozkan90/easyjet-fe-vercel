@@ -1,5 +1,7 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -14,7 +16,6 @@ import { DollarOutlined, FileSearchOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import {
-  CustomersAPI,
   PartnersAPI,
   TransferOrdersAPI,
 } from "@/utils/api";
@@ -44,9 +45,10 @@ export default function TransferPaymentManagementPage() {
   const tStatus = useTranslations("common.status");
   const tCommon = useTranslations("common.actions");
   const { message } = AntdApp.useApp();
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customerOptions } = useCustomerFilterOptions();
   const tableRef = useRef(null);
   const [selectedRowMap, setSelectedRowMap] = useState({});
-  const [customerOptions, setCustomerOptions] = useState([]);
   const [partnerOptions, setPartnerOptions] = useState([]);
   const [entityFilter, setEntityFilter] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -55,14 +57,8 @@ export default function TransferPaymentManagementPage() {
     let alive = true;
     (async () => {
       try {
-        const [customers, partners] = await Promise.all([
-          listAll(CustomersAPI.list),
-          listAll(PartnersAPI.list),
-        ]);
+        const partners = await listAll(PartnersAPI.list);
         if (!alive) return;
-        setCustomerOptions(
-          customers.map((row) => ({ value: row.id, label: row.name || row.id })),
-        );
         setPartnerOptions(
           partners.map((row) => ({ value: row.id, label: row.name || row.id })),
         );
@@ -99,10 +95,7 @@ export default function TransferPaymentManagementPage() {
 
   const entityOptions = useMemo(
     () => [
-      ...customerOptions.map((option) => ({
-        value: `customer:${option.value}`,
-        label: `Customer: ${option.label}`,
-      })),
+      ...customerOptions,
       ...partnerOptions.map((option) => ({
         value: `partner:${option.value}`,
         label: `Partner: ${option.label}`,
@@ -113,7 +106,7 @@ export default function TransferPaymentManagementPage() {
 
   const request = useCallback(
     async (ctx) => {
-      if (!ctx?.filters?.customer_id && !ctx?.filters?.partner_id) {
+      if (!ctx?.filters?.customer_id && !ctx?.filters?.customer_group_id && !ctx?.filters?.partner_id) {
         return { list: [], total: 0 };
       }
       const result = await listRequest(ctx);
@@ -158,19 +151,12 @@ export default function TransferPaymentManagementPage() {
     setEntityFilter(value || null);
     setSelectedRowMap({});
 
-    if (!value) {
-      tableRef.current?.setFilters?.({
-        customer_id: undefined,
-        partner_id: undefined,
-      });
-      tableRef.current?.setPage?.(1);
-      return;
-    }
-
-    const [type, id] = String(value).split(":");
+    const [type, id] = String(value || "").split(":");
     tableRef.current?.setFilters?.({
-      customer_id: type === "customer" ? id : undefined,
+      customer_id: undefined,
+      customer_group_id: undefined,
       partner_id: type === "partner" ? id : undefined,
+      ...customerSelection(value),
     });
     tableRef.current?.setPage?.(1);
   }, []);
@@ -187,6 +173,11 @@ export default function TransferPaymentManagementPage() {
   const handleCreatePaymentRequest = async () => {
     if (!entityFilter) {
       message.warning(t("selectEntity"));
+      return;
+    }
+    if (entityFilter.startsWith("customer_group:") &&
+      new Set(selectedRows.map((row) => row.customer_id)).size > 1) {
+      message.warning(tGroups("selectOnePayer"));
       return;
     }
     const transferOrderIds = selectedRows
@@ -389,7 +380,7 @@ export default function TransferPaymentManagementPage() {
               allowClear
               showSearch
               value={entityFilter}
-              placeholder={t("entityPlaceholder")}
+              placeholder={tGroups("customerOrPartnerFilter")}
               options={entityOptions}
               optionFilterProp="label"
               onChange={handleEntityFilterChange}

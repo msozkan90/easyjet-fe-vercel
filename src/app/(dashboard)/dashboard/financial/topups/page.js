@@ -1,5 +1,6 @@
 "use client";
 
+import { mapCustomerFilter, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -45,6 +46,11 @@ export default function WalletTopupsPage() {
 }
 
 function WalletTopups() {
+  const canFilterCustomers = useSelector((state) =>
+    hasAnyRole(state.auth.user, ["companyAdmin", "partnerAdmin"])
+  );
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customerFilterOptions } = useCustomerFilterOptions({ enabled: canFilterCustomers });
   const canCancel = useSelector((state) =>
     hasAnyRole(state.auth.user, ["partnerAdmin", "customerAdmin"])
   );
@@ -87,6 +93,7 @@ function WalletTopups() {
       makeListRequest(
         WalletTopupsAPI.list,
         {
+          filterTransform: mapCustomerFilter,
           defaultSort: [{ field: "created_at", direction: "desc" }],
         },
         normalizeListAndMeta
@@ -183,6 +190,12 @@ function WalletTopups() {
 
   const columns = useMemo(
     () => [
+      ...(canFilterCustomers ? [{
+        title: t("columns.owner"),
+        key: "customer_id",
+        filter: { type: "select", placeholder: tGroups("customerFilter"), options: customerFilterOptions },
+        render: (_, row) => row.customer?.name || row.partner?.name || row.company?.name || "—",
+      }] : []),
       {
         title: t("columns.amount"),
         dataIndex: "amount",
@@ -282,7 +295,7 @@ function WalletTopups() {
         ),
       },
     ],
-    [fundingOptions, handleCancel, t, tStatus, actionLoading, canCancel]
+    [fundingOptions, handleCancel, t, tStatus, actionLoading, canCancel, canFilterCustomers, customerFilterOptions, tGroups]
   );
 
   const topupForm = (

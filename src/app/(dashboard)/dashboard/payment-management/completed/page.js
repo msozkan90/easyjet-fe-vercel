@@ -1,8 +1,10 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
+
 import { useCallback, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { App as AntdApp, Button, Space, Tag, Tooltip } from "antd";
+import { App as AntdApp, Button, Select, Space, Tag, Tooltip } from "antd";
 import { DownloadOutlined, FileSearchOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -27,6 +29,8 @@ export default function TransferPaymentCompletedPage() {
   const t = useTranslations("dashboard.financial.transferPayments");
   const roles = useSelector((state) => state.auth.user?.roles || []);
   const isPartnerAdmin = roles.includes("partneradmin");
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customerOptions } = useCustomerFilterOptions();
   const tableRef = useRef(null);
   const [downloadingGroupId, setDownloadingGroupId] = useState(null);
 
@@ -278,6 +282,17 @@ export default function TransferPaymentCompletedPage() {
         <CrudTable
           ref={tableRef}
           rowKey="id"
+          toolbarLeft={
+            <Select allowClear showSearch optionFilterProp="label"
+              options={customerOptions} placeholder={tGroups("customerFilter")}
+              aria-label={tGroups("customerFilter")} style={{ width: 260 }}
+              onChange={(value) => tableRef.current?.setFilters({
+                customer_id: undefined,
+                customer_group_id: undefined,
+                ...customerSelection(value),
+              })}
+            />
+          }
           columns={columns}
           request={request}
         />

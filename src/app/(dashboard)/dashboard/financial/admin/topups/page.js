@@ -1,5 +1,6 @@
 "use client";
 
+import { useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Space, App as AntdApp } from "antd";
@@ -79,6 +80,8 @@ function WalletTopupsAdminList() {
     };
   }, [message, t]);
 
+  const { options: customerOptions } = useCustomerFilterOptions();
+
   const listRequest = useMemo(
     () =>
       makeListRequest(
@@ -95,7 +98,7 @@ function WalletTopupsAdminList() {
 
             if (
               ownerId &&
-              ["company", "partner", "customer"].includes(ownerType)
+              ["company", "partner", "customer", "customer_group"].includes(ownerType)
             ) {
               next[`${ownerType}_id`] = ownerId;
             }
@@ -138,19 +141,14 @@ function WalletTopupsAdminList() {
 
     orgForest.forEach((company) => {
       addOption("company", company);
-      (company.customers || []).forEach((customer) =>
-        addOption("customer", customer)
-      );
-      (company.partners || []).forEach((partner) => {
-        addOption("partner", partner);
-        (partner.customers || []).forEach((customer) =>
-          addOption("customer", customer)
-        );
-      });
+      (company.partners || []).forEach((partner) => addOption("partner", partner));
     });
 
-    return options;
-  }, [orgForest, t]);
+    return [...options, ...customerOptions.map((option) => ({
+      ...option,
+      label: option.type === "customer" ? `${t("ownerTypes.customer")}: ${option.label}` : option.label,
+    }))];
+  }, [orgForest, customerOptions, t]);
 
   const columns = useMemo(
     () => [

@@ -30,6 +30,14 @@ export const api = {
     http.delete(url, { params, ...config }).then((r) => r.data),
 };
 
+export const CustomerGroupsAPI = {
+  filterOptions: (params) => api.get("/customers/filter-options", params),
+  list: () => api.get("/customers/groups"),
+  create: (payload) => api.post("/customers/groups", payload),
+  update: (id, payload) => api.put(`/customers/groups/${id}`, payload),
+  remove: (id) => api.del(`/customers/groups/${id}`),
+};
+
 export const ShipmentReportAPI = {
   report: (payload) => api.post('/shipments/report', payload),
   dayDetail: (payload) => api.post('/shipments/report/day-detail', payload),
@@ -1002,6 +1010,7 @@ export const ProductCatalogAPI = {
   customerCategories: () => api.get("/product-prices/catalog/categories"),
   customerProduct: (id) => api.get(`/product-prices/catalog/products/${id}`),
   partnerPrices: (payload) => api.post("/product-prices/partner-catalog", payload),
+  partnerCustomerGroupPrices: (payload, groupId) => api.post("/product-prices/partner-customer-group-catalog", { ...payload, customer_group_id: groupId }),
   partnerCustomerPrices: (payload, customerId) => api.post("/product-prices/partner-customer-catalog", { ...payload, customer_id: customerId }),
 };
 

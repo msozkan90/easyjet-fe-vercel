@@ -1,5 +1,7 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { App, Button, Modal, Select, Space, Typography, Upload } from "antd";
 import { AppstoreOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
@@ -24,9 +26,7 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-  const [customersLoading, setCustomersLoading] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [filterOptions, setFilterOptions] = useState({ product: [], size: [], color: [] });
   // undefined = closed; null = open without a product; id = open on that product.
   const [bulkProductId, setBulkProductId] = useState(undefined);
@@ -51,16 +51,12 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
     });
     return () => { alive = false; };
   }, [message, t]);
-  useEffect(() => {
-    if (!partner || !selectCustomer) return;
-    let alive = true;
-    setCustomersLoading(true);
-    fetchGenericList("customer")
-      .then(list => { if (alive) setCustomers(list.map(item => ({ value: item.id, label: item.name }))); })
-      .catch(() => { if (alive) message.error(t("loadCustomersError")); })
-      .finally(() => { if (alive) setCustomersLoading(false); });
-    return () => { alive = false; };
-  }, [partner, selectCustomer, message, t]);
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customers, loading: customersLoading } = useCustomerFilterOptions({
+    enabled: partner && selectCustomer,
+    activeOnly: true,
+  });
+  const groupSelected = selectedCustomer?.startsWith("customer_group:");
   const { onDirtyChange, guardClose } = useDirtyGuard(Boolean(editing));
   useEffect(() => {
     if (!file) { setPreview(null); return; }
@@ -69,12 +65,17 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
     return () => URL.revokeObjectURL(url);
   }, [file]);
   const request = useMemo(() => {
-    if (partner && selectCustomer && !selectedCustomerId) {
+    if (partner && selectCustomer && !selectedCustomer) {
       return async () => ({ list: [], total: 0 });
     }
     const list = partner
       ? selectCustomer
-        ? payload => ProductCatalogAPI.partnerCustomerPrices(payload, selectedCustomerId)
+        ? (payload) => {
+            const { customer_id, customer_group_id } = customerSelection(selectedCustomer);
+            return customer_group_id
+              ? ProductCatalogAPI.partnerCustomerGroupPrices(payload, customer_group_id)
+              : ProductCatalogAPI.partnerCustomerPrices(payload, customer_id);
+          }
         : ProductCatalogAPI.partnerPrices
       : ProductCatalogAPI.list;
     return makeListRequest(list, {
@@ -85,7 +86,7 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
         ...(filters.color_name ? { color_name: { eq: filters.color_name } } : {}),
       }),
     }, normalizeListAndMeta);
-  }, [partner, selectCustomer, selectedCustomerId]);
+  }, [partner, selectCustomer, selectedCustomer]);
   const close = () => { setEditing(null); setFile(null); };
   const columns = [
     { title: t("image"), dataIndex: "image_url", width: 120, render: (url, row) => url ? (
@@ -97,7 +98,12 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
       render: (_, row) => row[`${field}_name`],
       filter: { type: "select", options: filterOptions[field], placeholder: t(`select${field[0].toUpperCase()}${field.slice(1)}`) },
     })),
-    ...(showPrices ? [{ title: t("price"), dataIndex: "price", sorter: true, render: value => formatPrice(value) }] : [{
+    ...(showPrices ? [{ title: t("price"), dataIndex: "price", sorter: !groupSelected,
+      render: (value, row) => groupSelected
+        ? <Space direction="vertical" size={2}>{row.customer_prices?.map((entry) => (
+            <span key={entry.customer_id}>{entry.customer_name} · {formatPrice(entry.price)}</span>
+          ))}</Space>
+        : formatPrice(value) }] : [{
       title: t("actions"), key: "actions", width: 110,
       render: (_, row) => (
         <Space size={4}>
@@ -126,13 +132,13 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
   };
   return (
     <RequireRole anyOfRoles={[partner ? "partnerAdmin" : "companyAdmin"]}>
-      <CrudTable key={selectedCustomerId || "unselected"} ref={tableRef} columns={columns} request={request}
+      <CrudTable key={selectedCustomer || "unselected"} ref={tableRef} columns={columns} request={request}
         toolbarLeft={partner && selectCustomer ? (
           <Space wrap>
             <Typography.Text>{t("customer")}</Typography.Text>
-            <Select aria-label={t("selectCustomer")} placeholder={t("selectCustomer")} allowClear showSearch
+            <Select aria-label={tGroups("customerFilter")} placeholder={tGroups("customerFilter")} allowClear showSearch
               optionFilterProp="label" options={customers} loading={customersLoading}
-              value={selectedCustomerId || undefined} onChange={value => setSelectedCustomerId(value || null)}
+              value={selectedCustomer || undefined} onChange={value => setSelectedCustomer(value || null)}
               style={{ width: 260, maxWidth: "100%" }} />
           </Space>
         ) : undefined}
@@ -141,7 +147,7 @@ export default function ProductCatalogTable({ partner = false, selectCustomer = 
             {t("bulk.open")}
           </Button>
         ) : undefined}
-        tableProps={{ scroll: { x: true }, ...(partner && selectCustomer && !selectedCustomerId
+        tableProps={{ scroll: { x: true }, ...(partner && selectCustomer && !selectedCustomer
           ? { locale: { emptyText: t("selectCustomerToView") } } : {}) }} />
       {!showPrices && <Modal title={t("editTitle")} open={Boolean(editing)} onCancel={guardClose(close)}
         onOk={save} confirmLoading={saving} okText={t("save")} cancelText={t("cancel")}

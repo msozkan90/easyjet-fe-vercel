@@ -1,5 +1,6 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -20,10 +21,10 @@ import { formatMoney } from "@/utils/formatMoney";
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const defaultRange = () => [dayjs().subtract(29, "day"), dayjs()];
-const payloadFor = (range, entityKey, entityId) => ({
+const payloadFor = (range, filters) => ({
   date_from: range[0].startOf("day").toISOString(),
   date_to: range[1].endOf("day").toISOString(),
-  ...(entityKey && entityId ? { [entityKey]: entityId } : {}),
+  ...filters,
 });
 const dataOf = (response) => response?.data ?? response ?? {};
 const money = (value) => formatMoney(value, { fallback: "—" });
@@ -55,12 +56,18 @@ export default function ShipmentReportPage() {
   const isCustomer = user?.roles?.includes("customeradmin");
   const isSystem = user?.roles?.includes("systemadmin");
   const isCompany = user?.roles?.includes("companyadmin");
-  const entityKey = isSystem ? "company_id" : isCompany ? "customer_id" : null;
+  const tGroups = useTranslations("dashboard.customerGroups");
   const t = useTranslations("dashboard.shipmentReport");
   const { locale } = useLocaleInfo();
   const { message } = AntdApp.useApp();
   const [range, setRange] = useState(defaultRange);
-  const [selectedEntityId, setSelectedEntityId] = useState(undefined);
+  const [companyId, setCompanyId] = useState(undefined);
+  const [customer, setCustomer] = useState(undefined);
+  const { options: customerOptions, loading: customersLoading } = useCustomerFilterOptions({
+    enabled: isSystem || isCompany,
+    companyId,
+    includePartnerCustomers: isCompany,
+  });
   const [appliedPayload, setAppliedPayload] = useState(null);
   const [exportLoading, setExportLoading] = useState(false);
   const [entityOptions, setEntityOptions] = useState([]);
@@ -74,11 +81,11 @@ export default function ShipmentReportPage() {
   const detailRequest = useRef(0);
   const reportRequest = useRef(0);
 
-  const load = useCallback(async (selectedRange, entityId) => {
+  const load = useCallback(async (selectedRange, filters = {}) => {
     const request = ++reportRequest.current;
     setLoading(true);
     try {
-      const payload = payloadFor(selectedRange, entityKey, entityId);
+      const payload = payloadFor(selectedRange, filters);
       const data = dataOf(await ShipmentReportAPI.report(payload));
       if (request === reportRequest.current) {
         setReport(data);
@@ -90,7 +97,7 @@ export default function ShipmentReportPage() {
     } finally {
       if (request === reportRequest.current) setLoading(false);
     }
-  }, [entityKey, message, t]);
+  }, [message, t]);
 
   const handleExport = useCallback(async (format) => {
     if (!appliedPayload) return;
@@ -106,11 +113,11 @@ export default function ShipmentReportPage() {
   }, [appliedPayload, locale, message, t]);
 
   useEffect(() => {
-    if (user) load(defaultRange(), undefined);
+    if (user) load(defaultRange());
   }, [load, user]);
 
   useEffect(() => {
-    if (!user || !entityKey) return;
+    if (!isSystem) return;
     let active = true;
     setOptionsLoading(true);
     ShipmentReportAPI.filterOptions()
@@ -120,7 +127,7 @@ export default function ShipmentReportPage() {
       .catch((error) => { if (active) message.error(error?.response?.data?.error?.message || t("loadOptionsError")); })
       .finally(() => { if (active) setOptionsLoading(false); });
     return () => { active = false; };
-  }, [entityKey, isSystem, message, t, user]);
+  }, [isSystem, message, t]);
 
   const openDetail = useCallback(async (date) => {
     const request = ++detailRequest.current;
@@ -128,8 +135,13 @@ export default function ShipmentReportPage() {
     setDetail(null);
     setDetailLoading(true);
     try {
-      const data = dataOf(await ShipmentReportAPI.dayDetail({ date,
-        ...(entityKey && appliedPayload?.[entityKey] ? { [entityKey]: appliedPayload[entityKey] } : {}) }));
+      const filters = appliedPayload || {};
+      const data = dataOf(await ShipmentReportAPI.dayDetail({
+        date,
+        company_id: filters.company_id,
+        customer_id: filters.customer_id,
+        customer_group_id: filters.customer_group_id,
+      }));
       if (request === detailRequest.current) setDetail(data);
     } catch (error) {
       if (request === detailRequest.current) {
@@ -138,7 +150,7 @@ export default function ShipmentReportPage() {
     } finally {
       if (request === detailRequest.current) setDetailLoading(false);
     }
-  }, [appliedPayload, entityKey, message, t]);
+  }, [appliedPayload, message, t]);
 
   const dailyColumns = useMemo(() => {
     const numeric = (key, labelKey, render) => {
@@ -242,17 +254,20 @@ export default function ShipmentReportPage() {
         </Row>
 
         <Card title={t("filters")} extra={<Space>
-          <Button icon={<ReloadOutlined />} onClick={() => { const next = defaultRange(); setRange(next); setSelectedEntityId(undefined); load(next, undefined); }}>{t("reset")}</Button>
-          <Button type="primary" icon={<SearchOutlined />} onClick={() => load(range, selectedEntityId)}>{t("search")}</Button>
+          <Button icon={<ReloadOutlined />} onClick={() => { const next = defaultRange(); setRange(next); setCompanyId(undefined); setCustomer(undefined); load(next); }}>{t("reset")}</Button>
+          <Button type="primary" icon={<SearchOutlined />} onClick={() => load(range, { company_id: companyId, ...customerSelection(customer) })}>{t("search")}</Button>
           <ReportExportButton onExport={handleExport} loading={exportLoading}
             disabled={!appliedPayload || loading} label={t("exportReport")} />
         </Space>}>
           <Space wrap size={12}>
             <RangePicker value={range} onChange={(value) => value && setRange(value)} allowClear={false} />
-            {entityKey && <Select allowClear showSearch optionFilterProp="label" style={{ width: 300 }}
-              value={selectedEntityId} onChange={setSelectedEntityId} options={entityOptions}
-              loading={optionsLoading} placeholder={t(isSystem ? "allCompanies" : "allCustomers")}
-              aria-label={t(isSystem ? "companyFilter" : "customerFilter")} />}
+            {isSystem && <Select allowClear showSearch optionFilterProp="label" style={{ width: 300 }}
+              value={companyId} onChange={(id) => { setCompanyId(id); setCustomer(undefined); }}
+              options={entityOptions} loading={optionsLoading} placeholder={t("allCompanies")}
+              aria-label={t("companyFilter")} />}
+            {(isSystem || isCompany) && <Select allowClear showSearch optionFilterProp="label" style={{ width: 300 }}
+              value={customer} onChange={setCustomer} options={customerOptions} loading={customersLoading}
+              placeholder={tGroups("customerFilter")} aria-label={tGroups("customerFilter")} />}
           </Space>
         </Card>
 

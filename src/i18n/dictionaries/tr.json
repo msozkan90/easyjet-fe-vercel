@@ -167,6 +167,26 @@
     }
   },
   "dashboard": {
+    "customerGroups": {
+      "customerOrPartnerFilter": "Müşteri, müşteri grubu veya partner",
+      "title": "Müşteri grupları",
+      "customerFilter": "Müşteri veya grup",
+      "groupFilter": "Müşteri grubu",
+      "groupOption": "{name} ({count} müşteri)",
+      "manage": "Müşteri gruplarını yönet",
+      "create": "Yeni grup",
+      "name": "Grup adı",
+      "members": "Müşteriler",
+      "save": "Grubu kaydet",
+      "remove": "Grubu sil",
+      "removeConfirm": "Grup silinsin mi? Müşterileri gruptan çıkarılacak.",
+      "loadError": "Müşteri filtre seçenekleri yüklenemedi.",
+      "saveError": "Müşteri grubu kaydedilemedi.",
+      "removeError": "Müşteri grubu silinemedi.",
+      "saved": "Müşteri grubu kaydedildi.",
+      "removed": "Müşteri grubu silindi.",
+      "selectOnePayer": "Ödeme talebi oluşturmak için aynı müşteriye ait siparişleri seçin."
+    },
     "stats": {
       "totalOrders": "Toplam Sipariş",
       "pending": "Bekleyen",
@@ -542,6 +562,7 @@
         "reset": "Temizle",
         "entityTypes": {
           "customer": "Customer",
+          "customer_group": "Müşteri grubu",
           "partner": "Partner"
         },
         "presets": {
@@ -659,6 +680,7 @@
         "reset": "Temizle",
         "entityTypes": {
           "customer": "Customer",
+          "customer_group": "Müşteri grubu",
           "partner": "Partner"
         },
         "presets": {
