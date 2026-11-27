@@ -1,8 +1,9 @@
 "use client";
 
+import { customerSelection, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { App as AntdApp, Button, Drawer, Switch } from "antd";
+import { Select, Space, App as AntdApp, Button, Drawer, Switch } from "antd";
 import { EditOutlined, KeyOutlined, ReadOutlined } from "@ant-design/icons";
 import CrudTable from "@/components/common/table/CrudTable";
 import ApiKeyTable from "@/components/settings/api-keys/ApiKeyTable";
@@ -74,12 +75,15 @@ export default function ApiAccessAdminPage() {
   const [editing, setEditing] = useState(null);
   const [viewingKeys, setViewingKeys] = useState(null);
 
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const { options: customerOptions } = useCustomerFilterOptions();
   const request = useCallback(
     async ({ page, pageSize, filters }) => {
       const resp = await ApiKeysAPI.adminListGrants({
         page,
         page_size: pageSize,
         search: filters?.name?.trim() || undefined,
+        ...customerSelection(filters?.customer_id),
         only_granted: filters?.only_granted || undefined,
       });
       return normalizeListAndMeta(resp);
@@ -169,6 +173,12 @@ export default function ApiAccessAdminPage() {
         initialPageSize={10}
         initialFilters={{ name: "", only_granted: false }}
         toolbarLeft={
+          <Space wrap>
+            <Select allowClear showSearch optionFilterProp="label"
+              options={customerOptions} placeholder={tGroups("customerFilter")}
+              aria-label={tGroups("customerFilter")} style={{ width: 240 }}
+              onChange={(value) => tableRef.current?.setFilters({ customer_id: value })}
+            />
           <label className="flex cursor-pointer items-center gap-2 text-sm text-text">
             <Switch
               size="small"
@@ -180,6 +190,7 @@ export default function ApiAccessAdminPage() {
             />
             {t("filters.onlyGranted")}
           </label>
+          </Space>
         }
         toolbarRight={
           <Link href="/dashboard/api-docs">

@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { App as AntdApp, Button, Card, Input } from "antd";
+import { App as AntdApp, Button, Card, Input, Select } from "antd";
 import { GoldOutlined, SearchOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import RequireRole from "@/components/common/Access/RequireRole";
 import PageHeader from "@/components/ui/PageHeader";
@@ -11,6 +11,7 @@ import { EmptyState, ErrorState } from "@/components/ui/StateView";
 import PriceGrid, { isPrice, pricesFromItems, productKeys } from "@/components/pricing/PriceGrid";
 import AssignPricePackageModal from "@/components/price-package/AssignPricePackageModal";
 import { PricePackagesAPI, ProductPricesAPI } from "@/utils/api";
+import { buildCustomerOptions, customerSelection } from "@/hooks/useCustomerFilterOptions";
 import { useTranslations } from "@/i18n/use-translations";
 
 const unwrap = (resp) => resp?.data ?? resp;
@@ -31,6 +32,18 @@ function CoveragePill({ priced, total, t }) {
 
 function TargetList({ targets, selected, onSelect, t }) {
   const [search, setSearch] = useState("");
+  const [customerFilter, setCustomerFilter] = useState(undefined);
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const customerOptions = useMemo(
+    () => buildCustomerOptions(targets.customers, (values) => tGroups("groupOption", values)),
+    [targets.customers, tGroups],
+  );
+  const { customer_id, customer_group_id } = customerSelection(customerFilter);
+  const customers = targets.customers.filter((customer) =>
+    (!customer_id || customer.id === customer_id) &&
+    (!customer_group_id || customer.customer_group_id === customer_group_id),
+  );
+  const partners = customerFilter ? [] : targets.partners;
   const needle = search.trim().toLocaleLowerCase();
   const match = (item) => !needle || item.name.toLocaleLowerCase().includes(needle);
   const total = targets.total_variations;
@@ -73,10 +86,14 @@ function TargetList({ targets, selected, onSelect, t }) {
         value={search}
         onChange={(event) => setSearch(event.target.value)}
       />
+      <Select className="mt-2 w-full" allowClear showSearch optionFilterProp="label"
+        options={customerOptions} value={customerFilter} onChange={setCustomerFilter}
+        aria-label={tGroups("customerFilter")} placeholder={tGroups("customerFilter")}
+      />
       <div className="max-h-[70vh] overflow-y-auto">
-        {section("customer", t("customers"), targets.customers)}
-        {section("partner", t("partners"), targets.partners)}
-        {!targets.customers.length && !targets.partners.length ? (
+        {section("customer", t("customers"), customers)}
+        {section("partner", t("partners"), partners)}
+        {!customers.length && !partners.length ? (
           <EmptyState compact description={t("noTargets")} />
         ) : null}
       </div>

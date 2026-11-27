@@ -1,5 +1,6 @@
 "use client";
 
+import { mapCustomerFilter, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
@@ -22,6 +23,7 @@ import {
 import StatusTag from "@/components/ui/StatusTag";
 import Link from "next/link";
 import RowActions from "@/components/ui/RowActions";
+import CustomerGroupsModal from "@/components/customers/CustomerGroupsModal";
 import AssignPricePackageModal from "@/components/price-package/AssignPricePackageModal";
 
 export default function CustomersPage() {
@@ -38,6 +40,13 @@ export default function CustomersPage() {
     ? multiplierToPercent(user?.entity?.product_markup_limit)
     : undefined;
 
+  const tGroups = useTranslations("dashboard.customerGroups");
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const [groupRevision, setGroupRevision] = useState(0);
+  const { options: customerFilterOptions } = useCustomerFilterOptions({
+    enabled: (user?.roles || []).some((role) => ["companyadmin", "partneradmin"].includes(role)),
+    revision: groupRevision,
+  });
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -100,7 +109,7 @@ export default function CustomersPage() {
     CustomersAPI.list,
     {
       defaultSort: [{ field: "created_at", direction: "desc" }],
-      filterMap: {},
+      filterTransform: mapCustomerFilter,
       numericArrayKeys: ["customer_categories"],
       fixedFilters: {},
     },
@@ -127,6 +136,12 @@ export default function CustomersPage() {
         dataIndex: "name",
         sorter: true,
         filter: { type: "text", placeholder: t("filters.searchName") },
+      },
+      {
+        title: tGroups("groupFilter"),
+        key: "customer_id",
+        filter: { type: "select", placeholder: tGroups("customerFilter"), options: customerFilterOptions },
+        render: (_, row) => row.customer_group?.name || "—",
       },
       {
         title: t("columns.description"),
@@ -286,6 +301,8 @@ export default function CustomersPage() {
       },
     ],
     [
+      customerFilterOptions,
+      tGroups,
       categories,
       isMineControlEnabled,
       isPartnerEntity,
@@ -386,7 +403,8 @@ export default function CustomersPage() {
           customer_categories: [],
         }}
         toolbarRight={
-          <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin"]}>
+          <Space>
+            <Button onClick={() => setGroupsOpen(true)}>{tGroups("manage")}</Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -398,7 +416,7 @@ export default function CustomersPage() {
             >
               {t("actions.new")}
             </Button>
-          </RequireRole>
+          </Space>
         }
         tableProps={{
           locale: { emptyText: t("table.noData") },
@@ -486,6 +504,16 @@ export default function CustomersPage() {
           />
         </div>
       </Modal>
+      {groupsOpen && (
+        <CustomerGroupsModal
+          onClose={() => setGroupsOpen(false)}
+          onChanged={() => {
+            setGroupsOpen(false);
+            setGroupRevision((value) => value + 1);
+            tableRef.current?.reload();
+          }}
+        />
+      )}
       <AssignPricePackageModal
         open={packageModalOpen}
         target={packageTarget}

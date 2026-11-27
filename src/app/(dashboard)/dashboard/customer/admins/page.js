@@ -1,5 +1,6 @@
 "use client";
 
+import { mapCustomerFilter, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Space, Tag, Button, Modal, App as AntdApp } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -28,6 +29,8 @@ export default function CustomerAdminsPage() {
   const [formDirty, setFormDirty] = useState(false);
   const { confirmIfDirty, unsavedChangesModalContextHolder } =
     useUnsavedChangesPrompt();
+  const { options: customerFilterOptions } = useCustomerFilterOptions();
+  const tGroups = useTranslations("dashboard.customerGroups");
   const [customers, setCustomers] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -75,6 +78,7 @@ export default function CustomerAdminsPage() {
   const request = makeListRequest(
     CustomerAdminsAPI.list,
     {
+      filterTransform: mapCustomerFilter,
       defaultSort: [{ field: "created_at", direction: "desc" }],
       filterMap: { customer: "customer_id" },
       numericArrayKeys: ["user_categories"],
@@ -128,11 +132,8 @@ export default function CustomerAdminsPage() {
         sorter: true,
         filter: {
           type: "select",
-          placeholder: t("filters.selectCustomer"),
-          options: customers.map((customer) => ({
-            value: customer.id,
-            label: customer.name,
-          })),
+          placeholder: tGroups("customerFilter"),
+          options: customerFilterOptions,
           width: 260,
         },
         render: (_, record) => record?.customer?.name || t("common.none"),
@@ -224,7 +225,7 @@ export default function CustomerAdminsPage() {
         ),
       },
     ],
-    [categories, customers, onDelete, t, tStatus]
+    [categories, customerFilterOptions, tGroups, onDelete, t, tStatus]
   );
 
   const onSubmit = async (values) => {

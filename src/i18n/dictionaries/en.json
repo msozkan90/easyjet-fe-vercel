@@ -167,6 +167,26 @@
     }
   },
   "dashboard": {
+    "customerGroups": {
+      "customerOrPartnerFilter": "Customer, customer group or partner",
+      "title": "Customer groups",
+      "customerFilter": "Customer or group",
+      "groupFilter": "Customer group",
+      "groupOption": "{name} ({count} customers)",
+      "manage": "Manage customer groups",
+      "create": "New group",
+      "name": "Group name",
+      "members": "Customers",
+      "save": "Save group",
+      "remove": "Delete group",
+      "removeConfirm": "Delete this group? Its customers will be ungrouped.",
+      "loadError": "Could not load customer filter options.",
+      "saveError": "Could not save the customer group.",
+      "removeError": "Could not delete the customer group.",
+      "saved": "Customer group saved.",
+      "removed": "Customer group deleted.",
+      "selectOnePayer": "Select orders belonging to one customer to create a payment request."
+    },
     "stats": {
       "totalOrders": "Total Orders",
       "pending": "Pending",
@@ -350,7 +370,7 @@
       },
       "form": {
         "title": "Wallet Top-Up",
-        "subtitle": "Create a new top-up request to be approved by admin."
+        "subtitle": "Submit a top-up request for system admin approval."
       },
       "fields": {
         "fundingAccount": "Funding Account",
@@ -426,7 +446,7 @@
       "messages": {
         "loadFundingError": "Funding accounts could not be loaded.",
         "loadOwnersError": "Owner options could not be loaded.",
-        "createSuccess": "Top-up request created.",
+        "createSuccess": "Top-up request submitted for system admin approval.",
         "createError": "Top-up request failed.",
         "cancelSuccess": "Top-up request canceled.",
         "cancelError": "Cancel failed.",
@@ -542,6 +562,7 @@
         "reset": "Clear",
         "entityTypes": {
           "customer": "Customer",
+          "customer_group": "Customer group",
           "partner": "Partner"
         },
         "presets": {
@@ -659,6 +680,7 @@
         "reset": "Clear",
         "entityTypes": {
           "customer": "Customer",
+          "customer_group": "Customer group",
           "partner": "Partner"
         },
         "presets": {

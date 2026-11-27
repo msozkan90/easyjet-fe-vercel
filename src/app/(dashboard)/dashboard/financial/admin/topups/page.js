@@ -1,5 +1,6 @@
 "use client";
 
+import { useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Space, App as AntdApp } from "antd";
@@ -25,6 +26,14 @@ const resolveOwnerName = (record) => {
 };
 
 export default function WalletTopupsAdminListPage() {
+  return (
+    <RequireRole anyOfRoles={["systemadmin"]}>
+      <WalletTopupsAdminList />
+    </RequireRole>
+  );
+}
+
+function WalletTopupsAdminList() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.financial");
   const tStatus = useTranslations("common.status");
@@ -71,6 +80,8 @@ export default function WalletTopupsAdminListPage() {
     };
   }, [message, t]);
 
+  const { options: customerOptions } = useCustomerFilterOptions();
+
   const listRequest = useMemo(
     () =>
       makeListRequest(
@@ -87,7 +98,7 @@ export default function WalletTopupsAdminListPage() {
 
             if (
               ownerId &&
-              ["company", "partner", "customer"].includes(ownerType)
+              ["company", "partner", "customer", "customer_group"].includes(ownerType)
             ) {
               next[`${ownerType}_id`] = ownerId;
             }
@@ -130,19 +141,14 @@ export default function WalletTopupsAdminListPage() {
 
     orgForest.forEach((company) => {
       addOption("company", company);
-      (company.customers || []).forEach((customer) =>
-        addOption("customer", customer)
-      );
-      (company.partners || []).forEach((partner) => {
-        addOption("partner", partner);
-        (partner.customers || []).forEach((customer) =>
-          addOption("customer", customer)
-        );
-      });
+      (company.partners || []).forEach((partner) => addOption("partner", partner));
     });
 
-    return options;
-  }, [orgForest, t]);
+    return [...options, ...customerOptions.map((option) => ({
+      ...option,
+      label: option.type === "customer" ? `${t("ownerTypes.customer")}: ${option.label}` : option.label,
+    }))];
+  }, [orgForest, customerOptions, t]);
 
   const columns = useMemo(
     () => [
@@ -265,11 +271,9 @@ export default function WalletTopupsAdminListPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["systemadmin"]}>
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <PageHeader title={t("adminTopups.title")} className="" />
-        <CrudTable rowKey="id" columns={columns} request={request} />
-      </Space>
-    </RequireRole>
+    <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <PageHeader title={t("adminTopups.title")} className="" />
+      <CrudTable rowKey="id" columns={columns} request={request} />
+    </Space>
   );
 }

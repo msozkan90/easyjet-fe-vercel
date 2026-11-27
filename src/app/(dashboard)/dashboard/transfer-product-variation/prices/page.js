@@ -1,5 +1,6 @@
 "use client";
 
+import { mapCustomerFilter, useCustomerFilterOptions } from "@/hooks/useCustomerFilterOptions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import {
@@ -46,6 +47,8 @@ export default function TransferProductPricesPage() {
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [transferProducts, setTransferProducts] = useState([]);
+  const { options: customerFilterOptions } = useCustomerFilterOptions();
+  const tGroups = useTranslations("dashboard.customerGroups");
   const [customers, setCustomers] = useState([]);
   const [partners, setPartners] = useState([]);
 
@@ -181,6 +184,7 @@ export default function TransferProductPricesPage() {
   const request = makeListRequest(
     TransferProductPricesAPI.list,
     {
+      filterTransform: mapCustomerFilter,
       defaultSort: [{ field: "created_at", direction: "desc" }],
     },
     normalizeListAndMeta,
@@ -226,11 +230,8 @@ export default function TransferProductPricesPage() {
         sorter: true,
         filter: {
           type: "select",
-          options: customers.map((customer) => ({
-            value: customer.id,
-            label: customer.name,
-          })),
-          placeholder: t("filters.selectCustomer"),
+          options: customerFilterOptions,
+          placeholder: tGroups("customerFilter"),
         },
         render: (_, record) => record?.customer?.name || t("common.none"),
       },
@@ -323,7 +324,7 @@ export default function TransferProductPricesPage() {
         ),
       },
     ],
-    [customers, onDelete, partners, t, tStatus, transferProducts],
+    [customerFilterOptions, tGroups, onDelete, partners, t, tStatus, transferProducts],
   );
 
   const onSubmit = async (values) => {
