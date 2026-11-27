@@ -25,6 +25,14 @@ const resolveOwnerName = (record) => {
 };
 
 export default function WalletTopupsAdminListPage() {
+  return (
+    <RequireRole anyOfRoles={["systemadmin"]}>
+      <WalletTopupsAdminList />
+    </RequireRole>
+  );
+}
+
+function WalletTopupsAdminList() {
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.financial");
   const tStatus = useTranslations("common.status");
@@ -265,11 +273,9 @@ export default function WalletTopupsAdminListPage() {
   );
 
   return (
-    <RequireRole anyOfRoles={["systemadmin"]}>
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <PageHeader title={t("adminTopups.title")} className="" />
-        <CrudTable rowKey="id" columns={columns} request={request} />
-      </Space>
-    </RequireRole>
+    <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <PageHeader title={t("adminTopups.title")} className="" />
+      <CrudTable rowKey="id" columns={columns} request={request} />
+    </Space>
   );
 }

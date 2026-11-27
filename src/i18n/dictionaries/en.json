@@ -350,7 +350,7 @@
       },
       "form": {
         "title": "Wallet Top-Up",
-        "subtitle": "Create a new top-up request to be approved by admin."
+        "subtitle": "Submit a top-up request for system admin approval."
       },
       "fields": {
         "fundingAccount": "Funding Account",
@@ -426,7 +426,7 @@
       "messages": {
         "loadFundingError": "Funding accounts could not be loaded.",
         "loadOwnersError": "Owner options could not be loaded.",
-        "createSuccess": "Top-up request created.",
+        "createSuccess": "Top-up request submitted for system admin approval.",
         "createError": "Top-up request failed.",
         "cancelSuccess": "Top-up request canceled.",
         "cancelError": "Cancel failed.",

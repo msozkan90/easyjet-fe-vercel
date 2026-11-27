@@ -19,7 +19,7 @@ import {
   EyeOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import CrudTable from "@/components/common/table/CrudTable";
 import { FundingAccountsAPI, WalletTopupsAPI } from "@/utils/api";
@@ -34,8 +34,20 @@ import RowActions from "@/components/ui/RowActions";
 import MoneyText from "@/components/ui/MoneyText";
 import StatusTag from "@/components/ui/StatusTag";
 import { useDirtyGuard } from "@/hooks/useDirtyGuard";
+import { hasAnyRole } from "@/utils/rbac";
 
-export default function WalletTopupsListPage() {
+export default function WalletTopupsPage() {
+  return (
+    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
+      <WalletTopups />
+    </RequireRole>
+  );
+}
+
+function WalletTopups() {
+  const canCancel = useSelector((state) =>
+    hasAnyRole(state.auth.user, ["partnerAdmin", "customerAdmin"])
+  );
   const { message } = AntdApp.useApp();
   const t = useTranslations("dashboard.financial");
   const tCommon = useTranslations("common.actions");
@@ -253,7 +265,7 @@ export default function WalletTopupsListPage() {
               },
             ]}
             menuItems={[
-              record.status === "pending" && {
+              canCancel && record.status === "pending" && {
                 key: "cancel",
                 icon: <CloseCircleOutlined />,
                 danger: true,
@@ -270,126 +282,129 @@ export default function WalletTopupsListPage() {
         ),
       },
     ],
-    [fundingOptions, handleCancel, t, tStatus, actionLoading]
+    [fundingOptions, handleCancel, t, tStatus, actionLoading, canCancel]
+  );
+
+  const topupForm = (
+    <Form
+      onValuesChange={() => onDirtyChange(true)}
+      form={form}
+      layout="vertical"
+      initialValues={{ currency: "USD" }}
+      onFinish={handleCreate}
+    >
+      <Form.Item
+        label={t("fields.fundingAccount")}
+        name="funding_account_id"
+        rules={[{ required: true, message: t("validation.required") }]}
+      >
+        <Select
+          placeholder={t("placeholders.selectFundingAccount")}
+          options={fundingOptions}
+        />
+      </Form.Item>
+      {selectedFundingAccount ? (
+        <Descriptions
+          bordered
+          size="small"
+          column={1}
+          style={{ marginBottom: 16 }}
+        >
+          <Descriptions.Item label={tFunding("columns.displayName")}>
+            {selectedFundingAccount.display_name || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={tFunding("columns.type")}>
+            {selectedFundingAccount.type || "-"}
+          </Descriptions.Item>
+          {selectedFundingAccountDetails.map((field) => (
+            <Descriptions.Item
+              key={field}
+              label={tFunding(`fields.details.${field}`)}
+            >
+              {selectedFundingAccount.details?.[field] || "-"}
+            </Descriptions.Item>
+          ))}
+        </Descriptions>
+      ) : null}
+      <Form.Item
+        label={t("fields.amount")}
+        name="amount"
+        rules={[{ required: true, message: t("validation.required") }]}
+      >
+        <InputNumber
+          min={0.01}
+          step={0.01}
+          style={{ width: "100%" }}
+          placeholder={t("placeholders.amount")}
+        />
+      </Form.Item>
+      <Form.Item
+        label={t("fields.currency")}
+        name="currency"
+        rules={[{ required: true, message: t("validation.required") }]}
+      >
+        <Select
+          placeholder={t("placeholders.currency")}
+          options={[
+            { value: "USD", label: "USD" },
+            { value: "EUR", label: "EUR" },
+            { value: "GBP", label: "GBP" },
+          ]}
+        />
+      </Form.Item>
+      <Form.Item label={t("fields.bankReference")} name="bank_reference">
+        <Input placeholder={t("placeholders.bankReference")} />
+      </Form.Item>
+      <Form.Item label={t("fields.note")} name="note">
+        <Input.TextArea rows={3} placeholder={t("placeholders.note")} />
+      </Form.Item>
+      <Form.Item
+        label={t("fields.receipt")}
+        name="receipt"
+        valuePropName="fileList"
+        getValueFromEvent={normalizeUpload}
+        rules={[{ required: true, message: t("validation.required") }]}
+      >
+        <Upload beforeUpload={() => false} maxCount={1}>
+          <Button icon={<UploadOutlined />}>
+            {t("actions.uploadReceipt")}
+          </Button>
+        </Upload>
+      </Form.Item>
+      <Space>
+        <Button type="primary" htmlType="submit" loading={submitting}>
+          {tCommon("save")}
+        </Button>
+        <Button onClick={() => form.resetFields()}>
+          {tCommon("reset")}
+        </Button>
+      </Space>
+    </Form>
   );
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <PageHeader title={t("topupList.title")} className="" />
-        <CrudTable
-          ref={tableRef}
-          rowKey="id"
-          columns={columns}
-          request={request}
-          toolbarRight={
-            <Button type="primary" onClick={() => setOpen(true)}>
-              {t("actions.new")}
-            </Button>
-          }
-        />
-        <Modal
-          title={t("form.title")}
-          open={open}
-          onCancel={guardClose(() => setOpen(false))}
-          footer={null}
-          destroyOnHidden
-        >
-          <Form onValuesChange={() => onDirtyChange(true)}
-            form={form}
-            layout="vertical"
-            initialValues={{ currency: "USD" }}
-            onFinish={handleCreate}
-          >
-            <Form.Item
-              label={t("fields.fundingAccount")}
-              name="funding_account_id"
-              rules={[{ required: true, message: t("validation.required") }]}
-            >
-              <Select
-                placeholder={t("placeholders.selectFundingAccount")}
-                options={fundingOptions}
-              />
-            </Form.Item>
-            {selectedFundingAccount ? (
-              <Descriptions
-                bordered
-                size="small"
-                column={1}
-                style={{ marginBottom: 16 }}
-              >
-                <Descriptions.Item label={tFunding("columns.displayName")}>
-                  {selectedFundingAccount.display_name || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label={tFunding("columns.type")}>
-                  {selectedFundingAccount.type || "-"}
-                </Descriptions.Item>
-                {selectedFundingAccountDetails.map((field) => (
-                  <Descriptions.Item
-                    key={field}
-                    label={tFunding(`fields.details.${field}`)}
-                  >
-                    {selectedFundingAccount.details?.[field] || "-"}
-                  </Descriptions.Item>
-                ))}
-              </Descriptions>
-            ) : null}
-            <Form.Item
-              label={t("fields.amount")}
-              name="amount"
-              rules={[{ required: true, message: t("validation.required") }]}
-            >
-              <InputNumber
-                min={0.01}
-                step={0.01}
-                style={{ width: "100%" }}
-                placeholder={t("placeholders.amount")}
-              />
-            </Form.Item>
-            <Form.Item
-              label={t("fields.currency")}
-              name="currency"
-              rules={[{ required: true, message: t("validation.required") }]}
-            >
-              <Select
-                placeholder={t("placeholders.currency")}
-                options={[
-                  { value: "USD", label: "USD" },
-                  { value: "EUR", label: "EUR" },
-                  { value: "GBP", label: "GBP" },
-                ]}
-              />
-            </Form.Item>
-            <Form.Item label={t("fields.bankReference")} name="bank_reference">
-              <Input placeholder={t("placeholders.bankReference")} />
-            </Form.Item>
-            <Form.Item label={t("fields.note")} name="note">
-              <Input.TextArea rows={3} placeholder={t("placeholders.note")} />
-            </Form.Item>
-            <Form.Item
-              label={t("fields.receipt")}
-              name="receipt"
-              valuePropName="fileList"
-              getValueFromEvent={normalizeUpload}
-              rules={[{ required: true, message: t("validation.required") }]}
-            >
-              <Upload beforeUpload={() => false} maxCount={1}>
-                <Button icon={<UploadOutlined />}>
-                  {t("actions.uploadReceipt")}
-                </Button>
-              </Upload>
-            </Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={submitting}>
-                {tCommon("save")}
-              </Button>
-              <Button onClick={() => form.resetFields()}>
-                {tCommon("reset")}
-              </Button>
-            </Space>
-          </Form>
-        </Modal>
-      </Space>
-    </RequireRole>
+    <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <PageHeader title={t("topupList.title")} className="" />
+      <CrudTable
+        ref={tableRef}
+        rowKey="id"
+        columns={columns}
+        request={request}
+        toolbarRight={
+          <Button type="primary" onClick={() => setOpen(true)}>
+            {t("actions.new")}
+          </Button>
+        }
+      />
+      <Modal
+        title={t("form.title")}
+        open={open}
+        onCancel={guardClose(() => setOpen(false))}
+        footer={null}
+        destroyOnHidden
+      >
+        {topupForm}
+      </Modal>
+    </Space>
   );
 }

@@ -62,6 +62,14 @@ const resolveOwnerName = (record) => {
 };
 
 export default function WalletTopupAdminDetailPage() {
+  return (
+    <RequireRole anyOfRoles={["systemadmin"]}>
+      <WalletTopupAdminDetail />
+    </RequireRole>
+  );
+}
+
+function WalletTopupAdminDetail() {
   const { message, modal } = AntdApp.useApp();
   const params = useParams();
   const t = useTranslations("dashboard.financial");
@@ -166,137 +174,135 @@ export default function WalletTopupAdminDetailPage() {
   };
 
   return (
-    <RequireRole anyOfRoles={["systemadmin"]}>
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <PageHeader
-          className=""
-          breadcrumb={[
-            {
-              title: t("adminTopups.title"),
-              href: "/dashboard/financial/admin/topups",
-            },
-            { title: t("topupDetail.adminTitle") },
-          ]}
-          title={t("topupDetail.adminTitle")}
-        />
-        <Card loading={loading} className="">
-          <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
-            <Descriptions.Item label={t("columns.id")}>
-              {record?.id || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.status")}>
-              <StatusTag status={record?.status}>
-                {record?.status ? tStatus(record.status) : "-"}
-              </StatusTag>
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.ownerType")}>
-              {record?.owner_type
-                ? (() => {
-                    const label = t(`ownerTypes.${record.owner_type}`);
-                    return label === `ownerTypes.${record.owner_type}`
-                      ? record.owner_type
-                      : label;
-                  })()
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.owner")}>
-              {resolveOwnerName(record)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.amount")}>
-              <MoneyText value={record?.amount} currency={record?.currency} />
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.approvedAmount")}>
-              <MoneyText value={record?.approved_amount} currency={record?.currency} />
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.currency")}>
-              {record?.currency || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.fundingAccount")}>
-              {record?.funding_account?.display_name ||
-                record?.funding_account_id ||
-                "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.bankReference")}>
-              {record?.bank_reference || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.receiptUrl")}>
-              {record?.receipt_url ? (
-                <a href={record.receipt_url} target="_blank" rel="noreferrer">
-                  {record.receipt_url}
-                </a>
-              ) : (
-                "-"
-              )}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.note")}>
-              {record?.note || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.requestedBy")}>
-              {formatPerson(record?.requested_by, record?.requested_by_user_id)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.reviewedBy")}>
-              {formatPerson(record?.reviewed_by, record?.reviewed_by_user_id)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.reviewedAt")}>
-              {record?.reviewed_at
-                ? dayjs(record.reviewed_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.rejectReason")}>
-              {record?.reject_reason || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.createdAt")}>
-              {record?.created_at
-                ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.updatedAt")}>
-              {record?.updated_at
-                ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-        {record?.status === "pending" ? (
-          <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Card className="" title={t("actions.approveTitle")}>
-              <Form form={approveForm} layout="vertical">
-                <Form.Item
-                  label={t("actions.approvedAmount")}
-                  name="approved_amount"
-                >
-                  <InputNumber min={0.01} step={0.01} style={{ width: "100%" }} />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  onClick={handleApprove}
-                  loading={actionLoading}
-                >
-                  {t("actions.approve")}
-                </Button>
-              </Form>
-            </Card>
-            <Card className="" title={t("actions.rejectTitle")}>
-              <Form form={rejectForm} layout="vertical">
-                <Form.Item
-                  label={t("actions.rejectReason")}
-                  name="reject_reason"
-                  rules={[{ required: true, message: t("validation.required") }]}
-                >
-                  <Input.TextArea rows={3} />
-                </Form.Item>
-                <Button
-                  danger
-                  onClick={handleReject}
-                  loading={actionLoading}
-                >
-                  {t("actions.reject")}
-                </Button>
-              </Form>
-            </Card>
-          </Space>
-        ) : null}
-      </Space>
-    </RequireRole>
+    <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <PageHeader
+        className=""
+        breadcrumb={[
+          {
+            title: t("adminTopups.title"),
+            href: "/dashboard/financial/admin/topups",
+          },
+          { title: t("topupDetail.adminTitle") },
+        ]}
+        title={t("topupDetail.adminTitle")}
+      />
+      <Card loading={loading} className="">
+        <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
+          <Descriptions.Item label={t("columns.id")}>
+            {record?.id || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.status")}>
+            <StatusTag status={record?.status}>
+              {record?.status ? tStatus(record.status) : "-"}
+            </StatusTag>
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.ownerType")}>
+            {record?.owner_type
+              ? (() => {
+                  const label = t(`ownerTypes.${record.owner_type}`);
+                  return label === `ownerTypes.${record.owner_type}`
+                    ? record.owner_type
+                    : label;
+                })()
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.owner")}>
+            {resolveOwnerName(record)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.amount")}>
+            <MoneyText value={record?.amount} currency={record?.currency} />
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.approvedAmount")}>
+            <MoneyText value={record?.approved_amount} currency={record?.currency} />
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.currency")}>
+            {record?.currency || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.fundingAccount")}>
+            {record?.funding_account?.display_name ||
+              record?.funding_account_id ||
+              "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.bankReference")}>
+            {record?.bank_reference || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.receiptUrl")}>
+            {record?.receipt_url ? (
+              <a href={record.receipt_url} target="_blank" rel="noreferrer">
+                {record.receipt_url}
+              </a>
+            ) : (
+              "-"
+            )}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.note")}>
+            {record?.note || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.requestedBy")}>
+            {formatPerson(record?.requested_by, record?.requested_by_user_id)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.reviewedBy")}>
+            {formatPerson(record?.reviewed_by, record?.reviewed_by_user_id)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.reviewedAt")}>
+            {record?.reviewed_at
+              ? dayjs(record.reviewed_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.rejectReason")}>
+            {record?.reject_reason || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.createdAt")}>
+            {record?.created_at
+              ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.updatedAt")}>
+            {record?.updated_at
+              ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
+      {record?.status === "pending" ? (
+        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <Card className="" title={t("actions.approveTitle")}>
+            <Form form={approveForm} layout="vertical">
+              <Form.Item
+                label={t("actions.approvedAmount")}
+                name="approved_amount"
+              >
+                <InputNumber min={0.01} step={0.01} style={{ width: "100%" }} />
+              </Form.Item>
+              <Button
+                type="primary"
+                onClick={handleApprove}
+                loading={actionLoading}
+              >
+                {t("actions.approve")}
+              </Button>
+            </Form>
+          </Card>
+          <Card className="" title={t("actions.rejectTitle")}>
+            <Form form={rejectForm} layout="vertical">
+              <Form.Item
+                label={t("actions.rejectReason")}
+                name="reject_reason"
+                rules={[{ required: true, message: t("validation.required") }]}
+              >
+                <Input.TextArea rows={3} />
+              </Form.Item>
+              <Button
+                danger
+                onClick={handleReject}
+                loading={actionLoading}
+              >
+                {t("actions.reject")}
+              </Button>
+            </Form>
+          </Card>
+        </Space>
+      ) : null}
+    </Space>
   );
 }

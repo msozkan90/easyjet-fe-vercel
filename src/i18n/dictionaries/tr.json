@@ -350,7 +350,7 @@
       },
       "form": {
         "title": "Bakiye Yükle",
-        "subtitle": "Admin onayı için yeni bir bakiye yükleme talebi oluşturun."
+        "subtitle": "Sistem yöneticisinin onayı için bir bakiye yükleme talebi gönderin."
       },
       "fields": {
         "fundingAccount": "Hesap",
@@ -426,7 +426,7 @@
       "messages": {
         "loadFundingError": "Hesaplar yüklenemedi.",
         "loadOwnersError": "Sahip seçenekleri yüklenemedi.",
-        "createSuccess": "Bakiye yükleme talebi oluşturuldu.",
+        "createSuccess": "Bakiye yükleme talebi sistem yöneticisinin onayına gönderildi.",
         "createError": "Bakiye yükleme talebi başarısız.",
         "cancelSuccess": "Bakiye yükleme talebi iptal edildi.",
         "cancelError": "İptal başarısız.",

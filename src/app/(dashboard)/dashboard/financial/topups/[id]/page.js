@@ -12,12 +12,14 @@ import {
   Popconfirm,
 } from "antd";
 import { useParams } from "next/navigation";
+import { useSelector } from "react-redux";
 import RequireRole from "@/components/common/Access/RequireRole";
 import { WalletTopupsAPI } from "@/utils/api";
 import { useTranslations } from "@/i18n/use-translations";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusTag from "@/components/ui/StatusTag";
 import MoneyText from "@/components/ui/MoneyText";
+import { hasAnyRole } from "@/utils/rbac";
 
 const { Text } = Typography;
 
@@ -60,6 +62,17 @@ const resolveOwnerName = (record) => {
 };
 
 export default function WalletTopupDetailPage() {
+  return (
+    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
+      <WalletTopupDetail />
+    </RequireRole>
+  );
+}
+
+function WalletTopupDetail() {
+  const canCancel = useSelector((state) =>
+    hasAnyRole(state.auth.user, ["partnerAdmin", "customerAdmin"])
+  );
   const { message } = AntdApp.useApp();
   const params = useParams();
   const t = useTranslations("dashboard.financial");
@@ -77,6 +90,7 @@ export default function WalletTopupDetailPage() {
       const payload = resp?.data ?? resp;
       setRecord(payload);
     } catch {
+      setRecord(null);
       message.error(t("messages.loadDetailError"));
     } finally {
       setLoading(false);
@@ -103,93 +117,93 @@ export default function WalletTopupDetailPage() {
   };
 
   return (
-    <RequireRole anyOfRoles={["companyAdmin", "partnerAdmin", "customerAdmin"]}>
-      <Space direction="vertical" size={16} style={{ width: "100%" }}>
-        <PageHeader
-          className=""
-          breadcrumb={[
-            { title: t("topupList.title"), href: "/dashboard/financial/topups" },
-            { title: t("topupDetail.title") },
-          ]}
-          title={t("topupDetail.title")}
-        />
-        <Card loading={loading} className="">
-          <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
-            <Descriptions.Item label={t("columns.id")}>
-              {record?.id || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.status")}>
-              <StatusTag status={record?.status}>
-                {record?.status ? tStatus(record.status) : "-"}
-              </StatusTag>
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.ownerType")}>
-              {record?.owner_type
-                ? (() => {
-                    const label = t(`ownerTypes.${record.owner_type}`);
-                    return label === `ownerTypes.${record.owner_type}`
-                      ? record.owner_type
-                      : label;
-                  })()
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.owner")}>
-              {resolveOwnerName(record)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.amount")}>
-              <MoneyText value={record?.amount} currency={record?.currency} />
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.approvedAmount")}>
-              <MoneyText value={record?.approved_amount} currency={record?.currency} />
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.currency")}>
-              {record?.currency || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.fundingAccount")}>
-              {record?.funding_account?.display_name ||
-                record?.funding_account_id ||
-                "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.bankReference")}>
-              {record?.bank_reference || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.receiptUrl")}>
-              {record?.receipt_url ? (
-                <a href={record.receipt_url} target="_blank" rel="noreferrer">
-                  {record.receipt_url}
-                </a>
-              ) : (
-                "-"
-              )}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.note")}>
-              {record?.note || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.requestedBy")}>
-              {formatPerson(record?.requested_by, record?.requested_by_user_id)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.reviewedBy")}>
-              {formatPerson(record?.reviewed_by, record?.reviewed_by_user_id)}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.reviewedAt")}>
-              {record?.reviewed_at
-                ? dayjs(record.reviewed_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.rejectReason")}>
-              {record?.reject_reason || "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("columns.createdAt")}>
-              {record?.created_at
-                ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-            <Descriptions.Item label={t("fields.updatedAt")}>
-              {record?.updated_at
-                ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm")
-                : "-"}
-            </Descriptions.Item>
-          </Descriptions>
+    <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <PageHeader
+        className=""
+        breadcrumb={[
+          { title: t("topupList.title"), href: "/dashboard/financial/topups" },
+          { title: t("topupDetail.title") },
+        ]}
+        title={t("topupDetail.title")}
+      />
+      <Card loading={loading} className="">
+        <Descriptions column={{ xs: 1, sm: 2, md: 2 }} bordered size="small">
+          <Descriptions.Item label={t("columns.id")}>
+            {record?.id || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.status")}>
+            <StatusTag status={record?.status}>
+              {record?.status ? tStatus(record.status) : "-"}
+            </StatusTag>
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.ownerType")}>
+            {record?.owner_type
+              ? (() => {
+                  const label = t(`ownerTypes.${record.owner_type}`);
+                  return label === `ownerTypes.${record.owner_type}`
+                    ? record.owner_type
+                    : label;
+                })()
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.owner")}>
+            {resolveOwnerName(record)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.amount")}>
+            <MoneyText value={record?.amount} currency={record?.currency} />
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.approvedAmount")}>
+            <MoneyText value={record?.approved_amount} currency={record?.currency} />
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.currency")}>
+            {record?.currency || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.fundingAccount")}>
+            {record?.funding_account?.display_name ||
+              record?.funding_account_id ||
+              "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.bankReference")}>
+            {record?.bank_reference || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.receiptUrl")}>
+            {record?.receipt_url ? (
+              <a href={record.receipt_url} target="_blank" rel="noreferrer">
+                {record.receipt_url}
+              </a>
+            ) : (
+              "-"
+            )}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.note")}>
+            {record?.note || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.requestedBy")}>
+            {formatPerson(record?.requested_by, record?.requested_by_user_id)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.reviewedBy")}>
+            {formatPerson(record?.reviewed_by, record?.reviewed_by_user_id)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.reviewedAt")}>
+            {record?.reviewed_at
+              ? dayjs(record.reviewed_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.rejectReason")}>
+            {record?.reject_reason || "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("columns.createdAt")}>
+            {record?.created_at
+              ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+          <Descriptions.Item label={t("fields.updatedAt")}>
+            {record?.updated_at
+              ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm")
+              : "-"}
+          </Descriptions.Item>
+        </Descriptions>
+        {canCancel && (
           <Space style={{ marginTop: 16 }}>
             {record?.status === "pending" ? (
               <Popconfirm
@@ -206,8 +220,8 @@ export default function WalletTopupDetailPage() {
               <Text type="secondary">{t("messages.noActions")}</Text>
             )}
           </Space>
-        </Card>
-      </Space>
-    </RequireRole>
+        )}
+      </Card>
+    </Space>
   );
 }
